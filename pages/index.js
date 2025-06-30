@@ -1,38 +1,28 @@
-export default function Home() {
+// @pages/index.js
+// @timestamp: 2025-06-25T21:12 EDT
+// @description: Main landing page for the BrewLotto application, showcasing available lottery games and user profile integration.
+import LandingLayout from "@/components/layouts/LandingLayout";
+import GameCard from "@/components/landing/GameCard";
+import { useUserProfile } from "@/hooks/useUserProfile"; // Or however you fetch user
+
+export default function HomePage() {
+    const { user } = useUserProfile();
+
+    const games = [
+        { name: "Pick 3", route: "/pick3" },
+        { name: "Pick 4", route: "/pick4" },
+        { name: "Pick 5", route: "/pick5" },
+        { name: "Mega Millions", route: "/mega" },
+        { name: "Powerball", route: "/powerball" },
+    ];
+
     return (
-        <main className="min-h-screen bg-[#181818] flex flex-col items-center justify-center px-4">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-[#FFD700] mb-4 text-center">
-                BrewLotto AI
-            </h1>
-            <p className="text-white text-lg mb-10 text-center">
-                Built on Trust. Driven by Probability.
-            </p>
-
-            {/* Feature Links */}
-            <div className="flex flex-wrap gap-4 mb-12 justify-center w-full max-w-3xl">
-                <a href="/pick3" className="w-44 px-4 py-3 rounded-xl font-bold bg-[#FFD700] text-[#181818] text-base hover:bg-white hover:text-[#FFD700] transition shadow text-center">
-                    Pick 3 Smart Picks
-                </a>
-                <a href="/pick4" className="w-44 px-4 py-3 rounded-xl font-bold bg-[#FFD700] text-[#181818] text-base hover:bg-white hover:text-[#FFD700] transition shadow text-center">
-                    Pick 4 Smart Picks
-                </a>
-                <a href="/pick5" className="w-44 px-4 py-3 rounded-xl font-bold bg-[#FFD700] text-[#181818] text-base hover:bg-white hover:text-[#FFD700] transition shadow text-center">
-                    Pick 5 Smart Picks
-                </a>
-                <a href="/mega" className="w-44 px-4 py-3 rounded-xl font-bold bg-[#FFD700] text-[#181818] text-base hover:bg-white hover:text-[#FFD700] transition shadow text-center">
-                    Mega Millions Smart Picks
-                </a>
-                <a href="/powerball" className="w-44 px-4 py-3 rounded-xl font-bold bg-[#FFD700] text-[#181818] text-base hover:bg-white hover:text-[#FFD700] transition shadow text-center">
-                    Powerball Smart Picks
-                </a>
-                <a href="/dashboard" className="w-44 px-4 py-3 rounded-xl font-bold bg-[#FFD700] text-[#181818] text-base hover:bg-white hover:text-[#FFD700] transition shadow text-center">
-                    Analytics Dashboard
-                </a>
+        <LandingLayout user={user}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {games.map((game) => (
+                    <GameCard key={game.route} game={game} user={user} />
+                ))}
             </div>
-
-            <footer className="w-full text-center text-gray-500 text-sm mt-8 mb-4">
-                &copy; {new Date().getFullYear()} BrewLotto AI. All rights reserved.
-            </footer>
-        </main>
+        </LandingLayout>
     );
 }

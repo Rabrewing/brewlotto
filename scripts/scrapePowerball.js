@@ -5,12 +5,7 @@
 import 'dotenv/config';
 import axios from 'axios';
 import { load } from 'cheerio';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_KEY
-);
+import { supabase } from "@/utils/supabase";
 
 const POWERBALL_URL = 'https://www.powerball.com/previous-results';
 

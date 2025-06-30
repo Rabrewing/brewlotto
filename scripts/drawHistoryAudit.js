@@ -1,10 +1,5 @@
 // /scripts/drawHistoryAudit.js
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+import { supabase } from "@/utils/supabase";
 
 const games = [
     { game: 'Pick 3', table: 'pick3_draws' },

@@ -8,14 +8,9 @@
 
 import fs from 'fs';
 import path from 'path';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from "@/utils/supabase"; // Importing the Supabase client from utils
 import { parseCsvFile, sanitizeRows, upsertDrawsToSupabase } from './upload/csvUtils.js';
 import 'dotenv/config';
-
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-);
 
 const games = [
     { key: 'pick3', table: 'pick3_draws' },
@@ -26,10 +21,13 @@ const games = [
 ];
 
 const today = new Date().toISOString().slice(0, 10);
-const dataFolder = process.argv[2] || './data';
+const dataFolder = './data'; // ✅ Always your data folder
+const gameKeyArg = process.argv[2]; // ✅ This is now purely the game key
 
 async function refreshGame(game) {
     const { key, table } = game;
+
+
 
     const { data: latest, error } = await supabase
         .from(table)
@@ -57,6 +55,10 @@ async function refreshGame(game) {
 
     const raw = parseCsvFile(path.join(dataFolder, fileMatch));
     const clean = sanitizeRows(raw, key);
+    // 🧪 Preview the first 3 rows
+    console.log(`🔍 Preview: First 3 parsed rows for ${key.toUpperCase()}`);
+    console.table(clean.slice(0, 3));
+
     const inserted = await upsertDrawsToSupabase(key, clean);
 
     console.log(`⬆️ ${inserted} rows inserted for ${key} from ${fileMatch}`);
@@ -64,10 +66,14 @@ async function refreshGame(game) {
 
 async function main() {
     console.log(`📦 BrewLotto Refresh Run — ${today}\n`);
-    for (const game of games) {
-        await refreshGame(game);
+
+    const game = games.find(g => g.key === gameKeyArg);
+    if (!game) {
+        console.error(`❌ Unsupported or missing game key: ${gameKeyArg}`);
+        process.exit(1);
     }
+
+    await refreshGame(game);
     console.log('\n🎯 Refresh complete.');
 }
-
 main();

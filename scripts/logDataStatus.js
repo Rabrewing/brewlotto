@@ -6,13 +6,8 @@
  * Last updated: 2025-06-25T02:39:00-04:00 (EDT)
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from "@/utils/supabase";
 import 'dotenv/config';
-
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-);
 
 const games = [
     { game: 'pick3', table: 'pick3_draws' },

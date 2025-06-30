@@ -1,0 +1,34 @@
+{
+    "timestamp": "2025-06-30T08:00:00Z",
+    "deprecated_modules": [
+        {
+            "file": "old/predictor-old.js",
+            "reason": "Replaced by new Poisson and Markov logic integration"
+        },
+        {
+            "file": "archive/strategy-legacy.js",
+            "reason": "Legacy strategy logic, no longer used in current refactor"
+        }
+    ],
+    "active_modules": [
+        "src/strategies/SmartPickRefactor.js",
+        "src/admin/BrewMergeUI.jsx",
+        "src/utils/DrawDataTriage.js",
+        "scripts/BrewMergeFileScanner.js"
+    ],
+    "unused_files": [
+        {
+            "file": "components/PredictionCard.jsx",
+            "reason": "No longer used in current UI flow"
+        },
+        {
+            "file": "components/DrawEntropyCard.jsx",
+            "reason": "Replaced by new entropy visualization component"
+        },
+        {
+            "file": "components/BrewLottoBot.jsx",
+            "reason": "Merged into main bot logic, no longer a separate component"
+        }
+    ],
+    "reviewed": false
+}

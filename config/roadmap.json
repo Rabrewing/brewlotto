@@ -1,0 +1,124 @@
+[
+    {
+        "phase": "Core Ingestion Infrastructure",
+        "created_at": "2025-06-24T22:50:00Z",
+        "category": "Ingestion",
+        "priority": "🔴 High",
+        "status": "complete",
+        "tasks": [
+            {
+                "task": "Set up refreshDraws.js engine",
+                "status": "complete",
+                "timestamp": "2025-06-24T22:52:00Z"
+            },
+            {
+                "task": "Create csvUtils.js parser logic",
+                "status": "complete"
+            },
+            {
+                "task": "Ensure Supabase schema sync",
+                "status": "complete"
+            }
+        ]
+    },
+    {
+        "phase": "Security Infrastructure",
+        "created_at": "2025-06-25T03:12:00Z",
+        "category": "Security",
+        "priority": "🔴 High",
+        "status": "active",
+        "tasks": [
+            {
+                "task": "Build BrewSentinel middleware (sentry.js)",
+                "status": "complete"
+            },
+            {
+                "task": "Develop firewall system (firewall.js)",
+                "status": "active"
+            },
+            {
+                "task": "Log threats to brew_sentinel_logs table",
+                "status": "active"
+            },
+            {
+                "task": "Wire Sentinel alerts into BrewVision",
+                "status": "planned"
+            }
+        ]
+    },
+    {
+        "phase": "Dashboard & Admin Systems",
+        "created_at": "2025-06-25T04:10:00Z",
+        "category": "Dashboard",
+        "priority": "🟡 Medium",
+        "status": "active",
+        "tasks": [
+            {
+                "task": "Create BrewVision.jsx panel",
+                "status": "complete"
+            },
+            {
+                "task": "Render Phase Viewer and Module Tracker",
+                "status": "active"
+            },
+            {
+                "task": "Prep Admin-only DevCore IDE Access",
+                "status": "planned"
+            },
+            {
+                "task": "Render BrewSentinel Threat Feed",
+                "status": "planned"
+            }
+        ]
+    },
+    {
+        "phase": "User Growth, Support & Education",
+        "created_at": "2025-06-25T04:15:00Z",
+        "category": "UX & Marketing",
+        "priority": "🟢 Low",
+        "status": "planned",
+        "tasks": [
+            {
+                "task": "Multi-State Draw Expansion (CA, GA, NY)",
+                "status": "planned"
+            },
+            {
+                "task": "BrewUniversity walkthroughs and demos",
+                "status": "planned"
+            },
+            {
+                "task": "2FA setup for secure login",
+                "status": "planned"
+            },
+            {
+                "task": "Add Problem Gambling hotline into UX",
+                "status": "planned"
+            },
+            {
+                "task": "Build FAQ & live support feature",
+                "status": "planned"
+            }
+        ]
+    },
+    {
+        "phase": "AI Strategy & Business Integration",
+        "created_at": "2025-06-25T04:17:00Z",
+        "category": "AI & Strategy",
+        "priority": "🟡 Medium",
+        "status": "planned",
+        "tasks": [
+            {
+                "task": "Integrate ChatG risk + market analysis",
+                "status": "pending"
+            },
+            {
+                "task": "Map Poisson/Poisson++ strategy tiers",
+                "status": "complete"
+            },
+            {
+                "task": "Define BrewCapital module",
+                "status": "planned"
+            }
+        ]
+    }
+]

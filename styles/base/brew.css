@@ -1,0 +1,14 @@
+/* @status: ✅ Brew 2 Global Styles */
+/* @created: 2025-06-27 */
+/* @purpose: Minimal, utility-aligned global layer for layout consistency */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Optional: normalize box model */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}

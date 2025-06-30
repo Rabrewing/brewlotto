@@ -5,12 +5,7 @@
 import 'dotenv/config';
 import axios from 'axios';
 import { load } from 'cheerio';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_KEY
-);
+import { supabase } from "@/utils/supabase"; // Supabase client for database operations
 
 const MEGA_URL = 'https://www.megamillions.com/Winning-Numbers.aspx';
 

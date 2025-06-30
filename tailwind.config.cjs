@@ -8,7 +8,21 @@ export default {
         "./public/**/*.html"
     ],
     theme: {
-        extend: {},
+        extend: {
+            fontFamily: {
+                sans: ['Inter', 'Segoe UI', 'Arial', 'sans-serif']
+            },
+            colors: {
+                brew: {
+                    primary: '#FFD700',
+                    background: '#181818',
+                    surface: '#232323'
+                }
+            },
+            borderRadius: {
+                xl: '1rem'
+            }
+        }
     },
-    plugins: [],
-}
+    plugins: []
+};

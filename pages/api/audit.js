@@ -3,14 +3,8 @@
  * Description: Runs drawHistoryAudit logic server-side and returns any gaps as JSON
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from "@/utils/supabase";
 import { runAudit } from '@/scripts/drawHistoryAudit';
-
-
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
 
 const games = [
     { game: 'Pick 3', table: 'pick3_draws' },

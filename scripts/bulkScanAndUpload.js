@@ -1,13 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import { parse } from 'csv-parse/sync';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from "@/utils/supabase";
 import 'dotenv/config';
-
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-);
 
 const supportedGames = {
     pick3: {

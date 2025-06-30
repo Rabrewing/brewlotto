@@ -1,11 +1,6 @@
 import { chromium } from 'playwright';
 import 'dotenv/config';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_KEY
-);
+import { supabase } from "@/utils/supabase";
 
 (async () => {
     const browser = await chromium.launch();

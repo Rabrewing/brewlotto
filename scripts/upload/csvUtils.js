@@ -9,62 +9,72 @@
 import fs from 'fs';
 import path from 'path';
 import { parse } from 'csv-parse/sync';
-import { createClient } from '@supabase/supabase-js';
+import { supabaseService as supabase } from "@/utils/supabaseService";
 import 'dotenv/config';
-
-// Supabase client (service role recommended for server scripts)
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-);
 
 // 🎮 Game-specific parser config
 const supportedGames = {
     pick3: {
         table: 'pick3_draws',
         conflictKeys: ['draw_date', 'draw_type'],
-        parser: ([date, type = 'day', values]) => ({
+        parser: ([date, type = 'day', b1, b2, b3, fireball, greenball, doubleDraw]) => ({
             draw_date: date,
-            draw_type: ['day', 'evening'].includes(type.toLowerCase()) ? type.toLowerCase() : 'day',
-            numbers: values?.split(/[\s,-]+/).map(Number).filter(n => !isNaN(n)) || []
+            draw_type: ['day', 'evening', 'd', 'e'].includes(type.toLowerCase())
+                ? (type.toLowerCase().startsWith('e') ? 'evening' : 'day')
+                : 'day',
+            numbers: [b1, b2, b3].map(Number).filter(n => !isNaN(n)),
+            fireball: fireball ? Number(fireball) : null,
+            greenball: greenball ? Number(greenball) : null,
+            double_draw: doubleDraw?.toLowerCase?.() === 'y' || doubleDraw === '1' ? true : false
         })
     },
     pick4: {
         table: 'pick4_draws',
         conflictKeys: ['draw_date', 'draw_type'],
-        parser: ([date, type = 'day', values]) => ({
+        parser: ([date, type = 'day', b1, b2, b3, b4, fireball]) => ({
             draw_date: date,
-            draw_type: ['day', 'evening'].includes(type.toLowerCase()) ? type.toLowerCase() : 'day',
-            numbers: values?.split(/[\s,-]+/).map(Number).filter(n => !isNaN(n)) || []
+            draw_type: ['day', 'evening', 'd', 'e'].includes(type.toLowerCase())
+                ? (type.toLowerCase().startsWith('e') ? 'evening' : 'day')
+                : 'day',
+            numbers: [b1, b2, b3, b4].map(Number).filter(n => !isNaN(n)),
+            fireball: fireball ? Number(fireball) : null
         })
+
     },
     pick5: {
         table: 'pick5_draws',
         conflictKeys: ['draw_date', 'draw_type'],
-        parser: ([date, type = 'day', values]) => ({
+        // before: parser: ([date, b1, b2, b3, b4, b5, dp]) => ({ … })
+
+        parser: ([date, b1, b2, b3, b4, b5, bonusFlag]) => ({
             draw_date: date,
-            draw_type: ['day', 'evening'].includes(type.toLowerCase()) ? type.toLowerCase() : 'day',
-            numbers: values?.split(/[\s,-]+/).map(Number).filter(n => !isNaN(n)) || []
+            draw_type: 'night',                     // Cash 5 is always an evening draw
+            numbers: [b1, b2, b3, b4, b5]           // pick your five
+                .map(Number)
+                .filter(n => !isNaN(n)),
+            bonus_cash: bonusFlag === '1'           // 1 → you qualified for Bonus Cash
         })
     },
     powerball: {
         table: 'powerball_draws',
         conflictKeys: ['draw_date'],
-        parser: ([date, nums, pb, powerplay]) => ({
+        parser: ([date, b1, b2, b3, b4, b5, powerball, powerPlay, jackpot]) => ({
             draw_date: date,
-            numbers: nums?.split(/[\s,-]+/).map(Number).filter(n => !isNaN(n)) || [],
-            powerball: Number(pb),
-            powerplay: powerplay || null
+            numbers: [b1, b2, b3, b4, b5].map(Number).filter(n => !isNaN(n)),
+            powerball: powerball ? Number(powerball) : null,
+            power_play: powerPlay ? Number(powerPlay) : null,
+            jackpot: jackpot ? parseInt(parseFloat(jackpot)) : null
         })
     },
     mega: {
         table: 'mega_draws',
         conflictKeys: ['draw_date'],
-        parser: ([date, nums, mb, megaplier]) => ({
+        parser: ([date, b1, b2, b3, b4, b5, megaBall, megaplier, jackpot]) => ({
             draw_date: date,
-            numbers: nums?.split(/[\s,-]+/).map(Number).filter(n => !isNaN(n)) || [],
-            mega_ball: Number(mb),
-            megaplier: megaplier || null
+            numbers: [b1, b2, b3, b4, b5].map(Number).filter(n => !isNaN(n)),
+            mega_ball: megaBall ? Number(megaBall) : null,
+            megaplier: megaplier ? Number(megaplier) : null,
+            jackpot: jackpot ? parseInt(parseFloat(jackpot)) : null
         })
     }
 };

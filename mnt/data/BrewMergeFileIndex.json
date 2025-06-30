@@ -1,0 +1,42 @@
+{
+    "SmartPickRefactor.js": {
+        "path": "src/strategies/SmartPickRefactor.js",
+        "status": "active",
+        "description": "Merges Poisson and Markov logic with tier-awareness for unified strategy engine",
+        "dependencies": [
+            "poisson.js",
+            "markov.js",
+            "useTierContext.js"
+        ]
+    },
+    "BrewMergeUI.jsx": {
+        "path": "src/admin/BrewMergeUI.jsx",
+        "status": "active",
+        "description": "Admin panel for reviewing merge status, override classifications, and managing refactor priorities",
+        "dependencies": [
+            "BrewMergeFileIndex.json",
+            "useAdminContext.js",
+            "useFileAuditStatus.js"
+        ]
+    },
+    "DrawDataTriage.js": {
+        "path": "src/utils/DrawDataTriage.js",
+        "status": "active",
+        "description": "Audits draw data, flags stale/missing entries, checks freshness, and preps anomalies for manual review",
+        "dependencies": [
+            "draws/",
+            "DrawHealthMonitor.jsx",
+            "AuditViewer.jsx"
+        ]
+    },
+    "BrewMergeFileScanner.js": {
+        "path": "scripts/BrewMergeFileScanner.js",
+        "status": "pending",
+        "description": "Node script that recursively scans Brew directory, maps all JS/JSX files, flags status (active, deprecated, unknown), and generates BrewMergeFileIndex.json",
+        "dependencies": [
+            "fs",
+            "path",
+            "CODE_PRUNE_AUDIT.json (optional output)"
+        ]
+    }
+}

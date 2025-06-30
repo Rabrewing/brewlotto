@@ -4,12 +4,7 @@
 import "dotenv/config";
 import axios from "axios";
 import { load } from "cheerio";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+import { supabase } from "@/utils/supabase";
 
 const MONTHS_BACK = 24;
 
