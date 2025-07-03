@@ -1,57 +1,97 @@
-// ✅ BrewAuditDashboard.jsx
-// Purpose: Visual UI to review CODE_PRUNE_AUDIT.json with color-coded module audit states
+// @file: BrewAuditDashboard.jsx
+// @directory: /admin
+// @timestamp: 2025-07-01T11:55 EDT
+// @summary: Full BrewMerge audit dashboard with MergebarMenu tab sync and localStorage persistence
+// @route: http://localhost:3000/admin/brew-audit-dashboard
 
 import React, { useEffect, useState } from 'react';
-import useFileAuditStatus from '@/hooks/useFileAuditStatus';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { useRouter } from 'next/router';
+import BrewAdminLayout from '@/components/layouts/BrewAdminLayout';
+import MergebarMenu from '@/components/ui/MergebarMenu';
+import MergeAuditTable from '@/components/ui/MergeAuditTable';
+import CODE_PRUNE_AUDIT from '@/data/CODE_PRUNE_AUDIT.json';
+import BrewMergeFileIndex from '@/mnt/data/BrewMergeFileIndex.json';
+import AuditVoiceOverlay from '@/components/overlays/AuditVoiceOverlay';
 
-const statusColor = {
-    active: 'bg-green-600 text-white',
-    deprecated: 'bg-red-600 text-white',
-    unused: 'bg-yellow-500 text-black'
-};
+const TABS = ['Deprecated Files', 'Unused Modules', 'Merge-Ready', 'Legacy Tracker'];
 
-const BrewAuditDashboard = () => {
-    const { auditData, loading, error } = useFileAuditStatus();
+export default function BrewAuditDashboard() {
+    const router = useRouter();
+    const [activeTab, setActiveTab] = useState(TABS[0]);
 
-    if (loading) return <div className="p-4">Loading audit...</div>;
-    if (error) return <div className="p-4 text-red-500">Error loading audit.</div>;
+    useEffect(() => {
+        const urlTab = router.query.tab;
+        const storedTab = localStorage.getItem('brewmerge_active_tab');
 
-    const renderFiles = (files, status) => (
-        files.map((file, idx) => (
-            <Card key={`${status}-${idx}`} className="mb-2">
-                <CardContent className="flex justify-between items-center">
-                    <div>
-                        <p className="font-mono text-sm">{typeof file === 'string' ? file : file.file}</p>
-                        {file.reason && <p className="text-xs text-muted-foreground">{file.reason}</p>}
-                    </div>
-                    <Badge className={statusColor[status]}>{status.toUpperCase()}</Badge>
-                </CardContent>
-            </Card>
-        ))
-    );
+        if (urlTab && TABS.includes(urlTab)) setActiveTab(urlTab);
+        else if (storedTab && TABS.includes(storedTab)) setActiveTab(storedTab);
+    }, [router.query.tab]);
+
+    const handleTabChange = (tab) => {
+        setActiveTab(tab);
+        localStorage.setItem('brewmerge_active_tab', tab);
+        router.push({ query: { ...router.query, tab } }, undefined, { shallow: true });
+    };
+
+    const renderTabContent = () => {
+        switch (activeTab) {
+            case 'Deprecated Files':
+                return (
+                    <MergeAuditTable
+                        title="Deprecated Files"
+                        data={CODE_PRUNE_AUDIT.deprecated_modules.map((m) => ({
+                            file: m.file,
+                            reason: m.reason,
+                            status: 'Deprecated',
+                        }))}
+                    />
+                );
+            case 'Unused Modules':
+                return (
+                    <MergeAuditTable
+                        title="Unused Modules"
+                        data={CODE_PRUNE_AUDIT.unused_files.map((m) => ({
+                            file: m.file,
+                            reason: m.reason,
+                            status: 'Unused',
+                        }))}
+                    />
+                );
+            case 'Merge-Ready':
+                return (
+                    <MergeAuditTable
+                        title="Merge-Ready Files"
+                        data={CODE_PRUNE_AUDIT.active_modules.map((f) => ({
+                            file: f,
+                            reason: 'Confirmed as core to current refactor',
+                            status: 'Active',
+                        }))}
+                    />
+                );
+            case 'Legacy Tracker':
+                return (
+                    <MergeAuditTable
+                        title="Legacy Files (from Merge Index)"
+                        data={(BrewMergeFileIndex.legacy || []).map((file) => ({
+                            file,
+                            reason: 'Auto-classified from directory scan',
+                            status: 'Legacy',
+                        }))}
+                    />
+                );
+            default:
+                return null;
+        }
+    };
 
     return (
-        <div className="p-6 max-w-3xl mx-auto">
-            <h1 className="text-xl font-bold mb-4">📊 BrewMerge Audit Dashboard</h1>
-
-            <section className="mb-6">
-                <h2 className="font-semibold mb-2">✅ Active Modules</h2>
-                {renderFiles(auditData.active_modules || [], 'active')}
-            </section>
-
-            <section className="mb-6">
-                <h2 className="font-semibold mb-2">❌ Deprecated Modules</h2>
-                {renderFiles(auditData.deprecated_modules || [], 'deprecated')}
-            </section>
-
-            <section>
-                <h2 className="font-semibold mb-2">🟡 Unused Files</h2>
-                {renderFiles(auditData.unused_files || [], 'unused')}
-            </section>
-        </div>
+        <BrewAdminLayout>
+            <div className="flex flex-col md:flex-row">
+                <MergebarMenu active={activeTab} onChange={handleTabChange} />
+                <div className="flex-1 p-6">{renderTabContent()}
+                    <AuditVoiceOverlay />
+                </div>
+            </div>
+        </BrewAdminLayout>
     );
-};
-
-export default BrewAuditDashboard;
+}

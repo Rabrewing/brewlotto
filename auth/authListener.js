@@ -2,7 +2,7 @@
 // Timestamp: 2025-06-24 19:50 EDT
 // Description: Seeds user_profiles with full_name, avatar, email, and tracks last login timestamp
 
-import { supabase } from '@/utils/supabase';
+import { supabase } from '@/lib/supabase/browserClient';
 
 supabase.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN') {
