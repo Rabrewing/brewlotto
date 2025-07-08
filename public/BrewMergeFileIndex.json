@@ -1,0 +1,1801 @@
+[
+  {
+    "path": ".env",
+    "hash": "4cfdb7f962aa50a78ff56c2cb7fbc8c0e10ddd64",
+    "lines": 16,
+    "type": "unknown",
+    "origin": "Brew2"
+  },
+  {
+    "path": ".github/workflows/brew-sync.yml",
+    "hash": "1b164da01e75cc3431a0bc9905f56c07f456278a",
+    "lines": 27,
+    "type": "yml",
+    "origin": "Brew2"
+  },
+  {
+    "path": ".gitignore",
+    "hash": "ea965d7b28149d44d18ad9d285aa613aba593e0d",
+    "lines": 139,
+    "type": "unknown",
+    "origin": "Brew2"
+  },
+  {
+    "path": ".husky/_/.gitignore",
+    "hash": "df58248c414f342c81e056b40bee12d17a08bf61",
+    "lines": 1,
+    "type": "unknown",
+    "origin": "Brew2"
+  },
+  {
+    "path": ".husky/_/applypatch-msg",
+    "hash": "b95c773222accf61b8febc7e33cba6a97ebc1a86",
+    "lines": 2,
+    "type": "unknown",
+    "origin": "Brew2"
+  },
+  {
+    "path": ".husky/_/commit-msg",
+    "hash": "b95c773222accf61b8febc7e33cba6a97ebc1a86",
+    "lines": 2,
+    "type": "unknown",
+    "origin": "Brew2"
+  },
+  {
+    "path": ".husky/_/h",
+    "hash": "605503e41eb0209f2744d80ce4031ee28f8764bb",
+    "lines": 23,
+    "type": "unknown",
+    "origin": "Brew2"
+  },
+  {
+    "path": ".husky/_/husky.sh",
+    "hash": "e8c52ee10c10eaa739ae7eca69c373dd437d9f33",
+    "lines": 9,
+    "type": "sh",
+    "origin": "Brew2"
+  },
+  {
+    "path": ".husky/_/post-applypatch",
+    "hash": "b95c773222accf61b8febc7e33cba6a97ebc1a86",
+    "lines": 2,
+    "type": "unknown",
+    "origin": "Brew2"
+  },
+  {
+    "path": ".husky/_/post-checkout",
+    "hash": "b95c773222accf61b8febc7e33cba6a97ebc1a86",
+    "lines": 2,
+    "type": "unknown",
+    "origin": "Brew2"
+  },
+  {
+    "path": ".husky/_/post-commit",
+    "hash": "b95c773222accf61b8febc7e33cba6a97ebc1a86",
+    "lines": 2,
+    "type": "unknown",
+    "origin": "Brew2"
+  },
+  {
+    "path": ".husky/_/post-merge",
+    "hash": "b95c773222accf61b8febc7e33cba6a97ebc1a86",
+    "lines": 2,
+    "type": "unknown",
+    "origin": "Brew2"
+  },
+  {
+    "path": ".husky/_/post-rewrite",
+    "hash": "b95c773222accf61b8febc7e33cba6a97ebc1a86",
+    "lines": 2,
+    "type": "unknown",
+    "origin": "Brew2"
+  },
+  {
+    "path": ".husky/_/pre-applypatch",
+    "hash": "b95c773222accf61b8febc7e33cba6a97ebc1a86",
+    "lines": 2,
+    "type": "unknown",
+    "origin": "Brew2"
+  },
+  {
+    "path": ".husky/_/pre-auto-gc",
+    "hash": "b95c773222accf61b8febc7e33cba6a97ebc1a86",
+    "lines": 2,
+    "type": "unknown",
+    "origin": "Brew2"
+  },
+  {
+    "path": ".husky/_/pre-commit",
+    "hash": "b95c773222accf61b8febc7e33cba6a97ebc1a86",
+    "lines": 2,
+    "type": "unknown",
+    "origin": "Brew2"
+  },
+  {
+    "path": ".husky/_/pre-merge-commit",
+    "hash": "b95c773222accf61b8febc7e33cba6a97ebc1a86",
+    "lines": 2,
+    "type": "unknown",
+    "origin": "Brew2"
+  },
+  {
+    "path": ".husky/_/pre-push",
+    "hash": "b95c773222accf61b8febc7e33cba6a97ebc1a86",
+    "lines": 2,
+    "type": "unknown",
+    "origin": "Brew2"
+  },
+  {
+    "path": ".husky/_/pre-rebase",
+    "hash": "b95c773222accf61b8febc7e33cba6a97ebc1a86",
+    "lines": 2,
+    "type": "unknown",
+    "origin": "Brew2"
+  },
+  {
+    "path": ".husky/_/prepare-commit-msg",
+    "hash": "b95c773222accf61b8febc7e33cba6a97ebc1a86",
+    "lines": 2,
+    "type": "unknown",
+    "origin": "Brew2"
+  },
+  {
+    "path": ".husky/pre-commit",
+    "hash": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+    "lines": 1,
+    "type": "unknown",
+    "origin": "Brew2"
+  },
+  {
+    "path": "CODE_PRUNE.md",
+    "hash": "82544abcb7640f0729bd22569a9a32aef0e01ab8",
+    "lines": 14,
+    "type": "md",
+    "origin": "Brew2"
+  },
+  {
+    "path": "CODE_PRUNE_AUDIT.json",
+    "hash": "47326e435534c0b4c8e5195974d81029bf4140fa",
+    "lines": 33,
+    "type": "json",
+    "origin": "Brew2"
+  },
+  {
+    "path": "LICENSE",
+    "hash": "bc1e6e3efb42a9ded4616dd4c7125c16b6b5f965",
+    "lines": 202,
+    "type": "unknown",
+    "origin": "Brew2"
+  },
+  {
+    "path": "README.md",
+    "hash": "9044384860116f454b30efa5197fe5b8305c5931",
+    "lines": 128,
+    "type": "md",
+    "origin": "Brew2"
+  },
+  {
+    "path": "admin/BrewAuditDashboard.jsx",
+    "hash": "b03a798092be6419165fb5877fc76f56d00eba86",
+    "lines": 125,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "admin/BrewAuditHistory.jsx",
+    "hash": "df6eb8ee4e87bd781dce7e1e86dcbe4a7057b946",
+    "lines": 43,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "admin/BrewMergeUI.jsx",
+    "hash": "22750561d01f6f200353167e07ab3db27c010ccc",
+    "lines": 83,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "admin/BrewVision.jsx",
+    "hash": "d629a682621ec76da5749caa30cfefbe3c43f57b",
+    "lines": 51,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "admin/FileScanResults.jsx",
+    "hash": "1a497f4289a5a9fbc16476c9f4d381f6e231e797",
+    "lines": 61,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "archive/legacy-code/generatePrediction.js",
+    "hash": "77ebd525959a172426971d7dc66849a7b4c0b253",
+    "lines": 45,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "archive/legacy-code/globals.css",
+    "hash": "2ca10a5b5180def9f3b8815cfabf1435f5a232b8",
+    "lines": 82,
+    "type": "css",
+    "origin": "Brew2"
+  },
+  {
+    "path": "archive/legacy-code/supabase.js",
+    "hash": "6cce91a5a5d12dac50eca6b62690cdbbd0f58d84",
+    "lines": 11,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "auth/authListener.js",
+    "hash": "c741f21032a6794e6bfc87d642234521f2e2a2db",
+    "lines": 27,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "backups/2025-06-25T08-54-53-159Z/_meta.json",
+    "hash": "6434ed7b72bebde16a29430e3b520f351ea796d9",
+    "lines": 10,
+    "type": "json",
+    "origin": "Brew2"
+  },
+  {
+    "path": "backups/2025-06-25T08-54-53-159Z/brew_sentinel_logs.json",
+    "hash": "97d170e1550eee4afc0af065b78cda302a97674c",
+    "lines": 1,
+    "type": "json",
+    "origin": "Brew2"
+  },
+  {
+    "path": "backups/2025-06-25T08-54-53-159Z/users.json",
+    "hash": "97d170e1550eee4afc0af065b78cda302a97674c",
+    "lines": 1,
+    "type": "json",
+    "origin": "Brew2"
+  },
+  {
+    "path": "brew/tools/initFileIndex.cjs",
+    "hash": "814bb17d9162f77fc62f6a4bfb6f00dbb47c1b2f",
+    "lines": 91,
+    "type": "cjs",
+    "origin": "Brew2"
+  },
+  {
+    "path": "brew-auditrc.json ",
+    "hash": "e3dcd5974d5f4a9ed1d98441d96c079d7c888d84",
+    "lines": 9,
+    "type": "json ",
+    "origin": "Brew2"
+  },
+  {
+    "path": "brew-command/ide/AuditInsightPanel.jsx",
+    "hash": "58b176fa6bddb7b8c31b1edd05018e935ff828ab",
+    "lines": 76,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "brew-command/ide/BrewEditorPanel.jsx",
+    "hash": "655497c8ab7cefeb51c8103e3c1551d63404680c",
+    "lines": 111,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "brew-command/ide/BrewFileTree.jsx",
+    "hash": "2dc9a7cf329ea5c95b88973049b31a29c066ef17",
+    "lines": 41,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "brew-command/layout/CommandConsoleLayout.jsx",
+    "hash": "0678b8b7d3de0ef4a52195c03c083c378f90b8ab",
+    "lines": 36,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "brew-directory.txt",
+    "hash": "dde5e8e1ab68ee3168dda75a11d994e501e4a24f",
+    "lines": 472,
+    "type": "txt",
+    "origin": "Brew2"
+  },
+  {
+    "path": "brew-scan.js",
+    "hash": "d437372873f5b5fffc06aa801cd41ce5490c6612",
+    "lines": 52,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/BrewVision/BrewAlertPanel.jsx",
+    "hash": "b9b3548915dd260308f69554eb5902ab46599b84",
+    "lines": 39,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/BrewVision/DevCoreLaunchButton.jsx",
+    "hash": "d3a33e8b0e9a734178de0f8a8d66fbaeec336441",
+    "lines": 48,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/BrewVision/PhaseRoadmapViewer.jsx",
+    "hash": "e7f7b78b68d7cc70981eb26acf80702762bf5167",
+    "lines": 88,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/DrawResultCard.jsx",
+    "hash": "74600d8222c6bfb46dd1878d9ec20c7ff6fa87c1",
+    "lines": 29,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/RequireAuth.jsx",
+    "hash": "e3e4fffca1fc8d96fe0d0ec3379684ab7ef368d0",
+    "lines": 26,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/admin/CodePruneVisualizer.jsx",
+    "hash": "8a83fcca27cf79705ef51e0d00727f5bc1d3164e",
+    "lines": 60,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/context/BrewBotContext.jsx",
+    "hash": "74583ebb3ceb3a8a67a02cc02af7f840f1bda823",
+    "lines": 43,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/dashboard/AdminHubLayout.jsx",
+    "hash": "cbe0c6c42b09b9ba9fcc7407d5e4ad59c4fd8b4d",
+    "lines": 59,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/dashboard/AuditViewer.jsx",
+    "hash": "2736a39ad0a04692a2a7d020df3672e8f9671ecb",
+    "lines": 72,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/dashboard/BrewGenerateToolbar.jsx",
+    "hash": "fac7f51242303a6acdab279bed6ee5857c665920",
+    "lines": 54,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/dashboard/BrewMergeOverviewCard.jsx",
+    "hash": "f6711bb6e4020c4647107c17a51140c569e8868c",
+    "lines": 32,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/dashboard/DrawHealthMonitor.jsx",
+    "hash": "9485eea2ffa335661f0d6d0e68afe3d104f997b6",
+    "lines": 82,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/dashboard/GameStrategySelector.jsx",
+    "hash": "b9fefba36af2b0d731ef6086fe508df95d8b7c48",
+    "lines": 21,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/dashboard/MyPicks.jsx",
+    "hash": "e884fbd819d275ee59ecee49f8c23f27a4e6a0a0",
+    "lines": 49,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/dashboard/PickDrawCards.jsx",
+    "hash": "74edfcb812708cbf07d5470ab8bdb9571e1d23e2",
+    "lines": 29,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/dashboard/PredictionFeed.jsx",
+    "hash": "cdf4db33ba1e4c794fc9ebaafaf1db8994670f43",
+    "lines": 68,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/dashboard/RefreshTrigger.jsx",
+    "hash": "472f18f6ce2de0c63d8f33b3c3a3362882d4538c",
+    "lines": 37,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/dashboard/SidebarMenu.jsx",
+    "hash": "62ce8d02e9cc9d923bb9ca258e1648f491a18873",
+    "lines": 43,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/dashboard/UploadZone.jsx",
+    "hash": "f807d272f565bafd520e223828bc0f815cb82258",
+    "lines": 47,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/dashboard/UserViewer.jsx",
+    "hash": "ba7b10d81882824b3ea3abaaa1368884bc67d98d",
+    "lines": 70,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/dashboard/WinRateChart.jsx",
+    "hash": "27cf7be0b0d9137ff029f672bbcf90dcd43c36a0",
+    "lines": 95,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/dev/BrewDevChat.jsx",
+    "hash": "e6d9f5b6658f12a2a7590bb7b4f441ec3449672d",
+    "lines": 144,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/dev/BrewFileUploader.jsx",
+    "hash": "4d5f8a2d1cc4e8402292f7454b2a75a3ce39183f",
+    "lines": 37,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/dev/BrewVoiceWaveform.jsx",
+    "hash": "dc1cf36824d1fc563fce85ef111327adf3872710",
+    "lines": 39,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/index.js",
+    "hash": "cc3eb2dc74b046510cd15fb9e0744b6f8087471c",
+    "lines": 62,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/landing/GameCard.jsx",
+    "hash": "5afe30b3204bf99dc3903ead902a1698fe88c1a7",
+    "lines": 49,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/layouts/AppShell.jsx",
+    "hash": "10fa3e96f9d5a6e3cb795ae1acc0c9e48d99d14f",
+    "lines": 72,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/layouts/BrewAdminLayout.jsx",
+    "hash": "b6b1d13cb60c23dd076d4dcab16ab35cff1d7a15",
+    "lines": 25,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/layouts/LandingLayout.jsx",
+    "hash": "951cc999f0fd81376ea0443e7e789a7f670c7d7a",
+    "lines": 23,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/nav/HamburgerMenu.jsx",
+    "hash": "9cdcbb7fa36ff7264a8c009ad7610dfe29f568e5",
+    "lines": 47,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/overlays/AuditVoiceOverlay.jsx",
+    "hash": "f152cd237a0adfc1d4dc4b0fced9abe119ca7408",
+    "lines": 30,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/overlays/FixSuggestionPanel.jsx",
+    "hash": "10f83c39b99713bd7f047c9513bccf6792ebfc86",
+    "lines": 128,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/overlays/RefactorPreviewPanel.jsx",
+    "hash": "59244a2af3ac3295ddc0204e9dded75f46df5b8d",
+    "lines": 55,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/predict/DailyPickTracker.jsx",
+    "hash": "31af4eb08be410c750d3b73d985d863d71192b70",
+    "lines": 62,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/predict/GameIntroCard.jsx",
+    "hash": "1f5baf9c80c66604849ea62f41043f00fc9dbf57",
+    "lines": 58,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/predict/PredictionCard.jsx",
+    "hash": "eb92fa0729a5e1e8d394969299ac2562ca4ffc3f",
+    "lines": 65,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/predict/PredictionInsights.jsx",
+    "hash": "252a688e8c36841c6ca1dce93a9f2a10867ecaa8",
+    "lines": 43,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/predict/PredictionResultPanel.jsx",
+    "hash": "18c3b1bb40a616ec1729847f6f74b0e29d2551b1",
+    "lines": 64,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/predict/PredictionStrategyToggle.jsx",
+    "hash": "13239d635fcc38521453a009dc2cc21f2bf72052",
+    "lines": 74,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/predict/StrategyExplainModal.jsx",
+    "hash": "3b05cb42b74c66ded32a2ed9c149cd1cd3444220",
+    "lines": 49,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/stats/DrawEntropyCard.jsx",
+    "hash": "a15a77c7d56e14e2953a332001c11222e7696bc4",
+    "lines": 41,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/stats/MatchAccuracyTimeline.jsx",
+    "hash": "cf82de7b3f8b11ec939f38096c7fb7eaf2edd135",
+    "lines": 60,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/tools/CodePruneVisualizer.jsx",
+    "hash": "a91f83c9b247b741d2c023a894ff3feb264fe34e",
+    "lines": 50,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/ui/BrewAvatar.jsx",
+    "hash": "9cae77c65af86a4e20f1f3a62c9fbd4a01134649",
+    "lines": 38,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/ui/BrewAvatarAnimated.jsx",
+    "hash": "8d4bfa36832380f980be5d14c5b70f85e4cd36f4",
+    "lines": 65,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/ui/BrewCommentaryEngine.jsx",
+    "hash": "914f57cbce5e13150b19162068233c85434e079f",
+    "lines": 52,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/ui/BrewLottoBot.jsx",
+    "hash": "eed760fa4dad8d9d07b1053691ead5062a936e59",
+    "lines": 32,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/ui/BrewLottoBotDock.jsx",
+    "hash": "b94b8883649c1c878690c8b5a272ca45b14b1b20",
+    "lines": 39,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/ui/BrewLottoBotModal.jsx",
+    "hash": "22b19e7087c4d6328c41847e2e854f3eacfa858d",
+    "lines": 90,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/ui/MergeAuditTable.jsx",
+    "hash": "694e8406f73ebc3e983ffb8b19da23a8cbb917d6",
+    "lines": 48,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/ui/MergebarMenu.jsx",
+    "hash": "32a0ba8c0ec2a1f4e3a1553f229f7331bd430686",
+    "lines": 47,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/ui/PatchDiff.jsx",
+    "hash": "060facd37c79111a5f26c24ff425a17594a18243",
+    "lines": 87,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/ui/PricingTierCard.jsx",
+    "hash": "e8c63abd79b191d689b3b850550a5fd68c0675a7",
+    "lines": 79,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/ui/TeamSelect.jsx",
+    "hash": "318bb0f070bb9e61dd659ac4942e779eb032102b",
+    "lines": 23,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/ui/TrialNudgeBanner.jsx",
+    "hash": "c1af71a55fd2e7c41ae9768584ff4a78b22ba493",
+    "lines": 32,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/ui/badge.jsx",
+    "hash": "2e90924fdb705191698c64b98eb95505d9f89bf2",
+    "lines": 26,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/ui/button.jsx",
+    "hash": "dca32629c52215e0ade048441af0f9e0ba13e58d",
+    "lines": 23,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/ui/card.jsx",
+    "hash": "ab11790bcb594ca9904a2d2891ce2b91930ceded",
+    "lines": 20,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "components/user/ReplayModal.jsx",
+    "hash": "5fe6b8e332f77d6079a592e600c80a549db5af58",
+    "lines": 116,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "config/backupConfig.json",
+    "hash": "e9d7081d609f812f0cca2556bab1ec8fe46bfd8e",
+    "lines": 6,
+    "type": "json",
+    "origin": "Brew2"
+  },
+  {
+    "path": "config/roadmap.json",
+    "hash": "889be20333330ba0ba800f4d406ede7c4e948a1a",
+    "lines": 124,
+    "type": "json",
+    "origin": "Brew2"
+  },
+  {
+    "path": "config/strategyNameMap.js",
+    "hash": "9d8446fcec3ce268100cacc458225738b4eadc04",
+    "lines": 17,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "data/CODE_PRUNE_AUDIT.json",
+    "hash": "9009ac03dc5557fc11225609f55a2c3d55e227ef",
+    "lines": 34,
+    "type": "json",
+    "origin": "Brew2"
+  },
+  {
+    "path": "data/Pick3.csv",
+    "hash": "7121728691a94998f199c9f7ba93a0f1ed9771b8",
+    "lines": 13067,
+    "type": "csv",
+    "origin": "Brew2"
+  },
+  {
+    "path": "data/Pick4.csv",
+    "hash": "a7085ea508b87011e149451a9c73ed36d87cc234",
+    "lines": 11143,
+    "type": "csv",
+    "origin": "Brew2"
+  },
+  {
+    "path": "data/Powerball.csv",
+    "hash": "1588722b314a65125315dc75acbdde2a3a003a85",
+    "lines": 2194,
+    "type": "csv",
+    "origin": "Brew2"
+  },
+  {
+    "path": "data/mega.csv",
+    "hash": "bbeda799983d3b6e30ab2685e46e0c5e51ee53dc",
+    "lines": 1610,
+    "type": "csv",
+    "origin": "Brew2"
+  },
+  {
+    "path": "data/pick5.csv",
+    "hash": "d97ee426a42c5c6ecdd31dc666a610056355d5fe",
+    "lines": 8336,
+    "type": "csv",
+    "origin": "Brew2"
+  },
+  {
+    "path": "docs/BrewLotto_Tiered_Pricing_Updated.md",
+    "hash": "43150fd4700a33a13a0f072fe761d24f0fcf5e7f",
+    "lines": 92,
+    "type": "md",
+    "origin": "Brew2"
+  },
+  {
+    "path": "docs/BrewVision.md",
+    "hash": "8eedeb5803c3178efa851c4282505c8020393546",
+    "lines": 110,
+    "type": "md",
+    "origin": "Brew2"
+  },
+  {
+    "path": "docs/CHANGELOG.md",
+    "hash": "e607fb5eae27b89a3af8ea2ef7180f2dcedfb564",
+    "lines": 59,
+    "type": "md",
+    "origin": "Brew2"
+  },
+  {
+    "path": "docs/CHANGELOG.md:Zone.Identifier",
+    "hash": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+    "lines": 1,
+    "type": "identifier",
+    "origin": "Brew2"
+  },
+  {
+    "path": "docs/Strategy_Map_BrewLotto.md",
+    "hash": "26b44811da56d63044f96ed9877449704a4aff7c",
+    "lines": 25,
+    "type": "md",
+    "origin": "Brew2"
+  },
+  {
+    "path": "docs/TODO.md",
+    "hash": "0cc18bd33f2e40dd79ed6bf1cb8cae9733cddfd6",
+    "lines": 26,
+    "type": "md",
+    "origin": "Brew2"
+  },
+  {
+    "path": "docs/data-pipeline-manual.md",
+    "hash": "aefab8020fe26b1a35010464ece59c482646fc51",
+    "lines": 181,
+    "type": "md",
+    "origin": "Brew2"
+  },
+  {
+    "path": "docs/dev-manual.md",
+    "hash": "77706ddb3c9fbc8a4fea1c9f765f38c9e475b572",
+    "lines": 57,
+    "type": "md",
+    "origin": "Brew2"
+  },
+  {
+    "path": "docs/init.sh",
+    "hash": "76b5b16e1fbdd38f1717101277b1f22362f57afc",
+    "lines": 19,
+    "type": "sh",
+    "origin": "Brew2"
+  },
+  {
+    "path": "docs/merge/.gitkeep",
+    "hash": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+    "lines": 1,
+    "type": "unknown",
+    "origin": "Brew2"
+  },
+  {
+    "path": "docs/merge/MERGE_REPORT.md",
+    "hash": "4f398e60086336f5b72fb5b97ed625dcdd38e91a",
+    "lines": 27,
+    "type": "md",
+    "origin": "Brew2"
+  },
+  {
+    "path": "docs/merge/MergeReadinessReport.md",
+    "hash": "61de3b55509d650c51316255a38e1726b73c6ca5",
+    "lines": 36,
+    "type": "md",
+    "origin": "Brew2"
+  },
+  {
+    "path": "eslint.config.mjs",
+    "hash": "3182682e0361ba13ed74d9fedef3d4635e1b888a",
+    "lines": 17,
+    "type": "mjs",
+    "origin": "Brew2"
+  },
+  {
+    "path": "hooks/useBrewBot.js",
+    "hash": "7c1fafa5201c08c8f9774199b7ac7a6e24ae04a4",
+    "lines": 43,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "hooks/useBrewVoice.js",
+    "hash": "eb44596e99be67d81877d76d6bcd8ea73f4a513b",
+    "lines": 64,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "hooks/useFileAuditStatus.js",
+    "hash": "f8e12b911065d083702ae47e5f4dfc44f82fdf2f",
+    "lines": 22,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "hooks/useMatchScan.js",
+    "hash": "e7098c614af8a021ca675f9f0e92755d6002707e",
+    "lines": 23,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "hooks/useMergeFileIndex.js",
+    "hash": "1a64a8583025847723dcb71c7df69403f6734937",
+    "lines": 42,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "hooks/usePredictionEngine.js",
+    "hash": "76beaf3103f7e37c197815c3666f756b984740da",
+    "lines": 69,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "hooks/useRefactorLedger.js",
+    "hash": "5cde3e1f16fb1ce431bc255c344602538d5130a7",
+    "lines": 34,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "hooks/useSupabaseSQL.js",
+    "hash": "d04cd81341b54c7572261d79695de478702772b1",
+    "lines": 23,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "hooks/useTeamDirecoty.js",
+    "hash": "cc48e488db0c84ce8a44af335aaed8140c0435e7",
+    "lines": 17,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "hooks/useUpgradeFlow.js",
+    "hash": "c6e83b3c59b54be38ff47f25770a2d676d5d43c6",
+    "lines": 16,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "hooks/useUserProfile.js",
+    "hash": "b485a28b48c151e602edd8f014705a9a97586140",
+    "lines": 52,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "hooks/useUserTier.js",
+    "hash": "d8cc14983d3b8100bf1dca56523b95cfc5a60c50",
+    "lines": 35,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "jsconfig.json",
+    "hash": "1503b16dc00717db30b85be39fa17fc5726dd7a2",
+    "lines": 10,
+    "type": "json",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/AuditExportUtils.js",
+    "hash": "e327836d6644e7f18c322cfcf7c882d1033f8325",
+    "lines": 64,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/BrewUtils.js",
+    "hash": "036820b58a3cde42b8ea4ea03946875bbbe58189",
+    "lines": 59,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/ai/useBrewAI.js",
+    "hash": "b80b4aa53f506db26776292360d36ddc8d4043de",
+    "lines": 34,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/analysis/marketAnalysis.js",
+    "hash": "60f5f92ae5e0ef1f7c80a346dbe81a58c40fda2e",
+    "lines": 34,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/analysis/poissonHotCold.js",
+    "hash": "d52d61466bcc3304e812cf64044d58d279739ce3",
+    "lines": 64,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/brewCommentary.js",
+    "hash": "058b469be4eb4aad543415af3a2262521b515012",
+    "lines": 83,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/config/getGameSettings.js",
+    "hash": "db974bc699d7d89ac572b40eae66b65908ebe44a",
+    "lines": 69,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/data/getLatestDrawResults.js",
+    "hash": "fb604223c399e974d7811b80ec1e216f5ea44941",
+    "lines": 50,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/engines/getSmartPick.js",
+    "hash": "71587eeae2eaa594f2d3c142aa72530b246e6f5d",
+    "lines": 22,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/engines/smartPickEngine.js",
+    "hash": "e3d976fa0226bfe103b30da48829b15f68cc4d67",
+    "lines": 39,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/explainers/strategyExplainers.js",
+    "hash": "cd8da7fd1d55b6dacb70e4acc5d77dc2ec1a0c88",
+    "lines": 33,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/geoCheck.js",
+    "hash": "fed6f1bb721943cb4f3149d889fb9a482722a80f",
+    "lines": 16,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/logGeoAudit.js",
+    "hash": "5be8b2e9fd22738049b589b053001706cedefe5e",
+    "lines": 15,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/matchPredictionToDraw.js",
+    "hash": "fb80021cb2fd3934f37857b6b66b4decfbad4a4b",
+    "lines": 30,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/refactorEngine.js",
+    "hash": "708996dc9884e86fb10e1769b0f89eba889fb86f",
+    "lines": 107,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/scanEngine.js",
+    "hash": "1865cc9f1228320f73a595599555ca977c51fc9e",
+    "lines": 110,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/stats/analyzeMega.js",
+    "hash": "221c1105f7d857bb0a44c11e5c804806e338fdd1",
+    "lines": 20,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/stats/analyzePick3.js",
+    "hash": "b29b80779dd6196a7c6de6aeea48a3ee29091875",
+    "lines": 13,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/stats/analyzePick4.js",
+    "hash": "88c3d2c92511020761d68c75d0b8a9c8f10bd0f6",
+    "lines": 15,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/stats/analyzePick5.js",
+    "hash": "05ee1a9df04beace63ed9b062759a048e4c85e4d",
+    "lines": 15,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/stats/analyzePowerball.js",
+    "hash": "ad9835a57a58b4632022f3a34c166e6ed435fc69",
+    "lines": 22,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/stats/fetchDraws.js",
+    "hash": "1eae86082df5eb2596ce77d6a07a3ad357257c38",
+    "lines": 26,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/stats/fetchStats.js",
+    "hash": "4f896ae5879908d6c23ea5d4304b9a496d9c5e2d",
+    "lines": 37,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/strategies/markov.js",
+    "hash": "898bc9b6528b897bcd576e9ae5ac433412fb5bfa",
+    "lines": 11,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/strategies/momentum.js",
+    "hash": "a20a87f4eaa3bef2b9270c7371c2a4d62700f481",
+    "lines": 11,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/strategies/poisson.js",
+    "hash": "9e7e648745074685730821474a03d25503fc228a",
+    "lines": 11,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/strategies/random.js",
+    "hash": "a7a5e6676f28c4f9bfab7019800813dd900dd7a3",
+    "lines": 26,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/summarizeUtils.js",
+    "hash": "1d6b9ac2ae2c812c0663ec8ddf0c9e98b2858389",
+    "lines": 17,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/supabase/browserClient.js",
+    "hash": "baf8ef66dda656d0a4d98a4fe719b11a64cb9760",
+    "lines": 7,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/supabase/serverClient.js",
+    "hash": "f472c0e096bea27e1509ea358d436488e16fff46",
+    "lines": 25,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/teamDirectory.json",
+    "hash": "bb370e3509701c11ec443c52e7c96c4c1a3d4e87",
+    "lines": 30,
+    "type": "json",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/voice/BREW_PHRASES.js",
+    "hash": "6effc86b11bcd039bb15791c9158cc18ef662161",
+    "lines": 56,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/voice/brewVoiceLines.js",
+    "hash": "f3ce6e2dc0af0e1f4fcbadca4330ce57c18f838b",
+    "lines": 25,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/voice/useSpeechToText.js",
+    "hash": "ef2ff95a2bd0cc39951d52346845b88d1fec5878",
+    "lines": 54,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "lib/voice/useTTS.js",
+    "hash": "4a0de55d388a33d037e7c9ccda6369a66220fdee",
+    "lines": 39,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "logs/brewBackup.log",
+    "hash": "3b03cd8a44a2f5453e545e578e6ee7e028e831e2",
+    "lines": 19,
+    "type": "log",
+    "origin": "Brew2"
+  },
+  {
+    "path": "logs/pick3_4_day.log",
+    "hash": "fa3fdf573a006e27a0927f8d274b2316aa08a8e5",
+    "lines": 77,
+    "type": "log",
+    "origin": "Brew2"
+  },
+  {
+    "path": "logs/pick3_4_evening.log",
+    "hash": "bcf4629302f5d7c920a56c047cf27184a65f54c5",
+    "lines": 97,
+    "type": "log",
+    "origin": "Brew2"
+  },
+  {
+    "path": "mnt/data/BrewMergeFileIndex.json",
+    "hash": "3050e932f9c2ec07149020e6ccb1d8ee962f562d",
+    "lines": 42,
+    "type": "json",
+    "origin": "Brew2"
+  },
+  {
+    "path": "next-env.d.ts",
+    "hash": "6142ddd0c74955fec9e01089e79cdd64d463638b",
+    "lines": 6,
+    "type": "ts",
+    "origin": "Brew2"
+  },
+  {
+    "path": "next.config.ts",
+    "hash": "89327ac52fc9a00fb8b885afd6654f18e58b3156",
+    "lines": 8,
+    "type": "ts",
+    "origin": "Brew2"
+  },
+  {
+    "path": "package-lock.json",
+    "hash": "c48a1afdf1d56e15f7a52e8fa1ac55435a4aaa8f",
+    "lines": 8751,
+    "type": "json",
+    "origin": "Brew2"
+  },
+  {
+    "path": "package.json",
+    "hash": "9e0a47078eac2aaf3dd4fe263ac33f940a1c140e",
+    "lines": 65,
+    "type": "json",
+    "origin": "Brew2"
+  },
+  {
+    "path": "pages/_app.js",
+    "hash": "6c8d399cc2920dca1e1dff7155540c4ab371d8d0",
+    "lines": 44,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "pages/admin/brew-audit-dashboard.jsx",
+    "hash": "622b3b3c466b3fceb74cad6976c65eab651caca4",
+    "lines": 17,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "pages/admin/brew-merge-ui.jsx",
+    "hash": "f2a52bffa1928f5cfa140849da7449e03cab0881",
+    "lines": 32,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "pages/admin/code-prune-visualizer.jsx",
+    "hash": "fe9014614302867e10a9769f9a67cdd0ca8544ff",
+    "lines": 32,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "pages/admin/merge-scan-results.jsx",
+    "hash": "bedcdeaaf270b805f2bb191dc8184d05ca23e742",
+    "lines": 28,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "pages/api/audit.js",
+    "hash": "7f50dec10628a66b26acab965ba4d77cc58e6770",
+    "lines": 63,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "pages/api/brew-ai.js",
+    "hash": "f0029fc056979db24905ef5796e9584d3a119011",
+    "lines": 73,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "pages/api/fix-file.js",
+    "hash": "2af83217749252390913652fa4d3bcecadec92e7",
+    "lines": 41,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "pages/api/generate-merge-report.js",
+    "hash": "432eae1a23878860babb1b5ce0ff334820a152a0",
+    "lines": 37,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "pages/api/ledger.js",
+    "hash": "19d9861ce4f9d192f2de70e47261486c0e33cd13",
+    "lines": 11,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "pages/api/load-file.js",
+    "hash": "3020129848cb93fe058cf7aa4f9de71d407c7d81",
+    "lines": 27,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "pages/api/play/log.js",
+    "hash": "8febcbc83b6391213b0f5ac2df32381759b9364d",
+    "lines": 13,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "pages/api/predict/[game].js",
+    "hash": "5fd3186d430a24d794aa34f663d2213376e8f46e",
+    "lines": 15,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "pages/api/predict.js",
+    "hash": "3654dbd3cfd1ca4c66e3950ca0a9336171cbac9a",
+    "lines": 38,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "pages/api/predictions.js",
+    "hash": "c06e12adf9ee9aaeeb0d449c3c453fbf66ad573a",
+    "lines": 30,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "pages/api/refresh.js",
+    "hash": "6c5f03681c60a368fdc08469a2c7e7c92c0f054b",
+    "lines": 18,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "pages/api/save-file.js",
+    "hash": "2f05b55643546d31cbbdd4707da20f6c9379a2c4",
+    "lines": 24,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "pages/api/stats/[game].js",
+    "hash": "808db9e7bf0f4c99a713ac85d448b160b98b912b",
+    "lines": 17,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "pages/brewcommand/CommandConsolePage.jsx",
+    "hash": "52da3644089b3bbb75ab2e9e29f9ebd416a15a12",
+    "lines": 50,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "pages/dashboard.js",
+    "hash": "3451a1d6ebda58b6b2db06d58caff9db33e3c263",
+    "lines": 140,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "pages/dev/ide.jsx",
+    "hash": "fdd3f20117a21059baeffa084088671ae9fda139",
+    "lines": 68,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "pages/index.js",
+    "hash": "d4b9b48bee529e38710e1cb46fbe1afb2a83c109",
+    "lines": 28,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "pages/legal/privacy.jsx",
+    "hash": "d9ed4bc9a877302bb3856dbe0c90cbff9c320c14",
+    "lines": 54,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "pages/legal/terms.jsx",
+    "hash": "894d4290310a1547d5fe29e368228ead6d2a5f43",
+    "lines": 47,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "pages/login.js",
+    "hash": "30806f5dd12e921e397f9edb090b1305b42a4bf3",
+    "lines": 78,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "pages/logout.js",
+    "hash": "b4f3aff95311a908ada0736e6c70faa6d22918e6",
+    "lines": 18,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "pages/mega.js",
+    "hash": "243498d3586a83d4a3e88f2ff0fa4335d164a782",
+    "lines": 129,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "pages/onboard/Gate.jsx",
+    "hash": "38e5fea45a4a606f4840c5d0e54a486cf2985f94",
+    "lines": 82,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "pages/pick3.js",
+    "hash": "7e6eba7fb53c8c6d9a0546f58ee4c2fc93632105",
+    "lines": 185,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "pages/pick4.js",
+    "hash": "b3d09b69a6b621b58b087ff36b712262d27a0d74",
+    "lines": 184,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "pages/pick5.js",
+    "hash": "1b95ee678983b76ecf8ed4417f1ef1bf7d8f7d6d",
+    "lines": 159,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "pages/powerball.js",
+    "hash": "b2fbb35a24f76e60e07abd3dca6dd91d74889e15",
+    "lines": 123,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "pages/predictor/[game].jsx",
+    "hash": "dc96da174837a688ab863a797ef48c5e060ca269",
+    "lines": 139,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "pages/pricing.jsx",
+    "hash": "27db02d692cc317c8258c3e0af291fd9df9ecb99",
+    "lines": 85,
+    "type": "jsx",
+    "origin": "Brew2"
+  },
+  {
+    "path": "postcss.config.cjs",
+    "hash": "e2d817eed4c4a196a89de326afd2e094b860c2ff",
+    "lines": 6,
+    "type": "cjs",
+    "origin": "Brew2"
+  },
+  {
+    "path": "refactor_ledger.json",
+    "hash": "3ca264e9ea513571edd492c513ac00dcfb67cd4e",
+    "lines": 20,
+    "type": "json",
+    "origin": "Brew2"
+  },
+  {
+    "path": "scripts/BrewMergeEngine.js",
+    "hash": "54659aa296e0c0b5634bc8139d019774bb71d16c",
+    "lines": 46,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "scripts/BrewMergeFileScanner.cjs",
+    "hash": "bb5678f451a714d407a162db9dcfb14ad61ab29d",
+    "lines": 30,
+    "type": "cjs",
+    "origin": "Brew2"
+  },
+  {
+    "path": "scripts/auditTables.js",
+    "hash": "85909b306f0beef0ed3659be599d007197d97a88",
+    "lines": 32,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "scripts/brewBackup.js",
+    "hash": "348b6bd23f82dd8d9912c59bac6f8a437551840d",
+    "lines": 54,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "scripts/bulkScanAndUpload.js",
+    "hash": "c3dd429a7008efea47918763ee4d4ca4830e6ffa",
+    "lines": 161,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "scripts/dbInspect.js",
+    "hash": "f7f74c26331abcf4ffcfcb68df79e9e09652bf4c",
+    "lines": 29,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "scripts/drawHistoryAudit.js",
+    "hash": "81940c3cc8b48750ed3789fde23ca632cbebeace",
+    "lines": 52,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "scripts/generateMergeReadinessReport.cjs",
+    "hash": "2d2d1d425b17c54c51482913be94d1c4ba74f3cd",
+    "lines": 111,
+    "type": "cjs",
+    "origin": "Brew2"
+  },
+  {
+    "path": "scripts/loadFromCsv.js",
+    "hash": "6578682d6e0a0eae136d02ae00e168842c558c63",
+    "lines": 49,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "scripts/logDataStatus.js",
+    "hash": "4c2786fde007bb6549d2d85f7dd4dedda6450ddb",
+    "lines": 50,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "scripts/promoteAdmin.js",
+    "hash": "db6efbaf3bcb02c9eae1c11bac5cfa8f6a7de2ba",
+    "lines": 25,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "scripts/refreshDraws.js",
+    "hash": "8ddbc3dd231c2a8e1e580a6741e500594f83043f",
+    "lines": 79,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "scripts/runAudit.js",
+    "hash": "bda075c520fbc054496ea26f579f2b558ffeff48",
+    "lines": 16,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "scripts/saveNC.js",
+    "hash": "08c7c34d2c249e49b2bcd13d812b6f58458d09cc",
+    "lines": 58,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "scripts/scrapeMega.js",
+    "hash": "50e2bb7338af2394d7f0b491c2a25e6f515f92af",
+    "lines": 72,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "scripts/scrapeNC.js",
+    "hash": "59b90e8f25c17fb8bb248280940d995140b12b4b",
+    "lines": 55,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "scripts/scrapeNC_Pick3.js",
+    "hash": "6547b74307b3cefc51ef488609b7d27c0b602c0a",
+    "lines": 72,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "scripts/scrapeNC_Pick3.playwright.js",
+    "hash": "c9d79b53be8ef830b5009eb5fdc93a1f7e57602a",
+    "lines": 77,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "scripts/scrapeNC_Pick4.js",
+    "hash": "d3bcb97158b223abea74e8471108f79405f71b72",
+    "lines": 63,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "scripts/scrapeNC_Pick5.js",
+    "hash": "0dd693394e5ae52cc634cfd887b7595774e6d145",
+    "lines": 63,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "scripts/scrapePowerball.js",
+    "hash": "dd709dc4c1ae4e605dc3bb0b2acb2430b88971f9",
+    "lines": 68,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "scripts/scrapePowerball.playwright.js",
+    "hash": "1f18b6d43c23930960a4e14600bdffde4a242b03",
+    "lines": 55,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "scripts/upload/csvUtils.js",
+    "hash": "d505a7ad1556bac1e7afd1898beb563918305047",
+    "lines": 143,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "stores/alertStore.js",
+    "hash": "c660692892c09ab9e613fae774119432cc122a4f",
+    "lines": 44,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "stores/useAlertStore.js",
+    "hash": "ebe64af8ca7e2a8bcb0dc153a03745a6bc3da8ed",
+    "lines": 41,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "stores/useAuditStore.js",
+    "hash": "d6cceca71b293cbaf232b7e17da3097b62f91a03",
+    "lines": 79,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "strategies/SmartPickRefactor.js",
+    "hash": "a2773182d6a3cccb22edb2245584afcc05d44b37",
+    "lines": 21,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "structure.txt",
+    "hash": "dde5e8e1ab68ee3168dda75a11d994e501e4a24f",
+    "lines": 472,
+    "type": "txt",
+    "origin": "Brew2"
+  },
+  {
+    "path": "styles/base/brew.css",
+    "hash": "d0b75d97b2b4805ad6a274bcbcb75048344f73b8",
+    "lines": 99,
+    "type": "css",
+    "origin": "Brew2"
+  },
+  {
+    "path": "tailwind.config.cjs",
+    "hash": "06d8ceeed877acf926f8d465aee8d7866ef01bf8",
+    "lines": 57,
+    "type": "cjs",
+    "origin": "Brew2"
+  },
+  {
+    "path": "theme/brewTheme.js",
+    "hash": "5233d7816dd9376a55d62ed0a119f87bd0fcaf2c",
+    "lines": 19,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "tsconfig.json",
+    "hash": "293f80e45cc3172c30809c657c078058088e3bf2",
+    "lines": 52,
+    "type": "json",
+    "origin": "Brew2"
+  },
+  {
+    "path": "utils/DrawDataTriage.js",
+    "hash": "45b336283d6924d150371b3f05f4a8e42a3b4bc1",
+    "lines": 25,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "utils/entropy.js",
+    "hash": "bfeceaf1179d0eefc0c6f460cad13d3e835260d3",
+    "lines": 26,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "utils/strategyLabel.js",
+    "hash": "1caf99aad4c537010e05ce99a42c84ad09f0a0ef",
+    "lines": 12,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "utils/supabaseServerClient.js",
+    "hash": "4ca9afef9cbb970666c2035fd2970fd6d634e4a4",
+    "lines": 6,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "utils/supabaseService.js",
+    "hash": "82a48306fde4aad92e57b45cd974ebe56f2dad23",
+    "lines": 9,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "utils/tier-untils.js",
+    "hash": "5480be63fbdd8c9a612d7088a40301830e8f17b7",
+    "lines": 4,
+    "type": "js",
+    "origin": "Brew2"
+  },
+  {
+    "path": "utils/toastservice.js",
+    "hash": "7044875492b5f6eb63297a99a9561754a2537648",
+    "lines": 12,
+    "type": "js",
+    "origin": "Brew2"
+  }
+]

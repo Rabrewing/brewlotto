@@ -1,0 +1,9 @@
+
+{
+  "complexityThreshold": 150,
+  "extensions": [".js", ".jsx"],
+  "ignoreDirs": ["node_modules", ".next", "dist", "out", "test-output"],
+  "auditPaths": ["src"],
+  "refactorMessage": "Complexity exceeds safe threshold",
+  "blockCommits": true
+} 

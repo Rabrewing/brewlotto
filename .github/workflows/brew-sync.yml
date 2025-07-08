@@ -1,0 +1,27 @@
+# ========================================================
+# 📡 GitHub Actions: BrewLotto Auto Push Monitor
+# Trigger: Manual commits or every 6 hours
+# Last updated: 2025-06-27 by Copilot (RB sync config)
+# ========================================================
+
+name: BrewLottoBot Auto Sync
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 */6 * * *' # Every 6 hours UTC
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🔄 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ✅ Confirm BrewBot sync status
+        run: echo "☕ BrewLottoBot sync task triggered at $(date)"
+
+      # Optional future steps:
+      # - name: Run tests or lint
+      #   run: npm run lint && npm test

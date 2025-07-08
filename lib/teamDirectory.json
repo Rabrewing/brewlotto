@@ -1,0 +1,30 @@
+{
+    "Ava": {
+        "dev": true,
+        "role": "Frontend Engineer",
+        "team": "UI Core",
+        "email": "ava@brewlotto.ai",
+        "avatar": "/avatars/ava.png"
+    },
+    "Zane": {
+        "dev": true,
+        "role": "Backend Architect",
+        "team": "StrategyEngine",
+        "email": "zane@brewlotto.ai",
+        "avatar": "/avatars/zane.png"
+    },
+    "Quinn": {
+        "dev": true,
+        "role": "Refactor Ops Lead",
+        "team": "RefactorOps",
+        "email": "quinn@brewlotto.ai",
+        "avatar": "/avatars/quinn.png"
+    },
+    "Nova": {
+        "dev": false,
+        "role": "AI Experience Designer",
+        "team": "UX Lab",
+        "email": "nova@brewlotto.ai",
+        "avatar": "/avatars/nova.png"
+    }
+}

@@ -1,0 +1,10 @@
+{
+  "created_at": "2025-06-25T08-54-53-159Z",
+  "tables": [
+    "draws",
+    "users",
+    "roadmap",
+    "brew_sentinel_logs"
+  ],
+  "status": "complete"
+}
