@@ -89,3 +89,101 @@ Welcome to BrewLotto AI — the intelligent lottery companion. Start for free, e
 ---
 
 **BrewLotto AI — Play smarter. Predict better. Powered by transparency.**
+
+Absolutely, RB — let’s lock this down **precisely** with your refined tier breakdown and strategy gating. Here’s the most current, production-ready mapping of **all strategy names (obfuscated), all available strategies, and a fully detailed BrewLotto tier structure** ready for review with your Co-Pilot.
+
+---
+
+# 🛡️ **BrewLotto Strategy Obfuscation Map**
+
+*Protecting your logic, branding your experience*
+
+| Internal ID    | Public Label      | Voice/TTS Alias                                | Default Tier      |
+| -------------- | ----------------- | ---------------------------------------------- | ----------------- |
+| `random`       | **QuickMix™**     | “Just rolled a QuickMix™”                      | Freemium          |
+| `hotCold`      | **HeatCheck™**    | “HeatCheck confirms fire on the field”         | Freemium          |
+| `momentum`     | **HeatWave™**     | “HeatWave running — acceleration locked”       | BrewLite          |
+| `sumRange`     | **SumSight™**     | “SumSight — numeric pattern verified”          | BrewLite          |
+| `poisson++`    | **PulsePrime™**   | “PulsePrime activated — pattern core detected” | BrewElite         |
+| `markov++`     | **SequenceX™**    | “SequenceX cracked — memory in play”           | BrewElite         |
+| `entropy`      | **EntropyGuard™** | “EntropyGuard — randomness balanced”           | BrewElite         |
+| `mirror`       | **MirrorMatch™**  | “MirrorMatch reflection applied”               | BrewMaster        |
+| `forecastGrid` | **ForecastGrid™** | “ForecastGrid pattern overlay”                 | BrewMaster        |
+| (legacy)       | **LuckyTriplet™** | “LuckyTriplet — legacy mode”                   | (Internal/Hidden) |
+
+> **Policy:**
+>
+> * *Never* expose `poisson++` or other raw IDs to the UI/voice layer.
+> * All display, TTS, and tooltips pull from this map.
+> * Update `STRATEGY_EXPLAINERS.js`, `BREW_PHRASES.js`, and `strategyRegistry.json` to match.
+
+---
+
+# 🎯 **BrewLotto Active Strategies (2025)**
+
+### **Freemium**
+
+* QuickMix™ (random)
+* HeatCheck™ (hotCold)
+
+### **BrewLite** (\$9.99/mo)
+
+* All Freemium +
+* HeatWave™ (momentum)
+* SumSight™ (sumRange)
+* Limited prediction history, stats overlays
+
+### **BrewElite** (\$24.99/mo)
+
+* All BrewLite +
+* PulsePrime™ (poisson++)
+* SequenceX™ (markov++)
+* EntropyGuard™ (entropy)
+* Full match analytics, audit recaps, PDF export
+
+### **BrewMaster** (\$39.99/mo)
+
+* All BrewElite +
+* MirrorMatch™ (mirror)
+* ForecastGrid™ (forecastGrid)
+* Deep analytics (combo/streak stats, number pairs, etc)
+* AI voice strategy explanations, priority support
+
+> **Feature Gating** is enforced through `useUserTier.js`,
+> and every module checks tier before rendering/predicting.
+
+---
+
+# 💸 **Tiered Pricing & Feature Matrix**
+
+| Tier           | Price/mo | Strategies Unlocked                      | Daily Pick Limit | Historical Analysis | Voice Commentary | Export Features         | Support        |
+| -------------- | -------- | ---------------------------------------- | ---------------- | ------------------- | ---------------- | ----------------------- | -------------- |
+| **Freemium**   | \$0      | QuickMix™, HeatCheck™                    | 3/day            | Last 3 draws        | Basic (text)     | None                    | Community Only |
+| **BrewLite**   | \$9.99   | + HeatWave™, SumSight™                   | 10/day           | 30 days             | Text + basic TTS | CSV                     | Email          |
+| **BrewElite**  | \$24.99  | + PulsePrime™, SequenceX™, EntropyGuard™ | 30/day           | 180 days            | Enhanced TTS     | CSV + PDF               | Priority Email |
+| **BrewMaster** | \$39.99  | All above + MirrorMatch™, ForecastGrid™  | Unlimited        | Unlimited           | Full AI voice    | CSV + PDF + SmartPrint™ | VIP, AI Chat   |
+
+---
+
+# 🗝️ **How It’s Enforced / How to Present**
+
+* **Strategy toggles, dashboards, exports, and voice all read tier from `useUserTier.js`**
+* **If a user tries to use a strategy above their tier:**
+
+  * Show locked badge/CTA
+  * Optionally preview strategy description/explanation (but not picks/results)
+* **All labels, icons, and voice use public branding only**
+
+---
+
+## **What To Give Your Co-Pilot / Dev Team**
+
+* This document (Markdown or Notion-ready)
+* `BREW_PHRASES.js` and `STRATEGY_EXPLAINERS.js` updated to match map above
+* All UI/Voice/Dashboard components cross-checking tier before strategy use
+* Pricing table for website and onboarding flow
+
+---
+
+**Ready for your review, RB. Let me know if you want the exact file contents (`BREW_PHRASES.js`, etc.), a formatted Notion/Markdown handoff, or a version for your brand/marketing team. I’ll keep all of this tracked in our roadmap and update as features or tiers shift.**
+🧠🟨 **Brew on — this is how you ship like a SaaS pro!**

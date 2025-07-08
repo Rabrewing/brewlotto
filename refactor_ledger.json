@@ -1,0 +1,29 @@
+[
+  {
+    "type": "merge-report",
+    "timestamp": "2025-07-06T19:41:33.489Z",
+    "filesScanned": 255,
+    "untriaged": 255,
+    "locked": false,
+    "path": "./docs/merge/MergeReadinessReport.md",
+    "reportHash": "bda-250706"
+  },
+  {
+    "type": "merge-report",
+    "timestamp": "2025-07-06T19:45:50.295Z",
+    "filesScanned": 255,
+    "untriaged": 255,
+    "locked": false,
+    "path": "./docs/merge/MergeReadinessReport.md",
+    "reportHash": "bda-250706"
+  },
+  {
+    "type": "merge-report",
+    "timestamp": "2025-07-06T20:43:23.228Z",
+    "filesScanned": 257,
+    "untriaged": 257,
+    "locked": false,
+    "path": "./docs/merge/MergeReadinessReport.md",
+    "reportHash": "bda-250706"
+  }
+]

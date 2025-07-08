@@ -57,3 +57,17 @@ This changelog tracks all notable changes, features, bug fixes, and refactors to
 ---
 
 *For future PRs and features, add updates here using `[YYYY-MM-DD] Feature/Refactor` headings.*
+
+// =============================================
+// 📁 File: /full/path/to/file.jsx
+// 🧠 Summary: One-liner describing core role
+//
+// ▸ Bullet callouts explaining purpose, behavior, or key logic
+// ▸ Integration notes — e.g. “Triggered by XYZ UI”
+// ▸ Input/output expectations (props, context, hooks)
+// ▸ UX or system context: strategy, audit, pick, voice
+//
+// 🔁 Used in: [list files or routes if known]
+// 🔗 Dependencies: [context, hooks, libraries, etc]
+// ✨ Added: Phase X.Y — Brief phase milestone title
+// =============================================

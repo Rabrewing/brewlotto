@@ -1,19 +1,32 @@
 // @file: BrewAuditDashboard.jsx
-// @directory: /admin
-// @timestamp: 2025-07-01T11:55 EDT
-// @summary: Full BrewMerge audit dashboard with MergebarMenu tab sync and localStorage persistence
-// @route: http://localhost:3000/admin/brew-audit-dashboard
+// @summary: Cockpit dashboard for merge audit tracking, scan insights, and manual report generation
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+
+// Core layout and UI modules
 import BrewAdminLayout from '@/components/layouts/BrewAdminLayout';
 import MergebarMenu from '@/components/ui/MergebarMenu';
 import MergeAuditTable from '@/components/ui/MergeAuditTable';
+
+// Static audit datasets
 import CODE_PRUNE_AUDIT from '@/data/CODE_PRUNE_AUDIT.json';
 import BrewMergeFileIndex from '@/mnt/data/BrewMergeFileIndex.json';
+
+// 🔁 NEW AUDIT INTELLIGENCE COMPONENTS
+import BrewGenerateToolbar from '@/components/dashboard/BrewGenerateToolbar';
+import BrewMergeOverviewCard from '@/components/dashboard/BrewMergeOverviewCard';
+import ReadinessReportViewer from '@/components/dashboard/ReadinessReportViewer';
+import RefactorLedgerPanel from '@/components/dashboard/RefactorLedgerPanel';
+import PatchQueuePanel from '@/components/dashboard/PatchQueuePanel';
 import AuditVoiceOverlay from '@/components/overlays/AuditVoiceOverlay';
 
-const TABS = ['Deprecated Files', 'Unused Modules', 'Merge-Ready', 'Legacy Tracker'];
+const TABS = [
+    'Deprecated Files',
+    'Unused Modules',
+    'Merge-Ready',
+    'Legacy Tracker'
+];
 
 export default function BrewAuditDashboard() {
     const router = useRouter();
@@ -22,7 +35,6 @@ export default function BrewAuditDashboard() {
     useEffect(() => {
         const urlTab = router.query.tab;
         const storedTab = localStorage.getItem('brewmerge_active_tab');
-
         if (urlTab && TABS.includes(urlTab)) setActiveTab(urlTab);
         else if (storedTab && TABS.includes(storedTab)) setActiveTab(storedTab);
     }, [router.query.tab]);
@@ -42,7 +54,7 @@ export default function BrewAuditDashboard() {
                         data={CODE_PRUNE_AUDIT.deprecated_modules.map((m) => ({
                             file: m.file,
                             reason: m.reason,
-                            status: 'Deprecated',
+                            status: 'Deprecated'
                         }))}
                     />
                 );
@@ -53,7 +65,7 @@ export default function BrewAuditDashboard() {
                         data={CODE_PRUNE_AUDIT.unused_files.map((m) => ({
                             file: m.file,
                             reason: m.reason,
-                            status: 'Unused',
+                            status: 'Unused'
                         }))}
                     />
                 );
@@ -64,7 +76,7 @@ export default function BrewAuditDashboard() {
                         data={CODE_PRUNE_AUDIT.active_modules.map((f) => ({
                             file: f,
                             reason: 'Confirmed as core to current refactor',
-                            status: 'Active',
+                            status: 'Active'
                         }))}
                     />
                 );
@@ -75,7 +87,7 @@ export default function BrewAuditDashboard() {
                         data={(BrewMergeFileIndex.legacy || []).map((file) => ({
                             file,
                             reason: 'Auto-classified from directory scan',
-                            status: 'Legacy',
+                            status: 'Legacy'
                         }))}
                     />
                 );
@@ -88,7 +100,25 @@ export default function BrewAuditDashboard() {
         <BrewAdminLayout>
             <div className="flex flex-col md:flex-row">
                 <MergebarMenu active={activeTab} onChange={handleTabChange} />
-                <div className="flex-1 p-6">{renderTabContent()}
+
+                <div className="flex-1 p-6 space-y-6">
+                    {/* 📝 Manual report generation trigger */}
+                    <BrewGenerateToolbar />
+
+                    {/* 🧠 Merge scan summary */}
+                    <BrewMergeOverviewCard />
+
+                    {/* 📑 AI-aware audit intelligence */}
+                    <div className="grid md:grid-cols-2 gap-6">
+                        <ReadinessReportViewer />
+                        <RefactorLedgerPanel />
+                        <PatchQueuePanel />
+                    </div>
+
+                    {/* 🔍 Categorized audit views */}
+                    {renderTabContent()}
+
+                    {/* 🎤 Optional AI overlays */}
                     <AuditVoiceOverlay />
                 </div>
             </div>

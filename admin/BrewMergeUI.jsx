@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
 import useAuditStore from '@/stores/useAuditStore'; // ✅ Runtime audit state
-import { runAuditScan } from '@/lib/scanEngine';    // ✅ Live scanner engine
+import { runAuditScan } from '@/lib/server/scanEngine';    // ✅ Live scanner engine
 
 const BrewMergeUI = () => {
     const {

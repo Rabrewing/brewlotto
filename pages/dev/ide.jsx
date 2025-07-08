@@ -1,18 +1,33 @@
-// @file: ide.jsx
-// @directory: /pages/dev
-// @summary: Brew AI Developer Console — IDE view with file context, scan intelligence, and Dev AI assistant
+// =============================================
+// 📁 File: /pages/dev/ide.jsx
+// 🧠 Summary: Brew AI Developer IDE — cockpit with source intelligence + fix suggestion AI
+//
+// ▸ Hosts FileTree, DevChat, Editor, and Audit HUD in a modular grid
+// ▸ Scans active file content and fetches patch suggestions via Brew Fix Engine
+// ▸ Integrates with AuditInsightPanel and FixSuggestionPanel for visual & voice commentary
+// ▸ Narrates commentary via BrewBotContext.speak() based on file activity
+//
+// 🔁 Used in: DevTools route (/dev/ide)
+// 🔗 Dependencies: useFixSuggestion, AuditInsightPanel, BrewBotContext
+// ✨ Enhanced: Phase 5.2 — RefactorOverlayHUD + Inline Patch Narration
+// =============================================
 
 import Head from "next/head";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import BrewFileTree from "@/brew-command/ide/BrewFileTree";
 import BrewEditorPanel from "@/brew-command/ide/BrewEditorPanel";
 import BrewDevChat from "@/components/dev/BrewDevChat";
 import BrewFileUploader from "@/components/dev/BrewFileUploader";
 import AuditInsightPanel from "@/brew-command/ide/AuditInsightPanel";
+import FixSuggestionPanel from "@/components/dev/FixSuggestionPanel";
+import RefactorOverlayHUD from "@/components/editor/RefactorOverlayHUD"; // 🆕 ADDED
+import useFixSuggestion from "@/hooks/useFixSuggestion";
 
 export default function BrewIDE() {
     const [activeFile, setActiveFile] = useState(null);
     const [fileCode, setFileCode] = useState("");
+
+    const { fix, fetchFix, loading } = useFixSuggestion();
 
     const handleFileSelect = (file) => {
         setActiveFile(file);
@@ -20,9 +35,16 @@ export default function BrewIDE() {
     };
 
     const handleFileUpload = ({ name, content }) => {
-        setActiveFile(name.includes("/") ? name : `/upload/${name}`);
+        const safePath = name.includes("/") ? name : `/upload/${name}`;
+        setActiveFile(safePath);
         setFileCode(content);
     };
+
+    useEffect(() => {
+        if (activeFile && fileCode) {
+            fetchFix({ path: activeFile, code: fileCode });
+        }
+    }, [activeFile]);
 
     return (
         <>
@@ -40,7 +62,7 @@ export default function BrewIDE() {
                         <BrewFileUploader onFileRead={handleFileUpload} />
                     </div>
 
-                    {/* 💻 Right: Editor, Audit HUD, DevBot */}
+                    {/* 💻 Right: Editor, Audit HUD, Fix Panel, DevBot */}
                     <div className="md:col-span-2 flex flex-col space-y-4 relative">
                         <BrewEditorPanel
                             fileName={activeFile ? activeFile.split("/").pop() : "No file selected"}
@@ -49,6 +71,20 @@ export default function BrewIDE() {
                         />
 
                         <AuditInsightPanel />
+
+                        {fix && (
+                            <>
+                                <FixSuggestionPanel fix={fix} onApply={(newCode) => setFileCode(newCode)} />
+                                <RefactorOverlayHUD
+                                    patch={{
+                                        ...fix,
+                                        file: activeFile,
+                                        x: 620, // Placeholder positioning; to be dynamically computed
+                                        y: 240
+                                    }}
+                                />
+                            </>
+                        )}
 
                         {/* 🧍 BrewBot — Docked bottom-left */}
                         <div className="absolute bottom-0 left-0 w-full md:w-auto">

@@ -6,32 +6,37 @@
       "dom.iterable",
       "esnext"
     ],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "bundler",
+    "moduleResolution": "nodenext", // 🔁 Supports .cjs/.mjs & Node-style packages
+    "baseUrl": ".", // 🧭 Required for paths below
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    },
+    "allowJs": true,
+    "checkJs": false,
+    "skipLibCheck": true,
     "resolveJsonModule": true,
-    "isolatedModules": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true, // 🧾 Enables clean JSON/default imports
     "jsx": "preserve",
     "incremental": true,
+    "strict": true,
+    "noEmit": true,
     "types": [
       "node",
       "estree",
-      "json-schema"
+      "json-schema",
+      "jest",
+      "mocha"
     ],
     "plugins": [
       {
         "name": "next"
       }
     ],
-    "paths": {
-      "@/*": [
-        "./*"
-      ]
-    }
+    "isolatedModules": true
   },
   "include": [
     "next-env.d.ts",
@@ -40,7 +45,9 @@
     "**/*.js",
     "**/*.jsx",
     ".next/types/**/*.ts",
-    "scripts/BrewMergeFileScanner.cjs"
+    "scripts/BrewMergeFileScanner.cjs",
+    "pages/api/generate-merge-report.js",
+    "scripts/generateMergeReadinessReport.cjs"
   ],
   "exclude": [
     "node_modules"

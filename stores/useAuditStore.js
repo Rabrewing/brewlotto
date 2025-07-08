@@ -1,8 +1,8 @@
 // @file: useAuditStore.js
 // @directory: /stores
-// @timestamp: 2025-07-01T09:56 EDT
-// @summary: Central Zustand store for BrewAudit runtime state and ingestion routines
-// @route: N/A — used across admin dashboard modules
+// @timestamp: 2025-07-03T08:00 EDT
+// @summary: Central Zustand store for BrewAudit runtime state, file triage, and editor sync
+// @route: N/A — used across BrewCommand, Monaco, and admin dashboards
 
 import { create } from 'zustand';
 
@@ -10,6 +10,9 @@ const useAuditStore = create((set) => ({
     deprecatedFiles: [],
     unusedFiles: [],
     activeModules: [],
+    refactorCandidates: [],
+    currentFile: null,
+    fileSummaries: {},
     scanMeta: {
         lastScan: null,
         triggeredBy: 'system',
@@ -17,11 +20,20 @@ const useAuditStore = create((set) => ({
     },
 
     // 🧠 Triggered by scanEngine.js after ingestion
-    ingestAuditSnapshot: ({ deprecated = [], unused = [], active = [], meta = {} }) =>
+    ingestAuditSnapshot: ({
+        deprecated = [],
+        unused = [],
+        active = [],
+        refactor = [],
+        summaries = {},
+        meta = {},
+    }) =>
         set(() => ({
             deprecatedFiles: deprecated,
             unusedFiles: unused,
             activeModules: active,
+            refactorCandidates: refactor,
+            fileSummaries: summaries,
             scanMeta: {
                 ...meta,
                 lastScan: new Date().toISOString(),
@@ -37,6 +49,8 @@ const useAuditStore = create((set) => ({
             deprecated: snapshot.deprecated_modules,
             unused: snapshot.unused_files,
             active: snapshot.active_modules,
+            refactor: snapshot.refactor_candidates,
+            summaries: snapshot.file_summaries || {},
             meta: { triggeredBy: 'manual' },
         });
     },
@@ -46,13 +60,20 @@ const useAuditStore = create((set) => ({
         set((state) => ({
             deprecatedFiles: state.deprecatedFiles.filter((f) => f.file !== filePath),
             unusedFiles: state.unusedFiles.filter((f) => f.file !== filePath),
+            refactorCandidates: state.refactorCandidates.filter((f) => f.file !== filePath),
         })),
 
     archiveFile: (filePath) =>
         set((state) => ({
             deprecatedFiles: state.deprecatedFiles.filter((f) => f.file !== filePath),
             unusedFiles: state.unusedFiles.filter((f) => f.file !== filePath),
+            refactorCandidates: state.refactorCandidates.filter((f) => f.file !== filePath),
         })),
+
+    // 🧠 Direct setters
+    setRefactorCandidates: (data) => set({ refactorCandidates: data }),
+    setCurrentFile: (path) => set({ currentFile: path }),
+    setFileSummaries: (map) => set({ fileSummaries: map }),
 }));
 
 export default useAuditStore;

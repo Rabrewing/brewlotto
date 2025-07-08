@@ -1,10 +1,9 @@
 // @file: CommandConsoleLayout.jsx
-// @directory: /brew-command/layout
 // @summary: Global layout wrapper for BrewCommand admin tools with nav, pane slots, HUDs
 
 import React from 'react';
 import SidebarMenu from '@/components/dashboard/SidebarMenu';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/BrewUtils'; // ✅ Updated path
 
 export default function CommandConsoleLayout({ children, bottomBar, overlayHUD, user }) {
     return (

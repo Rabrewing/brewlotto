@@ -2,8 +2,16 @@
 // @directory: /
 // @summary: CLI runner for scanEngine.js — prints audit summary, JSON snapshot, or Git-safe exit
 
-import { runAuditScan } from './lib/scanEngine.js';
+import { runAuditScan } from './lib/server/scanEngine.js';
 import fs from 'fs';
+
+let config = { blockCommits: true };
+try {
+    const raw = fs.readFileSync('./.brew-auditrc.json', 'utf-8');
+    config = { ...config, ...JSON.parse(raw) };
+} catch (e) {
+    // fallback to default
+}
 
 const args = process.argv.slice(2);
 const asJSON = args.includes('--json');
@@ -20,8 +28,8 @@ if (asJSON) {
 }
 
 if (isHook) {
-    const risky = snapshot.refactor_candidates.filter(f => f.score > 150);
-    if (risky.length > 0) {
+    const risky = snapshot.refactor_candidates.filter(f => f.score > (config.complexityThreshold || 150));
+    if (config.blockCommits && risky.length > 0) {
         console.log('\n🛑 Commit blocked — High-complexity files detected:');
         risky.forEach(f =>
             console.log(`  🔧 ${f.file} (score: ${f.score})`)
