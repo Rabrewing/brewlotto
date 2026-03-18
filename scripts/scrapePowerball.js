@@ -12,7 +12,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY
 );
 
-const MONTHS_BACK = 3;
+const MONTHS_BACK = 6; // Look back 6 months for more data
 
 (async () => {
     const allDraws = [];
