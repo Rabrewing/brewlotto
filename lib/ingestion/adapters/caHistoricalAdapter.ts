@@ -158,23 +158,8 @@ export class CAHistoricalAdapter {
           }
           
           // Transform to database format
-          const dbRecords = normalizedDraws.map(draw => ({
-            id: this.generateUuid(),
-            game_id: gameId,
-            draw_date: draw.draw_date,
-            draw_window_label: draw.draw_time || 'daily', // Default to daily if not specified
-            draw_datetime_local: new Date(`${draw.draw_date}T12:00:00`).toISOString(), // Default to noon if time not specified
-            primary_numbers: draw.numbers,
-            bonus_numbers: draw.bonus_number ? [draw.bonus_number] : [],
-            multiplier_value: draw.multiplier ? parseInt(draw.multiplier) : null,
-            fireball_value: draw.fireball || null,
-            special_values: draw.special_values || {},
-            source_id: sourceId,
-            source_draw_id: draw.checksum,
-            source_payload: draw.raw_payload || {},
-            result_status: 'official',
-            is_latest_snapshot: false,
-          }));
+          // For games with multiple draws per day, we need to determine day/evening
+          const dbRecords = this.assignDrawWindows(normalizedDraws, game, gameId, sourceId);
 
           // For historical data, we'll insert directly (no upsert due to unique constraint complexity)
           // First, check for existing records to avoid duplicates
@@ -211,6 +196,17 @@ export class CAHistoricalAdapter {
           } else {
             console.log(`  📥 All ${dbRecords.length} records already exist in Supabase`);
             result.insertedRecords = 0;
+          }
+          
+          // Show what draw windows are assigned
+          if (dbRecords.length > 0) {
+            console.log(`  🕐 Draw window assignments:`);
+            dbRecords.slice(0, 2).forEach((record: any, i: number) => {
+              console.log(`    [${i + 1}] ${record.draw_date} ${record.draw_window_label}: ${record.primary_numbers.join('-')} @ ${record.draw_datetime_local}`);
+            });
+            if (dbRecords.length > 2) {
+              console.log(`    ... and ${dbRecords.length - 2} more records`);
+            }
           }
         } catch (supabaseError: unknown) {
           const errorMessage = supabaseError instanceof Error ? supabaseError.message : String(supabaseError);
@@ -458,6 +454,106 @@ export class CAHistoricalAdapter {
     };
     
     return configs[game] || configs.daily3;
+  }
+
+  /**
+   * Assign draw windows (day/evening) based on draw order
+   */
+  private assignDrawWindows(
+    draws: NormalizedDraw[], 
+    game: string, 
+    gameId: string, 
+    sourceId: string
+  ): any[] {
+    // Group draws by date
+    const drawsByDate: Record<string, NormalizedDraw[]> = {};
+    draws.forEach(draw => {
+      if (!drawsByDate[draw.draw_date]) {
+        drawsByDate[draw.draw_date] = [];
+      }
+      drawsByDate[draw.draw_date].push(draw);
+    });
+
+    const dbRecords: any[] = [];
+
+    Object.entries(drawsByDate).forEach(([date, dateDraws]) => {
+      // Sort by draw_id (from raw_payload or checksum) to determine order
+      // For now, we'll assume the order in the CSV is chronological
+      // Later, we could parse the draw_id from raw_payload if available
+      
+      if (game === 'daily3' || game === 'daily4') {
+        // These games have 2 draws per day: day and evening
+        // But data sources might only include one draw per day
+        if (dateDraws.length === 2) {
+          // Two draws: assume first is day, second is evening
+          dateDraws.forEach((draw, index) => {
+            const isDayDraw = index === 0;
+            const windowLabel = isDayDraw ? 'day' : 'evening';
+            const timeStr = isDayDraw ? '13:29:00' : '18:59:00'; // 1:29 PM and 6:59 PM PT
+            
+            dbRecords.push({
+              id: this.generateUuid(),
+              game_id: gameId,
+              draw_date: draw.draw_date,
+              draw_window_label: windowLabel,
+              draw_datetime_local: `${draw.draw_date}T${timeStr}-07:00`,
+              primary_numbers: draw.numbers,
+              bonus_numbers: draw.bonus_number ? [draw.bonus_number] : [],
+              multiplier_value: draw.multiplier ? parseInt(draw.multiplier) : null,
+              fireball_value: draw.fireball || null,
+              special_values: draw.special_values || {},
+              source_id: sourceId,
+              source_draw_id: draw.checksum,
+              source_payload: draw.raw_payload || {},
+              result_status: 'official',
+              is_latest_snapshot: false,
+            });
+          });
+        } else {
+          // Single draw: default to evening (main draw)
+          const draw = dateDraws[0];
+          dbRecords.push({
+            id: this.generateUuid(),
+            game_id: gameId,
+            draw_date: draw.draw_date,
+            draw_window_label: 'evening',
+            draw_datetime_local: `${draw.draw_date}T18:59:00-07:00`,
+            primary_numbers: draw.numbers,
+            bonus_numbers: draw.bonus_number ? [draw.bonus_number] : [],
+            multiplier_value: draw.multiplier ? parseInt(draw.multiplier) : null,
+            fireball_value: draw.fireball || null,
+            special_values: draw.special_values || {},
+            source_id: sourceId,
+            source_draw_id: draw.checksum,
+            source_payload: draw.raw_payload || {},
+            result_status: 'official',
+            is_latest_snapshot: false,
+          });
+        }
+      } else {
+        // Fantasy 5 and other games have 1 draw per day
+        const draw = dateDraws[0];
+        dbRecords.push({
+          id: this.generateUuid(),
+          game_id: gameId,
+          draw_date: draw.draw_date,
+          draw_window_label: 'nightly',
+          draw_datetime_local: `${draw.draw_date}T18:45:00-07:00`, // 6:45 PM PT
+          primary_numbers: draw.numbers,
+          bonus_numbers: draw.bonus_number ? [draw.bonus_number] : [],
+          multiplier_value: draw.multiplier ? parseInt(draw.multiplier) : null,
+          fireball_value: draw.fireball || null,
+          special_values: draw.special_values || {},
+          source_id: sourceId,
+          source_draw_id: draw.checksum,
+          source_payload: draw.raw_payload || {},
+          result_status: 'official',
+          is_latest_snapshot: false,
+        });
+      }
+    });
+
+    return dbRecords;
   }
 
   /**

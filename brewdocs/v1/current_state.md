@@ -63,11 +63,12 @@
 ### ✅ Test Results (2026-03-18 15:00 ET)
 - **CA Daily 3**: 199 valid out of 200 records (1 invalid with all zeros from 2026-02-28)
   - Data shows 2 draws per day (daytime and evening) with consecutive draw_ids
-  - Most recent date: 2026-03-16 (2 draws: 7-8-8 and 9-3-5)
-- **CA Daily 4**: 200 valid out of 200 records (2 draws per day pattern)
-- **CA Fantasy 5**: 30 valid out of 30 records (1 draw per day, nightly)
+  - Most recent date: 2026-03-16 (2 draws: day @ 1:29 PM PT = 9-3-5, evening @ 6:59 PM PT = 7-8-8)
+- **CA Daily 4**: 200 valid out of 200 records (1 draw per day in this data source)
+  - Assigned as evening draw @ 6:59 PM PT (main draw)
+- **CA Fantasy 5**: 30 valid out of 30 records (1 draw per day, nightly @ 6:45 PM PT)
 - **Total**: 429 valid records out of 430 total records
-- **Supabase Insertion**: All valid records successfully inserted
+- **Supabase Insertion**: All valid records successfully inserted with correct draw_window_label
 
 ### Test Command
 ```bash
