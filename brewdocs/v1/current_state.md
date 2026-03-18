@@ -39,11 +39,12 @@
 2. **`lib/ingestion/parsers/caPick4Parser.js`** - CA Daily 4 parser
 3. **`lib/ingestion/parsers/caFantasy5Parser.js`** - CA Fantasy 5 parser (new)
 
-## CA Historical Adapter (D7.1)
+## CA Historical Adapter (D7.1 & D7.2)
 
 **Status**: ✅ COMPLETED
-**Completion Time**: 2026-03-18 14:30 ET
-**Total Duration**: ~2 hours
+**D7.1 Completion Time**: 2026-03-18 14:30 ET
+**D7.2 Completion Time**: 2026-03-18 15:00 ET
+**Total Duration**: ~3 hours
 
 ### ✅ Created Adapter
 1. **`lib/ingestion/adapters/caHistoricalAdapter.ts`** - CA historical data ingestion adapter
@@ -54,24 +55,27 @@
 - Validates records using the validator
 - Handles different date formats across CSV files
 - Maps source keys to game config keys
-- Logs sample records for verification
+- **D7.2**: Supabase integration with game/source lookups
+- **D7.2**: Creates missing game and source records
+- **D7.2**: Inserts draws into official_draws table
+- **D7.2**: Duplicate checking to avoid re-insertion
 
-### ✅ Test Results (2026-03-18 14:30 ET)
+### ✅ Test Results (2026-03-18 15:00 ET)
 - **CA Daily 3**: 199 valid out of 200 records (1 invalid with all zeros)
 - **CA Daily 4**: 200 valid out of 200 records
 - **CA Fantasy 5**: 30 valid out of 30 records
 - **Total**: 429 valid records out of 430 total records
+- **Supabase Insertion**: All valid records successfully inserted
 
 ### Test Command
 ```bash
 npx tsx scripts/testCAIngestion.ts
 ```
 
-### Next Steps (D7.2 - Supabase Integration)
-- Create ingestion job runner for Supabase insertion
-- Add game_id and source_id lookups from database
-- Integrate with existing ingestion pipeline
-- Create scheduling for automated updates
+### Next Steps (D7.3 - Scheduler Layer)
+- Create automated ingestion jobs
+- Add scheduling for daily updates
+- Implement retry logic for failed insertions
 - **Target Completion**: 2026-03-19 ET
 
 ## Ingestion Core Modules (Phase D1)

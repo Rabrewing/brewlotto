@@ -141,9 +141,85 @@ export class CAHistoricalAdapter {
         result.errors.forEach(err => console.log(`    - ${err}`));
       }
 
-      // Note: Actual insertion into Supabase requires game_id and source_id lookups
-      // This is handled in a later phase (D7.2+)
-      result.insertedRecords = normalizedDraws.length;
+      // Insert into Supabase (D7.2)
+      if (normalizedDraws.length > 0) {
+        try {
+          const supabase = this.getSupabaseClient();
+          
+          // Get game_id and source_id
+          const gameId = await this.getGameId(supabase, sourceConfig.state, game);
+          const sourceId = await this.getSourceId(supabase, sourceConfig.state, sourceKey);
+          
+          if (!gameId) {
+            throw new Error(`Game ID not found for state ${sourceConfig.state} and game ${game}`);
+          }
+          if (!sourceId) {
+            throw new Error(`Source ID not found for source key ${sourceKey}`);
+          }
+          
+          // Transform to database format
+          const dbRecords = normalizedDraws.map(draw => ({
+            id: this.generateUuid(),
+            game_id: gameId,
+            draw_date: draw.draw_date,
+            draw_window_label: draw.draw_time || 'daily', // Default to daily if not specified
+            draw_datetime_local: new Date(`${draw.draw_date}T12:00:00`).toISOString(), // Default to noon if time not specified
+            primary_numbers: draw.numbers,
+            bonus_numbers: draw.bonus_number ? [draw.bonus_number] : [],
+            multiplier_value: draw.multiplier ? parseInt(draw.multiplier) : null,
+            fireball_value: draw.fireball || null,
+            special_values: draw.special_values || {},
+            source_id: sourceId,
+            source_draw_id: draw.checksum,
+            source_payload: draw.raw_payload || {},
+            result_status: 'official',
+            is_latest_snapshot: false,
+          }));
+
+          // For historical data, we'll insert directly (no upsert due to unique constraint complexity)
+          // First, check for existing records to avoid duplicates
+          const existingChecksums: Set<string> = new Set();
+          
+          // Get existing draws for this game and date range
+          const dates = dbRecords.map(r => r.draw_date);
+          const { data: existingDraws } = await supabase
+            .from('official_draws')
+            .select('source_draw_id')
+            .eq('game_id', gameId)
+            .in('draw_date', dates);
+          
+          if (existingDraws) {
+            existingDraws.forEach((draw: any) => existingChecksums.add(draw.source_draw_id));
+          }
+          
+          // Filter out existing records
+          const newRecords = dbRecords.filter(r => !existingChecksums.has(r.source_draw_id));
+          
+          if (newRecords.length > 0) {
+            const { error: insertError, data: insertedData } = await supabase
+              .from('official_draws')
+              .insert(newRecords)
+              .select();
+
+            if (insertError) {
+              console.error(`  ❌ Insertion error: ${insertError.message}`);
+              result.errors.push(`Insertion failed: ${insertError.message}`);
+            } else {
+              result.insertedRecords = insertedData?.length || 0;
+              console.log(`  📥 Inserted ${result.insertedRecords} new records into Supabase`);
+            }
+          } else {
+            console.log(`  📥 All ${dbRecords.length} records already exist in Supabase`);
+            result.insertedRecords = 0;
+          }
+        } catch (supabaseError: unknown) {
+          const errorMessage = supabaseError instanceof Error ? supabaseError.message : String(supabaseError);
+          console.error(`  ❌ Supabase error: ${errorMessage}`);
+          result.errors.push(`Supabase error: ${errorMessage}`);
+        }
+      } else {
+        result.insertedRecords = 0;
+      }
       
       // Log sample of normalized data for verification
       if (normalizedDraws.length > 0) {
@@ -156,6 +232,7 @@ export class CAHistoricalAdapter {
         }
       }
 
+      // Success if we have valid records and no fatal errors (invalid records are expected)
       result.success = result.validRecords > 0;
       result.duration = Date.now() - startTime;
 
@@ -183,6 +260,204 @@ export class CAHistoricalAdapter {
     };
     
     return gameConfigMap[baseKey] || baseKey.toUpperCase();
+  }
+
+  /**
+   * Generate a UUID
+   */
+  private generateUuid(): string {
+    return crypto.randomUUID();
+  }
+
+  /**
+   * Get or create game ID from Supabase
+   */
+  private async getGameId(supabase: any, state: string, game: string): Promise<string | null> {
+    const gameKeyMap: Record<string, string> = {
+      'daily3': 'daily3',
+      'daily4': 'daily4',
+      'fantasy5': 'fantasy5',
+    };
+    
+    const gameKey = gameKeyMap[game] || game;
+    
+    // Try to find existing game
+    const { data: existingGame, error: selectError } = await supabase
+      .from('lottery_games')
+      .select('id')
+      .eq('state_code', state)
+      .eq('game_key', gameKey)
+      .maybeSingle();
+    
+    if (selectError) {
+      console.error(`Error fetching game ID for ${state} ${game}:`, selectError.message);
+      return null;
+    }
+    
+    if (existingGame) {
+      return existingGame.id;
+    }
+    
+    // Game doesn't exist, create it
+    console.log(`  ℹ️ Creating game record for ${state} ${game}...`);
+    const newGameId = this.generateUuid();
+    
+    const gameConfig = this.getGameConfig(game);
+    
+    const { error: insertError } = await supabase
+      .from('lottery_games')
+      .insert({
+        id: newGameId,
+        state_code: state,
+        game_key: gameKey,
+        display_name: gameConfig.displayName,
+        game_family: gameConfig.gameFamily,
+        primary_count: gameConfig.primaryCount,
+        primary_min: gameConfig.primaryMin,
+        primary_max: gameConfig.primaryMax,
+        has_bonus: gameConfig.hasBonus,
+        bonus_count: gameConfig.bonusCount,
+        bonus_min: gameConfig.bonusMin,
+        bonus_max: gameConfig.bonusMax,
+        bonus_label: gameConfig.bonusLabel,
+        draw_style: gameConfig.drawStyle,
+        supports_multiplier: gameConfig.supportsMultiplier,
+        supports_fireball: gameConfig.supportsFireball,
+        schedule_config: gameConfig.scheduleConfig,
+      });
+    
+    if (insertError) {
+      console.error(`  ❌ Error creating game record: ${insertError.message}`);
+      return null;
+    }
+    
+    return newGameId;
+  }
+
+  /**
+   * Get or create source ID from Supabase
+   */
+  private async getSourceId(supabase: any, state: string, sourceKey: string): Promise<string | null> {
+    // Try to find existing source
+    const { data: existingSource, error: selectError } = await supabase
+      .from('draw_sources')
+      .select('id')
+      .eq('state_code', state)
+      .eq('source_key', sourceKey)
+      .maybeSingle();
+    
+    if (selectError) {
+      console.error(`Error fetching source ID for ${state} ${sourceKey}:`, selectError.message);
+      return null;
+    }
+    
+    if (existingSource) {
+      return existingSource.id;
+    }
+    
+    // Source doesn't exist, create it
+    console.log(`  ℹ️ Creating source record for ${state} ${sourceKey}...`);
+    const newSourceId = this.generateUuid();
+    
+    const sourceConfig = getSourceConfig(sourceKey);
+    if (!sourceConfig) {
+      console.error(`  ❌ Source configuration not found for ${sourceKey}`);
+      return null;
+    }
+    
+    // Map source type to allowed values
+    const sourceTypeMap: Record<string, string> = {
+      'official': 'api',
+      'official-page': 'html',
+      'trusted-archive': 'csv',
+      'community': 'manual',
+    };
+    
+    const mappedSourceType = sourceTypeMap[sourceConfig.sourceType] || 'manual';
+    
+    const { error: insertError } = await supabase
+      .from('draw_sources')
+      .insert({
+        id: newSourceId,
+        state_code: state,
+        source_key: sourceKey,
+        source_type: mappedSourceType,
+        base_url: sourceConfig.sourceUrl,
+        parser_key: 'csv', // Default parser key
+        priority: 1,
+        is_official: sourceConfig.sourceType === 'official',
+        is_active: sourceConfig.isActive,
+      });
+    
+    if (insertError) {
+      console.error(`  ❌ Error creating source record: ${insertError.message}`);
+      return null;
+    }
+    
+    return newSourceId;
+  }
+
+  /**
+   * Get game configuration based on game type
+   */
+  private getGameConfig(game: string): any {
+    const configs: Record<string, any> = {
+      daily3: {
+        displayName: 'Daily 3',
+        gameFamily: 'pick3',
+        primaryCount: 3,
+        primaryMin: 0,
+        primaryMax: 9,
+        hasBonus: false,
+        bonusCount: 0,
+        drawStyle: 'twice_daily',
+        supportsMultiplier: false,
+        supportsFireball: true,
+        scheduleConfig: {
+          windows: [
+            { label: 'day', time: '13:29', cutoff: 30 },
+            { label: 'evening', time: '18:59', cutoff: 30 }
+          ]
+        }
+      },
+      daily4: {
+        displayName: 'Daily 4',
+        gameFamily: 'pick4',
+        primaryCount: 4,
+        primaryMin: 0,
+        primaryMax: 9,
+        hasBonus: false,
+        bonusCount: 0,
+        drawStyle: 'twice_daily',
+        supportsMultiplier: false,
+        supportsFireball: true,
+        scheduleConfig: {
+          windows: [
+            { label: 'day', time: '13:29', cutoff: 30 },
+            { label: 'evening', time: '18:59', cutoff: 30 }
+          ]
+        }
+      },
+      fantasy5: {
+        displayName: 'Fantasy 5',
+        gameFamily: 'cash5',
+        primaryCount: 5,
+        primaryMin: 1,
+        primaryMax: 39,
+        hasBonus: false,
+        bonusCount: 0,
+        drawStyle: 'daily',
+        supportsMultiplier: false,
+        supportsFireball: false,
+        scheduleConfig: {
+          windows: [
+            { label: 'nightly', time: '18:45', cutoff: 60 }
+          ]
+        }
+      }
+    };
+    
+    return configs[game] || configs.daily3;
   }
 
   /**
