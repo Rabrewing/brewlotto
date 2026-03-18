@@ -19,6 +19,7 @@ export interface NormalizedDraw {
   trust_score: number;
   checksum: string;
   raw_payload?: unknown;
+  draw_variant?: string | null; // e.g., 'double_draw', 'double_play'
 }
 
 export interface GameConfig {
@@ -39,10 +40,12 @@ const GAME_CONFIGS: Record<string, GameConfig> = {
   'NC_PICK4': { state: 'NC', game: 'pick4', primaryCount: 4, primaryMin: 0, primaryMax: 9, supportsFireball: true },
   'NC_CASH5': { state: 'NC', game: 'cash5', primaryCount: 5, primaryMin: 1, primaryMax: 43, hasBonus: false },
   'NC_POWERBALL': { state: 'NC', game: 'powerball', primaryCount: 5, primaryMin: 1, primaryMax: 69, hasBonus: true, bonusCount: 1, bonusMin: 1, bonusMax: 26 },
-  'NC_MEGA': { state: 'NC', game: 'mega_millions', primaryCount: 5, primaryMin: 1, primaryMax: 70, hasBonus: true, bonusCount: 1, bonusMin: 1, bonusMax: 25 },
+  'NC_MEGA_MILLIONS': { state: 'NC', game: 'mega_millions', primaryCount: 5, primaryMin: 1, primaryMax: 70, hasBonus: true, bonusCount: 1, bonusMin: 1, bonusMax: 25 },
   'CA_DAILY3': { state: 'CA', game: 'daily3', primaryCount: 3, primaryMin: 0, primaryMax: 9, supportsFireball: true },
   'CA_DAILY4': { state: 'CA', game: 'daily4', primaryCount: 4, primaryMin: 0, primaryMax: 9, supportsFireball: true },
   'CA_FANTASY5': { state: 'CA', game: 'fantasy5', primaryCount: 5, primaryMin: 1, primaryMax: 39 },
+  'CA_POWERBALL': { state: 'CA', game: 'powerball', primaryCount: 5, primaryMin: 1, primaryMax: 69, hasBonus: true, bonusCount: 1, bonusMin: 1, bonusMax: 26 },
+  'CA_MEGA_MILLIONS': { state: 'CA', game: 'mega_millions', primaryCount: 5, primaryMin: 1, primaryMax: 70, hasBonus: true, bonusCount: 1, bonusMin: 1, bonusMax: 25 },
 };
 
 /**

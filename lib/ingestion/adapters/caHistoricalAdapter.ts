@@ -411,8 +411,8 @@ export class CAHistoricalAdapter {
         supportsFireball: true,
         scheduleConfig: {
           windows: [
-            { label: 'day', time: '13:29', cutoff: 30 },
-            { label: 'evening', time: '18:59', cutoff: 30 }
+            { label: 'day', time: '13:00', cutoff: 0 },
+            { label: 'evening', time: '18:30', cutoff: 0 }
           ]
         }
       },
@@ -424,13 +424,12 @@ export class CAHistoricalAdapter {
         primaryMax: 9,
         hasBonus: false,
         bonusCount: 0,
-        drawStyle: 'twice_daily',
+        drawStyle: 'daily', // Note: CA Daily 4 is once daily, not twice
         supportsMultiplier: false,
         supportsFireball: true,
         scheduleConfig: {
           windows: [
-            { label: 'day', time: '13:29', cutoff: 30 },
-            { label: 'evening', time: '18:59', cutoff: 30 }
+            { label: 'evening', time: '18:30', cutoff: 0 }
           ]
         }
       },
@@ -447,7 +446,7 @@ export class CAHistoricalAdapter {
         supportsFireball: false,
         scheduleConfig: {
           windows: [
-            { label: 'nightly', time: '18:45', cutoff: 60 }
+            { label: 'nightly', time: '18:30', cutoff: 0 }
           ]
         }
       }
@@ -481,15 +480,15 @@ export class CAHistoricalAdapter {
       // For now, we'll assume the order in the CSV is chronological
       // Later, we could parse the draw_id from raw_payload if available
       
-      if (game === 'daily3' || game === 'daily4') {
-        // These games have 2 draws per day: day and evening
-        // But data sources might only include one draw per day
+      if (game === 'daily3') {
+        // CA Daily 3 has 2 draws per day: day and evening
+        // Day: 1:00 PM PT, Evening: 6:30 PM PT
         if (dateDraws.length === 2) {
           // Two draws: assume first is day, second is evening
           dateDraws.forEach((draw, index) => {
             const isDayDraw = index === 0;
             const windowLabel = isDayDraw ? 'day' : 'evening';
-            const timeStr = isDayDraw ? '13:29:00' : '18:59:00'; // 1:29 PM and 6:59 PM PT
+            const timeStr = isDayDraw ? '13:00:00' : '18:30:00'; // 1:00 PM and 6:30 PM PT
             
             dbRecords.push({
               id: this.generateUuid(),
@@ -517,7 +516,7 @@ export class CAHistoricalAdapter {
             game_id: gameId,
             draw_date: draw.draw_date,
             draw_window_label: 'evening',
-            draw_datetime_local: `${draw.draw_date}T18:59:00-07:00`,
+            draw_datetime_local: `${draw.draw_date}T18:30:00-07:00`,
             primary_numbers: draw.numbers,
             bonus_numbers: draw.bonus_number ? [draw.bonus_number] : [],
             multiplier_value: draw.multiplier ? parseInt(draw.multiplier) : null,
@@ -530,6 +529,30 @@ export class CAHistoricalAdapter {
             is_latest_snapshot: false,
           });
         }
+      } else if (game === 'daily4' || game === 'fantasy5') {
+        // CA Daily 4 and Fantasy 5 have 1 draw per day (evening/nightly)
+        // Daily 4: 6:30 PM PT, Fantasy 5: 6:30 PM PT
+        const draw = dateDraws[0];
+        const windowLabel = game === 'daily4' ? 'evening' : 'nightly';
+        const timeStr = '18:30:00'; // 6:30 PM PT
+        
+        dbRecords.push({
+          id: this.generateUuid(),
+          game_id: gameId,
+          draw_date: draw.draw_date,
+          draw_window_label: windowLabel,
+          draw_datetime_local: `${draw.draw_date}T${timeStr}-07:00`,
+          primary_numbers: draw.numbers,
+          bonus_numbers: draw.bonus_number ? [draw.bonus_number] : [],
+          multiplier_value: draw.multiplier ? parseInt(draw.multiplier) : null,
+          fireball_value: draw.fireball || null,
+          special_values: draw.special_values || {},
+          source_id: sourceId,
+          source_draw_id: draw.checksum,
+          source_payload: draw.raw_payload || {},
+          result_status: 'official',
+          is_latest_snapshot: false,
+        });
       } else {
         // Fantasy 5 and other games have 1 draw per day
         const draw = dateDraws[0];
