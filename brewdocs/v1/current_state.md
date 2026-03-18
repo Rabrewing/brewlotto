@@ -8,29 +8,56 @@
 ## Data Files Status
 
 ### ✅ California Data
-- **Daily 3**: `/data/ca/ca-daily3.csv` - 200 draws (2025-12-07 to 2026-03-16) ✅ VALIDATED
-- **Daily 4**: `/data/ca/ca-daily4.csv` - 200 draws (2025-08-29 to 2026-03-16) ✅ VALIDATED
-- **Fantasy 5**: `/data/ca/ca-fantasy5.csv` - 30 live draws from lotto-8.com
+| Game | File | Draws | Date Range | Source | Status |
+|------|------|-------|------------|--------|--------|
+| Daily 3 | `/data/ca/ca-daily3.csv` | 200 | 2025-12-07 to 2026-03-16 | lotteryextreme.com | ✅ VALIDATED |
+| Daily 4 | `/data/ca/ca-daily4.csv` | 200 | 2025-08-29 to 2026-03-16 | lotteryextreme.com | ✅ VALIDATED |
+| Fantasy 5 | `/data/ca/ca-fantasy5.csv` | 30 | Recent | lotto-8.com | ⚠️ Needs more |
 
 ### ✅ North Carolina Data
-- **Pick 3**: `/data/nc/nc-pick3.csv` - Historical data (NCELPick3.csv renamed)
-- **Pick 4**: `/data/nc/nc-pick4.csv` - Historical data (NCELPick4.csv renamed)
-- **Cash 5**: `/data/nc/nc-cash5.csv` - Historical data (NCELCash5.csv renamed)
+| Game | File | Draws | Source | Status |
+|------|------|-------|--------|--------|
+| Pick 3 | `/data/nc/nc-pick3.csv` | ~13,600 | nclottery.com | ✅ Ready |
+| Pick 4 | `/data/nc/nc-pick4.csv` | ~11,700 | nclottery.com | ✅ Ready |
+| Cash 5 | `/data/nc/nc-cash5.csv` | ~8,800 | nclottery.com | ✅ Ready |
 
 ### ✅ Multi-State Data
-- **Powerball**: `/data/multi-state/powerball.csv` - Historical data
-- **Mega Millions**: `/data/multi-state/mega-millions.csv` - Historical data
+| Game | File | Draws | Source | Status |
+|------|------|-------|--------|--------|
+| Powerball | `/data/multi-state/powerball.csv` | 2,373 | NCEL | ✅ Ready |
+| Mega Millions | `/data/multi-state/mega-millions.csv` | 1,682 | NCEL | ✅ Ready |
 
 ## Data Fetching Scripts
 
 ### ✅ Created Scripts
-1. **`scripts/fetchCAData.js`** - Fetches California data from lotto-8.com
-   - Fantasy 5: Working (30 draws retrieved)
-   - Pick 3/Pick 4: Sources returning 404
+1. **`scripts/scrapeCA_Data.js`** - Fetches CA Daily 3/Daily 4 from lotteryextreme.com
+   - Daily 3: Working (2 draws/day)
+   - Daily 4: Working (1 draw/day)
+   - Command: `node scripts/scrapeCA_Data.js [daily3|daily4|both] [max_draws]`
 
-2. **`scripts/fetchCAData2.js`** - Alternative source fetching
-   - Attempts lotteryusa.com and other sources
-   - Falls back to sample data generation
+2. **`scripts/fetchCAData.js`** - Fetches CA Fantasy 5 from lotto-8.com
+   - Fantasy 5: Working (30 draws retrieved)
+   - Command: `node scripts/fetchCAData.js`
+
+3. **`scripts/scrapePowerball.js`** - Fetches Powerball from NCEL
+   - Powerball: Working (uses NCEL as fallback)
+   - Command: `node scripts/scrapePowerball.js`
+
+4. **`scripts/scrapeMega.js`** - Fetches Mega Millions from NCEL
+   - Mega Millions: Working (uses NCEL as fallback)
+   - Command: `node scripts/scrapeMega.js`
+
+### Data Source Summary
+| Game | State | Source | Script |
+|------|-------|--------|--------|
+| Daily 3 | CA | lotteryextreme.com | scrapeCA_Data.js |
+| Daily 4 | CA | lotteryextreme.com | scrapeCA_Data.js |
+| Fantasy 5 | CA | lotto-8.com | fetchCAData.js |
+| Pick 3 | NC | nclottery.com | scrapeNC_Pick3.js |
+| Pick 4 | NC | nclottery.com | scrapeNC_Pick4.js |
+| Cash 5 | NC | nclottery.com | scrapeNC_Cash5.js |
+| Powerball | NC/CA | NCEL (fallback) | scrapePowerball.js |
+| Mega Millions | NC/CA | NCEL (fallback) | scrapeMega.js |
 
 ## Parser Implementation
 

@@ -134,17 +134,28 @@ npm run ingest-all
   ```
   data/
   ├── ca/                      # California historical data
-  │   ├── ca-pick3.csv         # Daily 3 (Pick 3)
-  │   ├── ca-pick4.csv         # Daily 4 (Pick 4)
-  │   └── ca-fantasy5.csv      # Fantasy 5 (Cash 5 equivalent)
+  │   ├── ca-daily3.csv        # Daily 3 (2 draws/day)
+  │   ├── ca-daily4.csv        # Daily 4 (1 draw/day)
+  │   └── ca-fantasy5.csv      # Fantasy 5 (1 draw/day)
   ├── nc/                      # North Carolina historical data
-  │   ├── nc-pick3.csv         # Pick 3
-  │   ├── nc-pick4.csv         # Pick 4
-  │   └── nc-cash5.csv         # Cash 5
+  │   ├── nc-pick3.csv         # Pick 3 (2 draws/day)
+  │   ├── nc-pick4.csv         # Pick 4 (2 draws/day)
+  │   └── nc-cash5.csv         # Cash 5 (1 draw/day)
   └── multi-state/
-      ├── powerball.csv        # Powerball (multi-state)
-      └── mega-millions.csv    # Mega Millions (multi-state)
+      ├── powerball.csv        # Powerball (multi-state, Mon/Wed/Sat)
+      └── mega-millions.csv    # Mega Millions (multi-state, Tue/Fri)
   ```
+
+### Data Fetching Scripts
+- **CA Daily 3/Daily 4**: `scripts/scrapeCA_Data.js` (uses lotteryextreme.com)
+  - Command: `node scripts/scrapeCA_Data.js [daily3|daily4|both] [max_draws]`
+  - Default: Scrapes last 5000 draws for both games
+- **CA Fantasy 5**: `scripts/fetchCAData.js` (uses lotto-8.com)
+  - Command: `node scripts/fetchCAData.js`
+- **NC Games**: `scripts/scrapeNC_*.js` (uses nclottery.com)
+- **Powerball**: `scripts/scrapePowerball.js` (uses NCEL as fallback)
+- **Mega Millions**: `scripts/scrapeMega.js` (uses NCEL as fallback)
+- **Multi-State Adapters**: `lib/ingestion/adapters/multiState*.ts` (ingest into Supabase)
 - **Documentation Directory**: `/home/brewexec/brewlotto/brewdocs/`
 - **Documentation Structure**:
   ```
