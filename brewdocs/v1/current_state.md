@@ -60,15 +60,37 @@
 - **D7.2**: Inserts draws into official_draws table
 - **D7.2**: Duplicate checking to avoid re-insertion
 
-### ✅ Test Results (2026-03-18 15:00 ET)
+### ✅ Test Results (2026-03-18 15:30 ET)
+
+**California Lottery Draw Schedule (Verified from calottery.com)**:
+- **Daily 3**: 2 draws per day
+  - Day draw: 1:00 PM PT (ticket close: 1:00 PM)
+  - Evening draw: 6:30 PM PT (ticket close: 6:30 PM)
+- **Daily 4**: 1 draw per day
+  - Evening draw: 6:30 PM PT (ticket close: 6:30 PM)
+- **Fantasy 5**: 1 draw per day
+  - Nightly draw: 6:30 PM PT
+
+**North Carolina Lottery Draw Schedule (Verified from nclottery.com)**:
+- **Pick 3**: 2 draws per day
+  - Daytime: 3:00 PM ET
+  - Evening: 11:22 PM ET
+- **Pick 4**: 2 draws per day
+  - Daytime: 3:00 PM ET
+  - Evening: 11:22 PM ET
+- **Cash 5**: 1 draw per day
+  - Evening: 11:22 PM ET (with Double Play option)
+
+**Data Processing Results (CA Historical)**:
 - **CA Daily 3**: 199 valid out of 200 records (1 invalid with all zeros from 2026-02-28)
-  - Data shows 2 draws per day (daytime and evening) with consecutive draw_ids
-  - Most recent date: 2026-03-16 (2 draws: day @ 1:29 PM PT = 9-3-5, evening @ 6:59 PM PT = 7-8-8)
-- **CA Daily 4**: 200 valid out of 200 records (1 draw per day in this data source)
-  - Assigned as evening draw @ 6:59 PM PT (main draw)
-- **CA Fantasy 5**: 30 valid out of 30 records (1 draw per day, nightly @ 6:45 PM PT)
+  - Most recent date: 2026-03-16 (2 draws: day @ 1:00 PM PT = 9-3-5, evening @ 6:30 PM PT = 7-8-8)
+- **CA Daily 4**: 200 valid out of 200 records (1 draw per day)
+  - Assigned as evening draw @ 6:30 PM PT
+- **CA Fantasy 5**: 30 valid out of 30 records (1 draw per day, nightly @ 6:30 PM PT)
 - **Total**: 429 valid records out of 430 total records
 - **Supabase Insertion**: All valid records successfully inserted with correct draw_window_label
+
+**Note**: NC data is available but not yet ingested. The NC CSV files have proper day/evening markers ("D"/"E") for Pick 3 and Pick 4.
 
 ### Test Command
 ```bash
