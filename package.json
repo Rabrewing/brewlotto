@@ -20,7 +20,8 @@
     "scrape-nc-games": "node scripts/scrapeNC_Pick3.js && node scripts/scrapeNC_Pick4.js && node scripts/scrapeNC_Cash5.js",
     "scrape-multi-state": "node scripts/scrapePowerball.js && node scripts/scrapeMega.js",
     "ingest-all": "node scripts/ingestionJob.js",
-    "scheduler": "node scripts/ingestionScheduler.js"
+    "scheduler": "node scripts/ingestionScheduler.js",
+    "health-check": "node scripts/ingestionHealth.js"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",
