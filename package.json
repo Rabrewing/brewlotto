@@ -19,7 +19,8 @@
     "scrape-ca-daily": "node scripts/scrapeCA_Data.js both 1000",
     "scrape-nc-games": "node scripts/scrapeNC_Pick3.js && node scripts/scrapeNC_Pick4.js && node scripts/scrapeNC_Cash5.js",
     "scrape-multi-state": "node scripts/scrapePowerball.js && node scripts/scrapeMega.js",
-    "ingest-all": "node scripts/ingestionJob.js"
+    "ingest-all": "node scripts/ingestionJob.js",
+    "scheduler": "node scripts/ingestionScheduler.js"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",
@@ -44,6 +45,7 @@
     "nanoid": "^5.1.5",
     "next": "^15.3.4",
     "next-pwa": "^2.0.2",
+    "node-cron": "^4.2.1",
     "openai": "^5.8.2",
     "postcss": "^8.5.6",
     "prismjs": "^1.30.0",
