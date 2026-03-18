@@ -17,19 +17,42 @@ const supabase = createClient(
 const DELAY_BETWEEN_SCRAPERS = 2000; // 2 seconds between scrapers
 
 /**
- * Run a command and capture output
+ * Run a command with retry logic
  */
-function runCommand(command, description) {
+function runCommand(command, description, maxRetries = 3) {
   console.log(`\n🔄 ${description}...`);
   console.log(`   Command: ${command}`);
   
-  try {
-    const output = execSync(command, { encoding: 'utf-8', stdio: 'pipe' });
-    console.log(`✅ ${description} completed`);
-    return { success: true, output };
-  } catch (error) {
-    console.error(`❌ ${description} failed:`, error.message);
-    return { success: false, error: error.message };
+  let lastError;
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const output = execSync(command, { encoding: 'utf-8', stdio: 'pipe' });
+      console.log(`✅ ${description} completed (attempt ${attempt}/${maxRetries})`);
+      return { success: true, output, attempts: attempt };
+    } catch (error) {
+      lastError = error.message;
+      console.log(`⚠️ Attempt ${attempt}/${maxRetries} failed: ${error.message}`);
+      
+      if (attempt < maxRetries) {
+        const delay = Math.min(1000 * Math.pow(2, attempt), 30000); // Exponential backoff, max 30s
+        console.log(`   Retrying in ${delay/1000} seconds...`);
+        waitSync(delay);
+      }
+    }
+  }
+  
+  console.error(`❌ ${description} failed after ${maxRetries} attempts`);
+  return { success: false, error: lastError, attempts: maxRetries };
+}
+
+/**
+ * Synchronous wait function
+ */
+function waitSync(ms) {
+  const start = Date.now();
+  while (Date.now() - start < ms) {
+    // Busy wait
   }
 }
 
