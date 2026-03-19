@@ -388,7 +388,7 @@ The system is considered complete when:
 | D5 | Scheduler Layer | ✅ Complete | Daily scheduler with node-cron |
 | D6 | CA Official Latest Parsers | ✅ Complete | CA scraper working |
 | D7 | CA Historical Adapters | ✅ Complete | Multi-state adapters, unified job, health monitor |
-| D8 | Cross-Source Validation | ✅ Complete | Alert system created, pipeline validated |
+| D8 | Cross-Source Validation | ✅ Complete | Alert system tables created (system_alerts, alert_events, alert_deliveries), pipeline validated |
 | D9 | Source Registry Config | ✅ Complete | sourceRegistry.ts created |
 | D10 | Admin Monitoring Hooks | ✅ Complete | Health monitor implemented |
 | D11 | Prediction Trigger | ⏳ Pending | |
@@ -429,6 +429,9 @@ node scripts/ingestionScheduler.js
 # Health monitor
 node scripts/ingestionHealth.js
 
-# Validate CA data
-node scripts/validateCA_Data.js
+# Alert system check
+npm run alerts
+
+# Cross-source validation
+npm run validate
 ```
