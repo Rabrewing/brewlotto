@@ -104,7 +104,11 @@ async function checkScraperHealth() {
     { name: 'CA Daily 3', command: 'node scripts/scrapeCA_Data.js daily3 10' },
     { name: 'CA Daily 4', command: 'node scripts/scrapeCA_Data.js daily4 10' },
     { name: 'CA Fantasy 5', command: 'node scripts/fetchCAData.js' },
-    { name: 'Powerball', command: 'node scripts/scrapePowerball.js' }
+    { name: 'NC Pick 3', command: 'npx tsx scripts/testNCIIIngestion.ts' },
+    { name: 'NC Pick 4', command: 'npx tsx scripts/testNC4Ingestion.ts' },
+    { name: 'NC Cash 5', command: 'npx tsx scripts/testNC5Ingestion.ts' },
+    { name: 'Powerball', command: 'node scripts/scrapePowerball.js' },
+    { name: 'Mega Millions', command: 'node scripts/scrapeMega.js' }
   ];
 
   const results = [];

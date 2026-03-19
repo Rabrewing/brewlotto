@@ -375,7 +375,7 @@ The system is considered complete when:
 
 ## V1 Progress Tracker
 
-**Last Updated:** 2026-03-17 ET
+**Last Updated:** 2026-03-18 ET (D8.1 Started)
 
 ### Phase Status
 
@@ -384,13 +384,13 @@ The system is considered complete when:
 | D1 | Shared Ingestion Foundation | ✅ Complete | fetcher, parser, normalizer, validator, sourceRegistry |
 | D2 | Canonical Schema | ✅ Complete | Schema already in supabase/migrations |
 | D3 | NC Official Ingestors | ✅ Complete | NC CSV data ready in /data/nc |
-| D4 | NC Backfill Runner | ⏳ Pending | Can use NC CSV files |
-| D5 | Scheduler Layer | ⏳ Pending | Scheduled job infrastructure |
+| D4 | NC Backfill Runner | ✅ Complete | V1 adapters created for NC games (Pick 3, Pick 4, Cash 5) |
+| D5 | Scheduler Layer | ✅ Complete | Daily scheduler with node-cron |
 | D6 | CA Official Latest Parsers | ✅ Complete | CA scraper working |
-| D7 | CA Historical Adapters | 🔄 In Progress | D7.1: 200 Daily 3 + 200 Daily 4 collected |
-| D8 | Cross-Source Validation | ⏳ Pending | Validation script ready |
+| D7 | CA Historical Adapters | ✅ Complete | Multi-state adapters, unified job, health monitor |
+| D8 | Cross-Source Validation | 🔄 In Progress | Pipeline verified, data reconciliation pending |
 | D9 | Source Registry Config | ✅ Complete | sourceRegistry.ts created |
-| D10 | Admin Monitoring Hooks | ⏳ Pending | |
+| D10 | Admin Monitoring Hooks | ✅ Complete | Health monitor implemented |
 | D11 | Prediction Trigger | ⏳ Pending | |
 | D12 | Testing Layer | ⏳ Pending | |
 
@@ -398,21 +398,35 @@ The system is considered complete when:
 
 | Game | State | Records | Date Range | Status |
 |------|-------|---------|------------|--------|
-| Pick 3 | NC | ~13,600 | Historical | ✅ Ready |
-| Pick 4 | NC | ~11,700 | Historical | ✅ Ready |
-| Cash 5 | NC | ~8,800 | Historical | ✅ Ready |
+| Pick 3 | NC | ~13,600 | Historical | ⚠️ Ready (V1 adapter created, needs testing) |
+| Pick 4 | NC | ~11,700 | Historical | ⚠️ Ready (V1 adapter created, needs testing) |
+| Cash 5 | NC | ~8,800 | Historical | ⚠️ Ready (V1 adapter created, needs testing) |
 | Daily 3 | CA | 200 | 2025-12-07 to 2026-03-16 | ✅ Validated |
 | Daily 4 | CA | 200 | 2025-08-29 to 2026-03-16 | ✅ Validated |
 | Fantasy 5 | CA | 30 | Recent | ⚠️ Needs more |
+| Powerball | Multi-State | 2,373 | Historical | ✅ Ready |
+| Mega Millions | Multi-State | 1,682 | Historical | ✅ Ready |
 
-### Ingestion Scripts
+### Ingestion Scripts (Updated 2026-03-18)
 
 ```bash
 # Scrape CA historical data
 node scripts/scrapeCA_Data.js daily3 2000
 node scripts/scrapeCA_Data.js daily4 2000
 
+# Scrape multi-state games
+node scripts/scrapePowerball.js
+node scripts/scrapeMega.js
+
+# Unified ingestion job (with retry logic)
+node scripts/ingestionJob.js
+
+# Daily scheduler (runs at 12:00 AM PT)
+node scripts/ingestionScheduler.js
+
+# Health monitor
+node scripts/ingestionHealth.js
+
 # Validate CA data
-node scripts/scrapeCA_Data.js daily3 25
 node scripts/validateCA_Data.js
 ```
