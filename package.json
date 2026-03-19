@@ -21,7 +21,9 @@
     "scrape-multi-state": "node scripts/scrapePowerball.js && node scripts/scrapeMega.js",
     "ingest-all": "node scripts/ingestionJob.js",
     "scheduler": "node scripts/ingestionScheduler.js",
-    "health-check": "node scripts/ingestionHealth.js"
+    "health-check": "node scripts/ingestionHealth.js",
+    "alerts": "npx tsx scripts/ingestionAlerts.ts",
+    "validate": "node scripts/validateCrossSource.js"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",
