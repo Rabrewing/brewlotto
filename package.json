@@ -21,6 +21,9 @@
     "scrape-multi-state": "node scripts/scrapePowerball.js && node scripts/scrapeMega.js",
     "ingest-all": "node scripts/ingestionJob.js",
     "scheduler": "node scripts/ingestionScheduler.js",
+    "scheduler:predict": "node scripts/predictionScheduler.js",
+    "predict": "node scripts/runPrediction.js",
+    "predict:all": "node -e \"import('./lib/prediction/predictionGenerator.js').then(m => m.runAllPredictions().then(console.log))\"",
     "health-check": "node scripts/ingestionHealth.js",
     "alerts": "npx tsx scripts/ingestionAlerts.ts",
     "validate": "node scripts/validateCrossSource.js"
