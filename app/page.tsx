@@ -105,7 +105,7 @@ export default function Page() {
                 <GameTabs selected={selectedGame} onChange={setSelectedGame} />
               </div>
 
-              <div className="mt-6 grid grid-cols-[1.6fr_1fr] gap-3">
+              <div className="mt-6 grid grid-cols-1 sm:grid-cols-[1.6fr_1fr] gap-3">
                 <div className="space-y-3">
                   <StatCard
                     title="Hot Numbers"
@@ -142,7 +142,7 @@ export default function Page() {
               </div>
 
               <div className="mt-5">
-                <button className="group relative flex h-[64px] w-full items-center justify-center rounded-[999px] border border-[#ffd978]/80 bg-[linear-gradient(180deg,#ffcf4a_0%,#ffba19_55%,#f6a800_100%)] px-6 text-[18px] font-bold text-black shadow-[0_0_0_2px_rgba(255,200,60,0.12),0_10px_35px_rgba(255,170,0,0.35),0_0_30px_rgba(255,200,0,0.6),0_0_60px_rgba(255,140,0,0.4),inset_0_1px_0_rgba(255,255,255,0.45)] transition duration-200 hover:scale-[1.01]">
+                <button className="group relative flex h-[56px] sm:h-[64px] w-full items-center justify-center rounded-[999px] border border-[#ffd978]/80 bg-[linear-gradient(180deg,#ffcf4a_0%,#ffba19_55%,#f6a800_100%)] px-4 sm:px-6 text-[16px] sm:text-[18px] font-bold text-black shadow-[0_0_0_2px_rgba(255,200,60,0.12),0_10px_35px_rgba(255,170,0,0.35),0_0_30px_rgba(255,200,0,0.6),0_0_60px_rgba(255,140,0,0.4),inset_0_1px_0_rgba(255,255,255,0.45)] transition duration-200 hover:scale-[1.01]">
                   <span className="absolute inset-[2px] rounded-[999px] bg-[linear-gradient(180deg,rgba(255,255,255,0.22),rgba(255,255,255,0.02))]" />
                   <span className="relative flex items-center gap-3">
                     Generate My Smart Pick
@@ -257,7 +257,7 @@ function GameTabs({
   const games = getOrderedGames();
 
   return (
-    <nav className="flex gap-3">
+    <nav className="flex flex-wrap gap-2 sm:gap-3">
       {games.map((game) => {
         const active = game.key === selected;
 
@@ -266,7 +266,7 @@ function GameTabs({
             key={game.key}
             onClick={() => onChange(game.key)}
             className={[
-              "relative rounded-full px-5 py-3 text-[14px] font-medium transition-all duration-200",
+              "relative rounded-full px-3 py-2 sm:px-5 sm:py-3 text-[12px] sm:text-[14px] font-medium transition-all duration-200",
               "border",
               active
                 ? "border-[#ffcd52] bg-[linear-gradient(180deg,#6a4700_0%,#c48714_28%,#ffb61d_100%)] text-[#fff4c4] shadow-[0_0_0_1px_rgba(255,205,82,0.15),0_0_20px_rgba(255,182,29,0.35),inset_0_1px_0_rgba(255,255,255,0.25)]"
@@ -547,7 +547,7 @@ function VoiceCard() {
 
 function BottomNav() {
   return (
-    <div className="flex items-center justify-around px-6 py-4 border-t border-[#ffb84a]/20 shadow-[0_-2px_20px_rgba(255,200,0,0.05)]">
+    <div className="flex items-center justify-around px-4 py-3 sm:px-6 sm:py-4 border-t border-[#ffb84a]/20 shadow-[0_-2px_20px_rgba(255,200,0,0.05)]">
       <button className="flex flex-col items-center gap-1 text-[#ffcf68]">
         <Home className="h-6 w-6" />
         <span className="text-[10px] font-medium">Home</span>
