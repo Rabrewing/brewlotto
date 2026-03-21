@@ -14,6 +14,9 @@ body {
   @apply text-white;
   background-color: #050509;
   background-image:
+    radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.4) 100%),
+    radial-gradient(circle at 50% 20%, rgba(255,215,0,0.08), transparent 60%),
+    radial-gradient(circle at 80% 80%, rgba(255,140,0,0.06), transparent 60%),
     radial-gradient(circle at top, rgba(255, 215, 0, 0.1), transparent 55%),
     radial-gradient(circle at bottom, rgba(0, 199, 183, 0.08), transparent 60%),
     linear-gradient(135deg, #050509, #050509 40%, #090914 100%);

@@ -79,13 +79,13 @@ export default function Page() {
       <div className="w-full max-w-[500px] h-[88vh] max-h-[920px] flex items-center justify-center mx-auto">
         <section className="relative w-full h-full">
           {/* Outer aura */}
-          <div className="pointer-events-none absolute -inset-10 rounded-[44px] bg-[radial-gradient(circle_at_center,rgba(255,184,28,0.20),transparent_58%)] blur-2xl" />
+          <div className="pointer-events-none absolute -inset-10 rounded-[44px] bg-[radial-gradient(circle_at_center,rgba(255,184,28,0.30),transparent_58%)] blur-2xl" />
 
           {/* Device shell */}
-          <div className="relative h-full flex flex-col overflow-hidden rounded-[42px] border border-[#ffbf3d]/60 bg-[#0a0909] shadow-[0_0_0_1px_rgba(255,210,110,0.35),0_0_22px_rgba(255,170,0,0.18),0_0_80px_rgba(255,140,0,0.14)]">
+          <div className="relative h-full flex flex-col overflow-hidden rounded-[42px] border border-[#ffbf3d]/60 bg-[#0a0909] shadow-[0_0_0_1px_rgba(255,210,110,0.35),0_0_22px_rgba(255,170,0,0.18),0_0_80px_rgba(255,140,0,0.14),0_0_120px_rgba(255,200,0,0.15),0_0_40px_rgba(255,200,0,0.2)]">
             {/* golden edge glow */}
             <div className="pointer-events-none absolute inset-0 rounded-[42px] ring-1 ring-[#ffd36f]/25" />
-            <div className="pointer-events-none absolute inset-[1px] rounded-[41px] shadow-[inset_0_0_24px_rgba(255,179,0,0.10),inset_0_0_60px_rgba(255,140,0,0.06)]" />
+            <div className="pointer-events-none absolute inset-[1px] rounded-[41px] shadow-[inset_0_0_24px_rgba(255,179,0,0.15),inset_0_0_60px_rgba(255,140,0,0.10)]" />
             <div className="pointer-events-none absolute left-0 right-0 top-0 h-40 bg-[radial-gradient(circle_at_top,rgba(255,194,80,0.18),transparent_65%)]" />
             <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-28 bg-[radial-gradient(circle_at_bottom,rgba(255,170,0,0.14),transparent_70%)]" />
 
@@ -142,7 +142,7 @@ export default function Page() {
               </div>
 
               <div className="mt-5">
-                <button className="group relative flex h-[64px] w-full items-center justify-center rounded-[999px] border border-[#ffd978]/80 bg-[linear-gradient(180deg,#ffcf4a_0%,#ffba19_55%,#f6a800_100%)] px-6 text-[18px] font-bold text-black shadow-[0_0_0_2px_rgba(255,200,60,0.12),0_10px_35px_rgba(255,170,0,0.35),inset_0_1px_0_rgba(255,255,255,0.45)] transition duration-200 hover:scale-[1.01]">
+                <button className="group relative flex h-[64px] w-full items-center justify-center rounded-[999px] border border-[#ffd978]/80 bg-[linear-gradient(180deg,#ffcf4a_0%,#ffba19_55%,#f6a800_100%)] px-6 text-[18px] font-bold text-black shadow-[0_0_0_2px_rgba(255,200,60,0.12),0_10px_35px_rgba(255,170,0,0.35),0_0_30px_rgba(255,200,0,0.6),0_0_60px_rgba(255,140,0,0.4),inset_0_1px_0_rgba(255,255,255,0.45)] transition duration-200 hover:scale-[1.01]">
                   <span className="absolute inset-[2px] rounded-[999px] bg-[linear-gradient(180deg,rgba(255,255,255,0.22),rgba(255,255,255,0.02))]" />
                   <span className="relative flex items-center gap-3">
                     Generate My Smart Pick
@@ -302,13 +302,13 @@ function StatCard({
 
   const borderTone =
     tone === "hot"
-      ? "border-[#ffb84a]/50 shadow-[0_0_15px_rgba(255,184,0,0.15),inset_0_0_30px_rgba(255,153,0,0.06)]"
-      : "border-[#58a9ff]/40 shadow-[0_0_15px_rgba(100,180,255,0.15),inset_0_0_30px_rgba(40,110,255,0.06)]";
+      ? "border-[#ffb84a]/50 shadow-[0_0_15px_rgba(255,184,0,0.15),inset_0_0_20px_rgba(255,215,0,0.05),0_0_25px_rgba(255,140,0,0.1)]"
+      : "border-[#58a9ff]/40 shadow-[0_0_15px_rgba(100,180,255,0.15),inset_0_0_20px_rgba(100,180,255,0.05),0_0_25px_rgba(40,110,255,0.1)]";
 
   return (
     <div
       className={[
-        "relative overflow-hidden rounded-[30px] border bg-[linear-gradient(180deg,rgba(18,14,14,0.96),rgba(8,8,10,0.96))] p-3",
+        "relative overflow-hidden rounded-[30px] border bg-[linear-gradient(145deg,rgba(255,255,255,0.04),rgba(0,0,0,0.6))] backdrop-blur-[10px] p-3",
         borderTone,
       ].join(" ")}
     >
@@ -376,11 +376,11 @@ function LotteryBall({
 
   const outerClass = isBonus
     ? tone === "hot"
-      ? "bg-[radial-gradient(circle_at_30%_30%,#ffb978_0%,#ff6230_35%,#c01600_100%)] shadow-[0_0_20px_rgba(255,87,34,0.45),inset_0_2px_10px_rgba(255,255,255,0.18)]"
-      : "bg-[radial-gradient(circle_at_30%_30%,#7fe6ff_0%,#1ea6ff_42%,#0049c6_100%)] shadow-[0_0_20px_rgba(47,156,255,0.42),inset_0_2px_10px_rgba(255,255,255,0.16)]"
+      ? "bg-[radial-gradient(circle_at_30%_30%,#ffb978_0%,#ff6230_35%,#c01600_100%)] shadow-[inset_0_4px_10px_rgba(255,255,255,0.4),inset_0_-6px_10px_rgba(0,0,0,0.6),0_0_12px_rgba(255,200,0,0.6),0_0_20px_rgba(255,87,34,0.45)]"
+      : "bg-[radial-gradient(circle_at_30%_30%,#7fe6ff_0%,#1ea6ff_42%,#0049c6_100%)] shadow-[inset_0_4px_10px_rgba(255,255,255,0.4),inset_0_-6px_10px_rgba(0,0,0,0.6),0_0_12px_rgba(255,200,0,0.6),0_0_20px_rgba(47,156,255,0.42)]"
     : tone === "hot"
-    ? "bg-[radial-gradient(circle_at_30%_25%,#fff3a1_0%,#ffd449_35%,#f0a300_78%,#b96d00_100%)] shadow-[0_0_18px_rgba(255,188,44,0.42),inset_0_3px_12px_rgba(255,255,255,0.24)]"
-    : "bg-[radial-gradient(circle_at_30%_25%,#ffffff_0%,#caecff_30%,#8fcfff_62%,#4a9cdb_100%)] shadow-[0_0_18px_rgba(102,197,255,0.30),inset_0_3px_12px_rgba(255,255,255,0.22)]";
+    ? "bg-[radial-gradient(circle_at_30%_25%,#fff3a1_0%,#ffd449_35%,#f0a300_78%,#b96d00_100%)] shadow-[inset_0_4px_10px_rgba(255,255,255,0.4),inset_0_-6px_10px_rgba(0,0,0,0.6),0_0_12px_rgba(255,200,0,0.6),0_0_18px_rgba(255,188,44,0.42)]"
+    : "bg-[radial-gradient(circle_at_30%_25%,#ffffff_0%,#caecff_30%,#8fcfff_62%,#4a9cdb_100%)] shadow-[inset_0_4px_10px_rgba(255,255,255,0.4),inset_0_-6px_10px_rgba(0,0,0,0.6),0_0_12px_rgba(255,200,0,0.6),0_0_18px_rgba(102,197,255,0.30)]";
 
   const textTone = isBonus ? "text-white" : "text-[#121212]";
   
@@ -452,19 +452,19 @@ function MomentumCard({ value }: { value: number }) {
   const clamped = Math.max(0, Math.min(100, value));
 
   return (
-    <div className="relative overflow-hidden rounded-[30px] border border-[#ffb84a]/50 bg-[linear-gradient(180deg,rgba(18,14,14,0.96),rgba(8,8,10,0.96))] p-3 shadow-[0_0_15px_rgba(255,184,0,0.15),inset_0_0_30px_rgba(255,153,0,0.06)]">
+    <div className="relative overflow-hidden rounded-[30px] border border-[#ffb84a]/50 bg-[linear-gradient(145deg,rgba(255,255,255,0.04),rgba(0,0,0,0.6))] backdrop-blur-[10px] p-3 shadow-[0_0_15px_rgba(255,184,0,0.15),inset_0_0_20px_rgba(255,215,0,0.05),0_0_25px_rgba(255,140,0,0.1)]">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_bottom,rgba(255,180,0,0.08),transparent_42%)]" />
 
       <h2 className="text-[16px] font-semibold text-[#ffcf67]">Momentum Meter</h2>
 
       <div className="mt-4 flex flex-col items-center justify-between h-[180px]">
-        <div className="relative flex h-[160px] w-[80px] items-end justify-center rounded-[40px] border border-[#33281c] bg-[linear-gradient(180deg,#0f0b0a,#171111_40%,#0e0909)] p-[10px] shadow-[inset_0_0_22px_rgba(0,0,0,0.75)]">
+        <div className="relative flex h-[160px] w-[80px] items-end justify-center rounded-[40px] border border-[#33281c] bg-[linear-gradient(180deg,#0f0b0a,#171111_40%,#0e0909)] p-[10px] shadow-[inset_0_0_22px_rgba(0,0,0,0.75),0_0_15px_rgba(255,200,0,0.3)]">
           <div className="absolute inset-y-5 left-3 w-[1px] bg-[linear-gradient(180deg,transparent,rgba(255,170,0,0.15),transparent)]" />
           <div className="absolute inset-y-5 right-3 w-[1px] bg-[linear-gradient(180deg,transparent,rgba(255,170,0,0.15),transparent)]" />
 
           <div className="relative h-full w-[30px] overflow-hidden rounded-full border border-[#1b130f] bg-[linear-gradient(180deg,#070606,#120d0c)] shadow-[inset_0_0_12px_rgba(0,0,0,0.8)]">
             <div
-              className="absolute bottom-0 left-0 right-0 rounded-full bg-[linear-gradient(180deg,#ffd95a_0%,#ffb31f_30%,#ff8a00_70%,#ff6500_100%)] shadow-[0_0_24px_rgba(255,153,0,0.6)]"
+              className="absolute bottom-0 left-0 right-0 rounded-full bg-[linear-gradient(180deg,#ff8a00_0%,#ffd700_30%,#fff3a0_60%,#ff8a00_100%)] shadow-[0_0_24px_rgba(255,153,0,0.6)]"
               style={{ height: `${clamped}%` }}
             />
             <div className="absolute inset-x-[35%] bottom-0 w-[30%] rounded-full bg-[linear-gradient(180deg,rgba(255,255,255,0.0),rgba(255,244,180,0.75),rgba(255,255,255,0.0))]" />
@@ -485,9 +485,9 @@ function MomentumCard({ value }: { value: number }) {
 
 function PredictionCard({ config }: { config: GameConfig }) {
   return (
-    <div className="relative h-full overflow-hidden rounded-[30px] border border-[#ffb84a]/40 bg-[linear-gradient(180deg,rgba(18,14,14,0.96),rgba(8,8,10,0.96))] p-3 shadow-[0_0_15px_rgba(255,184,0,0.15),inset_0_0_30px_rgba(255,153,0,0.06)]">
-      <div className="pointer-events-none absolute right-0 top-0 h-36 w-36 bg-[radial-gradient(circle,rgba(255,174,0,0.10),transparent_55%)]" />
-      <div className="pointer-events-none absolute bottom-0 right-0 h-28 w-28 bg-[radial-gradient(circle,rgba(255,174,0,0.08),transparent_58%)]" />
+    <div className="relative h-full overflow-hidden rounded-[30px] border border-[#ffb84a]/40 bg-[linear-gradient(145deg,rgba(255,255,255,0.04),rgba(0,0,0,0.6))] backdrop-blur-[10px] p-3 shadow-[0_0_15px_rgba(255,184,0,0.15),inset_0_0_20px_rgba(255,215,0,0.05),0_0_25px_rgba(255,140,0,0.1)]">
+      <div className="pointer-events-none absolute right-0 top-0 h-36 w-36 bg-[radial-gradient(circle,rgba(255,174,0,0.15),transparent_55%)]" />
+      <div className="pointer-events-none absolute bottom-0 right-0 h-28 w-28 bg-[radial-gradient(circle,rgba(255,174,0,0.12),transparent_58%)]" />
 
       <div className="flex items-center gap-2">
         <Sparkles className="h-5 w-5 text-[#cc83ff]" />
@@ -536,7 +536,7 @@ function VoiceCard() {
         </div>
       </div>
 
-      <button className="relative flex h-[60px] w-[60px] shrink-0 items-center justify-center rounded-full border border-[#ffe08e]/70 bg-[radial-gradient(circle_at_35%_30%,#ffe685_0%,#ffc926_45%,#eea700_82%,#b16e00_100%)] text-black shadow-[0_0_0_2px_rgba(255,220,120,0.12),0_0_28px_rgba(255,187,0,0.40),inset_0_2px_10px_rgba(255,255,255,0.28)]">
+      <button className="relative flex h-[60px] w-[60px] shrink-0 items-center justify-center rounded-full border border-[#ffe08e]/70 bg-[radial-gradient(circle_at_35%_30%,#ffe685_0%,#ffc926_45%,#eea700_82%,#b16e00_100%)] text-black shadow-[0_0_0_2px_rgba(255,220,120,0.12),0_0_28px_rgba(255,187,0,0.40),0_0_40px_rgba(255,187,0,0.6),0_0_80px_rgba(255,140,0,0.4),inset_0_2px_10px_rgba(255,255,255,0.28)]">
         <Mic className="h-7 w-7" />
         <span className="absolute -left-5 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full border-l-2 border-[#ffcb55]/60 opacity-70" />
         <span className="absolute -left-9 top-1/2 h-9 w-9 -translate-y-1/2 rounded-full border-l-2 border-[#ffcb55]/40 opacity-50" />
@@ -547,7 +547,7 @@ function VoiceCard() {
 
 function BottomNav() {
   return (
-    <div className="flex items-center justify-around px-6 py-4 border-t border-[#ffb84a]/20">
+    <div className="flex items-center justify-around px-6 py-4 border-t border-[#ffb84a]/20 shadow-[0_-2px_20px_rgba(255,200,0,0.05)]">
       <button className="flex flex-col items-center gap-1 text-[#ffcf68]">
         <Home className="h-6 w-6" />
         <span className="text-[10px] font-medium">Home</span>
