@@ -1,0 +1,49 @@
+@config "../tailwind.config.ts";
+@import "tailwindcss";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  @apply text-white;
+  background-color: #050509;
+  background-image:
+    radial-gradient(circle at top, rgba(255, 215, 0, 0.1), transparent 55%),
+    radial-gradient(circle at bottom, rgba(0, 199, 183, 0.08), transparent 60%),
+    linear-gradient(135deg, #050509, #050509 40%, #090914 100%);
+  background-size: cover;
+  background-attachment: fixed;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+}
+
+/* Custom scrollbar for the application */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(10, 9, 9, 0.5);
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 207, 74, 0.3);
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 207, 74, 0.5);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 207, 74, 0.3) rgba(10, 9, 9, 0.5);
+}
