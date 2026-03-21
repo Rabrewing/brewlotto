@@ -5,8 +5,8 @@
 Timestamp: 2026-03-16 ET  
 Phase: V1 Reset / Product Foundation  
 Purpose: Canonical BrewDocs product overview for rebuilding BrewLotto into a stable, launch-ready V1.  
-Updated: 2026-03-18  
-Reason: V1 UX correction for dropdown scope and Brew visibility rules  
+Updated: 2026-03-21  
+Reason: Added Web App First, PWA Later decision note to Section 14.1  
 \--\>BrewLotto AI — Product Overview (V1 Reset)
 
 1\. Document Purpose
@@ -31,7 +31,126 @@ This is the first canon document in the new BrewLotto V1 SDLC stack.
 
 \---
 
-2\. Product Definition
+# 14.1 Web App First, PWA Later
+
+**Purpose**
+
+Define BrewLotto V1’s mobile delivery strategy so the product remains focused on launch stability while preserving a clean path to installable mobile distribution later.
+
+**Canonical V1 Decision**
+
+BrewLotto V1 will launch first as a responsive mobile-first web application.
+
+Progressive Web App capabilities may be prepared in the codebase, but full PWA enablement is not a launch blocker.
+
+**Why**
+
+This decision supports BrewLotto V1’s core product goals:
+
+- stable draw ingestion
+- reliable prediction generation
+- saved picks and outcome tracking
+- subscription tier unlocking
+- practical notifications
+- polished mobile-first user experience
+
+The launch priority is to deliver a fast, premium, explainable web app experience before adding additional packaging complexity.
+
+**What V1 Must Support**
+
+BrewLotto V1 must provide:
+
+- responsive mobile-first layouts
+- tablet and desktop support
+- touch-friendly controls
+- mobile-friendly navigation and bottom nav behavior
+- premium dashboard fidelity in mobile browsers
+- secure authentication and account flows
+- in-app notifications
+- email notifications for operational/admin use where applicable
+
+**What Is Deferred**
+
+The following are explicitly deferred until after core V1 stability is achieved:
+
+- full service worker productionization
+- offline-first behavior
+- install prompts and installability polish
+- push notifications tied to PWA delivery
+- app-store packaging optimization
+- advanced mobile shell/offline caching strategies
+
+**PWA Readiness Position**
+
+BrewLotto may keep PWA foundation assets in the repo, including:
+
+- manifest
+- icons
+- splash assets
+- offline fallback file
+- package dependencies for future enablement
+
+However, those assets should remain secondary to core web application readiness until the main V1 loop is stable.
+
+**Launch Priority Order**
+
+The mobile delivery priority for V1 is:
+
+1. responsive web experience
+2. stable dashboard and gameplay flow
+3. results and pick tracking
+4. subscription and notification reliability
+5. admin and operational visibility
+6. optional PWA enablement pass
+7. later app-store packaging strategy
+
+**Benefits of This Decision**
+
+This approach:
+
+- reduces launch risk
+- prevents PWA edge cases from slowing core delivery
+- keeps engineering focused on product value
+- preserves a clean path to installability later
+- aligns with BrewLotto’s disciplined V1 scope
+
+**Future Phase Direction**
+
+After BrewLotto V1 is functionally stable, a dedicated PWA Enablement Pass may be scheduled to add:
+
+- manifest validation
+- installable shell behavior
+- service worker configuration
+- limited offline fallback
+- icon and splash QA
+- mobile browser install testing
+- push notification readiness if approved
+
+**Success Criteria**
+
+This decision is successful when:
+
+- BrewLotto feels excellent in mobile browsers
+- the app is usable and polished without requiring installation
+- core gameplay and subscription flows are stable
+- PWA remains optional and does not block launch
+- future installable/mobile packaging can be added without major rework
+
+**PM Note**
+
+BrewLotto V1 should behave like a premium mobile app in the browser first.
+
+Installability is valuable, but launch success depends more on:
+
+- stability
+- responsiveness
+- prediction trust
+- outcome tracking
+- tier reliability
+- operational visibility
+
+Web-first execution keeps V1 disciplined while preserving the option to expand into PWA and store-distribution paths later.
+
 
 BrewLotto AI is a lottery intelligence and player education platform focused on helping users make more informed plays through:
 
@@ -1062,31 +1181,85 @@ modular component architecture
 
 mobile-first responsive layouts
 
-UI direction
+UI Direction (Aligned to Figma Design)
 
-The new pasted interface should be treated as the core dashboard shell for draw insights and pick generation.
+The Figma design is the canonical source of truth for the BrewLotto V1 dashboard UI. The design establishes a **"Cosmic Lottery Intelligence"** aesthetic — a premium, futuristic look that combines high-end casino vibes with AI-powered analytics.
 
-Key UI modules from the new design
+### Visual Design System
 
-header / identity strip
+| Element | Specification |
+|---------|---------------|
+| **Color Palette** | BrewGold (#FFD700), Deep Black (#050505), Hot (#ffbd39), Cold (#72caff) |
+| **Container** | 430px max-width, `rounded-[42px]` device shell with golden edge glow |
+| **Cards** | `rounded-[30px]` with gradient backgrounds, inner/outer shadows |
+| **Typography** | 42px/46px black weight title, 10px uppercase tracking for labels |
+| **Effects** | Cosmic aura (radial gradient + blur), LED shimmer, inner glows |
 
-game tabs
+### Brand Identity
 
-hot number card
+| Element | Figma Shows | Implementation |
+|---------|-------------|----------------|
+| **Sub-header** | "BREWVERSE LABS" with accent bar | 10px uppercase, tracking 0.22em, gold accent bar |
+| **Main Logo** | Custom "BREWLOTTO" logo | User-provided PNG in `/public/`, with text fallback |
+| **BotBadge** | Pulsing AI indicator | Animated gold circle in top-right corner |
 
-cold number card
+### Avatar System (Flexible)
 
-momentum meter
+Users should NOT be required to use their real face photo. The avatar system supports:
 
-prediction explanation card
+1. **Initials** (Default): Auto-generated initials with colored background (8 color options)
+2. **Built-in Presets**: Pre-designed lottery-themed avatars in `/public/avatars/`
+3. **Custom Upload**: Any image (not just faces) uploaded to Supabase Storage
 
-CTA buttons
+### Dropdown Menu (V1 Final)
 
-voice mode toggle area
+The avatar dropdown contains exactly these 11 items matching the Figma:
 
-Frontend architecture rule
+```
+[Avatar / Username ▼]
+├─ Profile              → /profile
+├─ My Picks             → /picks
+├─ Today's Results      → /results/today  ← Core V1 page
+├─ Stats & Performance  → /stats
+├─ Strategy Locker      → /strategies
+├─ Notifications [5]    → /notifications
+├─ Settings             → /settings
+├─ Subscription / Billing → /pricing
+├─ Help / Learn         → /learn
+├─ Terms & Privacy      → /legal/terms
+└─ Logout               → /logout
+```
 
-The UI must remain config-driven by game definitions rather than branching into separate hardcoded page logic per game or per state.
+**Note**: "Missions & Achievements" is **removed from V1** and deferred to V2.
+
+### Key UI Modules
+
+| Module | Figma Reference | Component |
+|--------|-----------------|-----------|
+| Header / Identity Strip | Top section with logo + avatar | `Header.tsx` |
+| Navigation Tabs | Dashboard / Results / My Picks | `NavigationTabs.tsx` |
+| Section Kicker | "TODAY'S DRAW INSIGHTS" | `SectionKicker.tsx` |
+| Game Tabs | Pick 3 / Pick 4 / Cash 5 / Powerball / Mega | `GameTabs.tsx` |
+| Hot Numbers Card | Gold balls with orange glow | `HotNumbersCard.tsx` |
+| Cold Numbers Card | Blue/silver balls with blue glow | `ColdNumbersCard.tsx` |
+| Bonus Balls | Red (hot) or blue (cold) with "BONUS" label | `LotteryBall.tsx` |
+| Momentum Meter | Vertical tube with liquid fill (49%) | `MomentumMeter.tsx` |
+| Prediction Card | "Brew says..." commentary | `PredictionCard.tsx` |
+| CTA Button | "Generate My Smart Pick →" gold gradient | `GeneratePickButton.tsx` |
+| Utility Pills | My Picks / Strategy Locker | `UtilityPills.tsx` |
+| Voice Mode Card | Mic toggle with pulse animation | `VoiceModeCard.tsx` |
+| Avatar Dropdown | 11 items with icons and badge | `AvatarDropdown.tsx` |
+
+### Complete Specification Documents
+
+The full implementation specs are in:
+- `brewdocs/v1/dashboard.md` — Complete component code templates
+- `brewdocs/BREWLOTTO_V1_UI_UX_ARCHITECTURE.md` — Architecture and contracts
+- `brewdocs/reference/BREWLOTTO_UX_DESIGN.md` — Design tokens and system
+
+### Frontend Architecture Rule
+
+The UI must remain config-driven by game definitions rather than branching into separate hardcoded page logic per game or per state. All game-specific data (numbers, momentum, insights) is loaded dynamically based on the selected game tab.
 
 \---
 
