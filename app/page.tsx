@@ -257,7 +257,7 @@ function GameTabs({
   const games = getOrderedGames();
 
   return (
-    <nav className="flex flex-wrap gap-2 sm:gap-3">
+    <nav className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
       {games.map((game) => {
         const active = game.key === selected;
 
@@ -266,7 +266,7 @@ function GameTabs({
             key={game.key}
             onClick={() => onChange(game.key)}
             className={[
-              "relative rounded-full px-3 py-2 sm:px-5 sm:py-3 text-[12px] sm:text-[14px] font-medium transition-all duration-200",
+              "relative flex-shrink-0 rounded-full px-3 py-2 text-[12px] font-medium transition-all duration-200",
               "border",
               active
                 ? "border-[#ffcd52] bg-[linear-gradient(180deg,#6a4700_0%,#c48714_28%,#ffb61d_100%)] text-[#fff4c4] shadow-[0_0_0_1px_rgba(255,205,82,0.15),0_0_20px_rgba(255,182,29,0.35),inset_0_1px_0_rgba(255,255,255,0.25)]"
@@ -455,28 +455,48 @@ function MomentumCard({ value }: { value: number }) {
     <div className="relative overflow-hidden rounded-[30px] border border-[#ffb84a]/50 bg-[linear-gradient(145deg,rgba(255,255,255,0.04),rgba(0,0,0,0.6))] backdrop-blur-[10px] p-3 shadow-[0_0_15px_rgba(255,184,0,0.15),inset_0_0_20px_rgba(255,215,0,0.05),0_0_25px_rgba(255,140,0,0.1)]">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_bottom,rgba(255,180,0,0.08),transparent_42%)]" />
 
-      <h2 className="text-[16px] font-semibold text-[#ffcf67]">Momentum Meter</h2>
+      <h2 className="text-[14px] font-semibold text-[#ffcf67]">Momentum Meter</h2>
 
-      <div className="mt-4 flex flex-col items-center justify-between h-[180px]">
-        <div className="relative flex h-[160px] w-[80px] items-end justify-center rounded-[40px] border border-[#33281c] bg-[linear-gradient(180deg,#0f0b0a,#171111_40%,#0e0909)] p-[10px] shadow-[inset_0_0_22px_rgba(0,0,0,0.75),0_0_15px_rgba(255,200,0,0.3)]">
+      <div className="mt-4 flex flex-1 flex-col items-center justify-between">
+        {/* Wavy edge container */}
+        <div className="relative flex h-full min-h-[280px] w-[80px] items-end justify-center rounded-[40px] border border-[#33281c] bg-[linear-gradient(180deg,#0f0b0a,#171111_40%,#0e0909)] p-[10px] shadow-[inset_0_0_22px_rgba(0,0,0,0.75),0_0_15px_rgba(255,200,0,0.3)]">
+          {/* Wavy decorative edges */}
+          <div className="absolute -left-2 inset-y-8 w-2">
+            <svg viewBox="0 0 8 200" className="h-full w-full" preserveAspectRatio="none">
+              <path d="M4,0 Q0,25 4,50 Q8,75 4,100 Q0,125 4,150 Q8,175 4,200" 
+                    fill="none" stroke="rgba(255,170,0,0.3)" strokeWidth="1.5"/>
+            </svg>
+          </div>
+          <div className="absolute -right-2 inset-y-8 w-2">
+            <svg viewBox="0 0 8 200" className="h-full w-full" preserveAspectRatio="none">
+              <path d="M4,0 Q8,25 4,50 Q0,75 4,100 Q8,125 4,150 Q0,175 4,200" 
+                    fill="none" stroke="rgba(255,170,0,0.3)" strokeWidth="1.5"/>
+            </svg>
+          </div>
+          
+          {/* Inner glow lines */}
           <div className="absolute inset-y-5 left-3 w-[1px] bg-[linear-gradient(180deg,transparent,rgba(255,170,0,0.15),transparent)]" />
           <div className="absolute inset-y-5 right-3 w-[1px] bg-[linear-gradient(180deg,transparent,rgba(255,170,0,0.15),transparent)]" />
 
+          {/* Inner fill bar */}
           <div className="relative h-full w-[30px] overflow-hidden rounded-full border border-[#1b130f] bg-[linear-gradient(180deg,#070606,#120d0c)] shadow-[inset_0_0_12px_rgba(0,0,0,0.8)]">
             <div
               className="absolute bottom-0 left-0 right-0 rounded-full bg-[linear-gradient(180deg,#ff8a00_0%,#ffd700_30%,#fff3a0_60%,#ff8a00_100%)] shadow-[0_0_24px_rgba(255,153,0,0.6)]"
               style={{ height: `${clamped}%` }}
             />
+            {/* Center highlight */}
             <div className="absolute inset-x-[35%] bottom-0 w-[30%] rounded-full bg-[linear-gradient(180deg,rgba(255,255,255,0.0),rgba(255,244,180,0.75),rgba(255,255,255,0.0))]" />
+            {/* Ambient glow */}
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,214,84,0.08),transparent_60%)]" />
           </div>
         </div>
 
-        <div className="mt-4 text-center">
-          <div className="text-[42px] font-semibold leading-none text-[#ffcf68] drop-shadow-[0_0_12px_rgba(255,190,39,0.32)]">
+        {/* Percentage and label */}
+        <div className="mt-3 text-center">
+          <div className="text-[36px] font-semibold leading-none text-[#ffcf68] drop-shadow-[0_0_12px_rgba(255,190,39,0.32)]">
             {clamped}%
           </div>
-          <div className="mt-1 text-[14px] text-white/75">Win Probability</div>
+          <div className="mt-1 text-[12px] text-white/75">Win Probability</div>
         </div>
       </div>
     </div>

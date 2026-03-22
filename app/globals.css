@@ -50,3 +50,12 @@ body {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 207, 74, 0.3) rgba(10, 9, 9, 0.5);
 }
+
+/* Hide scrollbar but keep scroll functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
