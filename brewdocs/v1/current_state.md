@@ -17,9 +17,9 @@
 ### ✅ North Carolina Data
 | Game | File | Draws | Source | Status |
 |------|------|-------|--------|--------|
-| Pick 3 | `/data/nc/nc-pick3.csv` | ~13,600 | nclottery.com | ⚠️ Ready (V1 adapter created, needs testing) |
-| Pick 4 | `/data/nc/nc-pick4.csv` | ~11,700 | nclottery.com | ⚠️ Ready (V1 adapter created, needs testing) |
-| Cash 5 | `/data/nc/nc-cash5.csv` | ~8,800 | nclottery.com | ⚠️ Ready (V1 adapter created, needs testing) |
+| Pick 3 | `/data/nc/nc-pick3.csv` | ~13,600 | nclottery.com | ✅ In Database (adapter functional) |
+| Pick 4 | `/data/nc/nc-pick4.csv` | ~11,700 | nclottery.com | ✅ In Database (adapter functional) |
+| Cash 5 | `/data/nc/nc-cash5.csv` | ~8,800 | nclottery.com | ✅ In Database (adapter functional) |
 
 ### ✅ Multi-State Data
 | Game | File | Draws | Source | Status |

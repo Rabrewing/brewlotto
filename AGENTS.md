@@ -399,16 +399,16 @@ The system is considered complete when:
 
 | Game | State | Records | Date Range | Status |
 |------|-------|---------|------------|--------|
-| Pick 3 | NC | ~27,000 | Historical | ✅ In Database |
-| Pick 4 | NC | ~23,000 | Historical | ✅ In Database |
-| Cash 5 | NC | ~17,000 | Historical | ✅ In Database |
+| Pick 3 | NC | ~13,600 | Historical | ✅ In Database (adapter verified) |
+| Pick 4 | NC | ~11,700 | Historical | ✅ In Database (adapter verified) |
+| Cash 5 | NC | ~8,900 | Historical | ✅ In Database (adapter verified) |
 | Daily 3 | CA | ~200 | 2025-12-07 to 2026-03-16 | ✅ Validated |
 | Daily 4 | CA | ~200 | 2025-08-29 to 2026-03-16 | ✅ Validated |
-| Fantasy 5 | CA | ~32 | Recent | ⚠️ Needs more |
+| Fantasy 5 | CA | ~97 | Dec 2025 - Mar 2026 | ✅ Validated (3 months historical) |
 | Powerball | NC/CA | ~10,000 | Historical | ✅ In Database |
 | Mega Millions | NC/CA | ~2,700 | Historical | ✅ In Database |
 
-**Total Records in Database:** ~81,916
+**Total Records in Database:** ~47,397
 
 ### Ingestion Scripts (Updated 2026-03-18)
 
