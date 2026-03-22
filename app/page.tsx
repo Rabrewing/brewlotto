@@ -17,8 +17,13 @@ import {
   GAME_CONFIGS,
   GameConfig,
   GameKey,
-  getOrderedGames,
+  StateKey,
+  DEFAULT_STATE,
+  DEFAULT_GAME,
+  getOrderedGamesForState,
+  getDisplayLabel,
 } from "@/lib/brewlotto-games";
+import StateSelector from "@/components/StateSelector";
 
 /**
  * BrewLotto V1 mock UI
@@ -33,7 +38,7 @@ const MOCK_HOT: Record<GameKey, number[]> = {
   pick4: [1, 2, 4, 9],
   cash5: [3, 14, 29, 31, 40],
   powerball: [3, 14, 29, 41, 52],
-  'mega-millions': [5, 16, 23, 42, 61],
+  mega_millions: [5, 16, 23, 42, 61],
 };
 
 const MOCK_COLD: Record<GameKey, number[]> = {
@@ -41,17 +46,17 @@ const MOCK_COLD: Record<GameKey, number[]> = {
   pick4: [0, 8, 6, 5],
   cash5: [2, 9, 33, 37, 43],
   powerball: [1, 7, 22, 54, 69],
-  'mega-millions': [4, 18, 27, 55, 70],
+  mega_millions: [4, 18, 27, 55, 70],
 };
 
 const MOCK_BONUS_HOT: Partial<Record<GameKey, number>> = {
   powerball: 11,
-  'mega-millions': 10,
+  mega_millions: 10,
 };
 
 const MOCK_BONUS_COLD: Partial<Record<GameKey, number>> = {
   powerball: 3,
-  'mega-millions': 2,
+  mega_millions: 2,
 };
 
 const MOCK_MOMENTUM: Record<GameKey, number> = {
@@ -59,12 +64,11 @@ const MOCK_MOMENTUM: Record<GameKey, number> = {
   pick4: 64,
   cash5: 58,
   powerball: 49,
-  'mega-millions': 53,
+  mega_millions: 53,
 };
 
-const DEFAULT_GAME: GameKey = "powerball";
-
 export default function Page() {
+  const [selectedState, setSelectedState] = useState<StateKey>(DEFAULT_STATE);
   const [selectedGame, setSelectedGame] = useState<GameKey>(DEFAULT_GAME);
 
   const config = GAME_CONFIGS[selectedGame];
@@ -73,6 +77,9 @@ export default function Page() {
   const bonusHot = MOCK_BONUS_HOT[selectedGame];
   const bonusCold = MOCK_BONUS_COLD[selectedGame];
   const momentum = MOCK_MOMENTUM[selectedGame] ?? 50;
+
+  // Get state-aware display label for current game
+  const displayLabel = getDisplayLabel(selectedState, selectedGame);
 
   return (
     <main className="min-h-screen bg-[#050505] px-4 py-2 text-white">
@@ -91,7 +98,10 @@ export default function Page() {
 
             {/* Header area - fixed */}
             <div className="px-6 pt-6 pb-2">
-              <Header />
+              <Header 
+                currentState={selectedState} 
+                onStateChange={setSelectedState} 
+              />
               <NavigationTabs />
             </div>
 
@@ -102,7 +112,11 @@ export default function Page() {
               </div>
 
               <div className="mt-4">
-                <GameTabs selected={selectedGame} onChange={setSelectedGame} />
+                <GameTabs 
+                  selected={selectedGame} 
+                  onChange={setSelectedGame}
+                  state={selectedState}
+                />
               </div>
 
               <div className="mt-6 grid grid-cols-1 sm:grid-cols-[1.6fr_1fr] gap-3">
@@ -138,7 +152,7 @@ export default function Page() {
               </div>
 
               <div className="mt-5">
-                <PredictionCard config={config} />
+                <PredictionCard config={config} gameLabel={displayLabel} />
               </div>
 
               <div className="mt-5">
@@ -170,7 +184,13 @@ export default function Page() {
   );
 }
 
-function Header() {
+function Header({ 
+  currentState, 
+  onStateChange 
+}: { 
+  currentState: StateKey;
+  onStateChange: (state: StateKey) => void;
+}) {
   return (
     <header className="flex items-start justify-between gap-4">
       <div className="min-w-0">
@@ -186,7 +206,10 @@ function Header() {
         <div className="mt-2 h-[3px] w-[160px] rounded-full bg-[linear-gradient(90deg,rgba(255,200,72,0.9),rgba(255,170,0,0.5),transparent)] shadow-[0_0_14px_rgba(255,180,0,0.65)]" />
       </div>
 
-      <UserAvatar />
+      <div className="flex items-center gap-3">
+        <StateSelector currentState={currentState} onStateChange={onStateChange} />
+        <UserAvatar />
+      </div>
     </header>
   );
 }
@@ -250,11 +273,13 @@ function SectionKicker() {
 function GameTabs({
   selected,
   onChange,
+  state,
 }: {
   selected: GameKey;
   onChange: (key: GameKey) => void;
+  state: StateKey;
 }) {
-  const games = getOrderedGames();
+  const games = getOrderedGamesForState(state);
 
   return (
     <nav className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
@@ -390,15 +415,15 @@ function LotteryBall({
   if (config) {
     // Smaller balls for games with more numbers
     switch (config.primaryCount) {
-      case 3: // Pick 3
+      case 3: // Pick 3 / Daily 3
         baseSize = 60;
         baseTextSize = 24;
         break;
-      case 4: // Pick 4
+      case 4: // Pick 4 / Daily 4
         baseSize = 56;
         baseTextSize = 22;
         break;
-      case 5: // Cash 5, Powerball, Mega
+      case 5: // Cash 5 / Fantasy 5, Powerball, Mega
         // Check if it has bonus (Powerball/Mega) for even smaller balls
         if (config.hasBonus) {
           baseSize = 44;
@@ -503,7 +528,7 @@ function MomentumCard({ value }: { value: number }) {
   );
 }
 
-function PredictionCard({ config }: { config: GameConfig }) {
+function PredictionCard({ config, gameLabel }: { config: GameConfig; gameLabel: string }) {
   return (
     <div className="relative h-full overflow-hidden rounded-[30px] border border-[#ffb84a]/40 bg-[linear-gradient(145deg,rgba(255,255,255,0.04),rgba(0,0,0,0.6))] backdrop-blur-[10px] p-3 shadow-[0_0_15px_rgba(255,184,0,0.15),inset_0_0_20px_rgba(255,215,0,0.05),0_0_25px_rgba(255,140,0,0.1)]">
       <div className="pointer-events-none absolute right-0 top-0 h-36 w-36 bg-[radial-gradient(circle,rgba(255,174,0,0.15),transparent_55%)]" />
@@ -516,7 +541,7 @@ function PredictionCard({ config }: { config: GameConfig }) {
 
       <p className="mt-5 text-[16px] leading-8 text-white/88">
         Brew says today&apos;s pattern for{" "}
-        <span className="font-bold text-[#ffd364]">{config.label}</span> favors{" "}
+        <span className="font-bold text-[#ffd364]">{gameLabel}</span> favors{" "}
         <span className="font-bold text-[#ffd364]">low &amp; even</span> numbers,
         recent <span className="font-bold text-[#ffce5c]">hot streaks</span>, and
         overdue positions.

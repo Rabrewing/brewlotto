@@ -2,11 +2,11 @@
 
 \<\!--  
 /brewexec/brewdocs/BREWLOTTO\_V1\_Product\_Overview.md  
-Timestamp: 2026-03-16 ET  
-Phase: V1 Reset / Product Foundation  
-Purpose: Canonical BrewDocs product overview for rebuilding BrewLotto into a stable, launch-ready V1.  
-Updated: 2026-03-21  
-Reason: Added Web App First, PWA Later decision note to Section 14.1  
+Timestamp: 2026-03-16 ET
+Phase: V1 Reset / Product Foundation
+Purpose: Canonical BrewDocs product overview for rebuilding BrewLotto into a stable, launch-ready V1.
+Updated: 2026-03-22
+Reason: Added Section 9.1 State-Aware Game Presentation
 \--\>BrewLotto AI — Product Overview (V1 Reset)
 
 1\. Document Purpose
@@ -482,7 +482,80 @@ Why This Matters
 
 This is the foundation for future state rollout. Once NC \+ CA are stable, new states become a config and ingestion expansion problem rather than a full app rewrite.
 
-\---
+---
+
+## 9.1 State-Aware Game Presentation
+
+**Purpose**
+
+Define how BrewLotto V1 presents game labels to users based on their selected state preference, while maintaining canonical internal game keys.
+
+**V1 Decision**
+
+BrewLotto V1 will dynamically adapt game display labels based on the user's selected state, while using stable canonical game keys internally.
+
+**Why**
+
+- NC and CA have different public game names (Daily 3 vs Pick 3, Fantasy 5 vs Cash 5)
+- Multi-state games (Powerball, Mega Millions) are shared across states
+- Users should see familiar game names for their state
+- Backend architecture remains stable with normalized game keys
+- Future state expansion becomes a config problem, not a rewrite
+
+**Canonical Game Keys**
+
+```typescript
+type GameKey = 
+  | 'pick3'
+  | 'pick4' 
+  | 'cash5'
+  | 'powerball'
+  | 'mega_millions';
+```
+
+**State-Specific Display Labels**
+
+| Game Key | NC Label | CA Label | Multi-State |
+|----------|----------|----------|-------------|
+| pick3 | Pick 3 | Daily 3 | No |
+| pick4 | Pick 4 | Daily 4 | No |
+| cash5 | Cash 5 | Fantasy 5 | No |
+| powerball | Powerball | Powerball | Yes |
+| mega_millions | Mega | Mega | Yes |
+
+**Architecture**
+
+- `StateKey = 'nc' | 'ca'` - State identifier type
+- `StateGameMapping` - Maps state to game with display labels
+- `STATE_GAMES` - Record of state-to-games mappings
+- `getStateGames(state)` - Returns ordered games for a state
+- `getDisplayLabel(state, gameKey)` - Returns display label for game in state
+- `isMultiStateGame(gameKey)` - Checks if game is shared across states
+
+**User Flow**
+
+1. **Onboarding**: User selects preferred state (required)
+2. **Dashboard**: Game tabs show state-specific labels
+3. **State Toggle**: Header badge allows switching states
+4. **Profile**: State preference saved to user profile
+5. **Fallback**: Default to NC if no preference exists
+
+**State Selector Component**
+
+- Located in header next to user avatar
+- Compact badge showing current state (NC/CA)
+- Dropdown for switching between states
+- Persists selection to user profile
+- Updates all game tabs immediately
+
+**Multi-State Game Handling**
+
+- Powerball and Mega Millions visible in both states
+- Still tagged with current state context for play history
+- Display labels consistent across states
+- Ingestion draws shared, not duplicated
+
+---
 
 10\. Payments Recommendation
 
