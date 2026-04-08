@@ -1,0 +1,119 @@
+# BrewLotto Progress Summary
+
+**Last Updated:** 2026-04-08 ET
+
+## Current State
+
+- App Router dashboard is now the canonical frontend entrypoint
+- BrewCommand admin work is active in Phase 8
+- Live Supabase security issues reported by the database linter were corrected
+- `draw_freshness_status` has been backfilled in the live database
+- Duplicate `lottery_games` placeholder rows were deactivated after dependency audit
+
+## 2026-04-08 Delivery Summary
+
+### Completed
+- Fixed live Supabase security lints for user views and alert tables
+- Added `supabase/migrations/20260408120000_fix_security_lints.sql`
+- Restored missing BrewCommand database views and alert helper RPCs
+- Added `supabase/migrations/20260408133000_restore_brewcommand_admin_views.sql`
+- Added BrewCommand App Router page at `/admin`
+- Added live ingestion health API at `app/api/admin/ingestion-health/route.ts`
+- Backfilled `draw_freshness_status` from draw history and schedule configuration
+- Added `supabase/migrations/20260408143000_backfill_draw_freshness_status.sql`
+
+### Verified Live
+- `v_brewcommand_alert_center`
+- `v_ingestion_health_summary`
+- `raise_system_alert(...)`
+- `draw_freshness_status` populated with current rows
+
+### Completed Follow-up Cleanup
+- Audited duplicate `lottery_games` placeholder rows across dependent V1 tables
+- Verified placeholders had no draw, source, run, feature, prediction request, user preference, or alert usage
+- Deactivated the empty placeholders instead of deleting them
+- Removed their derived freshness rows and refreshed freshness state
+- Confirmed BrewCommand ingestion health now reflects canonical active games only
+
+### Next Step
+- Continue BrewCommand phase polish or begin wiring real prediction explanations into the dashboard for Phase 9
+
+### Canonical Rows Kept Active
+- NC: `pick3`, `pick4`, `cash5`, `powerball`, `mega_millions`
+- CA: `daily3`, `daily4`, `fantasy5`, `powerball`, `mega_millions`
+
+---
+
+# Migration and PWA Implementation Plan
+
+This document outlines the plan for migrating the BrewLotto application from the Next.js `pages` router to the `app` router, with a focus on implementing PWA functionality and a new UI facelift.
+
+## Phase 1: PWA and UI Facelift Implementation - COMPLETE
+
+1.  **Install `next-pwa`:** COMPLETE
+2.  **Configure `next.config.js`:** COMPLETE
+3.  **Update `app/layout.tsx`:** COMPLETE
+4.  **Create `public/manifest.webmanifest`:** COMPLETE
+5.  **Create `public/offline.html`:** COMPLETE
+6.  **Add Icons:** COMPLETE
+7.  **Create New Components:** COMPLETE
+    *   `components/PwaInstall.tsx`
+    *   `components/CustomerNavDropdown.tsx`
+    *   `components/Header.tsx`
+8.  **Update `app/page.tsx`:** COMPLETE
+9.  **Update `app/layout.tsx`:** COMPLETE
+
+## Phase 2: Migration of Existing Routes - COMPLETE
+
+1.  **Analyze `pages` directory:** COMPLETE
+2.  **Prioritize Routes:** COMPLETE
+3.  **Migrate Routes:**
+    *   `pages/dashboard.js` to `app/dashboard/page.tsx`: COMPLETE (Note: `RequireAuth` component removed, authentication will need to be handled at a higher level, e.g., `app/dashboard/layout.tsx` or middleware).
+    *   `pages/login.js` to `app/login/page.tsx`: COMPLETE
+    *   `pages/logout.js` to `app/logout/page.tsx`: COMPLETE
+    *   `pages/pricing.jsx` to `app/pricing/page.tsx`: COMPLETE
+    *   `pages/pick3.js` to `app/pick3/page.tsx`: COMPLETE
+    *   `pages/pick4.js` to `app/pick4/page.tsx`: COMPLETE
+    *   `pages/pick5.js` to `app/pick5/page.tsx`: COMPLETE
+    *   `pages/mega.js` to `app/mega/page.tsx`: COMPLETE
+    *   `pages/powerball.js` to `app/powerball/page.tsx`: COMPLETE
+4.  **API Routes:**
+    *   `pages/api/play/log.js` to `app/api/play/log/route.ts`: COMPLETE
+    *   `pages/api/predict/[game].js` to `app/api/predict/[game]/route.ts`: COMPLETE
+    *   `pages/api/stats/[game].js` to `app/api/stats/[game]/route.ts`: COMPLETE
+    *   `pages/api/predict.js` to `app/api/predict/route.ts`: COMPLETE (Note: Potential compatibility issue with `getSupabaseServerClient` and `Request`/`NextResponse` objects.)
+    *   `pages/api/predictions.js` to `app/api/predictions/route.ts`: COMPLETE
+    *   `pages/api/audit.js` to `app/api/audit/route.ts`: COMPLETE
+    *   `pages/api/brew-ai.js` to `app/api/brew-ai/route.ts`: COMPLETE
+    *   `pages/api/annotate-pick.js` to `app/api/annotate-pick/route.ts`: COMPLETE
+    *   `pages/api/fix-file.js` to `app/api/fix-file/route.ts`: COMPLETE
+    *   `pages/api/generate-merge-report.js` to `app/api/generate-merge-report/route.ts`: COMPLETE (Note: Dynamic import of CJS module might require specific Node.js configurations or a wrapper.)
+    *   `pages/api/ledger.js` to `app/api/ledger/route.ts`: COMPLETE
+    *   `pages/api/load-file.js` to `app/api/load-file/route.ts`: COMPLETE
+    *   `pages/api/refresh.js` to `app/api/refresh/route.ts`: COMPLETE
+    *   `pages/api/save-file.js` to `app/api/save-file/route.ts`: COMPLETE
+    *   `pages/api/scan.js` to `app/api/scan/route.ts`: COMPLETE
+    *   `pages/api/suggest-fix.js` to `app/api/suggest-fix/route.ts`: COMPLETE
+
+## Phase 3: Cleanup and Finalization - IN PROGRESS
+
+1.  **Remove `pages` directory:** COMPLETE
+2.  **Testing:** RESOLVED - New UI facelift applied.
+3.  **Update Documentation:** Update the project documentation to reflect the new `app` router structure.
+
+## Current Development Tasks - IN PROGRESS
+
+*   [Implement BrewLotto Navigation Engine](tasks/feature_updates/implement_brewlotto_nav_engine.md) - Testing Required - Error
+
+## Current Status: UI Facelift Complete
+
+The new UI facelift has been successfully applied and verified. The Tailwind CSS configuration has been corrected, and the cosmic theme with glowing elements is now displaying as expected.
+
+**Next Steps:**
+1.  Wiring strategies into the frontend.
+2.  Gating the app for MVP.
+3.  Wiring in all the buttons.
+
+## Questions for You
+
+*   I will create placeholder icons for now. Do you have specific designs or assets for the PWA icons?

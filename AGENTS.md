@@ -375,7 +375,7 @@ The system is considered complete when:
 
 ## V1 Progress Tracker
 
-**Last Updated:** 2026-03-21 ET (Phase 7 Complete - Dashboard UI implemented)
+**Last Updated:** 2026-04-08 ET (Phase 8 in progress - BrewCommand admin restored, freshness backfill completed, duplicate game placeholders deactivated)
 
 ### Phase Status
 
@@ -394,6 +394,10 @@ The system is considered complete when:
 | D11 | Prediction Trigger | ✅ Complete | Prediction scheduler and generator created for all games |
 | D12 | Testing Layer | ✅ Complete | Jest tests created for alerts, data integrity, and prediction generation (29 tests) |
 | 7 | Dashboard UI | ✅ Complete | Premium dashboard implemented with mobile-first design, dynamic ball sizes, custom scrollbar, and phone-like layout |
+| 8 | BrewCommand Admin | 🔄 In Progress | `/admin` added in App Router, alert console live, ingestion health panel live, remote admin views/RPCs restored |
+| 8.1 | Database Security Hardening | ✅ Complete | Security invoker set on user views, RLS enabled on alert tables, live Supabase lint issues corrected |
+| 8.2 | Freshness Backfill | ✅ Complete | `draw_freshness_status` backfilled from `official_draws` plus schedule config, ingestion health now populated |
+| 8.3 | Duplicate Game Reconciliation | ✅ Complete | Empty placeholder `lottery_games` rows deactivated; derived freshness rows removed; BrewCommand health now reflects canonical active games |
 
 ### Data Collection Status
 
@@ -409,6 +413,56 @@ The system is considered complete when:
 | Mega Millions | NC/CA | ~2,700 | Historical | ✅ In Database |
 
 **Total Records in Database:** ~47,397
+
+### 2026-04-08 Progress Update
+
+#### ✅ Completed Today
+- Fixed live Supabase security warnings for `security_definer_view` and `rls_disabled_in_public`
+- Added `supabase/migrations/20260408120000_fix_security_lints.sql`
+- Consolidated the duplicated dashboard entrypoint so `/` now reuses the canonical App Router dashboard
+- Added App Router BrewCommand page at `/admin`
+- Added admin alerts console wired to existing alert APIs
+- Added admin ingestion health API at `app/api/admin/ingestion-health/route.ts`
+- Restored missing live BrewCommand database objects:
+  - `public.v_brewcommand_alert_center`
+  - `public.v_ingestion_health_summary`
+  - `public.raise_system_alert(...)`
+  - `public.acknowledge_system_alert(...)`
+  - `public.resolve_system_alert(...)`
+  - `public.escalate_system_alert(...)`
+- Added `supabase/migrations/20260408133000_restore_brewcommand_admin_views.sql`
+- Added `supabase/migrations/20260408143000_backfill_draw_freshness_status.sql`
+- Backfilled live `draw_freshness_status` so BrewCommand health is no longer blank
+
+#### 🔎 Current Findings
+- The live project contains duplicate `lottery_games` rows for several NC and CA games
+- The canonical rows are the ones with linked `official_draws` history
+- The duplicate placeholder rows currently have:
+  - `official_draws_count = 0`
+  - `draw_sources_count = 0`
+  - `ingestion_runs_count = 0`
+  - `prediction_requests_count = 0`
+  - `alert_events_count = 0`
+  - only a freshness row created by the new backfill
+
+#### ✅ Duplicate Game Cleanup Completed
+- Deactivated 10 empty duplicate `lottery_games` placeholder rows in the live project
+- Removed freshness rows tied only to those placeholders
+- Refreshed `draw_freshness_status`
+- Verified `v_ingestion_health_summary` now shows one active canonical row per game/state instead of duplicate healthy/failed entries
+
+#### ✅ Phase 9 Commentary Pass Started
+- Dashboard `PredictionCard` now loads real stored explanation text instead of hardcoded mock insights
+- Added `GET /api/dashboard/commentary` for dashboard-safe commentary retrieval
+- `Generate My Smart Pick` now calls `POST /api/predictions`
+- The dashboard now shows the latest generated pick numbers plus strategy/confidence metadata when a stored prediction exists
+- `StatsGrid` now reads live hot/cold/momentum data from recent `official_draws` through `GET /api/dashboard/stats`
+- The dashboard now exposes live stale-data messaging through `GET /api/dashboard/freshness`
+- Dashboard tab data selection is now tightened to canonical source games instead of blended NC/CA families
+- `VoiceModeCard` now uses browser speech synthesis to narrate the live Brew summary when supported
+
+#### ⏭️ Next Action
+- Continue Phase 9 by replacing any remaining placeholder dashboard utilities with live feature data and tightening any remaining per-game dashboard behavior
 
 ### Ingestion Scripts (Updated 2026-03-18)
 

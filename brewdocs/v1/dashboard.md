@@ -10,6 +10,19 @@ Status: IMPLEMENTED - Mobile-first design with dynamic ball sizing, custom scrol
 
 This document specifies the dashboard UI implementation for BrewLotto V1, matching the premium Figma design exactly.
 
+## Implementation Notes
+
+- Canonical customer dashboard routes now resolve through the App Router implementation.
+- `/` reuses the canonical dashboard entrypoint instead of maintaining a second forked dashboard implementation.
+- Dashboard state now owns the selected game and passes it into the tab component, keeping tab selection controlled by the page rather than duplicated local state.
+- Dashboard tabs now resolve to intentional canonical source games instead of blending NC and CA families for Pick 3, Pick 4, Cash 5, Powerball, and Mega Millions.
+- Dashboard commentary now pulls from real stored prediction explanations through `GET /api/dashboard/commentary?game=...`.
+- The primary CTA now generates real predictions through `POST /api/predictions` and the dashboard immediately reflects the saved explanation text and generated numbers when available.
+- `StatsGrid` now pulls live hot/cold/momentum values from recent `official_draws` through `GET /api/dashboard/stats?game=...`.
+- Dashboard now shows a live freshness banner through `GET /api/dashboard/freshness?game=...`, warning when draw data is delayed, stale, unavailable, or unclear.
+- Voice Mode now uses browser speech synthesis to narrate the active freshness summary and Brew commentary when supported.
+- Fallback messaging remains in place for games that do not yet have stored predictions.
+
 ---
 
 ## 1. Document Purpose

@@ -1,7 +1,7 @@
 # BrewLotto V1 - Current State & Next Steps
 
-**Last Updated:** 2026-03-21 ET
-**Phase:** Dashboard UI Complete - Premium mobile-first design implemented
+**Last Updated:** 2026-04-08 ET
+**Phase:** Phase 8 - BrewCommand Admin in progress; security hardening and freshness backfill completed
 
 ---
 
@@ -229,6 +229,46 @@ data/
 
 **Current Status**: ✅ All files follow this structure
 
+## 2026-04-08 Progress Snapshot
+
+### ✅ Completed Since Phase 7
+- Live Supabase security lints corrected
+  - User access views now run with `security_invoker = true`
+  - Alert tables now have RLS enabled in the live project
+- Root route cleanup completed
+  - `/` now reuses the canonical App Router dashboard instead of maintaining a second forked dashboard implementation
+- BrewCommand App Router surface added at `/admin`
+  - alert summary cards
+  - open alert feed
+  - acknowledge / resolve actions
+  - ingestion health panel
+- Missing live BrewCommand DB objects restored
+  - `v_brewcommand_alert_center`
+  - `v_ingestion_health_summary`
+  - alert helper RPC functions
+- `draw_freshness_status` backfilled from live `official_draws` and game `schedule_config`
+- Dashboard prediction commentary now reads from real stored prediction explanations
+- Dashboard generate action now creates real predictions via `/api/predictions`
+- Dashboard hot/cold/momentum cards now read from live recent `official_draws`
+- Dashboard now surfaces live stale-data messaging from the ingestion health/freshness layer
+- Dashboard game tabs now map to canonical source games instead of blending NC and CA families
+- Voice Mode now performs real browser narration when supported
+
+### 🔎 Current Findings
+- BrewCommand health no longer renders blank and now reflects the canonical active game catalog
+- The previously identified duplicate placeholder `lottery_games` rows were confirmed empty and then deactivated safely
+- The canonical rows are the records that already own the actual `official_draws` history
+- Current freshness output now surfaces actual stale game status instead of duplicate placeholder failures
+
+### 🔄 In Progress
+- BrewCommand phase completion work
+- Phase 9 commentary integration and replacement of remaining mocked dashboard data
+
+### Next Recommended Action
+1. Continue BrewCommand admin improvements beyond the current alert and ingestion health surfaces
+2. Replace dashboard mock prediction commentary with real prediction/explanation data
+3. Add follow-up validation around stale-game handling and scheduler freshness updates
+
 ## Current Issues & Workarounds
 
 ### Issue 1: CA Pick 3/Pick 4 Live Data
@@ -346,11 +386,15 @@ When checking with ChatGPT, ask for:
 - ✅ Parsers created for all CA games
 - ✅ Fetch scripts created and tested
 - ✅ Documentation updated
+- ✅ Live Supabase security posture corrected for BrewCommand-related objects
+- ✅ App Router BrewCommand admin console started
+- ✅ Ingestion health API and live DB views restored
+- ✅ `draw_freshness_status` backfilled in production
+- ✅ Empty duplicate `lottery_games` placeholders deactivated in production
 
-**In Progress (D8)**:
-- 🔄 Cross-source validation and data quality checks
-- 🔄 Automated data reconciliation between sources
-- 🔄 Alerting system for data discrepancies
+**In Progress (Phase 8 / Ops Cleanup)**:
+- 🔄 Final BrewCommand admin cleanup and data consistency pass
+- 🔄 Remaining cross-source validation and data quality alignment
 
 **Next Phase**:
-Proceed with D8 - Cross-Source Validation to ensure data accuracy before moving to prediction engine.
+Continue Phase 8 admin cleanup and then move deeper into Phase 9 commentary integration.

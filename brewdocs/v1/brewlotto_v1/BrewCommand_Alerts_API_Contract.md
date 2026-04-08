@@ -1,8 +1,8 @@
 # BrewCommand Alerts API Contract
 
 **Project:** BrewLotto AI
-**Phase:** V1 Phase 7
-**Timestamp:** 2026-03-19 ET
+**Phase:** V1 Phase 8
+**Timestamp:** 2026-04-08 ET
 **Purpose:** Define internal API routes for BrewCommand operational alerts, alert lifecycle, and critical email delivery visibility.
 
 ## 1. Scope
@@ -14,6 +14,7 @@ This API is **internal-only** and supports:
 - acknowledge/resolve flows
 - critical email delivery tracking
 - alert summary widgets for admin health views
+- ingestion health widgets for BrewCommand admin monitoring
 
 This is **not** a public user-facing API.
 
@@ -80,6 +81,7 @@ Mutating routes like acknowledge/resolve should be limited to admin/support.
 ```txt
 GET    /api/admin/alerts
 GET    /api/admin/alerts/summary
+GET    /api/admin/ingestion-health
 GET    /api/admin/alerts/:id
 GET    /api/admin/alerts/:id/events
 GET    /api/admin/alerts/:id/deliveries
@@ -94,6 +96,55 @@ POST   /api/internal/alerts/raise
 ---
 
 ## 6. Route Contracts
+
+### 6.0 GET `/api/admin/ingestion-health`
+
+**Purpose:** Return BrewCommand ingestion health rows and summary metrics using live game, draw, and ingestion-run state.
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "gameId": "uuid",
+      "gameName": "Pick 3",
+      "gameKey": "pick3",
+      "stateCode": "NC",
+      "freshnessStatus": "stale",
+      "freshnessSource": "tracked",
+      "stalenessMinutes": 32815,
+      "latestDrawAt": "2026-03-17T01:30:00Z",
+      "latestDrawDate": "2026-03-16",
+      "expectedNextDrawAt": "2026-03-17T17:00:00Z",
+      "lastRunId": null,
+      "lastRunStatus": "unknown",
+      "lastRunStartedAt": null,
+      "lastRunFinishedAt": null,
+      "drawsSeen": null,
+      "drawsInserted": null,
+      "drawsUpdated": null,
+      "errorCount": 0
+    }
+  ],
+  "error": null,
+  "meta": {
+    "summary": {
+      "totalGames": 10,
+      "failedRuns": 0,
+      "gamesWithErrors": 0,
+      "byFreshness": {
+        "healthy": 0,
+        "delayed": 0,
+        "stale": 10,
+        "failed": 0,
+        "unknown": 0
+      }
+    }
+  }
+}
+```
 
 ### 6.1 GET `/api/admin/alerts`
 
