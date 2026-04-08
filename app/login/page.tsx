@@ -1,18 +1,15 @@
-// BrewLotto Login Page
-// @pages/login.js
-// Timestamp: 2025-06-25T21:12 EDT
-// Purpose: Provides a login interface for users to sign in using their email
+'use client';
+
 import { useState } from "react";
-import { useRouter } from "next/router";
-import { supabase } from "@/utils/supabase";
-import { showToast } from "@/utils/toastservice"; // If you use toasts here (optional)
+import { useRouter } from "next/navigation"; // Changed from "next/router"
+import { supabase } from '../../lib/supabase/browserClient';
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
-    const [message, setMessage] = useState(null);
+    const [message, setMessage] = useState<{ type: "error" | "success"; text: string } | null>(null);
     const router = useRouter();
 
-    const handleLogin = async (e) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setMessage(null);
 
@@ -36,7 +33,7 @@ export default function LoginPage() {
             <div className="mb-6">
                 <button
                     onClick={() => router.push("/")}
-                    className="text-sm text-[#181818] hover:text-white underline transition"
+                    className="text-sm text-[#FFD700] hover:text-white underline transition"
                 >
                     ← Back to BrewLotto
                 </button>

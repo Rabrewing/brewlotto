@@ -1,7 +1,8 @@
-// pages/logout.js
+'use client';
+
 import { useEffect } from "react";
-import { useRouter } from "next/router";
-import { supabase } from "@/utils/supabase";
+import { useRouter } from "next/navigation"; // Changed from "next/router"
+import { supabase } from "../../lib/supabase/browserClient";
 
 export default function LogoutPage() {
     const router = useRouter();
