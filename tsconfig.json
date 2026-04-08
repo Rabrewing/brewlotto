@@ -7,11 +7,80 @@
       "esnext"
     ],
     "module": "esnext",
-    "moduleResolution": "nodenext", // 🔁 Supports .cjs/.mjs & Node-style packages
-    "baseUrl": ".", // 🧭 Required for paths below
+    "moduleResolution": "bundler",
+    "baseUrl": ".",
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "@admin/*": [
+        "admin/*"
+      ],
+      "@archive/*": [
+        "archive/*"
+      ],
+      "@auth/*": [
+        "auth/*"
+      ],
+      "@brew/*": [
+        "brew/*"
+      ],
+      "@brew-command/*": [
+        "brew-command/*"
+      ],
+      "@brew-university/*": [
+        "brew-university/*"
+      ],
+      "@components/*": [
+        "components/*"
+      ],
+      "@config/*": [
+        "config/*"
+      ],
+      "@data/*": [
+        "data/*"
+      ],
+      "@docs/*": [
+        "docs/*"
+      ],
+      "@hooks/*": [
+        "hooks/*"
+      ],
+      "@lib/*": [
+        "lib/*"
+      ],
+      "@logs/*": [
+        "logs/*"
+      ],
+      "@mnt/*": [
+        "mnt/*"
+      ],
+      "@pages/*": [
+        "pages/*"
+      ],
+      "@public/*": [
+        "public/*"
+      ],
+      "@scripts/*": [
+        "scripts/*"
+      ],
+      "@src/*": [
+        "src/*"
+      ],
+      "@stores/*": [
+        "stores/*"
+      ],
+      "@strategies/*": [
+        "strategies/*"
+      ],
+      "@styles/*": [
+        "styles/*"
+      ],
+      "@theme/*": [
+        "theme/*"
+      ],
+      "@utils/*": [
+        "utils/*"
       ]
     },
     "allowJs": true,
@@ -19,7 +88,7 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true, // 🧾 Enables clean JSON/default imports
+    "allowSyntheticDefaultImports": true,
     "jsx": "preserve",
     "incremental": true,
     "strict": true,

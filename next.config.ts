@@ -1,7 +1,10 @@
-import type { NextConfig } from "next";
+// Simple Next.js config without PWA for development
+// PWA can be re-enabled once core functionality is working
 
-const nextConfig: NextConfig = {
-  /* config options here */
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+  outputFileTracingRoot: __dirname,
 };
 
-export default nextConfig;
+module.exports = nextConfig;

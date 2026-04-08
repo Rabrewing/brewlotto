@@ -48,6 +48,7 @@
     "diff": "^8.0.2",
     "dotenv": "^16.5.0",
     "framer-motion": "^12.19.1",
+    "lucide-react": "^0.577.0",
     "nanoid": "^5.1.5",
     "next": "^15.3.4",
     "next-pwa": "^2.0.2",
