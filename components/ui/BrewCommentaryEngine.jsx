@@ -21,8 +21,8 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { BREW_PHRASES } from "@/lib/voice/BREW_PHRASES";
-import { STRATEGY_EXPLAINERS } from "@/lib/explainers/strategyExplainers";
+import { BREW_PHRASES } from "../../lib/voice/BREW_PHRASES";
+import { STRATEGY_EXPLAINERS } from "../../lib/explainers/strategyExplainers";
 
 export default function BrewCommentaryEngine({
     status = "idle",          // "idle" | "loading" | "success" | "error"

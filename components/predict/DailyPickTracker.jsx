@@ -2,7 +2,7 @@
 // Updated: 2025-06-28T02:51 EDT
 // Displays tier-aware prediction quota usage with refill countdown and upgrade nudges
 
-import { useUserTier } from "@/lib/useUserTier";
+import { useUserTier } from "@/hooks/useUserTier";
 import { useEffect, useState } from "react";
 
 // 🔐 Tier cap system for daily predictions

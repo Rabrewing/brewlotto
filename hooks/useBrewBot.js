@@ -6,7 +6,7 @@
 // =============================================
 
 import { create } from "zustand";
-import useBrewVoice from "@/hooks/useBrewVoice";
+import useBrewVoice from "./useBrewVoice";
 
 export const useBrewBot = create((set) => ({
   open: false,

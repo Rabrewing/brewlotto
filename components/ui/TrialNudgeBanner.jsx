@@ -2,8 +2,8 @@
 // Summary: Shows trial status banner w/ voice prompt & upgrade CTA
 
 import { useEffect } from "react";
-import { useUserTier } from "@/hooks/useUserTier";
-import { useBrewBotContext } from "@/components/context/BrewBotContext";
+import { useUserTier } from "../../hooks/useUserTier";
+import { useBrewBotContext } from "../../components/context/BrewBotContext";
 import { formatDistanceToNowStrict } from "date-fns";
 
 export default function TrialNudgeBanner() {

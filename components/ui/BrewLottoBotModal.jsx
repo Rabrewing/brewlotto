@@ -10,7 +10,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import BrewAvatar from "./BrewAvatar";
 import BrewCommentaryEngine from "./BrewCommentaryEngine";
-import useBrewVoice from "@/hooks/useBrewVoice";
+import useBrewVoice from "../../hooks/useBrewVoice";
 
 export default function BrewLottoBotModal({ open, onClose }) {
     const [voiceTone, setVoiceTone] = useState("coach"); // voice delivery style

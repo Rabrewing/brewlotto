@@ -10,6 +10,9 @@ export default function GameIntroCard({ game }) {
   const [meta, setMeta] = useState({});
   const [nextDraw, setNextDraw] = useState(null);
 
+  const jackpotLabel =
+    typeof meta.jackpot === "number" ? `$${meta.jackpot.toLocaleString()}` : meta.jackpot;
+
   useEffect(() => {
     const load = async () => {
       const conf = getGameMeta(game);
@@ -31,9 +34,9 @@ export default function GameIntroCard({ game }) {
         <h2 className="text-yellow-300 font-bold text-base uppercase">
           {meta.name || game}
         </h2>
-        {meta.jackpot && (
+        {jackpotLabel && (
           <p className="text-green-400 font-mono text-lg">
-            💰 ${meta.jackpot.toLocaleString()}
+            💰 {jackpotLabel}
           </p>
         )}
       </div>

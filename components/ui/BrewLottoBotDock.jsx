@@ -8,7 +8,7 @@
 // =============================================
 
 import { useEffect } from "react";
-import { useBrewBot } from "@/hooks/useBrewBot";
+import { useBrewBot } from "../../hooks/useBrewBot";
 
 export default function BrewLottoBotDock() {
     const { toggle } = useBrewBot();

@@ -3,7 +3,7 @@
 // Description: Displays per-game missing draw dates grouped and formatted, with error guards and audit clarity
 
 import { useEffect, useState } from 'react';
-import { supabase } from '@/utils/supabase';
+import { supabase } from '../../lib/supabase/browserClient';
 import { showToast } from '@/utils/toastservice';
 import { format } from 'date-fns';
 

@@ -4,8 +4,8 @@
 
 import { useRouter } from "next/router";
 import { motion } from "framer-motion";
-import { showToast } from "@/utils/toastservice"; // Swap alert to toast later
-import { STRATEGY_EXPLAINERS } from "@/lib/explainers/strategyExplainers";
+import { showToast } from "../../utils/toastservice"; // Swap alert to toast later
+import { STRATEGY_EXPLAINERS } from "../../lib/explainers/strategyExplainers";
 
 export default function GameCard({ game, user }) {
   const router = useRouter();

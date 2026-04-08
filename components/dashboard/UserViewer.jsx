@@ -3,7 +3,7 @@
 // Description: Admin panel component for viewing all user_profiles with login and auth context
 
 import { useEffect, useState } from 'react';
-import { supabase } from '@/utils/supabase';
+import { supabase } from '../../lib/supabase/browserClient';
 import { showToast } from '@/utils/toastservice';
 
 export default function UserViewer() {

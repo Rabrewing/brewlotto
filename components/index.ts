@@ -1,2 +1,1 @@
-// Stub for components - to be replaced with actual implementation
-export {};
+export { default as GameStrategySelector } from "./dashboard/GameStrategySelector";
