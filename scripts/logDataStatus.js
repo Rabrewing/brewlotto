@@ -6,7 +6,7 @@
  * Last updated: 2025-06-25T02:39:00-04:00 (EDT)
  */
 
-import { supabase } from "@/utils/supabase";
+import { supabase } from "../../lib/supabase/browserClient";
 import 'dotenv/config';
 
 const games = [

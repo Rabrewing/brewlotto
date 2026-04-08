@@ -9,7 +9,7 @@
 import fs from 'fs';
 import path from 'path';
 import { parse } from 'csv-parse/sync';
-import { supabaseService as supabase } from "@/utils/supabaseService";
+import { supabaseService as supabase } from "../../lib/supabase/browserClientService";
 import 'dotenv/config';
 
 // 🎮 Game-specific parser config

@@ -5,7 +5,7 @@
 import "dotenv/config"; // Load environment variables from .env file
 // timestamp:  2023-10-01T12:00:00Z
 
-import { supabaseService } from "@/utils/supabaseService";
+import { supabaseService } from "../../lib/supabase/browserClientService";
 
 const promote = async () => {
     const targetEmail = "luckyrbwon@gmail.com"; // 👈 Replace with your email

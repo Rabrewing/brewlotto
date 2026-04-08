@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { parse } from 'csv-parse/sync';
-import { supabase } from "@/utils/supabase";
+import { supabase } from "../../lib/supabase/browserClient";
 import 'dotenv/config';
 
 const supportedGames = {

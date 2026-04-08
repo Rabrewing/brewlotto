@@ -1,5 +1,5 @@
 // /scripts/drawHistoryAudit.js
-import { supabase } from "@/utils/supabase";
+import { supabase } from "../../lib/supabase/browserClient";
 
 const games = [
     { game: 'Pick 3', table: 'pick3_draws' },

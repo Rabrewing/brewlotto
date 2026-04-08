@@ -8,7 +8,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { supabase } from "@/utils/supabase"; // Importing the Supabase client from utils
+import { supabase } from "../../lib/supabase/browserClient"; // Importing the Supabase client from utils
 import { parseCsvFile, sanitizeRows, upsertDrawsToSupabase } from './upload/csvUtils.js';
 import 'dotenv/config';
 

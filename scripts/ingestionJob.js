@@ -85,6 +85,7 @@ async function runIngestionJob() {
   try {
     // 1. CA Daily 3 & 4 (from lotteryextreme.com)
     console.log('\n📍 PHASE 1: California Daily Games');
+    
     results.caDaily3 = runCommand(
       'node scripts/scrapeCA_Data.js daily3 1000',
       'CA Daily 3 scraper'

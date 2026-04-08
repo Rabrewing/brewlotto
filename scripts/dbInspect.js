@@ -1,7 +1,7 @@
 // /scripts/dbInspect.js
 // Description: Inspect draw table metadata — last draw date, row count, sample row
 import "dotenv/config";
-import { supabase } from "@/utils/supabase";
+import { supabase } from "../../lib/supabase/browserClient";
 
 const TABLES = ["pick3_draws", "pick4_draws", "pick5_draws", "mega_draws", "powerball_draws"];
 

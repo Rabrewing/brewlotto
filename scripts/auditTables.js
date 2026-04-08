@@ -4,7 +4,7 @@
 
 // Load .env file first
 import 'dotenv/config';
-import { supabase } from "@/utils/supabase";
+import { supabase } from "../../lib/supabase/browserClient";
 
 const TABLES = ['pick3_draws', 'pick4_draws', 'pick5_draws', 'predictions', 'game_settings'];
 
