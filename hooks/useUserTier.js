@@ -2,7 +2,7 @@
 // Summary: Retrieves current user tier and trial info using Supabase SSR client
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase/browserClient";
+import { supabase } from "../../lib/supabase/browserClient";
 
 export function useUserTier() {
     const [currentTier, setCurrentTier] = useState("free");

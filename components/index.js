@@ -7,7 +7,6 @@
 
 // 🧭 Core App Components
 export { default as NavBar } from "./NavBar";
-export { default as RequireAuth } from "./RequireAuth";
 export { default as DrawResultCard } from "./DrawResultCard";
 
 // 🎯 Prediction Experience

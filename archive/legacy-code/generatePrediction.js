@@ -3,7 +3,7 @@
 // @reason: Superseded by lib/engines/smartPickEngine.js
 // @notes: Used hardcoded config, lacked tier abstraction, and bypassed STRATEGY_EXPLAINERS
 
-import { supabase } from "@/utils/supabase";
+import { supabase } from "../../lib/supabase/browserClient";
 /**
  * Generates a set of random numbers for a lottery game based on its configuration.
  * @param {Object} params - Parameters for the prediction.

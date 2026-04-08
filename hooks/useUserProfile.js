@@ -3,7 +3,7 @@
 // Timestamp: 2025-06-26T14:10 EDT
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/utils/supabase";
+import { supabase } from '../../lib/supabase/browserClient';
 
 export function useUserProfile() {
     const [user, setUser] = useState(null);
