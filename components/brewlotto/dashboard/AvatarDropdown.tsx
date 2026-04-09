@@ -54,8 +54,8 @@ const MENU_SECTIONS: MenuSection[] = [
     items: [
       { label: 'My Picks', icon: 'picks', href: '/my-picks', enabled: true },
       { label: "Today's Results", icon: 'results', href: '/results', enabled: true },
-      { label: 'Stats & Performance', icon: 'stats', enabled: false },
-      { label: 'Strategy Locker', icon: 'locker', enabled: false },
+      { label: 'Stats & Performance', icon: 'stats', href: '/stats', enabled: true },
+      { label: 'Strategy Locker', icon: 'locker', href: '/strategy-locker', enabled: true },
     ],
   },
   {
