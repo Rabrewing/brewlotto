@@ -1,6 +1,6 @@
 # BrewLotto Progress Summary
 
-**Last Updated:** 2026-04-09 ET (11:14 EDT)
+**Last Updated:** 2026-04-09 ET (12:24 EDT)
 
 ## Current State
 
@@ -134,6 +134,50 @@
 
 ### Next Step
 - Move into Phase 9D by building `/stats` and `/strategy-locker`
+
+## 2026-04-09 Phase 9 Completion Update (12:24 EDT)
+
+### Completed
+- Finished Phase 9D by adding:
+  - `/stats`
+  - `/strategy-locker`
+- Finished Phase 9E by adding:
+  - `/notifications`
+  - `/settings`
+  - `/billing`
+  - `/learn`
+  - `/legal`
+- Updated the avatar dropdown so the full normalized destination set now routes to live pages
+- Renamed the visible learn destination to `BrewU` while keeping the canonical route at `/learn`
+
+### Data Truthfulness
+- `/stats` reads real account-scoped performance data from `play_logs`, `pick_results`, `user_daily_stats`, and user-owned `predictions`
+- `/strategy-locker` reads real strategy/tier data from `strategy_registry`, `user_saved_strategies`, `user_strategy_activity`, `user_entitlements`, `subscription_tiers`, and user-owned `predictions`
+- `/notifications` reads and updates `notification_preferences` and `user_notifications`
+- `/settings` reads and updates `user_settings`
+- `/billing` reads `user_entitlements`, `subscription_tiers`, and `feature_entitlements`
+- `/learn` and `/legal` are thin truthful support surfaces without fake backend dependencies
+
+### Verification
+- `npm run build` passes
+- `npm test` passes (4 suites, 33 tests)
+
+### Current Navigation State
+- Live normalized dropdown destinations:
+  - `/profile`
+  - `/my-picks`
+  - `/results`
+  - `/stats`
+  - `/strategy-locker`
+  - `/notifications`
+  - `/settings`
+  - `/billing`
+  - `/learn` as `BrewU`
+  - `/legal`
+  - `/logout`
+
+### Next Step
+- Decide whether the next slice should deepen the new routes, resume BrewCommand/Phase 8 work, or start a focused lint-debt cleanup pass
 
 ---
 

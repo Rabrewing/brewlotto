@@ -375,7 +375,7 @@ The system is considered complete when:
 
 ## V1 Progress Tracker
 
-**Last Updated:** 2026-04-09 ET (11:14 EDT - Phase 9C high-value routes live through `/profile`, verification green)
+**Last Updated:** 2026-04-09 ET (12:24 EDT - normalized dropdown destination set live through Phase 9E, verification green)
 
 ### Phase Status
 
@@ -564,8 +564,37 @@ The system is considered complete when:
 - `npm run build` ✅
 - `npm test` ✅ (4 suites, 33 tests)
 
+#### ✅ Phase 9D Completed
+- Added `/stats` as a live account performance surface backed by `play_logs`, `pick_results`, `user_daily_stats`, and user-owned `predictions`
+- Added `/strategy-locker` as a live premium strategy surface backed by `strategy_registry`, `user_saved_strategies`, `user_strategy_activity`, `user_entitlements`, `subscription_tiers`, and user-owned `predictions`
+
+#### ✅ Phase 9E Completed
+- Added `/notifications` backed by `notification_preferences` and `user_notifications`
+- Added `/settings` backed by `user_settings`
+- Added `/billing` as an authenticated entitlement summary backed by `user_entitlements`, `subscription_tiers`, and `feature_entitlements`
+- Added `/learn` as the live BrewUniversity Lite surface, visibly labeled `BrewU` in the dropdown
+- Added `/legal` as a truthful V1 legal index without dead placeholder links
+
+#### ✅ Current Destination Status
+- `AvatarDropdown` now routes to every normalized V1 destination:
+  - `/my-picks`
+  - `/results`
+  - `/profile`
+  - `/stats`
+  - `/strategy-locker`
+  - `/notifications`
+  - `/settings`
+  - `/billing`
+  - `/learn` labeled as `BrewU`
+  - `/legal`
+  - confirmable `/logout`
+
+#### 🧪 Verification
+- `npm run build` ✅
+- `npm test` ✅ (4 suites, 33 tests)
+
 #### 🔜 Next Action
-- Begin Phase 9D with `/stats`, then `/strategy-locker`
+- Update progress documentation and decide whether the next pass should return to Phase 8/BrewCommand polish, expand route depth, or tackle repo lint debt
 
 #### 🛠️ Execution Rules For Any AI Picking This Up
 - Treat `brewdocs/v1/navigation/dropdown-menu-normalized.md` as the IA source of truth

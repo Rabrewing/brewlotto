@@ -488,11 +488,49 @@ Fix the baseline lint/build/test compatibility issues separately, then continue 
 6. `Strategy Locker`
 7. account/support surfaces (`Notifications`, `Settings`, `Billing`, `Help / Learn`, `Terms & Privacy`)
 
-### Immediate Next Build Slice
-- Phase 9B begins with the avatar dropdown identity system using the normalized docs under `brewdocs/v1/navigation/`
-- Build scope for that slice:
-  - connected dropdown container
-  - grouped sections
-  - profile header depth
-  - clickable state selector pill styling
-  - route-safe menu items only
+## 2026-04-09 Dropdown Destination Completion Update (12:24 EDT)
+
+### ✅ Completed
+- Phase 9D shipped:
+  - `/stats`
+  - `/strategy-locker`
+- Phase 9E shipped:
+  - `/notifications`
+  - `/settings`
+  - `/billing`
+  - `/learn`
+  - `/legal`
+- The avatar dropdown now routes to the full normalized V1 destination set
+- The learn destination is now visibly labeled `BrewU` while keeping the route at `/learn`
+
+### ✅ Route Data Sources
+- `/stats`
+  - `play_logs`
+  - `pick_results`
+  - `user_daily_stats`
+  - user-owned `predictions`
+- `/strategy-locker`
+  - `strategy_registry`
+  - `user_saved_strategies`
+  - `user_strategy_activity`
+  - `user_entitlements`
+  - `subscription_tiers`
+  - user-owned `predictions`
+- `/notifications`
+  - `notification_preferences`
+  - `user_notifications`
+- `/settings`
+  - `user_settings`
+- `/billing`
+  - `user_entitlements`
+  - `subscription_tiers`
+  - `feature_entitlements`
+
+### 🧪 Verification
+- `npm run build` ✅
+- `npm test` ✅ (4 suites, 33 tests)
+
+### 🔜 Next Recommended Action
+1. Update any remaining design/progress docs that still describe Phase 9D/9E as pending
+2. Decide whether to deepen these new routes or shift back to Phase 8/BrewCommand polish
+3. Start a focused lint tranche when feature priorities permit
