@@ -375,7 +375,7 @@ The system is considered complete when:
 
 ## V1 Progress Tracker
 
-**Last Updated:** 2026-04-08 ET (Phase 8 in progress - BrewCommand admin restored, freshness backfill completed, duplicate game placeholders deactivated)
+**Last Updated:** 2026-04-08 ET (Phase 8 in progress - BrewCommand admin restored, freshness backfill completed, duplicate game placeholders deactivated, V1 dashboard commit groups cleaned up)
 
 ### Phase Status
 
@@ -463,6 +463,32 @@ The system is considered complete when:
 
 #### ⏭️ Next Action
 - Continue Phase 9 by replacing any remaining placeholder dashboard utilities with live feature data and tightening any remaining per-game dashboard behavior
+
+### 2026-04-08 Late Progress Update (22:37 EDT)
+
+#### ✅ Recent Commits Landed
+- `8ecd68d` `feat(dashboard): add V1 dashboard shell and PWA assets`
+- `910d577` `docs(v1): add UI architecture docs and supporting shared components`
+- `f456919` `chore(repo): ignore local artifacts and untrack logs`
+
+#### ✅ Repo Hygiene Completed
+- Grouped the remaining V1 dashboard work into clean commit boundaries instead of mixing it with legacy leftovers
+- Added the canonical dashboard shell component set under `components/brewlotto/dashboard/`
+- Added committed public app assets used by the V1 dashboard and PWA surface
+- Added supporting shared UI files used by current routes (`components/landing/PricingTierCard.jsx`, `components/user/MatchScoreBadge.jsx`)
+- Added `lib/supabase/serverClient.d.ts` to document the existing Supabase server helper exports
+- Expanded `.gitignore` for local/export artifacts and stopped tracking noisy `logs/pick3_4_day.log` and `logs/pick3_4_evening.log`
+
+#### 🧪 Verification Snapshot
+- `npm run lint` fails on pre-existing repo-wide ESLint debt outside the new dashboard commit group
+- `npm run build` fails on unresolved legacy/module-path issues:
+  - `app/api/stats/[game]/route.ts` -> missing `utils/fetchStats`
+  - `app/api/suggest-fix/route.ts` -> missing `@/lib/audit/entropyTools`
+  - `components/index.js` -> missing legacy component exports such as `./NavBar`, `./dashboard/UserStatsCard`, `./user/MyPicksCard`
+- `npm test` is partially green: 3 suites pass and 29 tests pass, but `tests/ingestionManager.test.js` fails because Jest loads `lib/supabase/serverClient.js` as CJS even though it uses ESM imports
+
+#### 🔜 Recommended Next Step
+- Fix the outstanding lint/build/test baseline separately from the new dashboard work so Phase 9 UI progress stays isolated from legacy compatibility cleanup
 
 ### Ingestion Scripts (Updated 2026-03-18)
 

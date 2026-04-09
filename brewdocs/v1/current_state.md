@@ -1,7 +1,7 @@
 # BrewLotto V1 - Current State & Next Steps
 
-**Last Updated:** 2026-04-08 ET
-**Phase:** Phase 8 - BrewCommand Admin in progress; security hardening and freshness backfill completed
+**Last Updated:** 2026-04-08 ET (22:37 EDT)
+**Phase:** Phase 8 - BrewCommand Admin in progress; security hardening and freshness backfill completed; V1 dashboard commit groups cleaned up
 
 ---
 
@@ -396,5 +396,28 @@ When checking with ChatGPT, ask for:
 - 🔄 Final BrewCommand admin cleanup and data consistency pass
 - 🔄 Remaining cross-source validation and data quality alignment
 
+## 2026-04-08 Late Progress Update (22:37 EDT)
+
+### ✅ Recent Commits
+- `8ecd68d` `feat(dashboard): add V1 dashboard shell and PWA assets`
+- `910d577` `docs(v1): add UI architecture docs and supporting shared components`
+- `f456919` `chore(repo): ignore local artifacts and untrack logs`
+
+### ✅ What Changed
+- Grouped the remaining V1 dashboard UI work into isolated commits instead of leaving it mixed with legacy and local files
+- Added the canonical dashboard shell components under `components/brewlotto/dashboard/`
+- Added the public PWA/dashboard asset set used by the App Router dashboard
+- Added the shared pricing and match-score support components required by current routes
+- Added `lib/supabase/serverClient.d.ts` to document the current Supabase server helper exports
+- Expanded `.gitignore` for local/export artifacts and removed tracked log noise from the repository index
+
+### 🧪 Verification Snapshot
+- `npm run lint` fails on existing repo-wide ESLint violations outside the newly grouped dashboard work
+- `npm run build` still fails on unresolved legacy/module-path issues:
+  - `app/api/stats/[game]/route.ts` missing `utils/fetchStats`
+  - `app/api/suggest-fix/route.ts` missing `@/lib/audit/entropyTools`
+  - `components/index.js` references missing legacy exports including `./NavBar`, `./dashboard/UserStatsCard`, and `./user/MyPicksCard`
+- `npm test` is partially green: 3 suites / 29 tests pass, but `tests/ingestionManager.test.js` still fails because Jest loads `lib/supabase/serverClient.js` as CommonJS while that file uses ESM imports
+
 **Next Phase**:
-Continue Phase 8 admin cleanup and then move deeper into Phase 9 commentary integration.
+Fix the baseline lint/build/test compatibility issues separately, then continue Phase 8 admin cleanup and move deeper into Phase 9 commentary integration.

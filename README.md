@@ -16,6 +16,11 @@ BrewLotto AI V1 is a lottery intelligence and player education platform focused 
 
 This document reflects the V1 Reset / Product Foundation as defined in `brewdocs/v1/Brewlotto_v1.md`.
 
+**Latest Status (2026-04-08 22:37 EDT):**
+- V1 dashboard shell, PWA assets, and supporting shared components were grouped into clean commits
+- Repo hygiene cleanup removed tracked log noise and ignored local/export artifacts
+- Current verification baseline still has pre-existing lint/build/test issues; see `AGENTS.md` and `brewdocs/v1/current_state.md` for the timestamped failure summary
+
 ---
 
 ## 🚀 Core Features (V1)

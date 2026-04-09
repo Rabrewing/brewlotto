@@ -1,6 +1,6 @@
 # BrewLotto Progress Summary
 
-**Last Updated:** 2026-04-08 ET
+**Last Updated:** 2026-04-08 ET (22:37 EDT)
 
 ## Current State
 
@@ -41,6 +41,28 @@
 ### Canonical Rows Kept Active
 - NC: `pick3`, `pick4`, `cash5`, `powerball`, `mega_millions`
 - CA: `daily3`, `daily4`, `fantasy5`, `powerball`, `mega_millions`
+
+## 2026-04-08 Late Progress Update (22:37 EDT)
+
+### Recent Commits
+- `8ecd68d` `feat(dashboard): add V1 dashboard shell and PWA assets`
+- `910d577` `docs(v1): add UI architecture docs and supporting shared components`
+- `f456919` `chore(repo): ignore local artifacts and untrack logs`
+
+### Completed
+- Grouped the remaining V1 dashboard work into isolated commit boundaries
+- Added the canonical dashboard shell component set and public PWA assets
+- Added supporting shared UI components for pricing and match-score surfaces
+- Added `lib/supabase/serverClient.d.ts` to capture the current Supabase helper exports
+- Expanded `.gitignore` to ignore local/export artifacts and removed tracked log files from git noise
+
+### Verification Snapshot
+- `npm run lint` fails on pre-existing repo-wide ESLint debt
+- `npm run build` fails on unresolved legacy import/module-path issues in `app/api/stats/[game]/route.ts`, `app/api/suggest-fix/route.ts`, and `components/index.js`
+- `npm test` is partially green: 3 suites / 29 tests pass, but `tests/ingestionManager.test.js` fails because Jest loads `lib/supabase/serverClient.js` as CJS while the helper uses ESM imports
+
+### Recommended Next Step
+- Stabilize the lint/build/test baseline in a dedicated compatibility pass before continuing additional Phase 9 UI work
 
 ---
 
