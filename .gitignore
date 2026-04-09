@@ -136,3 +136,16 @@ dist
 .pnp.*
 brewlotto.code-workspace
 .env
+.aider*
+
+# Local workspace artifacts
+.brewprofile
+launch.sh
+
+# Scratch and export files
+@tailwind base;
+chat.html
+Co_P_History.csv
+
+# Generated public fallback assets
+public/fallback-*.js
