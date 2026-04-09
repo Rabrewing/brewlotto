@@ -62,16 +62,16 @@ const MENU_SECTIONS: MenuSection[] = [
     title: 'Account',
     items: [
       { label: 'Profile', icon: 'profile', href: '/profile', enabled: true },
-      { label: 'Notifications', icon: 'notifications', enabled: false },
-      { label: 'Settings', icon: 'settings', enabled: false },
-      { label: 'Subscription / Billing', icon: 'billing', enabled: false },
+      { label: 'Notifications', icon: 'notifications', href: '/notifications', enabled: true },
+      { label: 'Settings', icon: 'settings', href: '/settings', enabled: true },
+      { label: 'Subscription / Billing', icon: 'billing', href: '/billing', enabled: true },
     ],
   },
   {
     title: 'System',
     items: [
-      { label: 'Help / Learn', icon: 'learn', enabled: false },
-      { label: 'Terms & Privacy', icon: 'legal', enabled: false },
+      { label: 'BrewU', icon: 'learn', href: '/learn', enabled: true },
+      { label: 'Terms & Privacy', icon: 'legal', href: '/legal', enabled: true },
       { label: 'Logout', icon: 'logout', href: '/logout', enabled: true },
     ],
   },
