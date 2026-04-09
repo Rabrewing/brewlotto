@@ -1,32 +1,34 @@
 'use client';
 
-import { useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 type TabId = 'dashboard' | 'results' | 'picks';
 
 interface Tab {
   id: TabId;
   label: string;
+  href: string;
 }
 
 const TABS: Tab[] = [
-  { id: 'dashboard', label: 'Dashboard' },
-  { id: 'results', label: 'Results' },
-  { id: 'picks', label: 'My Picks' },
+  { id: 'dashboard', label: 'Dashboard', href: '/dashboard' },
+  { id: 'results', label: 'Results', href: '/results' },
+  { id: 'picks', label: 'My Picks', href: '/my-picks' },
 ];
 
 export function NavigationTabs() {
-  const [activeTab, setActiveTab] = useState<TabId>('dashboard');
+  const pathname = usePathname();
 
   return (
     <nav className="mb-4">
       <div className="flex items-center gap-6">
         {TABS.map((tab) => (
-          <button
+          <Link
             key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
+            href={tab.href}
             className={`relative pb-2 text-[15px] font-medium transition-colors ${
-              activeTab === tab.id
+              pathname === tab.href
                 ? 'text-[#ffc742]'
                 : 'text-white/70 hover:text-white'
             }`}
@@ -34,10 +36,10 @@ export function NavigationTabs() {
             {tab.label}
             
             {/* Active indicator */}
-            {activeTab === tab.id && (
+            {pathname === tab.href && (
               <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#ffc742] to-[#ffd364]" />
             )}
-          </button>
+          </Link>
         ))}
       </div>
     </nav>

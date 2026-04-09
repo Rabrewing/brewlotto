@@ -1,6 +1,6 @@
 # BrewLotto Progress Summary
 
-**Last Updated:** 2026-04-08 ET (22:37 EDT)
+**Last Updated:** 2026-04-09 ET (11:14 EDT)
 
 ## Current State
 
@@ -82,6 +82,58 @@
 - Handle `any` replacements after the easy wins using narrow inline types, interfaces, or `unknown`
 - Treat legacy CommonJS ingestion files as a separate policy decision: either migrate them to ESM or relax lint rules for explicitly legacy paths
 - Keep lint-only cleanup commits separate from V1 feature commits
+
+## 2026-04-09 Navigation Normalization Update (10:21 EDT)
+
+### Completed
+- Normalized the oversized dropdown/menu ideation into canonical V1 navigation docs
+- Added:
+  - `brewdocs/v1/navigation/dropdown-menu-normalized.md`
+  - `brewdocs/v1/navigation/dropdown-screen-map.md`
+  - `brewdocs/v1/navigation/dropdown-execution-plan.md`
+- Updated the raw `brewdocs/v1/dropdown-menu-v1.md` to point future work at the canonical normalized docs
+- Corrected the dashboard momentum meter so it better matches `brewdocs/v1/mockups/brewlotto_design.png`
+
+### Canonical Route Plan
+- `/profile`
+- `/my-picks`
+- `/results`
+- `/stats`
+- `/strategy-locker`
+- `/notifications`
+- `/settings`
+- `/billing`
+- `/learn`
+- `/legal`
+- `/logout` as confirmable action flow
+
+### Approved Execution Order
+1. Phase 9B: avatar dropdown identity system
+2. Phase 9C: `/my-picks`, `/results`, `/profile`
+3. Phase 9D: `/stats`, `/strategy-locker`
+4. Phase 9E: `/notifications`, `/settings`, `/billing`, `/learn`, `/legal`
+
+### Guidance
+- Build from the normalized navigation docs, not directly from the oversized ideation file
+- Keep each new route thin, real, and consistent with the existing dashboard shell
+
+## 2026-04-09 Route Rollout Update (11:14 EDT)
+
+### Completed
+- Finished the first high-value dropdown route tranche: `/my-picks`, `/results`, and `/profile`
+- Enabled `/profile` from the avatar dropdown alongside the already-live picks/results destinations
+- Added a thin real profile surface with:
+  - live auth/profile loading
+  - editable display name via auth metadata
+  - default-state persistence via `user_preferences`
+  - truthful security actions only
+
+### Verification
+- `npm run build` passes
+- `npm test` passes (4 suites, 33 tests)
+
+### Next Step
+- Move into Phase 9D by building `/stats` and `/strategy-locker`
 
 ---
 

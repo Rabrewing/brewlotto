@@ -375,7 +375,7 @@ The system is considered complete when:
 
 ## V1 Progress Tracker
 
-**Last Updated:** 2026-04-08 ET (Phase 8 in progress - BrewCommand admin restored, freshness backfill completed, duplicate game placeholders deactivated, V1 dashboard commit groups cleaned up)
+**Last Updated:** 2026-04-09 ET (11:14 EDT - Phase 9C high-value routes live through `/profile`, verification green)
 
 ### Phase Status
 
@@ -502,6 +502,78 @@ The system is considered complete when:
   - `lib/ingestion/**/*.js` last
 - Do mechanical fixes first (`no-unused-vars`, `prefer-const`, empty interfaces, ignored params), then narrow `any` replacements
 - Decide separately whether legacy CommonJS ingestion paths should be migrated or lint-relaxed
+
+### 2026-04-09 Implementation Direction (10:21 EDT)
+
+#### ✅ Phase 9A Dashboard Truthfulness Progress
+- Dashboard commentary now distinguishes between no stored prediction, stored pick without explanation, and ready explanation states
+- Dashboard stats no longer fall back to fake hardcoded values; empty live-data states are now explicit
+- Utility pills and top navigation were tightened so the dashboard only presents real routes/interactions
+- The momentum meter was corrected against `brewdocs/v1/mockups/brewlotto_design.png` and now uses the taller illuminated vertical tube language from the reference
+
+#### ✅ Dropdown IA Normalized
+- Raw ideation remains in `brewdocs/v1/dropdown-menu-v1.md`
+- Canonical V1 dropdown/navigation docs now live in:
+  - `brewdocs/v1/navigation/dropdown-menu-normalized.md`
+  - `brewdocs/v1/navigation/dropdown-screen-map.md`
+  - `brewdocs/v1/navigation/dropdown-execution-plan.md`
+
+#### 🧭 Canonical V1 Dropdown Destinations
+- `/profile`
+- `/my-picks`
+- `/results`
+- `/stats`
+- `/strategy-locker`
+- `/notifications`
+- `/settings`
+- `/billing`
+- `/learn`
+- `/legal`
+- `/logout` as a confirmed action flow
+
+#### 🔜 Approved Build Direction
+- Phase 9A: finish dashboard shell truthfulness and mockup alignment without adding fake destinations
+- Phase 9B: build the avatar dropdown identity system
+  - grouped sections
+  - improved profile header
+  - clickable state selector pill styling
+  - anchor triangle / connected dropdown feel
+  - route model based on normalized IA
+- Phase 9C: build first three high-value destination surfaces in this order:
+  - `/my-picks`
+  - `/results`
+  - `/profile`
+- Phase 9D: build `/stats` and `/strategy-locker`
+- Phase 9E: build `/notifications`, `/settings`, `/billing`, `/learn`, `/legal`
+
+### 2026-04-09 Route Rollout Update (11:14 EDT)
+
+#### ✅ Phase 9B Completed
+- `AvatarDropdown` now uses the normalized grouped IA with real routing for `/my-picks`, `/results`, `/profile`, and confirmable `/logout`
+
+#### ✅ Phase 9C Completed For First Three Routes
+- Added `/my-picks` as a live prediction management surface
+- Added `/results` as a live latest-draw and closest-match recap surface
+- Added `/profile` as a thin real identity/preferences surface
+  - live auth/profile loading
+  - display-name editing through auth metadata
+  - default-state persistence through `user_preferences`
+  - truthful security actions without fake password controls
+
+#### 🧪 Verification
+- `npm run build` ✅
+- `npm test` ✅ (4 suites, 33 tests)
+
+#### 🔜 Next Action
+- Begin Phase 9D with `/stats`, then `/strategy-locker`
+
+#### 🛠️ Execution Rules For Any AI Picking This Up
+- Treat `brewdocs/v1/navigation/dropdown-menu-normalized.md` as the IA source of truth
+- Treat `brewdocs/v1/navigation/dropdown-screen-map.md` as the route-definition source of truth
+- Treat `brewdocs/v1/navigation/dropdown-execution-plan.md` as the build-order source of truth
+- Do not implement directly from `dropdown-menu-v1.md` without first normalizing against the above docs
+- Do not add dead routes or fake interactions to the dashboard shell
+- Keep each new destination thin and real, with route/data purpose clearly scoped before expansion
 
 ### Ingestion Scripts (Updated 2026-03-18)
 

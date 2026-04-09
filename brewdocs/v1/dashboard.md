@@ -22,6 +22,14 @@ This document specifies the dashboard UI implementation for BrewLotto V1, matchi
 - Dashboard now shows a live freshness banner through `GET /api/dashboard/freshness?game=...`, warning when draw data is delayed, stale, unavailable, or unclear.
 - Voice Mode now uses browser speech synthesis to narrate the active freshness summary and Brew commentary when supported.
 - Fallback messaging remains in place for games that do not yet have stored predictions.
+- Momentum meter styling has been corrected to more closely match `brewdocs/v1/mockups/brewlotto_design.png`, using the tall illuminated vertical tube instead of the shorter capsule-like shape.
+
+## Dropdown Follow-On
+
+The dashboard shell is now the base for the upcoming V1 dropdown destination rollout. Canonical navigation normalization lives in:
+- `brewdocs/v1/navigation/dropdown-menu-normalized.md`
+- `brewdocs/v1/navigation/dropdown-screen-map.md`
+- `brewdocs/v1/navigation/dropdown-execution-plan.md`
 
 ---
 

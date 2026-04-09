@@ -1,7 +1,7 @@
 # BrewLotto V1 - Current State & Next Steps
 
-**Last Updated:** 2026-04-08 ET (22:37 EDT)
-**Phase:** Phase 8 - BrewCommand Admin in progress; security hardening and freshness backfill completed; V1 dashboard commit groups cleaned up
+**Last Updated:** 2026-04-09 ET (10:21 EDT)
+**Phase:** Phase 9 - Dashboard shell truthfulness in progress; dropdown IA normalized; Phase 9B avatar dropdown system queued
 
 ---
 
@@ -264,6 +264,25 @@ data/
 - BrewCommand phase completion work
 - Phase 9 commentary integration and replacement of remaining mocked dashboard data
 
+## 2026-04-09 Route Rollout Update (11:14 EDT)
+
+### ✅ Completed
+- Avatar dropdown is now aligned to the normalized IA and routes to live `/my-picks`, `/results`, `/profile`, and confirmable `/logout`
+- `/profile` is now live as a thin real V1 surface
+  - authenticated identity summary
+  - editable display name through auth metadata
+  - default-state persistence through `user_preferences`
+  - truthful security actions without speculative account controls
+
+### 🧪 Verification
+- `npm run build` ✅
+- `npm test` ✅ (4 suites, 33 tests)
+
+### 🔜 Next Recommended Action
+1. Build `/stats`
+2. Build `/strategy-locker`
+3. Continue the remaining account/support surfaces after the analysis/premium pass
+
 ### Next Recommended Action
 1. Continue BrewCommand admin improvements beyond the current alert and ingestion health surfaces
 2. Replace dashboard mock prediction commentary with real prediction/explanation data
@@ -434,3 +453,46 @@ Fix the baseline lint/build/test compatibility issues separately, then continue 
   - `lib/ingestion/**/*.ts`
   - `lib/ingestion/**/*.js` last
 - Mechanical fixes go first, then `any` replacement work, then any legacy lint policy decisions for old CommonJS ingestion paths
+
+## Phase 9 Navigation Normalization
+
+- Raw ideation for dropdown and destination screens remains in `brewdocs/v1/dropdown-menu-v1.md`
+- Canonical normalized V1 navigation specs now live in:
+  - `brewdocs/v1/navigation/dropdown-menu-normalized.md`
+  - `brewdocs/v1/navigation/dropdown-screen-map.md`
+  - `brewdocs/v1/navigation/dropdown-execution-plan.md`
+- Current execution focus is split into:
+  - Phase 9A: dashboard shell truthfulness and mockup alignment
+  - Phase 9B: avatar dropdown identity system
+  - Phase 9C+: destination-screen rollout in prioritized slices
+
+### Normalized V1 Dropdown Destinations
+- `/profile`
+- `/my-picks`
+- `/results`
+- `/stats`
+- `/strategy-locker`
+- `/notifications`
+- `/settings`
+- `/billing`
+- `/learn`
+- `/legal`
+- `/logout` as confirmed action flow
+
+### Recommended Build Order
+1. dropdown container / identity header upgrade
+2. `My Picks`
+3. `Today's Results`
+4. `Profile`
+5. `Stats & Performance`
+6. `Strategy Locker`
+7. account/support surfaces (`Notifications`, `Settings`, `Billing`, `Help / Learn`, `Terms & Privacy`)
+
+### Immediate Next Build Slice
+- Phase 9B begins with the avatar dropdown identity system using the normalized docs under `brewdocs/v1/navigation/`
+- Build scope for that slice:
+  - connected dropdown container
+  - grouped sections
+  - profile header depth
+  - clickable state selector pill styling
+  - route-safe menu items only
