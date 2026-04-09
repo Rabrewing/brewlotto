@@ -17,45 +17,6 @@ import {
 } from '@/components/brewlotto/dashboard';
 import { DASHBOARD_GAME_CONFIG } from '@/lib/dashboard/game-config';
 
-// Mock data - replace with Supabase/API calls in production
-const MOCK_DATA: Record<GameId, {
-  hotNumbers: number[];
-  hotBonus?: number;
-  coldNumbers: number[];
-  coldBonus?: number;
-  momentum: number;
-}> = {
-  pick3: {
-    hotNumbers: [3, 7, 5],
-    coldNumbers: [1, 9, 4],
-    momentum: 62,
-  },
-  pick4: {
-    hotNumbers: [3, 1, 4, 1],
-    coldNumbers: [1, 7, 2, 2],
-    momentum: 58,
-  },
-  cash5: {
-    hotNumbers: [3, 14, 22, 29, 35],
-    coldNumbers: [7, 18, 25, 31, 40],
-    momentum: 55,
-  },
-  powerball: {
-    hotNumbers: [3, 14, 29, 41, 52],
-    hotBonus: 11,
-    coldNumbers: [1, 7, 22, 54, 69],
-    coldBonus: 3,
-    momentum: 49,
-  },
-  mega: {
-    hotNumbers: [10, 22, 38, 51, 65],
-    hotBonus: 15,
-    coldNumbers: [5, 19, 33, 47, 60],
-    coldBonus: 8,
-    momentum: 52,
-  },
-};
-
 interface DashboardStats {
   hotNumbers: number[];
   hotBonus?: number | null;
@@ -65,6 +26,16 @@ interface DashboardStats {
   drawCount: number;
   sourceGames: string[];
 }
+
+const EMPTY_STATS: DashboardStats = {
+  hotNumbers: [],
+  hotBonus: null,
+  coldNumbers: [],
+  coldBonus: null,
+  momentumPercent: 0,
+  drawCount: 0,
+  sourceGames: [],
+};
 
 interface DashboardFreshness {
   status: 'healthy' | 'delayed' | 'stale' | 'failed' | 'unknown';
@@ -80,6 +51,7 @@ interface DashboardCommentary {
   sourceGame: string | null;
   primaryNumbers: number[];
   bonusNumber: number | null;
+  state: 'missing_prediction' | 'missing_explanation' | 'ready';
 }
 
 interface StoredPredictionExplanation {
@@ -95,6 +67,7 @@ interface StoredPredictionResponse {
   predicted_numbers?: unknown;
   bonus_number?: number | string | null;
   explanations?: StoredPredictionExplanation[] | null;
+  state?: DashboardCommentary['state'];
 }
 
 const EMPTY_COMMENTARY: DashboardCommentary = {
@@ -105,6 +78,7 @@ const EMPTY_COMMENTARY: DashboardCommentary = {
   sourceGame: null,
   primaryNumbers: [],
   bonusNumber: null,
+  state: 'missing_prediction',
 };
 
 const EMPTY_FRESHNESS: DashboardFreshness = {
@@ -135,6 +109,7 @@ function normalizePredictionResponse(prediction: StoredPredictionResponse): Dash
       prediction?.bonus_number !== null && prediction?.bonus_number !== undefined
         ? Number(prediction.bonus_number)
         : null,
+    state: prediction?.state || (explanation ? 'ready' : 'missing_explanation'),
   };
 }
 
@@ -144,19 +119,13 @@ export default function DashboardPage() {
   const [commentary, setCommentary] = useState<DashboardCommentary>(EMPTY_COMMENTARY);
   const [commentaryLoading, setCommentaryLoading] = useState(true);
   const [stats, setStats] = useState<DashboardStats>({
-    hotNumbers: MOCK_DATA.powerball.hotNumbers,
-    hotBonus: MOCK_DATA.powerball.hotBonus,
-    coldNumbers: MOCK_DATA.powerball.coldNumbers,
-    coldBonus: MOCK_DATA.powerball.coldBonus,
-    momentumPercent: MOCK_DATA.powerball.momentum,
-    drawCount: 0,
-    sourceGames: [],
+    ...EMPTY_STATS,
   });
   const [statsLoading, setStatsLoading] = useState(true);
+  const [statsFallback, setStatsFallback] = useState(false);
   const [freshness, setFreshness] = useState<DashboardFreshness>(EMPTY_FRESHNESS);
   const [freshnessLoading, setFreshnessLoading] = useState(true);
 
-  const fallbackStats = MOCK_DATA[selectedGame];
   const gameConfig = DASHBOARD_GAME_CONFIG[selectedGame];
   const gameLabel = gameConfig.displayLabel;
   const showBonus = selectedGame === 'powerball' || selectedGame === 'mega';
@@ -169,133 +138,119 @@ export default function DashboardPage() {
     commentary.summary,
   ].join(' ');
 
-  useEffect(() => {
-    let cancelled = false;
+  async function loadCommentary(game: GameId, signal?: { cancelled: boolean }) {
+    setCommentaryLoading(true);
 
-    async function loadCommentary() {
-      setCommentaryLoading(true);
+    try {
+      const response = await fetch(`/api/dashboard/commentary?game=${game}`, {
+        cache: 'no-store',
+      });
+      const payload = await response.json();
 
-      try {
-        const response = await fetch(`/api/dashboard/commentary?game=${selectedGame}`, {
-          cache: 'no-store',
+      if (!response.ok) {
+        throw new Error(payload?.error?.message || 'Failed to load commentary');
+      }
+
+      if (!signal?.cancelled) {
+        setCommentary(payload.data || EMPTY_COMMENTARY);
+      }
+    } catch (error) {
+      if (!signal?.cancelled) {
+        setCommentary({
+          ...EMPTY_COMMENTARY,
+          summary: error instanceof Error ? error.message : EMPTY_COMMENTARY.summary,
         });
-        const payload = await response.json();
-
-        if (!response.ok) {
-          throw new Error(payload?.error?.message || 'Failed to load commentary');
-        }
-
-        if (!cancelled) {
-          setCommentary(payload.data || EMPTY_COMMENTARY);
-        }
-      } catch (error) {
-        if (!cancelled) {
-          setCommentary({
-            ...EMPTY_COMMENTARY,
-            summary: error instanceof Error ? error.message : EMPTY_COMMENTARY.summary,
-          });
-        }
-      } finally {
-        if (!cancelled) {
-          setCommentaryLoading(false);
-        }
+      }
+    } finally {
+      if (!signal?.cancelled) {
+        setCommentaryLoading(false);
       }
     }
+  }
 
-    loadCommentary();
+  async function loadStats(game: GameId, signal?: { cancelled: boolean }) {
+    setStatsLoading(true);
+
+    try {
+      const response = await fetch(`/api/dashboard/stats?game=${game}`, {
+        cache: 'no-store',
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload?.error?.message || 'Failed to load stats');
+      }
+
+      if (!signal?.cancelled) {
+        setStats(payload.data || EMPTY_STATS);
+        setStatsFallback(Boolean(payload?.meta?.fallback) || !(payload?.data?.drawCount > 0));
+      }
+    } catch {
+      if (!signal?.cancelled) {
+        setStats(EMPTY_STATS);
+        setStatsFallback(true);
+      }
+    } finally {
+      if (!signal?.cancelled) {
+        setStatsLoading(false);
+      }
+    }
+  }
+
+  async function loadFreshness(game: GameId, signal?: { cancelled: boolean }) {
+    setFreshnessLoading(true);
+
+    try {
+      const response = await fetch(`/api/dashboard/freshness?game=${game}`, {
+        cache: 'no-store',
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload?.error?.message || 'Failed to load freshness');
+      }
+
+      if (!signal?.cancelled) {
+        setFreshness(payload.data || EMPTY_FRESHNESS);
+      }
+    } catch {
+      if (!signal?.cancelled) {
+        setFreshness(EMPTY_FRESHNESS);
+      }
+    } finally {
+      if (!signal?.cancelled) {
+        setFreshnessLoading(false);
+      }
+    }
+  }
+
+  useEffect(() => {
+    const signal = { cancelled: false };
+
+    loadCommentary(selectedGame, signal);
 
     return () => {
-      cancelled = true;
+      signal.cancelled = true;
     };
   }, [selectedGame]);
 
   useEffect(() => {
-    let cancelled = false;
+    const signal = { cancelled: false };
 
-    async function loadStats() {
-      setStatsLoading(true);
-
-      try {
-        const response = await fetch(`/api/dashboard/stats?game=${selectedGame}`, {
-          cache: 'no-store',
-        });
-        const payload = await response.json();
-
-        if (!response.ok) {
-          throw new Error(payload?.error?.message || 'Failed to load stats');
-        }
-
-        if (!cancelled) {
-          setStats(payload.data || {
-            hotNumbers: fallbackStats.hotNumbers,
-            hotBonus: fallbackStats.hotBonus,
-            coldNumbers: fallbackStats.coldNumbers,
-            coldBonus: fallbackStats.coldBonus,
-            momentumPercent: fallbackStats.momentum,
-            drawCount: 0,
-            sourceGames: [],
-          });
-        }
-      } catch {
-        if (!cancelled) {
-          setStats({
-            hotNumbers: fallbackStats.hotNumbers,
-            hotBonus: fallbackStats.hotBonus,
-            coldNumbers: fallbackStats.coldNumbers,
-            coldBonus: fallbackStats.coldBonus,
-            momentumPercent: fallbackStats.momentum,
-            drawCount: 0,
-            sourceGames: [],
-          });
-        }
-      } finally {
-        if (!cancelled) {
-          setStatsLoading(false);
-        }
-      }
-    }
-
-    loadStats();
+    loadStats(selectedGame, signal);
 
     return () => {
-      cancelled = true;
+      signal.cancelled = true;
     };
-  }, [selectedGame, fallbackStats.coldBonus, fallbackStats.coldNumbers, fallbackStats.hotBonus, fallbackStats.hotNumbers, fallbackStats.momentum]);
+  }, [selectedGame]);
 
   useEffect(() => {
-    let cancelled = false;
+    const signal = { cancelled: false };
 
-    async function loadFreshness() {
-      setFreshnessLoading(true);
-
-      try {
-        const response = await fetch(`/api/dashboard/freshness?game=${selectedGame}`, {
-          cache: 'no-store',
-        });
-        const payload = await response.json();
-
-        if (!response.ok) {
-          throw new Error(payload?.error?.message || 'Failed to load freshness');
-        }
-
-        if (!cancelled) {
-          setFreshness(payload.data || EMPTY_FRESHNESS);
-        }
-      } catch {
-        if (!cancelled) {
-          setFreshness(EMPTY_FRESHNESS);
-        }
-      } finally {
-        if (!cancelled) {
-          setFreshnessLoading(false);
-        }
-      }
-    }
-
-    loadFreshness();
+    loadFreshness(selectedGame, signal);
 
     return () => {
-      cancelled = true;
+      signal.cancelled = true;
     };
   }, [selectedGame]);
 
@@ -320,6 +275,11 @@ export default function DashboardPage() {
       }
 
       setCommentary(normalizePredictionResponse(payload.data));
+      await Promise.all([
+        loadCommentary(selectedGame),
+        loadStats(selectedGame),
+        loadFreshness(selectedGame),
+      ]);
     } catch (error) {
       setCommentary({
         ...EMPTY_COMMENTARY,
@@ -359,13 +319,13 @@ export default function DashboardPage() {
           <div className="-mt-1 mb-5 text-[12px] uppercase tracking-[0.16em] text-white/35">
             Loading live dashboard stats...
           </div>
-        ) : stats.drawCount > 0 ? (
+        ) : stats.drawCount > 0 && !statsFallback ? (
           <div className="-mt-1 mb-5 text-[12px] uppercase tracking-[0.16em] text-white/35">
             Live stats from {stats.drawCount} stored draws{stats.sourceGames.length > 0 ? ` across ${stats.sourceGames.join(', ')}` : ''}
           </div>
         ) : (
           <div className="-mt-1 mb-5 text-[12px] uppercase tracking-[0.16em] text-white/35">
-            Live stats unavailable, showing fallback dashboard defaults
+            No live stats are available for this game yet
           </div>
         )}
 
@@ -379,6 +339,7 @@ export default function DashboardPage() {
           primaryNumbers={commentary.primaryNumbers}
           bonusNumber={commentary.bonusNumber}
           bonusLabel={gameConfig.bonusLabel}
+          state={commentary.state}
         />
 
         <GeneratePickButton
@@ -386,7 +347,7 @@ export default function DashboardPage() {
           loading={isGenerating}
         />
 
-        <UtilityPills freshnessStatus={freshness.status} />
+        <UtilityPills freshnessStatus={freshness.status} game={selectedGame} />
         <VoiceModeCard text={voiceText} title="Brew Voice" />
       </DashboardContainer>
     </div>

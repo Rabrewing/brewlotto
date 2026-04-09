@@ -12,6 +12,40 @@ const getSupabase = () => createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+function formatPredictionNumbers(primaryNumbers: unknown, bonusNumber: unknown) {
+  const primary = Array.isArray(primaryNumbers)
+    ? primaryNumbers.filter((value): value is number => typeof value === 'number')
+    : [];
+  const bonus = typeof bonusNumber === 'number' ? bonusNumber : null;
+
+  if (primary.length === 0) {
+    return null;
+  }
+
+  const formattedPrimary = primary.map((value) => String(value).padStart(2, '0')).join(' ');
+  if (bonus == null) {
+    return formattedPrimary;
+  }
+
+  return `${formattedPrimary} + ${String(bonus).padStart(2, '0')}`;
+}
+
+function buildExplanationPendingSummary(
+  displayLabel: string,
+  sourceStrategyKey: string | null,
+  primaryNumbers: unknown,
+  bonusNumber: unknown,
+) {
+  const formattedNumbers = formatPredictionNumbers(primaryNumbers, bonusNumber);
+  const strategyFragment = sourceStrategyKey ? ` using ${sourceStrategyKey}` : '';
+
+  if (!formattedNumbers) {
+    return `Brew found a stored ${displayLabel} pick${strategyFragment}, but its explanation text has not been saved yet. Generate another pick to refresh live commentary.`;
+  }
+
+  return `Brew found a stored ${displayLabel} pick${strategyFragment}: ${formattedNumbers}. Explanation text is still pending, so generate another pick to refresh live commentary.`;
+}
+
 function buildFallback(game: string) {
   return {
     summary: `Brew is waiting on a fresh stored prediction for ${game}. Generate a new pick to populate live explainability here.`,
@@ -21,6 +55,7 @@ function buildFallback(game: string) {
     sourceGame: null,
     primaryNumbers: [],
     bonusNumber: null,
+    state: 'missing_prediction',
   };
 }
 
@@ -63,14 +98,40 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const latestWithExplanation = (data || []).find((prediction) =>
+    const predictions = data || [];
+    const latestPrediction = predictions[0] || null;
+    const latestWithExplanation = predictions.find((prediction) =>
       Array.isArray(prediction.prediction_explanations) && prediction.prediction_explanations.length > 0,
     );
+
+    if (!latestPrediction) {
+      return NextResponse.json({
+        success: true,
+        data: buildFallback(game),
+        meta: { fallback: true },
+      });
+    }
 
     if (!latestWithExplanation) {
       return NextResponse.json({
         success: true,
-        data: buildFallback(game),
+        data: {
+          summary: buildExplanationPendingSummary(
+            config.displayLabel,
+            latestPrediction.source_strategy_key,
+            latestPrediction.predicted_numbers,
+            latestPrediction.bonus_number,
+          ),
+          strategyLabel: latestPrediction.source_strategy_key,
+          confidenceScore: latestPrediction.confidence_score,
+          generatedAt: latestPrediction.created_at,
+          sourceGame: latestPrediction.game,
+          primaryNumbers: Array.isArray(latestPrediction.predicted_numbers)
+            ? latestPrediction.predicted_numbers
+            : [],
+          bonusNumber: latestPrediction.bonus_number,
+          state: 'missing_explanation',
+        },
         meta: { fallback: true },
       });
     }
@@ -94,6 +155,7 @@ export async function GET(request: NextRequest) {
           ? latestWithExplanation.predicted_numbers
           : [],
         bonusNumber: latestWithExplanation.bonus_number,
+        state: explanation ? 'ready' : 'missing_explanation',
       },
       meta: { fallback: !explanation },
     });

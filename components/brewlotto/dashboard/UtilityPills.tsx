@@ -7,6 +7,16 @@ interface UtilityPillProps {
   caption?: string;
 }
 
+type UtilityGameId = 'powerball' | 'mega' | 'cash5' | 'pick3' | 'pick4';
+
+const GAME_ROUTE_MAP: Record<UtilityGameId, string> = {
+  powerball: '/powerball',
+  mega: '/mega',
+  cash5: '/pick5',
+  pick3: '/pick3',
+  pick4: '/pick4',
+};
+
 function UtilityPill({ href, icon, label, caption }: UtilityPillProps) {
   return (
     <Link
@@ -24,20 +34,26 @@ function UtilityPill({ href, icon, label, caption }: UtilityPillProps) {
   );
 }
 
-export function UtilityPills({ freshnessStatus = 'unknown' }: { freshnessStatus?: string }) {
+export function UtilityPills({
+  freshnessStatus = 'unknown',
+  game,
+}: {
+  freshnessStatus?: string;
+  game: UtilityGameId;
+}) {
   return (
     <div className="mb-5 grid grid-cols-2 gap-4">
       <UtilityPill
-        href="/picks"
+        href={GAME_ROUTE_MAP[game]}
         icon={<span>👤</span>}
-        label="My Picks"
+        label="Open Game"
         caption={`Data ${freshnessStatus}`}
       />
       <UtilityPill
-        href="/strategies"
+        href="/pricing"
         icon={<span>🔒</span>}
-        label="Strategy Locker"
-        caption="Live methods"
+        label="Upgrade Tiers"
+        caption="Premium methods"
       />
     </div>
   );

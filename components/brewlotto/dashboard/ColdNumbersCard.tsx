@@ -13,6 +13,9 @@ export function ColdNumbersCard({
   bonusLabel = 'Powerball',
   showBonus = true,
 }: ColdNumbersCardProps) {
+  const hasNumbers = numbers.length > 0;
+  const hasBonus = showBonus && bonus !== undefined;
+
   return (
     <div className="rounded-[30px] border border-[#72caff]/30 bg-gradient-to-br from-[#72caff]/15 to-[#58a9ff]/5 p-5 shadow-[0_4px_24px_rgba(114,202,255,0.15)]">
       {/* Header */}
@@ -22,19 +25,25 @@ export function ColdNumbersCard({
       </div>
 
       {/* Primary numbers */}
-      <div className="mb-4 flex flex-wrap gap-2">
-        {numbers.map((num) => (
-          <LotteryBall
-            key={num}
-            number={num}
-            variant="cold"
-            size="large"
-          />
-        ))}
-      </div>
+      {hasNumbers ? (
+        <div className="mb-4 flex flex-wrap gap-2">
+          {numbers.map((num) => (
+            <LotteryBall
+              key={num}
+              number={num}
+              variant="cold"
+              size="large"
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="mb-4 text-[13px] text-white/55">
+          Brew needs more live draw history before cold-number signals can be shown.
+        </div>
+      )}
 
       {/* Bonus number */}
-      {showBonus && bonus !== undefined && (
+      {hasBonus && (
         <div className="flex flex-col items-start gap-1">
           <LotteryBall
             number={bonus}

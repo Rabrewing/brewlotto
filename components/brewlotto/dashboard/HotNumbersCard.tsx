@@ -13,6 +13,9 @@ export function HotNumbersCard({
   bonusLabel = 'Powerball',
   showBonus = true,
 }: HotNumbersCardProps) {
+  const hasNumbers = numbers.length > 0;
+  const hasBonus = showBonus && bonus !== undefined;
+
   return (
     <div className="rounded-[30px] border border-[#ffbd39]/30 bg-gradient-to-br from-[#ffbd39]/15 to-[#ffb84a]/5 p-5 shadow-[0_4px_24px_rgba(255,189,57,0.15)]">
       {/* Header */}
@@ -22,19 +25,25 @@ export function HotNumbersCard({
       </div>
 
       {/* Primary numbers */}
-      <div className="mb-4 flex flex-wrap gap-2">
-        {numbers.map((num) => (
-          <LotteryBall
-            key={num}
-            number={num}
-            variant="hot"
-            size="large"
-          />
-        ))}
-      </div>
+      {hasNumbers ? (
+        <div className="mb-4 flex flex-wrap gap-2">
+          {numbers.map((num) => (
+            <LotteryBall
+              key={num}
+              number={num}
+              variant="hot"
+              size="large"
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="mb-4 text-[13px] text-white/55">
+          Brew has not stored enough live draw data to rank hot numbers yet.
+        </div>
+      )}
 
       {/* Bonus number */}
-      {showBonus && bonus !== undefined && (
+      {hasBonus && (
         <div className="flex flex-col items-start gap-1">
           <LotteryBall
             number={bonus}
