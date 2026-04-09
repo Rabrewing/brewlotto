@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
 import { fetchStats } from "../../../../utils/fetchStats"; // Adjusted path
 
-export async function GET(request: Request, context: { params: { game: string } }) {
-    const { game } = context.params;
+export async function GET(
+    request: Request,
+    { params }: { params: Promise<{ game: string }> },
+) {
+    const { game } = await params;
     const { searchParams } = new URL(request.url);
 
     if (!game) {

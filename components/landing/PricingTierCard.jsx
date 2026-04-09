@@ -4,6 +4,17 @@
 import { CheckCircleIcon, LockClosedIcon } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
 
+/**
+ * @param {{
+ *   tierId?: string;
+ *   title?: string;
+ *   description?: string;
+ *   features?: string[];
+ *   locked?: boolean;
+ *   current?: boolean;
+ *   onUpgrade?: () => void;
+ * }} props
+ */
 export default function PricingTierCard({
     tierId = "",
     title = "",

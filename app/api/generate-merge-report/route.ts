@@ -9,7 +9,7 @@ export async function GET(req: Request) {
         // Dynamic import of a CJS module in an ESM context.
         // This might require specific Node.js configurations or a wrapper.
         // For now, assuming it works or will be addressed during testing.
-        const { default: generateReport } = await import('../../../../scripts/generateMergeReadinessReport.cjs');
+        const { default: generateReport } = await import('../../../scripts/generateMergeReadinessReport.cjs');
         const result = generateReport();
 
         if (!result || typeof result !== 'object') {

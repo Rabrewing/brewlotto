@@ -6,7 +6,16 @@
 
 import { createContext, useContext, useState } from "react";
 
-const BrewBotContext = createContext();
+const noop = () => {};
+
+const BrewBotContext = createContext({
+    message: null,
+    tone: "default",
+    visible: false,
+    speak: noop,
+    prompt: noop,
+    clear: noop,
+});
 
 export function BrewBotProvider({ children }) {
     const [message, setMessage] = useState(null);       // active message text
@@ -30,9 +39,10 @@ export function BrewBotProvider({ children }) {
     };
 
     const clear = () => setVisible(false);
+    const prompt = speak;
 
     return (
-        <BrewBotContext.Provider value={{ message, tone, visible, speak, clear }}>
+        <BrewBotContext.Provider value={{ message, tone, visible, speak, prompt, clear }}>
             {children}
         </BrewBotContext.Provider>
     );

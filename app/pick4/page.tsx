@@ -44,6 +44,10 @@ interface LatestDraws {
     evening?: { result: string; date: string };
 }
 
+interface LatestPickDrawsResponse {
+    draws?: LatestDraws;
+}
+
 export default function Pick4() {
     const [pick, setPick] = useState<PickData | null>(null);
     const [loading, setLoading] = useState(false);
@@ -54,7 +58,7 @@ export default function Pick4() {
     useEffect(() => {
         setLatestLoading(true);
         getLatestDrawResults("pick4")
-            .then((data) => {
+            .then((data: LatestPickDrawsResponse) => {
                 console.log("Latest Pick 4 Draws:", data);
                 setLatest(data.draws || {});
             })

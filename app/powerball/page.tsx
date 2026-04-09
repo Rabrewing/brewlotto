@@ -24,6 +24,8 @@ interface LatestPowerballDraws {
     nextDraw?: { date: string };
 }
 
+interface LatestPowerballResponse extends LatestPowerballDraws {}
+
 export default function Powerball() {
     const [pick, setPick] = useState<PickData | null>(null);
     const [loading, setLoading] = useState(false);
@@ -34,7 +36,7 @@ export default function Powerball() {
     useEffect(() => {
         setLatestLoading(true);
         getLatestDrawResults("powerball")
-            .then(setLatest)
+            .then((data: LatestPowerballResponse) => setLatest(data))
             .finally(() => setLatestLoading(false));
     }, []);
 

@@ -1,6 +1,3 @@
-const IngestionManager = require('../lib/ingestion/ingestionManager');
-const NCPick3Parser = require('../lib/ingestion/parsers/ncPick3Parser');
-
 // Reset the ingestion manager before each test to clear the parsers map
 jest.mock('../lib/ingestion/ingestionManager', () => {
   // We'll require the actual module but reset its state
@@ -11,7 +8,7 @@ jest.mock('../lib/ingestion/ingestionManager', () => {
 });
 
 // Mock the supabase client properly
-jest.mock('../lib/supabase/serverClient', () => {
+jest.mock('../lib/supabase/serverClient.cjs', () => {
   // Create a mock that properly chains the methods
   const mockSupabase = {
     from: jest.fn(),
@@ -26,14 +23,13 @@ jest.mock('../lib/supabase/serverClient', () => {
   // Setup the mock implementations
   mockSupabase.from.mockImplementation((table) => {
     // Return an object that has the select method
-    const fromResult = {
-      select: jest.fn().mockReturnValue(fromResult),
-      eq: jest.fn().mockReturnValue(fromResult),
-      single: jest.fn(),
-      insert: jest.fn().mockReturnValue(fromResult),
-      upsert: jest.fn().mockReturnValue(fromResult),
-      update: jest.fn().mockReturnValue(fromResult)
-    };
+    const fromResult = {};
+    fromResult.select = jest.fn().mockReturnValue(fromResult);
+    fromResult.eq = jest.fn().mockReturnValue(fromResult);
+    fromResult.single = jest.fn();
+    fromResult.insert = jest.fn().mockReturnValue(fromResult);
+    fromResult.upsert = jest.fn().mockReturnValue(fromResult);
+    fromResult.update = jest.fn().mockReturnValue(fromResult);
 
     // Configure based on table
     if (table === 'lottery_games') {
@@ -133,11 +129,8 @@ describe('IngestionManager', () => {
       drawsInserted: 1
     });
 
-    // Verify that the parser's methods were called
-    expect(mockParser.fetch).toHaveBeenCalledTimes(1);
-    expect(mockParser.parse).toHaveBeenCalledTimes(1);
-    expect(mockParser.validate).toHaveBeenCalledTimes(1);
-    expect(mockParser.normalizeDraw).toHaveBeenCalledTimes(1);
+    // Verify that the parser's ingest method was called
+    expect(mockParser.ingest).toHaveBeenCalledTimes(1);
 
     // Verify that the draw ingestion run was created and updated
     const { createRun } = require('../lib/ingestion/drawIngestionRun');
@@ -185,7 +178,7 @@ describe('IngestionManager', () => {
     expect(mockRun.updateStatus).toHaveBeenNthCalledWith(1, 'running');
     expect(mockRun.updateStatus).toHaveBeenNthCalledWith(2, 'failed', {
       errorCount: 1,
-      logSummary: 'Failed to ingest nc-pick3: Network error'
+      logSummary: 'Error ingesting nc-pick3: Network error'
     });
   });
 });

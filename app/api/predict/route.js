@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase/serverClient';
-import { StrategyEngine } from '@/lib/prediction/strategyEngine';
-import { IngestionManager } from '@/lib/ingestion/ingestionManager';
+import StrategyEngine from '@/lib/prediction/strategyEngine';
 
 /**
  * Generate predictions for a specific game
  * GET /api/predict/[game]
  */
-export async function GET(request, { params }) {
+async function getPredictionHistory(request, { params }) {
   try {
     const { game } = params;
     const { searchParams } = new URL(request.url);

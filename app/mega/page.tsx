@@ -24,6 +24,8 @@ interface LatestMegaDraws {
     nextDraw?: { date: string };
 }
 
+interface LatestMegaResponse extends LatestMegaDraws {}
+
 export default function Mega() {
     const [pick, setPick] = useState<PickData | null>(null);
     const [loading, setLoading] = useState(false);
@@ -34,7 +36,7 @@ export default function Mega() {
     useEffect(() => {
         setLatestLoading(true);
         getLatestDrawResults("mega")
-            .then(setLatest)
+            .then((data: LatestMegaResponse) => setLatest(data))
             .finally(() => setLatestLoading(false));
     }, []);
 

@@ -49,6 +49,16 @@ interface LatestDraws {
     evening?: LatestDraw;
 }
 
+interface LatestPick5DrawRecord {
+    draw_type: string;
+    draw_date: string;
+    numbers: string[];
+}
+
+interface LatestPick5Response {
+    draws?: LatestPick5DrawRecord[];
+}
+
 export default function Pick5() {
     const [pick, setPick] = useState<PickData | null>(null);
     const [loading, setLoading] = useState(false);
@@ -59,8 +69,8 @@ export default function Pick5() {
     useEffect(() => {
         setLatestLoading(true);
         getLatestDrawResults('pick5')
-            .then((data) => {
-                const parsed = Array.isArray(data?.draws) ? data.draws.reduce((acc: LatestDraws, draw: any) => {
+            .then((data: LatestPick5Response) => {
+                const parsed = Array.isArray(data?.draws) ? data.draws.reduce((acc: LatestDraws, draw: LatestPick5DrawRecord) => {
                     if (draw.draw_type === 'day') acc.day = { date: draw.draw_date, result: draw.numbers.join(" ") };
                     if (draw.draw_type === 'evening') acc.evening = { date: draw.draw_date, result: draw.numbers.join(" ") };
                     return acc;
