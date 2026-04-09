@@ -490,6 +490,19 @@ The system is considered complete when:
 #### 🔜 Recommended Next Step
 - Fix the outstanding lint/build/test baseline separately from the new dashboard work so Phase 9 UI progress stays isolated from legacy compatibility cleanup
 
+#### 🧹 Lint Cleanup Plan
+- `build` and `test` baseline are now restored; remaining lint failures are tracked as repo-wide follow-up debt
+- Clean lint in focused tranches instead of repo-wide all at once
+- Recommended order:
+  - `app/api/admin/**`
+  - remaining active `app/api/**`
+  - active `components/**`
+  - `lib/supabase/**`
+  - `lib/ingestion/**/*.ts`
+  - `lib/ingestion/**/*.js` last
+- Do mechanical fixes first (`no-unused-vars`, `prefer-const`, empty interfaces, ignored params), then narrow `any` replacements
+- Decide separately whether legacy CommonJS ingestion paths should be migrated or lint-relaxed
+
 ### Ingestion Scripts (Updated 2026-03-18)
 
 ```bash

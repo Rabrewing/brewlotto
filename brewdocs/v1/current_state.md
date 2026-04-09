@@ -421,3 +421,16 @@ When checking with ChatGPT, ask for:
 
 **Next Phase**:
 Fix the baseline lint/build/test compatibility issues separately, then continue Phase 8 admin cleanup and move deeper into Phase 9 commentary integration.
+
+## Lint Debt Plan
+
+- Current state: `build` and `test` are restored; `lint` still fails on repo-wide legacy debt
+- Strategy: address lint in targeted follow-up tranches instead of mixing it with current Phase 9 feature work
+- Planned tranche order:
+  - `app/api/admin/**`
+  - remaining active `app/api/**`
+  - active `components/**`
+  - `lib/supabase/**`
+  - `lib/ingestion/**/*.ts`
+  - `lib/ingestion/**/*.js` last
+- Mechanical fixes go first, then `any` replacement work, then any legacy lint policy decisions for old CommonJS ingestion paths

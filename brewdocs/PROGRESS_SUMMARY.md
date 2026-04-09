@@ -64,6 +64,25 @@
 ### Recommended Next Step
 - Stabilize the lint/build/test baseline in a dedicated compatibility pass before continuing additional Phase 9 UI work
 
+### Lint Cleanup Roadmap
+- Defer repo-wide lint cleanup until after active Phase 9 feature work unless a touched file needs immediate cleanup
+- Fix lint debt in slices instead of repo-wide all at once
+- Recommended order:
+  - `app/api/admin/**`
+  - remaining active `app/api/**` routes
+  - actively used `components/**`
+  - `lib/supabase/**`
+  - `lib/ingestion/**/*.ts`
+  - `lib/ingestion/**/*.js` last
+- Prioritize mechanical fixes first:
+  - unused variables
+  - `prefer-const`
+  - empty interfaces
+  - rename intentionally unused params to `_param`
+- Handle `any` replacements after the easy wins using narrow inline types, interfaces, or `unknown`
+- Treat legacy CommonJS ingestion files as a separate policy decision: either migrate them to ESM or relax lint rules for explicitly legacy paths
+- Keep lint-only cleanup commits separate from V1 feature commits
+
 ---
 
 # Migration and PWA Implementation Plan
