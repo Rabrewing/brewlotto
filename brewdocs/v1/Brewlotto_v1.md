@@ -149,6 +149,14 @@ All AI and ML features must be designed with a low-cost default path. Inference-
 
 The UI should feel world-class, but the backend should remain modular and practical.
 
+5.7 Freshness Is A Product Guarantee
+
+Current draw data is part of product trust, not just infrastructure hygiene.
+
+BrewLotto must ingest around actual draw windows, retry when official results lag, and prevent stale or unverified data from being presented as current live insight.
+
+User-facing prediction and stats surfaces must be gated by the freshness layer whenever source health is delayed, stale, failed, or unknown.
+
 \---
 
 6\. Product Scope
@@ -201,6 +209,8 @@ broad multi-state rollout beyond NC \+ CA at launch
 
 overbuilt internal dev cockpit unless directly supporting stability/ops
 
+native mobile exclusivity as a launch requirement
+
 6.3 Deferred to Post-V1
 
 broader state expansion
@@ -214,6 +224,23 @@ deeper predictive model experimentation
 enterprise learning hub integration
 
 advanced export/report builder
+
+Play Store packaging after the web and PWA surfaces are operationally stable
+
+---
+
+6.4 Launch Surface Model
+
+BrewLotto V1 launches as a web-first product.
+
+That launch model supports:
+
+1. primary website access
+2. mobile-responsive browser usage
+3. installable PWA capability when enabled safely
+4. future Android store packaging without splitting the product into a separate frontend
+
+The canonical launch infrastructure plan lives in `brewdocs/v1/launch-infrastructure-plan.md`.
 
 \---
 

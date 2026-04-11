@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface AlertSummary {
   openCount: number;
@@ -32,6 +32,10 @@ interface AlertItem {
   emailRequired: boolean;
   emailLastSentAt?: string | null;
 }
+
+type AlertStatusFilter = 'all' | AlertItem['status'];
+type AlertSeverityFilter = 'all' | AlertItem['severity'];
+type AlertCategoryFilter = 'all' | 'freshness' | 'ingestion' | 'validation' | 'system' | 'billing' | 'prediction';
 
 interface IngestionHealthSummary {
   totalGames: number;
@@ -66,6 +70,8 @@ interface IngestionHealthRow {
   drawsUpdated: number | null;
   errorCount: number;
 }
+
+type RefreshTarget = 'all' | IngestionHealthRow['gameKey'];
 
 const EMPTY_SUMMARY: AlertSummary = {
   openCount: 0,
@@ -236,26 +242,63 @@ export default function AdminPage() {
   const [summary, setSummary] = useState<AlertSummary>(EMPTY_SUMMARY);
   const [alerts, setAlerts] = useState<AlertItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [alertsLoading, setAlertsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [refreshTarget, setRefreshTarget] = useState<RefreshTarget | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [refreshMessage, setRefreshMessage] = useState<string | null>(null);
   const [mutatingId, setMutatingId] = useState<string | null>(null);
   const [ingestionSummary, setIngestionSummary] = useState<IngestionHealthSummary>(EMPTY_INGESTION_SUMMARY);
   const [ingestionRows, setIngestionRows] = useState<IngestionHealthRow[]>([]);
+  const [statusFilter, setStatusFilter] = useState<AlertStatusFilter>('all');
+  const [severityFilter, setSeverityFilter] = useState<AlertSeverityFilter>('all');
+  const [categoryFilter, setCategoryFilter] = useState<AlertCategoryFilter>('all');
+  const latestRequestRef = useRef(0);
 
-  async function loadAdminData() {
+  async function loadAdminData(options?: { alertsOnly?: boolean; nextRequestId?: number }) {
     setError(null);
+    const requestId = options?.nextRequestId ?? latestRequestRef.current;
 
-    const [summaryResponse, alertsResponse, ingestionResponse] = await Promise.all([
-      fetch('/api/admin/alerts/summary', { cache: 'no-store' }),
-      fetch('/api/admin/alerts?limit=12', { cache: 'no-store' }),
-      fetch('/api/admin/ingestion-health', { cache: 'no-store' }),
-    ]);
+    const alertParams = new URLSearchParams({ limit: '12' });
+    if (statusFilter !== 'all') {
+      alertParams.set('status', statusFilter);
+    }
+    if (severityFilter !== 'all') {
+      alertParams.set('severity', severityFilter);
+    }
+    if (categoryFilter !== 'all') {
+      alertParams.set('category', categoryFilter);
+    }
 
-    const [summaryPayload, alertsPayload, ingestionPayload] = await Promise.all([
-      summaryResponse.json(),
-      alertsResponse.json(),
-      ingestionResponse.json(),
-    ]);
+    const requests = options?.alertsOnly
+      ? [fetch(`/api/admin/alerts?${alertParams.toString()}`, { cache: 'no-store' })]
+      : [
+          fetch('/api/admin/alerts/summary', { cache: 'no-store' }),
+          fetch(`/api/admin/alerts?${alertParams.toString()}`, { cache: 'no-store' }),
+          fetch('/api/admin/ingestion-health', { cache: 'no-store' }),
+        ];
+
+    const responses = await Promise.all(requests);
+    const payloads = await Promise.all(responses.map((response) => response.json()));
+
+    if (requestId !== latestRequestRef.current) {
+      return;
+    }
+
+    if (options?.alertsOnly) {
+      const [alertsResponse] = responses;
+      const [alertsPayload] = payloads;
+
+      if (!alertsResponse.ok) {
+        throw new Error(alertsPayload?.error?.message || 'Failed to load alerts');
+      }
+
+      setAlerts(alertsPayload.data || []);
+      return;
+    }
+
+    const [summaryResponse, alertsResponse, ingestionResponse] = responses;
+    const [summaryPayload, alertsPayload, ingestionPayload] = payloads;
 
     if (!summaryResponse.ok) {
       throw new Error(summaryPayload?.error?.message || 'Failed to load alert summary');
@@ -277,20 +320,34 @@ export default function AdminPage() {
 
   useEffect(() => {
     async function bootstrap() {
+      const requestId = latestRequestRef.current + 1;
+      latestRequestRef.current = requestId;
+
       try {
-        await loadAdminData();
+        if (loading) {
+          await loadAdminData({ nextRequestId: requestId });
+        } else {
+          setAlertsLoading(true);
+          await loadAdminData({ alertsOnly: true, nextRequestId: requestId });
+        }
       } catch (loadError) {
-        setError(loadError instanceof Error ? loadError.message : 'Failed to load BrewCommand');
+        if (requestId === latestRequestRef.current) {
+          setError(loadError instanceof Error ? loadError.message : 'Failed to load BrewCommand');
+        }
       } finally {
-        setLoading(false);
+        if (requestId === latestRequestRef.current) {
+          setLoading(false);
+          setAlertsLoading(false);
+        }
       }
     }
 
     bootstrap();
-  }, []);
+  }, [statusFilter, severityFilter, categoryFilter]);
 
   async function handleRefresh() {
     setRefreshing(true);
+    setRefreshMessage(null);
 
     try {
       await loadAdminData();
@@ -298,6 +355,34 @@ export default function AdminPage() {
       setError(loadError instanceof Error ? loadError.message : 'Refresh failed');
     } finally {
       setRefreshing(false);
+    }
+  }
+
+  async function handleManualRefresh(target: RefreshTarget) {
+    setRefreshTarget(target);
+    setError(null);
+    setRefreshMessage(null);
+
+    try {
+      const response = await fetch('/api/admin/ingestion-refresh', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ target }),
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload?.error?.message || 'Manual refresh failed');
+      }
+
+      setRefreshMessage(`Manual refresh started for ${payload?.data?.label || target}.`);
+      await loadAdminData();
+    } catch (refreshError) {
+      setError(refreshError instanceof Error ? refreshError.message : 'Manual refresh failed');
+    } finally {
+      setRefreshTarget(null);
     }
   }
 
@@ -345,14 +430,25 @@ export default function AdminPage() {
               </p>
             </div>
 
-            <button
-              onClick={handleRefresh}
-              disabled={refreshing || loading}
-              className="rounded-full border border-[#ffd978]/70 bg-[linear-gradient(180deg,#ffcf4a_0%,#ffba19_55%,#f6a800_100%)] px-5 py-3 text-sm font-bold uppercase tracking-[0.12em] text-black transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {refreshing ? 'Refreshing' : 'Refresh'}
-            </button>
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={() => handleManualRefresh('all')}
+                disabled={Boolean(refreshTarget) || loading}
+                className="rounded-full border border-[#ffd978]/70 bg-[linear-gradient(180deg,#ffcf4a_0%,#ffba19_55%,#f6a800_100%)] px-5 py-3 text-sm font-bold uppercase tracking-[0.12em] text-black transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {refreshTarget === 'all' ? 'Running Full Refresh' : 'Run Full Refresh'}
+              </button>
+              <button
+                onClick={handleRefresh}
+                disabled={refreshing || loading || Boolean(refreshTarget)}
+                className="rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-bold uppercase tracking-[0.12em] text-white/80 transition hover:border-white/20 hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {refreshing ? 'Refreshing' : 'Refresh View'}
+              </button>
+            </div>
           </div>
+
+          {refreshMessage ? <div className="mt-4 rounded-2xl border border-[#53d48a]/30 bg-[#102117] px-4 py-3 text-sm text-[#93efb8]">{refreshMessage}</div> : null}
 
           <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
             <SummaryCard label="Open Alerts" value={summary.openCount} accent="text-white" />
@@ -388,6 +484,7 @@ export default function AdminPage() {
                       <th className="px-4 py-3">Last Draw</th>
                       <th className="px-4 py-3">Run Status</th>
                       <th className="px-4 py-3">Run Output</th>
+                      <th className="px-4 py-3">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5 text-white/75">
@@ -418,11 +515,20 @@ export default function AdminPage() {
                           <div>seen {row.drawsSeen ?? 0} / inserted {row.drawsInserted ?? 0} / updated {row.drawsUpdated ?? 0}</div>
                           <div className="mt-1 text-xs text-white/40">errors: {row.errorCount}</div>
                         </td>
+                        <td className="px-4 py-4">
+                          <button
+                            onClick={() => handleManualRefresh(row.gameKey)}
+                            disabled={Boolean(refreshTarget) || loading}
+                            className="rounded-full border border-[#ffd978]/55 bg-[#20170a] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#ffd873] transition hover:border-[#ffd978]/80 hover:bg-[#2b2210] disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            {refreshTarget === row.gameKey ? 'Running...' : 'Refresh Game'}
+                          </button>
+                        </td>
                       </tr>
                     ))}
                     {!loading && ingestionRows.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="px-4 py-8 text-center text-sm text-white/55">
+                        <td colSpan={7} className="px-4 py-8 text-center text-sm text-white/55">
                           No ingestion health records are available yet.
                         </td>
                       </tr>
@@ -469,9 +575,45 @@ export default function AdminPage() {
                 <h2 className="text-xl font-semibold text-white">Open Alert Feed</h2>
                 <p className="mt-1 text-sm text-white/55">Newest events first, using the alert APIs already wired into Supabase.</p>
               </div>
+              <div className="flex flex-wrap gap-2">
+                <select
+                  value={statusFilter}
+                  onChange={(event) => setStatusFilter(event.target.value as AlertStatusFilter)}
+                  className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 outline-none"
+                >
+                  <option value="all">All statuses</option>
+                  <option value="raised">Raised</option>
+                  <option value="acknowledged">Acknowledged</option>
+                  <option value="resolved">Resolved</option>
+                  <option value="escalated">Escalated</option>
+                </select>
+                <select
+                  value={severityFilter}
+                  onChange={(event) => setSeverityFilter(event.target.value as AlertSeverityFilter)}
+                  className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 outline-none"
+                >
+                  <option value="all">All severities</option>
+                  <option value="critical">Critical</option>
+                  <option value="warning">Warning</option>
+                  <option value="info">Info</option>
+                </select>
+                <select
+                  value={categoryFilter}
+                  onChange={(event) => setCategoryFilter(event.target.value as AlertCategoryFilter)}
+                  className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 outline-none"
+                >
+                  <option value="all">All categories</option>
+                  <option value="freshness">Freshness</option>
+                  <option value="ingestion">Ingestion</option>
+                  <option value="validation">Validation</option>
+                  <option value="system">System</option>
+                  <option value="billing">Billing</option>
+                  <option value="prediction">Prediction</option>
+                </select>
+              </div>
             </div>
 
-            {loading ? <div className="text-sm text-white/55">Loading BrewCommand data...</div> : null}
+            {loading || alertsLoading ? <div className="text-sm text-white/55">Loading BrewCommand data...</div> : null}
             {error ? <div className="rounded-2xl border border-[#ff7d67]/30 bg-[#2a1311] px-4 py-3 text-sm text-[#ffcdc6]">{error}</div> : null}
 
             {!loading && alerts.length === 0 ? (

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { AvatarDropdown } from './AvatarDropdown';
 import { BotBadge } from './BotBadge';
+import PwaInstall from '@/components/PwaInstall';
 
 interface HeaderProps {
   logoSrc?: string;
@@ -44,6 +45,7 @@ export function Header({ logoSrc = "/frontend/brew_logo.png" }: HeaderProps) {
 
         {/* Right: Avatar + Bot Badge */}
         <div className="flex items-center gap-3">
+          <PwaInstall />
           <BotBadge />
           <AvatarDropdown />
         </div>

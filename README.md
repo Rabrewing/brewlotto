@@ -75,9 +75,12 @@ BrewLotto is designed with modularity and AI-first strategy in mind — here’s
 2. **Set up environment**
    ```bash
    cp .env.example .env.local
-   # Fill in Supabase values: URL, ANON key, Service Role if needed
-   # Fill in Stripe values: SECRET_KEY, WEBHOOK_SECRET
-   ```
+    # Fill in Supabase values: URL, ANON key, Service Role if needed
+    # Fill in Stripe values: SECRET_KEY, WEBHOOK_SECRET
+    # Add BrewCommand admin values for protected admin access:
+    # BREWCOMMAND_ADMIN_EMAILS=email1@example.com,email2@example.com
+    # BREWCOMMAND_ADMIN_SECRET=your-server-to-server-secret
+    ```
 
 3. **Install dependencies**
    ```bash
@@ -103,6 +106,10 @@ BrewLotto is designed with modularity and AI-first strategy in mind — here’s
 ## 📚 Docs & Dev Manuals (V1)
 
 - `/brewdocs/v1/Brewlotto_v1.md` — Product Overview (V1 Reset)  
+- `/brewdocs/v1/launch-infrastructure-plan.md` — Canonical launch stack, hosting, PWA, and Play Store path  
+- `/brewdocs/v1/ingestion-freshness-policy.md` — Canonical freshness and draw-window ingestion policy  
+- `/brewdocs/v1/monitoring-runbook.md` — Canonical Sentry and uptime monitoring setup  
+- `/brewdocs/v1/deployment-checklist.md` — Step-by-step Vercel deployment and production rollout checklist  
 - `/brewdocs/v1/BREWLOTTO_V1_SYSTEM_ARCHITECTURE.md` — Technical architecture  
 - `/brewdocs/v1/BREWLOTTO_V1_DATABASE_SCHEMA.md` — Database design  
 - `/brewdocs/v1/BREWLOTTO_V1_DATA_INGESTION_SPEC.md` — Ingestion pipeline  

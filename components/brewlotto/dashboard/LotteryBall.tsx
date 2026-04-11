@@ -1,5 +1,5 @@
 type BallVariant = 'hot' | 'cold' | 'bonus-hot' | 'bonus-cold';
-type BallSize = 'small' | 'large';
+type BallSize = 'tiny' | 'extraSmall' | 'small' | 'medium' | 'large';
 
 interface LotteryBallProps {
   number: number;
@@ -16,8 +16,11 @@ const VARIANT_STYLES: Record<BallVariant, string> = {
 };
 
 const SIZE_STYLES: Record<BallSize, string> = {
-  small: 'h-10 w-10 text-[15px]',
-  large: 'h-[52px] w-[52px] text-[22px] sm:h-[58px] sm:w-[58px] sm:text-[24px]',
+  tiny: 'h-7 w-7 text-[11px] sm:h-8 sm:w-8 sm:text-[13px]',
+  extraSmall: 'h-8 w-8 text-[13px] sm:h-9 sm:w-9 sm:text-[14px]',
+  small: 'h-9 w-9 text-[14px] sm:h-10 sm:w-10 sm:text-[15px]',
+  medium: 'h-[42px] w-[42px] text-[16px] sm:h-[46px] sm:w-[46px] sm:text-[18px]',
+  large: 'h-[48px] w-[48px] text-[20px] sm:h-[54px] sm:w-[54px] sm:text-[22px]',
 };
 
 export function LotteryBall({ number, variant, size = 'large', label }: LotteryBallProps) {
@@ -33,7 +36,7 @@ export function LotteryBall({ number, variant, size = 'large', label }: LotteryB
           <div className="absolute inset-1 rounded-full bg-white/10" />
           <span className="relative z-10">{String(number).padStart(2, '0')}</span>
         </div>
-        <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/60">
+        <span className="text-[9px] font-bold uppercase tracking-[0.12em] text-white/60 sm:text-[10px]">
           {label}
         </span>
       </div>

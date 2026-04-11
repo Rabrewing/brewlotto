@@ -5,11 +5,27 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { DASHBOARD_GAME_CONFIG, type DashboardGameId } from '@/lib/dashboard/game-config';
 
 const getSupabase = () => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
+
+function getWorstFreshnessStatus(statuses: string[]) {
+  const rank = { failed: 0, stale: 1, delayed: 2, healthy: 3, unknown: 4 } as const;
+  return [...statuses].sort((a, b) => (rank[a as keyof typeof rank] ?? 5) - (rank[b as keyof typeof rank] ?? 5))[0] || 'unknown';
+}
+
+function resolveDashboardConfig(gameKey: string, state: string) {
+  const entries = Object.entries(DASHBOARD_GAME_CONFIG) as Array<[DashboardGameId, (typeof DASHBOARD_GAME_CONFIG)[DashboardGameId]]>;
+
+  return entries.find(([, config]) => {
+    const matchesRequestRoute = config.requestGameKey === gameKey && config.requestState === state;
+    const matchesPredictionRoute = config.predictionGame === gameKey && config.predictionStates.includes(state);
+    return matchesRequestRoute || matchesPredictionRoute;
+  })?.[1] || null;
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -73,6 +89,36 @@ export async function POST(request: NextRequest) {
         { success: false, error: { code: 'VALIDATION_ERROR', message: 'gameKey and state are required' } },
         { status: 400 }
       );
+    }
+
+    const freshnessConfig = resolveDashboardConfig(gameKey, state);
+    if (freshnessConfig) {
+      const { data: freshnessRows, error: freshnessError } = await supabase
+        .from('v_ingestion_health_summary')
+        .select('freshness_status')
+        .eq('state_code', freshnessConfig.statsStateCode)
+        .eq('game_key', freshnessConfig.statsGameKey);
+
+      if (freshnessError) {
+        return NextResponse.json(
+          { success: false, error: { code: 'FRESHNESS_ERROR', message: freshnessError.message } },
+          { status: 500 }
+        );
+      }
+
+      const freshnessStatus = getWorstFreshnessStatus((freshnessRows || []).map((row) => row.freshness_status || 'unknown'));
+      if (freshnessStatus !== 'healthy') {
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: 'STALE_SOURCE_DATA',
+              message: `Cannot generate ${gameKey} predictions while source freshness is ${freshnessStatus}. Wait for the latest official draw ingestion to complete.`,
+            },
+          },
+          { status: 409 }
+        );
+      }
     }
     
     // Import and run the prediction generator

@@ -63,15 +63,16 @@ export function VoiceModeCard({ text, title = 'Voice Mode', enabled = false, onT
   };
 
   return (
-    <div className="rounded-[28px] border border-[#ffc742]/20 bg-gradient-to-r from-[#1a1816]/90 to-[#14120e]/90 p-4">
-      <div className="flex items-center gap-4">
+    <div className="relative rounded-[24px] border border-[#ffc742]/32 bg-gradient-to-r from-[#1a1816]/90 to-[#14120e]/90 p-3 shadow-[0_0_22px_rgba(255,199,66,0.14),inset_0_0_18px_rgba(255,184,28,0.04)] lg:p-3 xl:p-3.5">
+      <div className="pointer-events-none absolute right-3 top-1/2 h-24 w-24 -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,199,66,0.3),transparent_68%)] blur-xl" />
+      <div className="flex items-center gap-2.5 lg:gap-3">
         {/* Left: Info */}
         <div className="flex-1">
-          <div className="mb-1 flex items-center gap-2">
+          <div className="mb-0.5 flex items-center gap-2">
             <span className="text-lg">🎙️</span>
-            <h3 className="text-[16px] font-semibold text-white">{title}</h3>
+            <h3 className="text-[15px] font-semibold text-white">{title}</h3>
           </div>
-          <p className="text-[13px] text-white/60">
+          <p className="text-[11px] leading-4.5 text-white/60 lg:text-[12px]">
             {isSupported
               ? 'Play the current Brew summary and freshness warning using your browser voice engine.'
               : 'Voice narration is unavailable in this browser, but your latest Brew summary is still shown above.'}
@@ -83,10 +84,10 @@ export function VoiceModeCard({ text, title = 'Voice Mode', enabled = false, onT
           onClick={handleToggle}
           disabled={!isSupported}
           title={buttonTitle}
-          className={`relative flex h-14 w-14 items-center justify-center rounded-full transition-all ${
+          className={`relative flex h-12 w-12 items-center justify-center rounded-full transition-all lg:h-14 lg:w-14 ${
             isActive
-              ? 'bg-gradient-to-br from-[#ffc742] to-[#ffbe27] shadow-[0_0_20px_rgba(255,199,66,0.5)]'
-              : 'bg-[#1a1a1c] border border-white/20 hover:border-[#ffc742]/50'
+              ? 'bg-gradient-to-br from-[#ffc742] to-[#ffbe27] shadow-[0_0_24px_rgba(255,199,66,0.6),0_0_40px_rgba(255,174,42,0.22)]'
+              : 'bg-[#1a1a1c] border border-white/20 shadow-[0_0_12px_rgba(255,199,66,0.08)] hover:border-[#ffc742]/60 hover:shadow-[0_0_18px_rgba(255,199,66,0.18)]'
           }`}
         >
           {/* Pulse ring when active */}
@@ -110,7 +111,7 @@ export function VoiceModeCard({ text, title = 'Voice Mode', enabled = false, onT
         </button>
       </div>
 
-      <div className="mt-3 text-[11px] uppercase tracking-[0.16em] text-white/35">
+      <div className="mt-2 text-[9px] uppercase tracking-[0.16em] text-white/35 lg:text-[10px]">
         {isSupported ? (isActive ? 'Narration live' : 'Narration ready') : 'Narration unavailable'}
       </div>
     </div>

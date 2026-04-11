@@ -2,8 +2,9 @@
  * GET /api/admin/ingestion-health - Ingestion health summary for BrewCommand
  */
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireBrewCommandRequest } from '@/lib/auth/brewcommand';
 
 const getSupabase = () => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -46,8 +47,13 @@ function getMinutesBetween(dateString?: string | null) {
   return Math.max(0, Math.round((Date.now() - timestamp) / 60000));
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const unauthorizedResponse = await requireBrewCommandRequest(request);
+    if (unauthorizedResponse) {
+      return unauthorizedResponse;
+    }
+
     const supabase = getSupabase();
 
     const [gamesResult, freshnessResult, runsResult, drawsResult] = await Promise.all([

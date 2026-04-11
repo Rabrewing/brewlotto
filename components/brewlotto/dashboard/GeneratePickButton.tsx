@@ -9,10 +9,12 @@ export function GeneratePickButton({ onClick, disabled, loading }: GeneratePickB
     <button
       onClick={onClick}
       disabled={disabled || loading}
-      className="group relative w-full overflow-hidden rounded-[999px] bg-gradient-to-r from-[#ffc742] via-[#ffd364] to-[#ffbe27] px-6 py-4 text-[18px] font-bold text-black transition-all hover:scale-[1.02] hover:shadow-[0_6px_20px_rgba(255,199,66,0.4)] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
+      className="group relative mb-3 w-full overflow-hidden rounded-[999px] border border-[#fff0ab]/35 bg-gradient-to-r from-[#ffc742] via-[#ffd364] to-[#ffbe27] px-6 py-3 text-[16px] font-bold text-black shadow-[0_0_22px_rgba(255,199,66,0.34),0_10px_26px_rgba(255,170,24,0.22)] transition-all hover:scale-[1.02] hover:shadow-[0_0_28px_rgba(255,199,66,0.46),0_14px_30px_rgba(255,170,24,0.28)] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100 sm:text-[17px]"
     >
       {/* Inner shine */}
       <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="pointer-events-none absolute inset-x-8 top-0 h-1/2 bg-gradient-to-b from-[#fff5c4]/35 to-transparent blur-md" />
+      <div className="pointer-events-none absolute inset-x-6 bottom-[3px] h-[3px] rounded-full bg-gradient-to-r from-transparent via-[#fff1a8] to-transparent shadow-[0_0_14px_rgba(255,241,168,0.9)]" />
       
       {/* Button content */}
       <span className="relative z-10 flex items-center justify-center gap-2">

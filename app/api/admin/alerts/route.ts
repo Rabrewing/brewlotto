@@ -4,6 +4,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireBrewCommandRequest } from '@/lib/auth/brewcommand';
 
 const getSupabase = () => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -12,6 +13,11 @@ const getSupabase = () => createClient(
 
 export async function GET(request: NextRequest) {
   try {
+    const unauthorizedResponse = await requireBrewCommandRequest(request);
+    if (unauthorizedResponse) {
+      return unauthorizedResponse;
+    }
+
     const supabase = getSupabase();
     const { searchParams } = new URL(request.url);
     
@@ -22,11 +28,21 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0');
     
     let query = supabase
-      .from('alert_events')
+      .from('v_brewcommand_alert_center')
       .select(`
-        *,
-        system_alerts(id, alert_key, alert_name, alert_type, severity, description)
-      `)
+        id,
+        alert_key,
+        alert_type,
+        game_id,
+        game_name,
+        state_code,
+        severity,
+        status,
+        title,
+        message,
+        event_data,
+        triggered_at
+      `, { count: 'exact' })
       .order('triggered_at', { ascending: false })
       .range(offset, offset + limit - 1);
     
@@ -35,6 +51,9 @@ export async function GET(request: NextRequest) {
     }
     if (severity) {
       query = query.eq('severity', severity);
+    }
+    if (category) {
+      query = query.eq('alert_type', category);
     }
     
     const { data, error, count } = await query;
@@ -48,13 +67,13 @@ export async function GET(request: NextRequest) {
     
     const formattedData = (data || []).map((alert: any) => ({
       id: alert.id,
-      alertKey: alert.system_alerts?.alert_key,
-      sourceModule: alert.system_alerts?.alert_type,
-      category: alert.system_alerts?.alert_type,
+      alertKey: alert.alert_key,
+      sourceModule: alert.alert_type,
+      category: alert.alert_type,
       severity: alert.severity,
       status: alert.status,
       state: alert.state_code,
-      game: alert.game_id,
+      game: alert.game_name || alert.game_id,
       title: alert.title,
       message: alert.message,
       firstSeenAt: alert.triggered_at,

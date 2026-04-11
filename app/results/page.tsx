@@ -37,6 +37,11 @@ interface ResultsPayload {
   } | null;
   matchCount: number;
   insights: string[];
+  freshness?: {
+    status: 'healthy' | 'delayed' | 'stale' | 'failed' | 'unknown';
+    stalenessMinutes: number | null;
+    expectedNextDrawAt: string | null;
+  };
 }
 
 function formatDrawTime(value: string | null) {
@@ -100,6 +105,7 @@ export default function ResultsPage() {
 
   const gameConfig = DASHBOARD_GAME_CONFIG[selectedGame];
   const showBonus = selectedGame === 'powerball' || selectedGame === 'mega';
+  const freshnessBlocked = results?.freshness && results.freshness.status !== 'healthy';
 
   return (
     <main className="min-h-screen bg-[#050505] text-white">
@@ -122,8 +128,10 @@ export default function ResultsPage() {
             {error}
           </div>
         ) : !results?.latestDraw ? (
-          <div className="rounded-[28px] border border-white/10 bg-white/[0.03] px-5 py-8 text-center text-white/55">
-            No official draw is available yet for {gameConfig.displayLabel}.
+          <div className={`rounded-[28px] px-5 py-8 text-center ${freshnessBlocked ? 'border border-[#ff8d7b]/25 bg-[#2a120d]/60 text-[#ffc4b8]' : 'border border-white/10 bg-white/[0.03] text-white/55'}`}>
+            {freshnessBlocked
+              ? results?.insights?.[0] || `Official ${gameConfig.displayLabel} results are temporarily withheld until freshness returns to healthy.`
+              : `No official draw is available yet for ${gameConfig.displayLabel}.`}
           </div>
         ) : (
           <div className="space-y-5">

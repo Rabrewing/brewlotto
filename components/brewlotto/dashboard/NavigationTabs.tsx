@@ -22,7 +22,7 @@ export function NavigationTabs() {
 
   return (
     <nav className="mb-4">
-      <div className="flex items-center gap-6">
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
         {TABS.map((tab) => (
           <Link
             key={tab.id}
@@ -36,9 +36,9 @@ export function NavigationTabs() {
             {tab.label}
             
             {/* Active indicator */}
-            {pathname === tab.href && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#ffc742] to-[#ffd364]" />
-            )}
+              {pathname === tab.href && (
+               <div className="absolute bottom-0 left-0 right-0 h-[3px] rounded-full bg-gradient-to-r from-[#ffc742] via-[#ffd364] to-[#ffc742] shadow-[0_0_12px_rgba(255,199,66,0.9),0_0_24px_rgba(255,174,42,0.28)]" />
+             )}
           </Link>
         ))}
       </div>

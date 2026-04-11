@@ -2,16 +2,22 @@
  * GET /api/admin/alerts/summary - Get alert summary for dashboard widgets
  */
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireBrewCommandRequest } from '@/lib/auth/brewcommand';
 
 const getSupabase = () => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const unauthorizedResponse = await requireBrewCommandRequest(request);
+    if (unauthorizedResponse) {
+      return unauthorizedResponse;
+    }
+
     const supabase = getSupabase();
     
     const today = new Date();

@@ -11,7 +11,7 @@ export async function GET() {
     timestamp: new Date().toISOString(),
     services: {
       database: 'unknown',
-      ingestion: 'unknown',
+      freshness: 'unknown',
     },
     version: '1.0.0',
   };
@@ -22,16 +22,34 @@ export async function GET() {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
     
-    const { error } = await supabase.from('lottery_games').select('id').limit(1);
-    
-    if (error) {
+    const [gamesResult, freshnessResult] = await Promise.all([
+      supabase.from('lottery_games').select('id').limit(1),
+      supabase
+        .from('draw_freshness_status')
+        .select('status')
+        .in('status', ['stale', 'failed'])
+        .limit(1),
+    ]);
+
+    if (gamesResult.error) {
       health.services.database = 'degraded';
       health.status = 'degraded';
     } else {
       health.services.database = 'healthy';
     }
+
+    if (freshnessResult.error) {
+      health.services.freshness = 'degraded';
+      health.status = health.status === 'healthy' ? 'degraded' : health.status;
+    } else if ((freshnessResult.data || []).length > 0) {
+      health.services.freshness = 'degraded';
+      health.status = 'degraded';
+    } else {
+      health.services.freshness = 'healthy';
+    }
   } catch (e) {
     health.services.database = 'unhealthy';
+    health.services.freshness = 'unhealthy';
     health.status = 'unhealthy';
   }
   

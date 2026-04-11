@@ -53,27 +53,27 @@ export function FreshnessBanner({ status, stalenessMinutes, expectedNextDrawAt, 
             ? 'Draw data is unavailable'
             : 'Freshness is unclear';
 
-  const body = loading
-    ? 'Brew is checking the latest ingestion window for this game.'
+  const compactBody = loading
+    ? 'Checking the latest ingestion window.'
     : status === 'healthy'
-      ? `The latest draw feed is within the expected freshness window. Next expected draw: ${formatDate(expectedNextDrawAt)}.`
+      ? `Next expected draw: ${formatDate(expectedNextDrawAt)}.`
       : status === 'delayed'
-        ? `The feed is lagging behind the expected schedule by about ${formatMinutes(stalenessMinutes)}. Next expected draw: ${formatDate(expectedNextDrawAt)}.`
+        ? `Feed lagging by about ${formatMinutes(stalenessMinutes)}.`
         : status === 'stale'
-          ? `The latest stored draw is about ${formatMinutes(stalenessMinutes)} old, so pattern guidance may be behind live conditions.`
+          ? `Latest stored draw is about ${formatMinutes(stalenessMinutes)} old.`
           : status === 'failed'
-            ? 'No recent draw data is available for this game, so current insight quality is degraded until ingestion catches up.'
-            : 'Brew could not determine whether the latest draw feed is current.';
+            ? 'No recent draw data is available right now.'
+            : 'Freshness could not be determined.';
 
   return (
-    <div className={`mb-4 rounded-[24px] border p-4 ${STATUS_STYLES[status]}`}>
-      <div className="flex flex-wrap items-start gap-3">
-        <span className="rounded-full border border-current/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em]">
+    <div className={`mb-3 rounded-[22px] border px-3 py-2.5 shadow-[0_0_16px_rgba(255,199,66,0.05)] ${STATUS_STYLES[status]}`}>
+      <div className="flex items-start gap-2">
+        <span className="rounded-full border border-current/20 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.16em]">
           {loading ? 'checking' : status}
         </span>
         <div className="min-w-0 flex-1">
-          <div className="text-[14px] font-semibold">{title}</div>
-          <p className="mt-1 text-[13px] leading-6 opacity-90">{body}</p>
+          <div className="text-[12px] font-semibold">{title}</div>
+          <p className="mt-0.5 text-[11px] leading-4.5 opacity-90">{compactBody}</p>
         </div>
       </div>
     </div>

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
+import { supabase } from '@/lib/supabase/browserClient';
 
 export type AvatarType = 'initials' | 'image' | 'custom';
 
@@ -11,6 +12,8 @@ export interface UserAvatar {
   initials?: string;
   colorIndex?: number;
 }
+
+type PreferredStateCode = 'NC' | 'CA';
 
 const AVATAR_COLORS = [
   'from-[#ffc742] to-[#ffbe27]',
@@ -230,6 +233,7 @@ function MenuRow({
 export function AvatarDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const [confirmingLogout, setConfirmingLogout] = useState(false);
+  const [preferredState, setPreferredState] = useState<PreferredStateCode>('NC');
   const [avatar] = useState<UserAvatar>({
     type: 'initials',
     initials: 'JD',
@@ -260,6 +264,71 @@ export function AvatarDropdown() {
       document.removeEventListener('keydown', handleEscape);
     };
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadPreferredState() {
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!user) {
+          const storedState = window.localStorage.getItem('brewlotto:preferred-state');
+          if (!cancelled && (storedState === 'NC' || storedState === 'CA')) {
+            setPreferredState(storedState);
+          }
+          return;
+        }
+
+        const { data: preferencesRow } = await supabase
+          .from('user_preferences')
+          .select('default_state_code')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        const nextState = preferencesRow?.default_state_code?.toUpperCase() === 'CA' ? 'CA' : 'NC';
+        if (!cancelled) {
+          setPreferredState(nextState);
+        }
+      } catch {
+        const storedState = window.localStorage.getItem('brewlotto:preferred-state');
+        if (!cancelled && (storedState === 'NC' || storedState === 'CA')) {
+          setPreferredState(storedState);
+        }
+      }
+    }
+
+    loadPreferredState();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  async function handleStateToggle() {
+    const nextState: PreferredStateCode = preferredState === 'NC' ? 'CA' : 'NC';
+    setPreferredState(nextState);
+    window.localStorage.setItem('brewlotto:preferred-state', nextState);
+
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        return;
+      }
+
+      await supabase.from('user_preferences').upsert({
+        user_id: user.id,
+        default_state_code: nextState,
+      });
+    } catch {
+      // Keep the UI responsive even if persistence is temporarily unavailable.
+    }
+  }
 
   const colorClass = AVATAR_COLORS[avatar.colorIndex || 0];
 
@@ -314,9 +383,17 @@ export function AvatarDropdown() {
         </svg>
       </button>
 
-      {isOpen ? (
-        <>
-          <div className="fixed inset-0 z-20 bg-black/10" aria-hidden="true" />
+        {isOpen ? (
+          <>
+          <button
+            type="button"
+            className="fixed inset-0 z-20 bg-black/10"
+            aria-label="Close account menu"
+            onClick={() => {
+              setIsOpen(false);
+              setConfirmingLogout(false);
+            }}
+          />
           <div className="absolute right-0 top-[calc(100%+14px)] z-30 w-[332px] max-w-[calc(100vw-2rem)]">
             <div className="absolute right-8 top-[-7px] h-4 w-4 rotate-45 rounded-[4px] border-l border-t border-[#ffc742]/28 bg-[linear-gradient(145deg,rgba(255,255,255,0.08),rgba(6,4,4,0.92))] shadow-[0_0_18px_rgba(255,199,66,0.18)]" />
 
@@ -332,11 +409,11 @@ export function AvatarDropdown() {
                   </div>
                   <button
                     type="button"
-                    disabled
-                    className="rounded-full border border-[#ffc742]/35 bg-[#ffc742]/12 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.16em] text-[#ffd988] opacity-90"
-                    title="State selection will be connected in a later V1 slice"
+                    onClick={handleStateToggle}
+                    className="rounded-full border border-[#ffc742]/35 bg-[#ffc742]/12 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.16em] text-[#ffd988] transition hover:border-[#ffc742]/55 hover:bg-[#ffc742]/18"
+                    aria-label={`Switch default state from ${preferredState}`}
                   >
-                    NC ▼
+                    {preferredState} ▼
                   </button>
                 </div>
               </div>

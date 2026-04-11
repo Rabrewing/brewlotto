@@ -1,7 +1,7 @@
 # BrewLotto V1 - Current State & Next Steps
 
-**Last Updated:** 2026-04-09 ET (10:21 EDT)
-**Phase:** Phase 9 - Dashboard shell truthfulness in progress; dropdown IA normalized; Phase 9B avatar dropdown system queued
+**Last Updated:** 2026-04-09 ET (operational freshness policy pass)
+**Phase:** Phase 9 - Dashboard truthfulness plus operational freshness hardening
 
 ---
 
@@ -51,8 +51,8 @@
    - Runs all scrapers and ingests data into Supabase
    - Command: `node scripts/ingestionJob.js`
 
-6. **`scripts/ingestionScheduler.js`** - Daily scheduler using node-cron
-   - Runs at 12:00 AM PT every day
+6. **`scripts/ingestionScheduler.js`** - Draw-window scheduler using node-cron
+   - Runs around actual draw windows with follow-up retries
    - Command: `node scripts/ingestionScheduler.js`
 
 7. **`scripts/ingestionHealth.js`** - Health monitor for ingestion pipeline
@@ -198,6 +198,39 @@ npm run ingest-all
 
 ### ✅ Updated Files
 1. **`AGENTS.md`** - Added data fetching commands and directory structure
+2. **`brewdocs/v1/ingestion-freshness-policy.md`** - Canonical freshness and UI-gating policy
+3. **`brewdocs/v1/launch-infrastructure-plan.md`** - Canonical launch stack and setup order
+4. **`brewdocs/v1/monitoring-runbook.md`** - Canonical uptime and Sentry setup
+5. **`brewdocs/v1/deployment-checklist.md`** - Step-by-step deployment and validation checklist
+
+## 2026-04-09 Operational Freshness Update
+
+### ✅ New Policy Direction
+- Draw freshness is now treated as a hard product requirement instead of a passive dashboard warning
+- The canonical V1 freshness policy now lives in `brewdocs/v1/ingestion-freshness-policy.md`
+- The canonical launch stack now lives in `brewdocs/v1/launch-infrastructure-plan.md`
+- Scheduler behavior is being normalized around real draw windows plus retry windows instead of a generic once-daily pass
+- Dashboard and prediction surfaces are now expected to withhold live output whenever freshness is not healthy
+
+### ✅ Launch Direction Locked
+- BrewLotto remains a web-first product on Vercel + Supabase
+- The same app should support website, mobile web, and PWA delivery
+- Production ingestion must run outside local development through dedicated scheduled infrastructure
+- Google Play packaging is a later distribution step, not the launch hosting model
+- `main` is the intended V1 production truth branch; active development continues on non-production branches until merge approval
+
+### ✅ Operational Hardening Added
+- BrewCommand server routes now require authorized admin access instead of being openly callable
+- `/admin` now sits behind server-side BrewCommand authorization
+- PWA support is re-enabled in production with install affordance in the dashboard header
+- Results now withhold official draw output when freshness is not healthy, matching dashboard truthfulness rules
+- Sentry foundation is now wired for app and API error capture
+- `/api/health` now reports database plus freshness degradation for uptime monitoring
+
+### 🔒 Required Runtime Behavior
+- Do not present stale stats as current
+- Do not generate predictions from delayed, stale, failed, or unknown freshness states
+- Use `draw_freshness_status` / `v_ingestion_health_summary` as the UI gating source of truth
 
 ## Package.json Updates
 

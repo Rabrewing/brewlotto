@@ -129,6 +129,22 @@ export default function DashboardPage() {
   const gameConfig = DASHBOARD_GAME_CONFIG[selectedGame];
   const gameLabel = gameConfig.displayLabel;
   const showBonus = selectedGame === 'powerball' || selectedGame === 'mega';
+  const freshnessBlocksLiveData = freshness.status === 'delayed' || freshness.status === 'stale' || freshness.status === 'failed' || freshness.status === 'unknown';
+  const effectiveStats = freshnessBlocksLiveData ? EMPTY_STATS : stats;
+  const effectiveStatsFallback = freshnessBlocksLiveData ? true : statsFallback;
+  const effectiveCommentary = freshnessBlocksLiveData
+    ? {
+        ...EMPTY_COMMENTARY,
+        summary:
+          freshness.status === 'delayed'
+            ? `${gameLabel} draw data is still waiting on the latest official result. Brew is holding prediction output until ingestion catches up.`
+            : freshness.status === 'stale'
+              ? `${gameLabel} draw data is stale. Brew has paused live stats and prediction output until the latest official draw is ingested.`
+              : freshness.status === 'failed'
+                ? `${gameLabel} draw ingestion is currently unavailable. Brew will not present live prediction output until the source recovers.`
+                : `${gameLabel} freshness could not be verified. Brew is withholding live stats and prediction output until the source state is confirmed.`,
+      }
+    : commentary;
   const voiceText = [
     freshness.status === 'healthy'
       ? `Freshness check. ${gameLabel} data is current.`
@@ -306,11 +322,11 @@ export default function DashboardPage() {
         <GameTabs selectedGame={selectedGame} onSelect={setSelectedGame} />
         
         <StatsGrid
-          hotNumbers={stats.hotNumbers}
-          hotBonus={stats.hotBonus ?? undefined}
-          coldNumbers={stats.coldNumbers}
-          coldBonus={stats.coldBonus ?? undefined}
-          momentumPercent={stats.momentumPercent}
+          hotNumbers={effectiveStats.hotNumbers}
+          hotBonus={effectiveStats.hotBonus ?? undefined}
+          coldNumbers={effectiveStats.coldNumbers}
+          coldBonus={effectiveStats.coldBonus ?? undefined}
+          momentumPercent={effectiveStats.momentumPercent}
           game={selectedGame}
           showBonus={showBonus}
         />
@@ -319,9 +335,13 @@ export default function DashboardPage() {
           <div className="-mt-1 mb-5 text-[12px] uppercase tracking-[0.16em] text-white/35">
             Loading live dashboard stats...
           </div>
-        ) : stats.drawCount > 0 && !statsFallback ? (
+        ) : freshnessBlocksLiveData ? (
+          <div className="-mt-1 mb-5 text-[12px] uppercase tracking-[0.16em] text-[#ffb5a8]">
+            Live stats paused until fresh official draw data is ingested
+          </div>
+        ) : effectiveStats.drawCount > 0 && !effectiveStatsFallback ? (
           <div className="-mt-1 mb-5 text-[12px] uppercase tracking-[0.16em] text-white/35">
-            Live stats from {stats.drawCount} stored draws{stats.sourceGames.length > 0 ? ` across ${stats.sourceGames.join(', ')}` : ''}
+            Live stats from {effectiveStats.drawCount} stored draws{effectiveStats.sourceGames.length > 0 ? ` across ${effectiveStats.sourceGames.join(', ')}` : ''}
           </div>
         ) : (
           <div className="-mt-1 mb-5 text-[12px] uppercase tracking-[0.16em] text-white/35">
@@ -331,20 +351,22 @@ export default function DashboardPage() {
 
         <PredictionCard
           game={gameLabel}
-          summary={commentaryLoading ? 'is loading the latest stored explainability...' : commentary.summary}
-          strategyLabel={commentary.strategyLabel}
-          confidenceScore={commentary.confidenceScore}
-          generatedAt={commentary.generatedAt}
-          sourceGame={commentary.sourceGame}
-          primaryNumbers={commentary.primaryNumbers}
-          bonusNumber={commentary.bonusNumber}
+          gameId={selectedGame}
+          summary={commentaryLoading && !freshnessBlocksLiveData ? 'is loading the latest stored explainability...' : effectiveCommentary.summary}
+          strategyLabel={effectiveCommentary.strategyLabel}
+          confidenceScore={effectiveCommentary.confidenceScore}
+          generatedAt={effectiveCommentary.generatedAt}
+          sourceGame={effectiveCommentary.sourceGame}
+          primaryNumbers={effectiveCommentary.primaryNumbers}
+          bonusNumber={effectiveCommentary.bonusNumber}
           bonusLabel={gameConfig.bonusLabel}
-          state={commentary.state}
+          state={effectiveCommentary.state}
         />
 
         <GeneratePickButton
           onClick={handleGenerate}
           loading={isGenerating}
+          disabled={freshnessBlocksLiveData}
         />
 
         <UtilityPills freshnessStatus={freshness.status} game={selectedGame} />

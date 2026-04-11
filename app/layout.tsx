@@ -4,6 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "BrewLotto",
   description: "AI-powered lottery insights and smart picks.",
+  manifest: "/manifest.webmanifest",
 };
 
 export const viewport: Viewport = {
@@ -22,7 +23,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="flex min-h-screen items-center justify-center px-4">
+      <body className="min-h-screen overflow-x-hidden px-2 sm:px-4">
         {children}
       </body>
     </html>
