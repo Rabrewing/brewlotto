@@ -1,5 +1,36 @@
 # AGENTS.md (BrewLotto V1)
 
+## V1 Production Deployment (2026-04-11 ET)
+
+### Deployment Status
+- Deployment Target: Vercel (https://brewlotto.app, custom domain configured)
+- Deployment Branch: main (production source of truth)
+- Build Configuration: ESLint and TypeScript errors ignored during build (temporarily disabled for V1 launch)
+
+### Required Environment Variables (Vercel)
+Set these in Vercel project Settings → Environment Variables:
+- NEXT_PUBLIC_SUPABASE_URL
+- NEXT_PUBLIC_SUPABASE_ANON_KEY
+- SUPABASE_SERVICE_ROLE_KEY
+- NEXT_PUBLIC_APP_URL (production URL, e.g., https://brewlotto.app)
+- BREWCOMMAND_ADMIN_EMAILS (comma-separated admin emails)
+- BREWCOMMAND_ADMIN_SECRET (secure random value)
+- SENTRY_DSN (optional, for error monitoring)
+- NEXT_PUBLIC_SENTRY_DSN (optional)
+
+### Git Branch Strategy
+- main = V1 production truth (only push approved/ready code)
+- brew2-overhaul = active development branch
+- Vercel Production Branch set to main
+- Do NOT merge incomplete/wip code directly to main
+
+### Post-Deploy Validation
+After successful build, manually verify:
+1. https://brewlotto.app/ → loads without error
+2. https://brewlotto.app/dashboard → loads without error
+3. https://brewlotto.app/results → loads without error
+4. https://brewlotto.app/api/health → returns 200 with health status
+
 ## Build/Lint/Test Commands
 
 **Development**
