@@ -87,13 +87,13 @@ async function runIngestionJob() {
     console.log('\n📍 PHASE 1: California Daily Games');
     
     results.caDaily3 = runCommand(
-      'node scripts/scrapeCA_Data.js daily3 1000',
+      'node scripts/scrapeCA_Data.js daily3 50',
       'CA Daily 3 scraper'
     );
     await wait(DELAY_BETWEEN_SCRAPERS);
     
     results.caDaily4 = runCommand(
-      'node scripts/scrapeCA_Data.js daily4 1000',
+      'node scripts/scrapeCA_Data.js daily4 50',
       'CA Daily 4 scraper'
     );
     await wait(DELAY_BETWEEN_SCRAPERS);
