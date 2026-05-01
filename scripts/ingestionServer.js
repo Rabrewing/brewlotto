@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import http from 'http';
-import { execSync } from 'child_process';
+import { spawn } from 'child_process';
 import { createClient } from '@supabase/supabase-js';
 import 'dotenv/config';
 
@@ -12,33 +12,64 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY
 );
 
-function runIngestion() {
+function runIngestion(res) {
   console.log('🚀 Starting ingestion job...');
-  try {
-    const output = execSync('node scripts/ingestionJob.js', { 
-      encoding: 'utf-8', 
-      timeout: 300000 // 5 minute timeout
-    });
-    console.log('✅ Ingestion completed successfully');
-    return { success: true, output };
-  } catch (error) {
-    console.error('❌ Ingestion failed:', error.message);
-    return { success: false, error: error.message };
-  }
+  
+  const proc = spawn('node', ['scripts/ingestionJob.js'], {
+    env: process.env,
+    stdio: 'pipe'
+  });
+
+  let output = '';
+  let errorOutput = '';
+
+  proc.stdout.on('data', (data) => {
+    const text = data.toString();
+    output += text;
+    console.log(text.trim());
+  });
+
+  proc.stderr.on('data', (data) => {
+    const text = data.toString();
+    errorOutput += text;
+    console.error(text.trim());
+  });
+
+  proc.on('close', (code) => {
+    console.log(`✅ Ingestion completed with code ${code}`);
+    
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      status: code === 0 ? 'completed' : 'failed',
+      exitCode: code,
+      timestamp: new Date().toISOString(),
+      output: output.slice(-1000), // Last 1000 chars
+      error: errorOutput.slice(-500)
+    }));
+  });
+
+  proc.on('error', (err) => {
+    console.error('❌ Failed to start ingestion:', err);
+    res.writeHead(500, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      status: 'failed',
+      error: err.message,
+      timestamp: new Date().toISOString()
+    }));
+  });
 }
 
 const server = http.createServer((req, res) => {
   console.log(`📥 Received ${req.method} request to ${req.url}`);
 
-  // Run ingestion
-  const result = runIngestion();
+  if (req.url === '/health') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ status: 'healthy', timestamp: new Date().toISOString() }));
+    return;
+  }
 
-  res.writeHead(200, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify({
-    status: result.success ? 'completed' : 'failed',
-    timestamp: new Date().toISOString(),
-    ...result
-  }));
+  // Run ingestion (async)
+  runIngestion(res);
 });
 
 server.listen(PORT, () => {

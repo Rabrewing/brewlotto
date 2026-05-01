@@ -440,6 +440,7 @@ The system is considered complete when:
 | 9E | Notifications/Settings/Billing/Learn/Legal | ✅ Complete | All V1 destination routes live |
 | 10 | Cloud Infrastructure | ✅ Complete | Cloud Run + 7 Scheduler jobs deployed, Sentry configured |
 | 11 | Vercel Production Deploy | ✅ Complete | Build fixed, lint disabled, Sentry DSN added, preview mode active |
+| 12 | Shared UI/UX Framework | 🔄 In Progress | `shared-ui-ux-framework.md` created, implementation pending |
 
 ### Data Collection Status
 
@@ -455,6 +456,22 @@ The system is considered complete when:
 | Mega Millions | NC/CA | ~2,700 | Historical | ✅ In Database |
 
 **Total Records in Database:** ~47,397
+
+### V1 Destination Status (Per Shared Framework)
+
+| Destination | Status | Data Source | Framework Components |
+|-------------|--------|-------------|----------------------|
+| `/my-picks` | ✅ Live | API: `/api/predictions` | DashboardContainer, Header, NavigationTabs, LotteryBall |
+| `/results` | ✅ Live | API: `/api/results` | DashboardContainer, Header, NavigationTabs, GameTabs |
+| `/stats` | ✅ Live | Direct Supabase | DashboardContainer, Header, NavigationTabs, StatCard |
+| `/strategy-locker` | ✅ Live | Direct Supabase | DashboardContainer, Header, NavigationTabs, SectionCard |
+| `/profile` | ✅ Live | Auth + `user_profiles` | DashboardContainer, Header, NavigationTabs, DetailRow |
+| `/notifications` | 🔄 Partial | `notification_preferences` | UI done, delivery pending |
+| `/settings` | 🔄 Partial | `user_settings` | UI done, theme not applied |
+| `/billing` | 🔄 Partial | `user_entitlements` | UI done, Stripe pending |
+| `/learn` | ❌ Shell | Hardcoded array | Needs CMS integration |
+| `/legal` | ❌ Shell | Hardcoded summaries | Needs real policy docs |
+| `/logout` | ✅ Live | Supabase Auth | Minimal (auto-signOut) |
 
 ### Next Logical Steps (After Testing Current Deployment)
 
@@ -489,15 +506,27 @@ The system is considered complete when:
    - Target: 1000+ draws for better prediction accuracy
    - Use `node scripts/scrapeCA_Data.js both 1000`
 
-3. **Stripe Billing Integration**
+3. **Stripe Billing Integration** 🔄 CRITICAL FOR LAUNCH
    - Currently placeholder pages exist at `/billing`
    - Wire up Stripe subscriptions for premium tiers
    - Implement `user_entitlements` logic
+   - **Reference:** `brewdocs/v1/shared-ui-ux-framework.md` Section 3.8
 
 4. **E2E Testing with Playwright**
    - Current: 33 Jest unit tests
    - Add Playwright E2E tests for critical paths (dashboard, predictions, auth)
    - Target: >80% coverage per V1 spec
+
+5. **Implement Shared Framework Components**
+   - Create `LoadingSkeleton.tsx` (Section 1.2)
+   - Create `ErrorBoundary.tsx` (Section 1.2)
+   - Migrate direct Supabase pages to API routes
+   - **Reference:** `brewdocs/v1/shared-ui-ux-framework.md`
+
+6. **Add Real Content**
+   - `/learn`: Create `brewu_lessons` table, add lesson content
+   - `/legal`: Add full Terms, Privacy, Responsible Use policies
+   - **Reference:** `brewdocs/v1/shared-ui-ux-framework.md` Sections 3.9-3.10
 
 ### 2026-04-08 Progress Update
 

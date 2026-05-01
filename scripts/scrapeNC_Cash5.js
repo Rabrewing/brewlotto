@@ -4,7 +4,7 @@
 // Last updated: 2026-03-18
 
 import 'dotenv/config';
-import { NCCash5Adapter } from '../lib/ingestion/adapters/ncCash5Adapter.js';
+import { NCCash5Adapter } from '../lib/ingestion/adapters/ncCash5Adapter.ts';
 
 (async () => {
     try {

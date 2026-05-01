@@ -4,7 +4,7 @@
 // Last updated: 2026-03-18
 
 import 'dotenv/config';
-import { NCPick4Adapter } from '../lib/ingestion/adapters/ncPick4Adapter.js';
+import { NCPick4Adapter } from '../lib/ingestion/adapters/ncPick4Adapter.ts';
 
 (async () => {
     try {
