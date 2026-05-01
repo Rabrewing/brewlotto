@@ -92,6 +92,11 @@ Each lottery game has specific draw times. Schedule ingestion to run shortly aft
 
 Replace `YOUR_CLOUD_RUN_URL` with your actual Cloud Run URL.
 
+**Current Deployment URL (2026-05-01):**
+```
+https://brewlotto-ingestion-jix2pwxsaa-uc.a.run.app
+```
+
 ```bash
 # NC Pick 3 - Afternoon draw (3pm ET)
 gcloud scheduler jobs create http nc-pick3-afternoon \

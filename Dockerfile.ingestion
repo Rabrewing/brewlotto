@@ -9,4 +9,4 @@ COPY . .
 
 RUN npm install -g dotenv
 
-CMD ["node", "scripts/ingestionJob.js"]
+CMD ["node", "scripts/ingestionServer.js"]
