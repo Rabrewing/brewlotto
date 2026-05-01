@@ -127,15 +127,26 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    // Get game_id from lottery_games first (avoid embedding issues)
+    const gameIdResult = await supabase
+      .from('lottery_games')
+      .select('id, display_name')
+      .eq('game_key', gameConfig.statsGameKey)
+      .eq('state_code', gameConfig.statsStateCode)
+      .maybeSingle();
+
+    const gameId = gameIdResult.data?.id;
+
     const [drawResult, predictionResult, statsResult] = await Promise.all([
-      supabase
-        .from('official_draws')
-        .select('draw_date, draw_datetime_local, primary_numbers, bonus_numbers, lottery_games!inner(game_key,state_code,display_name)')
-        .eq('lottery_games.game_key', gameConfig.statsGameKey)
-        .eq('lottery_games.state_code', gameConfig.statsStateCode)
-        .order('draw_date', { ascending: false })
-        .limit(1)
-        .single(),
+      gameId
+        ? supabase
+            .from('official_draws')
+            .select('draw_date, draw_datetime_local, primary_numbers, bonus_numbers')
+            .eq('game_id', gameId)
+            .order('draw_date', { ascending: false })
+            .limit(1)
+            .single()
+        : { data: null, error: { message: 'Game not found' } },
       supabase
         .from('predictions')
         .select('id, game, state, created_at, predicted_numbers, bonus_number, is_saved, source_strategy_key, confidence_score')
@@ -143,13 +154,14 @@ export async function GET(request: NextRequest) {
         .in('state', gameConfig.predictionStates)
         .order('created_at', { ascending: false })
         .limit(8),
-      supabase
-        .from('official_draws')
-        .select('primary_numbers, bonus_numbers')
-        .eq('lottery_games.game_key', gameConfig.statsGameKey)
-        .eq('lottery_games.state_code', gameConfig.statsStateCode)
-        .order('draw_date', { ascending: false })
-        .limit(24),
+      gameId
+        ? supabase
+            .from('official_draws')
+            .select('primary_numbers, bonus_numbers')
+            .eq('game_id', gameId)
+            .order('draw_date', { ascending: false })
+            .limit(24)
+        : { data: [], error: null },
     ]);
 
     if (drawResult.error) {

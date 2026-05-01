@@ -83,9 +83,7 @@ async function runIngestionJob() {
     caDaily3: null,
     caDaily4: null,
     caFantasy5: null,
-    ncPick3: null,
-    ncPick4: null,
-    ncCash5: null,
+    ncLive: null,
     powerball: null,
     megaMillions: null,
   };
@@ -114,23 +112,11 @@ async function runIngestionJob() {
     );
     await wait(DELAY_BETWEEN_SCRAPERS);
 
-    // 3. NC Games (from nclottery.com)
-    console.log('\n📍 PHASE 3: North Carolina Games');
+    // 3. NC Games (LIVE from nclottery.com — scraps CSV-based scrapers)
+    console.log('\n📍 PHASE 3: North Carolina Games (Live)');
     results.ncPick3 = runCommand(
-      'node scripts/scrapeNC_Pick3.cjs',
-      'NC Pick 3 scraper'
-    );
-    await wait(DELAY_BETWEEN_SCRAPERS);
-    
-    results.ncPick4 = runCommand(
-      'node scripts/scrapeNC_Pick4.cjs',
-      'NC Pick 4 scraper'
-    );
-    await wait(DELAY_BETWEEN_SCRAPERS);
-    
-    results.ncCash5 = runCommand(
-      'node scripts/scrapeNC_Cash5.cjs',
-      'NC Cash 5 scraper'
+      'node scripts/scrapeNC_Live.js',
+      'NC Live scraper (Pick3, Pick4, Cash5)'
     );
     await wait(DELAY_BETWEEN_SCRAPERS);
 
@@ -162,8 +148,9 @@ async function runIngestionJob() {
     // Print detailed results
     Object.entries(results).forEach(([key, result]) => {
       if (result) {
+        const displayKey = key === 'ncLive' ? 'ncLive (Pick3+Pick4+Cash5)' : key;
         const status = result.success ? '✅' : '❌';
-        console.log(`${status} ${key}: ${result.success ? 'Success' : 'Failed'}`);
+        console.log(`${status} ${displayKey}: ${result.success ? 'Success' : 'Failed'}`);
       }
     });
 
