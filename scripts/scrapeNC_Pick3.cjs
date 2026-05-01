@@ -3,7 +3,8 @@
 // Updated to use V1 adapter architecture
 // Last updated: 2026-03-18
 
-import 'dotenv/config';
+require('dotenv').config();
+const path = require('path');
 const { NCPick3Adapter } = require(path.resolve(__dirname, '../lib/ingestion/adapters/js/adapters/ncPick3Adapter.cjs'));
 
 (async () => {
