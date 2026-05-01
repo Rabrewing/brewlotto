@@ -32,7 +32,11 @@ function runCommand(command, description, maxRetries = 3) {
       return { success: true, output, attempts: attempt };
     } catch (error) {
       lastError = error.message;
+      const stderr = error.stderr || '';
+      const stdout = error.stdout || '';
       console.log(`⚠️ Attempt ${attempt}/${maxRetries} failed: ${error.message}`);
+      if (stderr) console.log(`   STDERR: ${stderr.slice(0, 500)}`);
+      if (stdout) console.log(`   STDOUT: ${stdout.slice(0, 500)}`);
       
       if (attempt < maxRetries) {
         const delay = Math.min(1000 * Math.pow(2, attempt), 30000); // Exponential backoff, max 30s
