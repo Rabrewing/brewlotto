@@ -198,11 +198,31 @@ gcloud scheduler jobs list --location us-central1
 
 ---
 
-## Cost Notes
+## Cost Notes (Updated 2026-05-01)
 
-- **Cloud Run**: Pay per request (~$0.40 per million requests, ~$0.05 per vCPU-hour)
-- **Cloud Scheduler**: First 3 jobs free, then $0.10 per job per month
-- **Estimated monthly cost**: <$5 for current workload
+### Actual Resources Deployed (7 Scheduler Jobs)
+1. **Cloud Run**: `brewlotto-ingestion` (us-central1)
+   - Min 0 instances, max 20
+   - ~160 invocations/month
+   - Cost: **~$0.50/month**
+
+2. **Cloud Scheduler**: 7 jobs
+   - First 3 jobs: FREE
+   - Additional 4 jobs: 4 × $0.10 = **$0.40/month**
+
+3. **Container Registry**: ~200MB image
+   - Cost: **~$0.05/month**
+
+4. **Network Egress**: Minimal HTTP requests
+   - Cost: **~$0.01/month**
+
+### Total Estimated Cost: ~$1.00/month
+
+### Notes
+- Well within free tier limits for Cloud Run
+- Costs only occur when jobs actually run
+- No charges when no draws are scheduled
+- Can set max instances to 1 to reduce costs further if needed
 
 ---
 
