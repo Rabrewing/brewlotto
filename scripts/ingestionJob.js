@@ -34,10 +34,11 @@ function runCommand(command, description, maxRetries = 3) {
       lastError = error.message;
       const stderr = error.stderr || '';
       const stdout = error.stdout || '';
-      const code = error.status || 'unknown';
+      const code = error.status || error.code || 'unknown';
       console.log(`⚠️ Attempt ${attempt}/${maxRetries} failed: ${error.message} [exit code: ${code}]`);
       console.log(`   Command: ${command}`);
       console.log(`   CWD: ${process.cwd()}`);
+      console.log(`   Error details: ${JSON.stringify({message: error.message, status: error.status, code: error.code}).slice(0, 200)}`);
       if (stderr) console.log(`   STDERR: ${stderr.slice(0, 500)}`);
       if (stdout) console.log(`   STDOUT: ${stdout.slice(0, 500)}`);
       
