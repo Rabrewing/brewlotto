@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server';
 import OpenAI from "openai";
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY
-});
+function getOpenAI(): OpenAI {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error('OPENAI_API_KEY is not set');
+  }
+  return new OpenAI({ apiKey });
+}
 
 // 🔧 Shell command simulation logic
 function simulateShellCommand(cmd: string): string {
@@ -44,6 +48,7 @@ export async function POST(req: Request) {
 
     // 🧠 GPT response
     try {
+        const openai = getOpenAI();
         const completion = await openai.chat.completions.create({
             model: "gpt-4",
             temperature: 0.7,
