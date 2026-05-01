@@ -409,7 +409,7 @@ The system is considered complete when:
 
 ## V1 Progress Tracker
 
-**Last Updated:** 2026-04-09 ET (12:24 EDT - normalized dropdown destination set live through Phase 9E, verification green)
+**Last Updated:** 2026-05-01 ET (15:45 EDT - NC adapter schema fixed, all 8/8 scrapers now insert into canonical official_draws)
 
 ### Phase Status
 
@@ -418,9 +418,9 @@ The system is considered complete when:
 | D1 | Shared Ingestion Foundation | ✅ Complete | fetcher, parser, normalizer, validator, sourceRegistry |
 | D2 | Canonical Schema | ✅ Complete | Schema already in supabase/migrations |
 | D3 | NC Official Ingestors | ✅ Complete | NC CSV data ready in /data/nc |
-| D4 | NC Backfill Runner | ✅ Complete | V1 adapters created for NC games (Pick 3, Pick 4, Cash 5) |
+| D4 | NC Backfill Runner | ✅ Complete | V1 adapters verified working - inserts into official_draws with correct schema (2026-05-01) |
 | D5 | Scheduler Layer | ✅ Complete | Daily scheduler with node-cron |
-| D6 | CA Official Latest Parsers | ✅ Complete | CA scraper working |
+| D6 | CA Official Latest Parsers | ✅ Complete | CA scraper working (50 draws per run, optimized from 1000) |
 | D7 | CA Historical Adapters | ✅ Complete | Multi-state adapters, unified job, health monitor |
 | D8 | Cross-Source Validation | ✅ Complete | Alert system tables created (system_alerts, alert_events, alert_deliveries), pipeline validated |
 | D9 | Source Registry Config | ✅ Complete | sourceRegistry.ts created |

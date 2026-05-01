@@ -3,6 +3,7 @@
 **Version:** 1.0  
 **Date:** 2026-05-01  
 **Status:** Canonical Source of Truth  
+**Last Updated:** 2026-05-01 ET (NC adapter schema fixed, all 8/8 ingestion scrapers working)
 **Purpose:** Define the shared UI/UX framework for all V1 destinations to ensure seamless transitions and consistent experience.
 
 ---
