@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env node'
 
 import http from 'http';
 import { spawn } from 'child_process';
@@ -13,7 +13,7 @@ const supabase = createClient(
 );
 
 function runIngestion(res) {
-  console.log('🚀 Starting ingestion job...');
+  console.log('🚀 Starting ingestion job...');  
   
   const proc = spawn('node', ['scripts/ingestionJob.js'], {
     env: process.env,
@@ -43,7 +43,7 @@ function runIngestion(res) {
       status: code === 0 ? 'completed' : 'failed',
       exitCode: code,
       timestamp: new Date().toISOString(),
-      output: output.slice(-1000), // Last 1000 chars
+      output: output.slice(-1000),
       error: errorOutput.slice(-500)
     }));
   });

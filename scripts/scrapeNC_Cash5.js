@@ -4,7 +4,7 @@
 // Last updated: 2026-03-18
 
 import 'dotenv/config';
-import { NCCash5Adapter } from '../lib/ingestion/adapters/ncCash5Adapter.ts';
+const { NCCash5Adapter } = require(path.resolve(__dirname, '../lib/ingestion/adapters/js/adapters/ncCash5Adapter.js'));
 
 (async () => {
     try {
