@@ -109,19 +109,19 @@ async function runIngestionJob() {
     // 3. NC Games (from nclottery.com)
     console.log('\n📍 PHASE 3: North Carolina Games');
     results.ncPick3 = runCommand(
-      'node scripts/scrapeNC_Pick3.js',
+      'node scripts/scrapeNC_Pick3.cjs',
       'NC Pick 3 scraper'
     );
     await wait(DELAY_BETWEEN_SCRAPERS);
     
     results.ncPick4 = runCommand(
-      'node scripts/scrapeNC_Pick4.js',
+      'node scripts/scrapeNC_Pick4.cjs',
       'NC Pick 4 scraper'
     );
     await wait(DELAY_BETWEEN_SCRAPERS);
     
     results.ncCash5 = runCommand(
-      'node scripts/scrapeNC_Cash5.js',
+      'node scripts/scrapeNC_Cash5.cjs',
       'NC Cash 5 scraper'
     );
     await wait(DELAY_BETWEEN_SCRAPERS);
