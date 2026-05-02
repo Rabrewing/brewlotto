@@ -17,7 +17,7 @@ export default function LoginPage() {
             email,
             options: {
                 shouldCreateUser: true,
-                emailRedirectTo: `${window.location.origin}/pick3`,
+                emailRedirectTo: `${window.location.origin}/auth/callback`,
             },
         });
 
