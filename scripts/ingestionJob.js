@@ -26,8 +26,8 @@ const STATE_GAME_KEYS = {
 };
 
 const SCRAPER_COMMANDS = {
-  caDaily3: 'node scripts/scrapeCA_Data.js daily3 50',
-  caDaily4: 'node scripts/scrapeCA_Data.js daily4 50',
+  caDaily3: 'node scripts/scrapeCA_Data.js daily3 1000',
+  caDaily4: 'node scripts/scrapeCA_Data.js daily4 1000',
   caFantasy5: 'node scripts/fetchCAData.js',
   ncLive: 'node scripts/scrapeNC_Live.js',
   powerball: 'node scripts/scrapePowerball.js',
