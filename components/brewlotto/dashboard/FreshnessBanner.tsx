@@ -1,35 +1,31 @@
+const TZ_MAP = { NC: { zone: 'America/New_York', label: 'ET' }, CA: { zone: 'America/Los_Angeles', label: 'PT' } };
+
 interface FreshnessBannerProps {
   status: 'healthy' | 'delayed' | 'stale' | 'failed' | 'unknown';
   stalenessMinutes: number | null;
   expectedNextDrawAt: string | null;
   loading?: boolean;
+  stateCode?: 'NC' | 'CA';
 }
 
 function formatMinutes(value: number | null) {
-  if (value == null) {
-    return 'unknown';
-  }
-
-  if (value < 60) {
-    return `${value}m`;
-  }
-
+  if (value == null) return 'unknown';
+  if (value < 60) return `${value}m`;
   const hours = Math.floor(value / 60);
   const minutes = value % 60;
   return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
 }
 
-function formatDate(value: string | null) {
-  if (!value) {
-    return 'not scheduled';
-  }
-
+function formatDrawDate(value: string | null, stateCode: string) {
+  if (!value) return 'not scheduled';
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-
-  return date.toLocaleString();
+  if (Number.isNaN(date.getTime())) return value;
+  const tz = TZ_MAP[stateCode as keyof typeof TZ_MAP] || TZ_MAP.NC;
+  const formatted = date.toLocaleString('en-US', {
+    timeZone: tz.zone, month: 'short', day: 'numeric', year: 'numeric',
+    hour: 'numeric', minute: '2-digit', hour12: true,
+  });
+  return `${formatted} ${tz.label}`;
 }
 
 const STATUS_STYLES = {
@@ -40,7 +36,7 @@ const STATUS_STYLES = {
   unknown: 'border-white/10 bg-white/5 text-white/70',
 };
 
-export function FreshnessBanner({ status, stalenessMinutes, expectedNextDrawAt, loading = false }: FreshnessBannerProps) {
+export function FreshnessBanner({ status, stalenessMinutes, expectedNextDrawAt, loading = false, stateCode = 'NC' }: FreshnessBannerProps) {
   const title = loading
     ? 'Checking source freshness'
     : status === 'healthy'
@@ -56,7 +52,7 @@ export function FreshnessBanner({ status, stalenessMinutes, expectedNextDrawAt, 
   const compactBody = loading
     ? 'Checking the latest ingestion window.'
     : status === 'healthy'
-      ? `Next expected draw: ${formatDate(expectedNextDrawAt)}.`
+      ? `Next expected draw: ${formatDrawDate(expectedNextDrawAt, stateCode)}.`
       : status === 'delayed'
         ? `Feed lagging by about ${formatMinutes(stalenessMinutes)}.`
         : status === 'stale'

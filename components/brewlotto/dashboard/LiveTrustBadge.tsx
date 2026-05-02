@@ -1,3 +1,8 @@
+const TZ_MAP: Record<string, { zone: string; label: string }> = {
+  NC: { zone: 'America/New_York', label: 'ET' },
+  CA: { zone: 'America/Los_Angeles', label: 'PT' },
+};
+
 interface LiveTrustBadgeProps {
   status: 'healthy' | 'delayed' | 'stale' | 'failed' | 'unknown';
   latestDrawDate?: string | null;
@@ -5,14 +10,17 @@ interface LiveTrustBadgeProps {
   expectedNextDrawAt?: string | null;
   sourceLabel?: string;
   compact?: boolean;
+  stateCode?: 'NC' | 'CA';
 }
 
-function formatDate(value: string | null) {
+function formatDate(value: string | null, stateCode: string) {
   if (!value) return null;
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString('en-US', {
-    month: 'short', day: 'numeric', year: 'numeric',
+  const tz = TZ_MAP[stateCode] || TZ_MAP.NC;
+  return date.toLocaleString('en-US', {
+    timeZone: tz.zone, month: 'short', day: 'numeric', year: 'numeric',
+    hour: 'numeric', minute: '2-digit', hour12: true,
   });
 }
 
@@ -55,10 +63,11 @@ export function LiveTrustBadge({
   expectedNextDrawAt,
   sourceLabel = 'Official Source',
   compact = false,
+  stateCode = 'NC',
 }: LiveTrustBadgeProps) {
   const staleness = formatMinutes(stalenessMinutes);
-  const lastDraw = formatDate(latestDrawDate);
-  const nextDraw = formatDate(expectedNextDrawAt);
+  const lastDraw = formatDate(latestDrawDate, stateCode);
+  const nextDraw = formatDate(expectedNextDrawAt, stateCode);
 
   return (
     <div className={`inline-flex flex-col gap-1 ${STATUS_TEXT[status]}`}>
