@@ -13,7 +13,8 @@ import {
   PredictionCard,
   GeneratePickButton,
   UtilityPills,
-  VoiceModeCard
+  VoiceModeCard,
+  LiveTrustBadge,
 } from '@/components/brewlotto/dashboard';
 import { DASHBOARD_GAME_CONFIG } from '@/lib/dashboard/game-config';
 
@@ -348,6 +349,15 @@ export default function DashboardPage() {
             No live stats are available for this game yet
           </div>
         )}
+
+        <div className="mb-5">
+          <LiveTrustBadge
+            status={freshness.status}
+            latestDrawDate={null}
+            stalenessMinutes={freshness.stalenessMinutes}
+            expectedNextDrawAt={freshness.expectedNextDrawAt}
+          />
+        </div>
 
         <PredictionCard
           game={gameLabel}

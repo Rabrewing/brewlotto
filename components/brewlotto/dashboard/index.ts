@@ -15,3 +15,4 @@ export { PredictionCard } from './PredictionCard';
 export { GeneratePickButton } from './GeneratePickButton';
 export { UtilityPills } from './UtilityPills';
 export { VoiceModeCard } from './VoiceModeCard';
+export { LiveTrustBadge } from './LiveTrustBadge';
