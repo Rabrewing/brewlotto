@@ -1,5 +1,49 @@
 # AGENTS.md (BrewLotto V1)
 
+## Current Status (2026-05-01 ET)
+
+### System Health — All NC Launch Games Green
+
+| Game | Latest Draw | Freshness | Source |
+|------|-------------|-----------|--------|
+| Pick 3 (NC) | May 1 | healthy | nclottery.com live |
+| Pick 4 (NC) | May 1 | healthy | nclottery.com live |
+| Cash 5 (NC) | May 1 | healthy | nclottery.com live |
+| Powerball (NC) | Apr 29 | healthy | NCEL live |
+| Mega Millions (NC) | May 1 | healthy | NCEL live |
+| CA Daily 3/4 | Mar 16 | stale (expected) | lotteryextreme.com |
+| CA Fantasy 5 | Mar 17 | stale (expected) | lotto-8.com |
+
+### Trust Loop Proven (2026-05-01)
+
+```
+official source → ingestion → Supabase → freshness view → API → UI
+```
+
+### Key Fixes Applied (May 1, 2026)
+
+| Fix | File(s) | Impact |
+|-----|---------|--------|
+| **Live NC scraper** | `scripts/scrapeNC_Live.js` (new) | Replaced CSV-based NC scrapers with live cheerio scraping from nclottery.com. Pick3/4/Cash5 data now 1-day fresh instead of 46-day stale. |
+| **Powerball NCEL source** | `scripts/scrapePowerball.js` | Replaced powerball.com (JS-rendered, 0 rows found) with NCEL server-rendered HTML. Correct ball class parsing (.ball / .powerball). 21 new draws inserted. |
+| **Delayed-draw retry rounds** | `scripts/ingestionJob.js` | 3-round retry: primary scrape → freshness check → retry stale/delayed → check → final retry. Recovers late-posted draws automatically. |
+| **CA scrape count** | `scripts/ingestionJob.js` | Increased from 50 to 1000 draws for prediction quality. |
+| **RLS policies** | `supabase/migrations/20260501170000_add_public_read_policies.sql` | Anon SELECT on official_draws, lottery_games, draw_sources. Dashboard was returning empty because RLS blocked all reads. |
+| **Results API join** | `app/api/results/route.ts` | Fixed broken embedded join (`lottery_games!inner`) → game_id lookup. |
+| **Freshness gating** | `app/api/results/route.ts`, `app/results/page.tsx`, `app/dashboard/page.tsx` | Changed from `!== 'healthy'` to `=== 'stale' || === 'failed'`. Delayed status no longer blocks draw display. |
+| **LiveTrustBadge** | `components/brewlotto/dashboard/LiveTrustBadge.tsx` (new) | Compact inline indicator: colored status dot, Live/Delayed/Stale label, Official Source badge, latest draw date, disclaimer. |
+| **Number formatting** | `LotteryBall.tsx` + 5 inline files + API route | Removed `padStart(2, '0')` globally. Numbers display as `6` not `06`. |
+| **Timezone display** | `FreshnessBanner.tsx`, `LiveTrustBadge.tsx`, `PredictionCard.tsx` | Removed seconds from timestamps. Added ET/PT timezone labels. Format: "May 2, 2026, 1:00 PM ET". |
+| **Dropdown navigation** | `AvatarDropdown.tsx` | Fixed onClick — now calls `router.push(href) + setIsOpen(false)` instead of just closing. Removed hardcoded "John Doe"/"john@example.com"/"JD" avatar — all loaded from auth. |
+| **Superadmin added** | `.env`, `.env.local` | `BREWCOMMAND_ADMIN_EMAILS` now includes `brewmaster.rb@brewassist.app`. |
+
+### Deployments
+
+| Service | Status | URL |
+|---------|--------|-----|
+| **Vercel** | Auto-deploy from main | https://brewlotto.vercel.app |
+| **Cloud Run** | v00020-hzg (latest) | https://brewlotto-ingestion-119469099721.us-central1.run.app |
+
 ## V1 Production Deployment (2026-04-11 ET)
 
 ### Deployment Status
@@ -459,74 +503,63 @@ The system is considered complete when:
 
 ### V1 Destination Status (Per Shared Framework)
 
-| Destination | Status | Data Source | Framework Components |
-|-------------|--------|-------------|----------------------|
-| `/my-picks` | ✅ Live | API: `/api/predictions` | DashboardContainer, Header, NavigationTabs, LotteryBall |
-| `/results` | ✅ Live | API: `/api/results` | DashboardContainer, Header, NavigationTabs, GameTabs |
-| `/stats` | ✅ Live | Direct Supabase | DashboardContainer, Header, NavigationTabs, StatCard |
-| `/strategy-locker` | ✅ Live | Direct Supabase | DashboardContainer, Header, NavigationTabs, SectionCard |
-| `/profile` | ✅ Live | Auth + `user_profiles` | DashboardContainer, Header, NavigationTabs, DetailRow |
-| `/notifications` | 🔄 Partial | `notification_preferences` | UI done, delivery pending |
-| `/settings` | 🔄 Partial | `user_settings` | UI done, theme not applied |
-| `/billing` | 🔄 Partial | `user_entitlements` | UI done, Stripe pending |
-| `/learn` | ❌ Shell | Hardcoded array | Needs CMS integration |
-| `/legal` | ❌ Shell | Hardcoded summaries | Needs real policy docs |
-| `/logout` | ✅ Live | Supabase Auth | Minimal (auto-signOut) |
+| Destination | Status | Data Source | Mockup | Key Gaps |
+|-------------|--------|-------------|--------|----------|
+| `/my-picks` | ✅ Live | API: `/api/predictions` | `my-picks.png` | Replay action, match history, SectionCard migration |
+| `/results` | ✅ Live | API: `/api/results` | `today-results.png` | Match history (last 5 draws), "Request New Prediction" CTA |
+| `/stats` | ✅ Live | Direct Supabase | `stats-and-performance.png` | Charts (Chart.js installed), date filter, API migration |
+| `/strategy-locker` | ✅ Live | Direct Supabase | `stratergy-locker.png` + card states + run animation | "Run Strategy" action, comparison view, animation not wired |
+| `/profile` | ✅ Live | Auth + `user_profiles` | `profile.png` | Avatar upload, theme apply |
+| `/notifications` | 🔄 Partial | `notification_preferences` | `notifications.png` | Actual delivery, pagination |
+| `/settings` | 🔄 Partial | `user_settings` | `settings.png` | Theme application to UI, data export |
+| `/billing` | 🔄 Partial | `user_entitlements` | `subscription-and-billing.png` | Stripe integration (critical), billing history |
+| `/learn` | ❌ Shell | Hardcoded array | `brewu.png` | CMS/DB, progress tracking, real content |
+| `/legal` | ❌ Shell | Hardcoded summaries | None yet | Full policies, cookie consent |
+| `/logout` | ✅ Live | Supabase Auth | None yet | Confirm modal on direct URL access |
 
-### Next Logical Steps (After Testing Current Deployment)
+**Shared Issue:** 6 destinations (Stats, Strategy Locker, Profile, Notifications, Settings, Billing) define local `SectionCard` instead of importing from a shared component.
 
-**IMMEDIATE (V1 Launch Prep):**
-1. **Test Deployed Services**
-   - Verify Vercel preview URL loads: `brewlotto.vercel.app`
-   - Test Cloud Run ingestion: `curl https://brewlotto-ingestion-119469099721.us-central1.run.app`
-   - Confirm Sentry receiving errors in dashboard
+### Remaining Work (Todo List)
 
-2. **Set Production Branch** (when ready for V1 launch)
-   - Vercel Dashboard → Settings → Git → Production Branch: `brewlotto-v1`
-   - Keep `main` or `brew2-overhaul` for preview/testing
-   - Re-add custom domain `brewlotto.app`
+**HIGH PRIORITY — Before V1 Launch:**
+1. **CA Live Scraper** — Build `scrapeCA_Live.js` mirroring the NC pattern (live from calottery.com)
+2. **Shared SectionCard** — Centralize the duplicated component into `components/brewlotto/dashboard/SectionCard.tsx`
+3. **Onboarding Specs** — Create onboarding flow documentation and spec (user signup → first pick → tutorial)
+4. **Mockup Alignment** — Visually QA all 15 mockup PNGs against rendered pages and lock designs
 
-3. **Complete V1 Success Criteria Validation**
-   - ✅ Historical draw data loads correctly for NC and CA games
-   - ✅ Prediction engine generates picks with reproducible statistical logic
-   - ✅ Dashboard displays predictions with explainable reasoning
-   - ✅ Strategies produce auditable reasoning and evidence trails
-   - 🔄 Admin panel shows ingestion health, prediction metrics, and audit logs (test now)
-   - 🔄 Billing system processes subscriptions and updates entitlements correctly
-   - ✅ All custom tools (brew-scan, init script, migrations) function as specified
+**MEDIUM PRIORITY:**
+1. **Stripe Billing** — Wire up Stripe subscriptions, webhooks, customer portal
+2. **Dropdown UX** — Add hover previews and keyboard navigation per dropdown spec
+3. **Shared Components** — Create `LoadingSkeleton.tsx`, `ErrorBoundary.tsx`
+4. **"Run Strategy" Animation** — Wire up the animation from `strategy-locker-run-stratergy-animation.png`
 
-**POST-LAUNCH (V1.1/P1):**
-1. **Fix Lint Debt** (tracked in AGENTS.md lint section)
-   - Fix unused vars in `lib/strategies/*.js`, `lib/stats/*.js`, etc.
-   - Re-enable ESLint in `eslint.config.mjs`
-   - Remove `--ignore-during-builds` from `next.config.ts`
+**LOW PRIORITY:**
+1. **Stats Charts** — Add Chart.js visualizations for trends
+2. **BrewU/Learn CMS** — Create `brewu_lessons` table, populate lessons
+3. **Legal Policies** — Add full Terms of Service, Privacy Policy, Responsible Use
+4. **Theme Application** — Wire settings theme selection to actual UI
+5. **Avatar Upload** — Add profile image upload
+6. **E2E Tests** — Playwright tests for critical paths
+7. **Lint Debt** — Fix unused vars, re-enable ESLint
 
-2. **Expand CA Historical Data**
-   - Current: ~200 draws for Daily 3/4, ~97 for Fantasy 5
-   - Target: 1000+ draws for better prediction accuracy
-   - Use `node scripts/scrapeCA_Data.js both 1000`
+### Mockup-to-Code Alignment Summary
 
-3. **Stripe Billing Integration** 🔄 CRITICAL FOR LAUNCH
-   - Currently placeholder pages exist at `/billing`
-   - Wire up Stripe subscriptions for premium tiers
-   - Implement `user_entitlements` logic
-   - **Reference:** `brewdocs/v1/shared-ui-ux-framework.md` Section 3.8
-
-4. **E2E Testing with Playwright**
-   - Current: 33 Jest unit tests
-   - Add Playwright E2E tests for critical paths (dashboard, predictions, auth)
-   - Target: >80% coverage per V1 spec
-
-5. **Implement Shared Framework Components**
-   - Create `LoadingSkeleton.tsx` (Section 1.2)
-   - Create `ErrorBoundary.tsx` (Section 1.2)
-   - Migrate direct Supabase pages to API routes
-   - **Reference:** `brewdocs/v1/shared-ui-ux-framework.md`
-
-6. **Add Real Content**
-   - `/learn`: Create `brewu_lessons` table, add lesson content
-   - `/legal`: Add full Terms, Privacy, Responsible Use policies
-   - **Reference:** `brewdocs/v1/shared-ui-ux-framework.md` Sections 3.9-3.10
+| Mockup File | Destination | Layout Score | Notes |
+|-------------|-------------|-------------|-------|
+| `brewlotto_dropdown.png` | AvatarDropdown | Strong | Width, glass, groups, anchor, identity header all match |
+| `my-picks.png` | My Picks | Strong | Filters, cards, save/delete aligned |
+| `today-results.png` | Results | Strong | Draw card, match tracking, insights all present |
+| `stats-and-performance.png` | Stats | Strong | Metrics, breakdown, trends present; charts missing |
+| `stratergy-locker.png` | Strategy Locker | Good | Cards, save, plan ladder, entitlements all present; run action missing |
+| `strategery-card-states-*.png` | Strategy Locker | Good | Active/Locked/Disabled states match code behavior |
+| `strategy-locker-run-stratergy-animation.png` | Strategy Locker | Weak | Animation not implemented |
+| `profile.png` | Profile | Strong | Hero, edit modal, details, prefs all present |
+| `notifications.png` | Notifications | Good | Toggles, alerts, quiet hours present; delivery not wired |
+| `settings.png` | Settings | Good | Defaults, prefs, theme UI present; theme not applied |
+| `subscription-and-billing.png` | Billing | Good | Plan, entitlements, features present; Stripe missing |
+| `brewu.png` | Learn | Weak | 4 hardcoded cards; needs CMS/progress tracking |
+| `trust-gate.png` | — | Deferred | Not in V1 scope |
+| `referral-engine-system.png` | — | Deferred | Not in V1 scope |
 
 ### 2026-04-08 Progress Update
 
