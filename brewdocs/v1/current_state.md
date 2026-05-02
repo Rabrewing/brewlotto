@@ -1,7 +1,7 @@
 # BrewLotto V1 - Current State & Next Steps
 
-**Last Updated:** 2026-05-01 ET (NC adapter schema fixed - all 8/8 scrapers working)
-**Phase:** D4 - NC Adapter Schema Fix Complete → Cloud Run Ingestion Verified
+**Last Updated:** 2026-05-02 ET (All NC games live, ingestion retry deployed, onboarding added)
+**Phase:** D8.1 — Delayed Draw Retry + Onboarding Flow Complete → Targeting CA Live Scraper
 
 ---
 

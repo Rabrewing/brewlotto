@@ -524,8 +524,19 @@ The system is considered complete when:
 **HIGH PRIORITY — Before V1 Launch:**
 1. **CA Live Scraper** — Build `scrapeCA_Live.js` mirroring the NC pattern (live from calottery.com)
 2. **Shared SectionCard** — Centralize the duplicated component into `components/brewlotto/dashboard/SectionCard.tsx`
-3. **Onboarding Specs** — Create onboarding flow documentation and spec (user signup → first pick → tutorial)
-4. **Mockup Alignment** — Visually QA all 15 mockup PNGs against rendered pages and lock designs
+3. **Mockup Alignment** — Visually QA all 15 mockup PNGs against rendered pages and lock designs
+
+**ONBOARDING STATUS:**
+| Component | Status |
+|-----------|--------|
+| `user_preferences` columns (migration) | ✅ Applied |
+| Disclaimer acknowledgment (step 1) | ✅ Built |
+| Tutorial carousel (step 2) | ✅ Built |
+| Skip to dashboard | ✅ Built |
+| Auth callback route | ✅ Built |
+| Middleware route protection | ✅ Built |
+| Post-login redirect | ✅ Updated |
+| Spec doc (`brewdocs/v1/onboarding-spec.md`) | ✅ Created |
 
 **MEDIUM PRIORITY:**
 1. **Stripe Billing** — Wire up Stripe subscriptions, webhooks, customer portal

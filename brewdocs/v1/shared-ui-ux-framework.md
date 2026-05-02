@@ -308,5 +308,29 @@ const { data, error } = await supabase
 ---
 
 **Maintainer:** @brewexec  
-**Last Updated:** 2026-05-01  
+**Last Updated:** 2026-05-02  
 **Next Review:** After Stripe integration complete
+
+---
+
+## Appendix D: Onboarding Flow (2026-05-02)
+
+V1 onboarding was implemented per `brewdocs/v1/onboarding-spec.md`.
+
+### Flow
+```
+Sign up / Magic Link → /auth/callback → Middleware checks onboarding_completed → /onboarding → /dashboard
+```
+
+### Middleware route protection
+- `middleware.ts` checks Supabase session + `user_preferences.onboarding_completed`
+- Exempt paths: `/login`, `/onboarding`, `/auth/callback`, `/api/*`
+
+### Onboarding steps
+1. Disclaimer acknowledgment (required checkbox + save to `user_preferences`)
+2. Tutorial (4 slides) with option to skip
+
+### Database
+- `user_preferences.onboarding_completed` (boolean)
+- `user_preferences.disclaimer_acknowledged` (boolean)  
+- `user_preferences.acknowledged_at` (timestamptz)
