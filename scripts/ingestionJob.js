@@ -17,18 +17,14 @@ const DELAY_BETWEEN_SCRAPERS = 2000;
 const RETRY_DELAY_MS = 10000;
 
 const STATE_GAME_KEYS = {
-  caDaily3: { state: 'CA', game: 'daily3' },
-  caDaily4: { state: 'CA', game: 'daily4' },
-  caFantasy5: { state: 'CA', game: 'fantasy5' },
+  caLive: { state: 'CA', game: ['daily3', 'daily4', 'fantasy5'] },
   ncLive: { state: 'NC', game: ['pick3', 'pick4', 'cash5'] },
   powerball: { state: 'NC', game: 'powerball' },
   megaMillions: { state: 'NC', game: 'mega_millions' },
 };
 
 const SCRAPER_COMMANDS = {
-  caDaily3: 'node scripts/scrapeCA_Data.js daily3 1000',
-  caDaily4: 'node scripts/scrapeCA_Data.js daily4 1000',
-  caFantasy5: 'node scripts/fetchCAData.js',
+  caLive: 'node scripts/scrapeCA_Live.js',
   ncLive: 'node scripts/scrapeNC_Live.js',
   powerball: 'node scripts/scrapePowerball.js',
   megaMillions: 'node scripts/scrapeMega.js',
@@ -114,7 +110,7 @@ function getDelayedKeys(delayedGames) {
   }).map(([key]) => key);
 }
 
-const RUN_ORDER = ['caDaily3', 'caDaily4', 'caFantasy5', 'ncLive', 'powerball', 'megaMillions'];
+const RUN_ORDER = ['caLive', 'ncLive', 'powerball', 'megaMillions'];
 
 async function ingestRound(results, keys, label) {
   console.log(`\n📍 ${label}`);
