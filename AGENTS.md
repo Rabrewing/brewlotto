@@ -517,7 +517,9 @@ The system is considered complete when:
 | `/legal` | ❌ Shell | Hardcoded summaries | None yet | Full policies, cookie consent |
 | `/logout` | ✅ Live | Supabase Auth | None yet | Confirm modal on direct URL access |
 
-**Shared Issue:** 6 destinations (Stats, Strategy Locker, Profile, Notifications, Settings, Billing) define local `SectionCard` instead of importing from a shared component.
+**Shared Issue:** SectionCard was duplicated across 6 destinations — now centralized into `components/brewlotto/dashboard/SectionCard.tsx` ✅
+
+**Mockup QA Note:** Visual alignment of 15 mockup PNGs vs rendered pages requires image-capable AI. Task is scoped and ready — hand off to vision-capable agent for pixel-level comparison. All screen-map specs locked in `brewdocs/v1/navigation/dropdown-screen-map.md`.
 
 ### Remaining Work (Todo List)
 
