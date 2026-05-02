@@ -34,7 +34,7 @@ export function LotteryBall({ number, variant, size = 'large', label }: LotteryB
         >
           {/* Inner glow */}
           <div className="absolute inset-1 rounded-full bg-white/10" />
-          <span className="relative z-10">{String(number).padStart(2, '0')}</span>
+          <span className="relative z-10">{number}</span>
         </div>
         <span className="text-[9px] font-bold uppercase tracking-[0.12em] text-white/60 sm:text-[10px]">
           {label}
@@ -49,7 +49,7 @@ export function LotteryBall({ number, variant, size = 'large', label }: LotteryB
     >
       {/* Inner glow */}
       <div className="absolute inset-1 rounded-full bg-white/10" />
-      <span className="relative z-10">{String(number).padStart(2, '0')}</span>
+      <span className="relative z-10">{number}</span>
     </div>
   );
 }
