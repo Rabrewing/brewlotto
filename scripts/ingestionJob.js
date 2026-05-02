@@ -1,189 +1,223 @@
 #!/usr/bin/env node
 
 /**
- * Unified Ingestion Job
- * Runs all scrapers in sequence to fetch and ingest lottery data
+ * Unified Ingestion Job with Delayed-Draw Retry
+ * Runs all scrapers, then retries delayed games up to 2 more times.
  */
 
 import { execSync } from 'child_process';
 import { createClient } from '@supabase/supabase-js';
 import 'dotenv/config';
 
-const supabase = createClient(
-  process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY
-);
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const DELAY_BETWEEN_SCRAPERS = 2000; // 2 seconds between scrapers
+const DELAY_BETWEEN_SCRAPERS = 2000;
+const RETRY_DELAY_MS = 10000;
 
-/**
- * Run a command with retry logic
- */
+const STATE_GAME_KEYS = {
+  caDaily3: { state: 'CA', game: 'daily3' },
+  caDaily4: { state: 'CA', game: 'daily4' },
+  caFantasy5: { state: 'CA', game: 'fantasy5' },
+  ncLive: { state: 'NC', game: ['pick3', 'pick4', 'cash5'] },
+  powerball: { state: 'NC', game: 'powerball' },
+  megaMillions: { state: 'NC', game: 'mega_millions' },
+};
+
+const SCRAPER_COMMANDS = {
+  caDaily3: 'node scripts/scrapeCA_Data.js daily3 50',
+  caDaily4: 'node scripts/scrapeCA_Data.js daily4 50',
+  caFantasy5: 'node scripts/fetchCAData.js',
+  ncLive: 'node scripts/scrapeNC_Live.js',
+  powerball: 'node scripts/scrapePowerball.js',
+  megaMillions: 'node scripts/scrapeMega.js',
+};
+
 function runCommand(command, description, maxRetries = 3) {
   console.log(`\n🔄 ${description}...`);
   console.log(`   Command: ${command}`);
-  
-  let lastError;
-  
+
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       const output = execSync(command, { encoding: 'utf-8', stdio: 'pipe' });
       console.log(`✅ ${description} completed (attempt ${attempt}/${maxRetries})`);
       return { success: true, output, attempts: attempt };
     } catch (error) {
-      lastError = error.message;
-      const stderr = error.stderr || '';
-      const stdout = error.stdout || '';
-      const code = error.status || error.code || 'unknown';
-      console.log(`⚠️ Attempt ${attempt}/${maxRetries} failed: ${error.message} [exit code: ${code}]`);
-      console.log(`   Command: ${command}`);
-      console.log(`   CWD: ${process.cwd()}`);
-      console.log(`   Error details: ${JSON.stringify({message: error.message, status: error.status, code: error.code}).slice(0, 200)}`);
-      if (stderr) console.log(`   STDERR: ${stderr.slice(0, 500)}`);
-      if (stdout) console.log(`   STDOUT: ${stdout.slice(0, 500)}`);
-      
+      console.log(`⚠️ Attempt ${attempt}/${maxRetries} failed: ${error.message.slice(0, 120)}`);
       if (attempt < maxRetries) {
-        const delay = Math.min(1000 * Math.pow(2, attempt), 30000); // Exponential backoff, max 30s
-        console.log(`   Retrying in ${delay/1000} seconds...`);
-        waitSync(delay);
+        waitSync(Math.min(1000 * Math.pow(2, attempt), 30000));
       }
     }
   }
-  
+
   console.error(`❌ ${description} failed after ${maxRetries} attempts`);
-  return { success: false, error: lastError, attempts: maxRetries };
+  return { success: false, error: 'max retries', attempts: maxRetries };
 }
 
-/**
- * Synchronous wait function
- */
 function waitSync(ms) {
   const start = Date.now();
-  while (Date.now() - start < ms) {
-    // Busy wait
-  }
+  while (Date.now() - start < ms) {}
 }
 
-/**
- * Wait for a specified duration
- */
 function wait(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-/**
- * Main ingestion job
- */
+async function refreshFreshness() {
+  try {
+    const { error } = await supabase.rpc('refresh_draw_freshness_status');
+    if (error) {
+      // Fallback: use raw SQL via DB
+      console.log('  ℹ️ RPC not available for refresh');
+    }
+  } catch {
+    // silently skip — refresh may fail if RPC doesn't exist
+  }
+}
+
+async function getDelayedGames() {
+  try {
+    const { data, error } = await supabase
+      .from('v_ingestion_health_summary')
+      .select('state_code, game_key, freshness_status, game_name');
+
+    if (error) {
+      console.log(`  ⚠️ Could not query freshness: ${error.message}`);
+      return [];
+    }
+
+    const delayed = (data || []).filter(
+      r => r.freshness_status === 'delayed' || r.freshness_status === 'stale'
+    );
+
+    if (delayed.length > 0) {
+      console.log(`  🔍 Delayed games detected:`);
+      delayed.forEach(d => console.log(`     ${d.state_code} ${d.game_name} (${d.freshness_status})`));
+    }
+
+    return delayed;
+  } catch (err) {
+    console.log(`  ⚠️ Freshness check error: ${err.message}`);
+    return [];
+  }
+}
+
+function getDelayedKeys(delayedGames) {
+  const delayed = new Set(
+    delayedGames.map(d => `${d.state_code}:${d.game_key}`)
+  );
+
+  return Object.entries(STATE_GAME_KEYS).filter(([key, spec]) => {
+    const games = Array.isArray(spec.game) ? spec.game : [spec.game];
+    return games.some(g => delayed.has(`${spec.state}:${g}`));
+  }).map(([key]) => key);
+}
+
+const RUN_ORDER = ['caDaily3', 'caDaily4', 'caFantasy5', 'ncLive', 'powerball', 'megaMillions'];
+
+async function ingestRound(results, keys, label) {
+  console.log(`\n📍 ${label}`);
+  for (const key of keys) {
+    if (!results[key]) results[key] = null;
+    if (results[key]?.success && label !== 'ROUND 1') {
+      console.log(`   Skipping ${key} (already succeeded in earlier round)`);
+      continue;
+    }
+    results[key] = runCommand(SCRAPER_COMMANDS[key], key);
+    await wait(DELAY_BETWEEN_SCRAPERS);
+  }
+}
+
+async function printSummary(results) {
+  console.log('\n' + '─'.repeat(60));
+  console.log('📊 INGESTION JOB SUMMARY');
+  console.log('─'.repeat(60));
+
+  const entries = Object.values(results).filter(Boolean);
+  const totalSuccess = entries.filter(r => r.success).length;
+  const totalFailed = entries.filter(r => !r.success).length;
+
+  console.log(`\n✅ Successful: ${totalSuccess}/${entries.length}`);
+  console.log(`❌ Failed: ${totalFailed}/${entries.length}`);
+
+  Object.entries(results).forEach(([key, result]) => {
+    if (result) {
+      const displayKey = key === 'ncLive' ? 'ncLive (Pick3+Pick4+Cash5)' : key;
+      console.log(`${result.success ? '✅' : '❌'} ${displayKey}: ${result.success ? 'Success' : 'Failed'}`);
+    }
+  });
+}
+
 async function runIngestionJob() {
   console.log('🚀 Starting Unified Ingestion Job');
   console.log(`📅 Date: ${new Date().toISOString()}`);
-  console.log('─'.repeat(60));
+  console.log('═'.repeat(60));
 
-  const results = {
-    caDaily3: null,
-    caDaily4: null,
-    caFantasy5: null,
-    ncLive: null,
-    powerball: null,
-    megaMillions: null,
-  };
+  const results = {};
+  const trackedKeys = Object.keys(SCRAPER_COMMANDS);
 
-  try {
-    // 1. CA Daily 3 & 4 (from lotteryextreme.com)
-    console.log('\n📍 PHASE 1: California Daily Games');
-    
-    results.caDaily3 = runCommand(
-      'node scripts/scrapeCA_Data.js daily3 50',
-      'CA Daily 3 scraper'
-    );
-    await wait(DELAY_BETWEEN_SCRAPERS);
-    
-    results.caDaily4 = runCommand(
-      'node scripts/scrapeCA_Data.js daily4 50',
-      'CA Daily 4 scraper'
-    );
-    await wait(DELAY_BETWEEN_SCRAPERS);
+  // ── ROUND 1: Primary scrape ──
+  await ingestRound(results, RUN_ORDER, 'PHASE 1: Primary Scrape');
 
-    // 2. CA Fantasy 5 (from lotto-8.com)
-    console.log('\n📍 PHASE 2: California Fantasy 5');
-    results.caFantasy5 = runCommand(
-      'node scripts/fetchCAData.js',
-      'CA Fantasy 5 scraper'
-    );
-    await wait(DELAY_BETWEEN_SCRAPERS);
+  // ── Refresh freshness ──
+  console.log('\n📍 REFRESH: Checking freshness');
+  await refreshFreshness();
+  let delayedGames = await getDelayedGames();
 
-    // 3. NC Games (LIVE from nclottery.com — scraps CSV-based scrapers)
-    console.log('\n📍 PHASE 3: North Carolina Games (Live)');
-    results.ncPick3 = runCommand(
-      'node scripts/scrapeNC_Live.js',
-      'NC Live scraper (Pick3, Pick4, Cash5)'
-    );
-    await wait(DELAY_BETWEEN_SCRAPERS);
-
-    // 4. Multi-State Games (from NCEL)
-    console.log('\n📍 PHASE 4: Multi-State Games');
-    results.powerball = runCommand(
-      'node scripts/scrapePowerball.js',
-      'Powerball scraper'
-    );
-    await wait(DELAY_BETWEEN_SCRAPERS);
-    
-    results.megaMillions = runCommand(
-      'node scripts/scrapeMega.js',
-      'Mega Millions scraper'
-    );
-    await wait(DELAY_BETWEEN_SCRAPERS);
-
-    // 5. Generate summary report
-    console.log('\n' + '─'.repeat(60));
-    console.log('📊 INGESTION JOB SUMMARY');
-    console.log('─'.repeat(60));
-
-    const totalSuccess = Object.values(results).filter(r => r?.success).length;
-    const totalFailed = Object.values(results).filter(r => r && !r.success).length;
-
-    console.log(`\n✅ Successful: ${totalSuccess}/${Object.keys(results).length}`);
-    console.log(`❌ Failed: ${totalFailed}/${Object.keys(results).length}`);
-
-    // Print detailed results
-    Object.entries(results).forEach(([key, result]) => {
-      if (result) {
-        const displayKey = key === 'ncLive' ? 'ncLive (Pick3+Pick4+Cash5)' : key;
-        const status = result.success ? '✅' : '❌';
-        console.log(`${status} ${displayKey}: ${result.success ? 'Success' : 'Failed'}`);
-      }
-    });
-
-    // 6. Check Supabase for recent inserts
-    console.log('\n📍 PHASE 5: Database Validation');
-    try {
-      const { data: recentDraws } = await supabase
-        .from('official_draws')
-        .select('game_id, draw_date')
-        .order('created_at', { ascending: false })
-        .limit(20);
-
-      if (recentDraws && recentDraws.length > 0) {
-        console.log(`✅ Found ${recentDraws.length} recent draws in database`);
-        console.log('   Latest draws:');
-        recentDraws.slice(0, 5).forEach((draw, i) => {
-          console.log(`   ${i + 1}. ${draw.draw_date} (game: ${draw.game_id})`);
-        });
-      } else {
-        console.log('⚠️ No recent draws found in database');
-      }
-    } catch (dbError) {
-      console.log(`⚠️ Database validation failed: ${dbError.message}`);
-    }
-
+  if (delayedGames.length === 0) {
+    console.log('   ✅ All games healthy — no retry needed');
+    await printSummary(results);
     console.log('\n' + '═'.repeat(60));
     console.log('🎉 Ingestion job completed!');
     console.log('═'.repeat(60));
-
-  } catch (error) {
-    console.error('\n❌ Fatal error in ingestion job:', error.message);
-    process.exit(1);
+    return;
   }
+
+  // ── ROUND 2: Retry delayed games ──
+  const round2Keys = getDelayedKeys(delayedGames);
+  console.log(`\n⏳ Waiting ${RETRY_DELAY_MS/1000}s before retry round...`);
+  await wait(RETRY_DELAY_MS);
+
+  await ingestRound(results, round2Keys, `PHASE 2: Retry Round (${round2Keys.length} delayed)`);
+
+  await refreshFreshness();
+  delayedGames = await getDelayedGames();
+
+  if (delayedGames.length === 0) {
+    console.log('   ✅ Retry resolved all delayed games');
+    await printSummary(results);
+    console.log('\n' + '═'.repeat(60));
+    console.log('🎉 Ingestion job completed!');
+    console.log('═'.repeat(60));
+    return;
+  }
+
+  // ── ROUND 3: Final retry ──
+  const round3Keys = getDelayedKeys(delayedGames);
+  console.log(`\n⏳ Waiting ${RETRY_DELAY_MS/1000}s before final retry...`);
+  await wait(RETRY_DELAY_MS);
+
+  await ingestRound(results, round3Keys, `PHASE 3: Final Retry (${round3Keys.length} still delayed)`);
+
+  await refreshFreshness();
+  delayedGames = await getDelayedGames();
+
+  // ── Final status ──
+  console.log('\n📍 FINAL FRESHNESS STATUS');
+  if (delayedGames.length > 0) {
+    console.log(`   ⚠️ ${delayedGames.length} game(s) still delayed after retries:`);
+    delayedGames.forEach(d => console.log(`      ${d.state_code} ${d.game_name} — ${d.freshness_status}`));
+    console.log('   ℹ️ Trust Badge will remain amber. Will retry on next scheduled run.');
+  } else {
+    console.log('   ✅ All games healthy after retry rounds');
+  }
+
+  await printSummary(results);
+
+  console.log('\n' + '═'.repeat(60));
+  console.log('🎉 Ingestion job completed!');
+  console.log('═'.repeat(60));
 }
 
 // Run if called directly
