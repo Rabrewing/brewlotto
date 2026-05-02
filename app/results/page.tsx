@@ -106,7 +106,7 @@ export default function ResultsPage() {
 
   const gameConfig = DASHBOARD_GAME_CONFIG[selectedGame];
   const showBonus = selectedGame === 'powerball' || selectedGame === 'mega';
-  const freshnessBlocked = results?.freshness && results.freshness.status !== 'healthy';
+  const freshnessBlocked = results?.freshness && (results.freshness.status === 'stale' || results.freshness.status === 'failed');
 
   return (
     <main className="min-h-screen bg-[#050505] text-white">

@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
 
     const freshnessRows = freshnessResult.data || [];
     const freshnessStatus = getWorstStatus(freshnessRows.map((row) => row.freshness_status || 'unknown'));
-    const freshnessBlocked = freshnessStatus !== 'healthy';
+    const freshnessBlocked = freshnessStatus === 'stale' || freshnessStatus === 'failed';
     const stalenessMinutes = freshnessRows.reduce<number | null>((maxValue, row) => {
       if (row.staleness_minutes == null) {
         return maxValue;

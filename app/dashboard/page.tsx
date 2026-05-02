@@ -130,7 +130,7 @@ export default function DashboardPage() {
   const gameConfig = DASHBOARD_GAME_CONFIG[selectedGame];
   const gameLabel = gameConfig.displayLabel;
   const showBonus = selectedGame === 'powerball' || selectedGame === 'mega';
-  const freshnessBlocksLiveData = freshness.status === 'delayed' || freshness.status === 'stale' || freshness.status === 'failed' || freshness.status === 'unknown';
+  const freshnessBlocksLiveData = freshness.status === 'stale' || freshness.status === 'failed';
   const effectiveStats = freshnessBlocksLiveData ? EMPTY_STATS : stats;
   const effectiveStatsFallback = freshnessBlocksLiveData ? true : statsFallback;
   const effectiveCommentary = freshnessBlocksLiveData
