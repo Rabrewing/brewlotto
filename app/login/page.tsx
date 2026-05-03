@@ -17,7 +17,7 @@ export default function LoginPage() {
             email,
             options: {
                 shouldCreateUser: true,
-                emailRedirectTo: `${window.location.origin}/auth/callback`,
+                emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/auth/callback`,
             },
         });
 
