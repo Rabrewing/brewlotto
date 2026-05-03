@@ -151,6 +151,60 @@ Week 5: Live on App Store
 
 ---
 
+## Auth & Email Setup
+
+### Current State
+
+| Component | Detail |
+|-----------|--------|
+| Auth method | Supabase Magic Link (`signInWithOtp`) |
+| Account creation | `shouldCreateUser: true` — auto-creates on first sign-in |
+| Post-login flow | `/auth/callback` → `/onboarding` → `/dashboard` |
+| Email delivery | Supabase built-in (rate-limited, ~2-3/hr on free plan) |
+| Custom SMTP | Not configured |
+| Admin emails | `BREWCOMMAND_ADMIN_EMAILS=command@brewlotto.app` |
+
+### Recommended: Resend for Email Delivery
+
+Supabase's built-in email is fine for development but unreliable for production. Resend fixes deliverability and lets you send from your own domain.
+
+#### Setup Steps
+
+| Step | Detail |
+|------|--------|
+| 1. Create Resend account | https://resend.com — free tier includes 3000 emails/mo |
+| 2. Verify domain | Add `brewlotto.app` DNS records (MX + TXT) in your DNS provider |
+| 3. Get SMTP credentials | Resend Dashboard → SMTP → Create API key |
+| 4. Configure Supabase | Project Settings → Auth → Custom SMTP → paste Resend SMTP values |
+| 5. Test | Sign up at `brewlotto.vercel.app` with `command@brewlotto.app` — confirm magic link arrives |
+
+#### Resend SMTP Settings
+
+| Field | Value |
+|-------|-------|
+| Host | `smtp.resend.com` |
+| Port | `587` |
+| Username | `smtp` (literal, not your email) |
+| Password | Your Resend SMTP API key |
+| Sender email | `noreply@brewlotto.app` |
+
+#### Why Resend Over Alternatives
+
+| Service | Free Tier | Deliverability | Setup |
+|---------|-----------|---------------|-------|
+| **Resend** | 3000/mo | High | 5 min |
+| SendGrid | 100/day | Medium | 10 min |
+| Supabase built-in | ~2/hr | Low | None (default) |
+| AWS SES | 62000/mo | High | 30 min (domain verify) |
+
+### Admin Access
+
+- **Superadmin email:** `command@brewlotto.app` — sign up via magic link, middleware auto-detects admin role
+- **Route:** `/admin` — ingestion health, alert console, freshness monitoring
+- **Auth check:** `BREWCOMMAND_ADMIN_EMAILS` env var + `lib/auth/brewcommand.ts`
+
+---
+
 ## Risks & Mitigations
 
 | Risk | Likelihood | Impact | Mitigation |
@@ -184,6 +238,10 @@ Week 5: Live on App Store
 - `brewdocs/reference/case-study_brewlotto_frontend_pwa.md` — Existing PWA migration case study
 - `brewdocs/v1/onboarding-spec.md` — User onboarding flow
 - `brewdocs/v1/shared-ui-ux-framework.md` — Shared UI framework
+- `brewdocs/v1/onboarding-spec.md` — User onboarding + disclaimer flow
+- `lib/auth/brewcommand.ts` — Admin authorization logic
+- `app/login/page.tsx` — Magic link auth entry point
+- `app/auth/callback/route.ts` — Post-login code exchange
 
 ---
 
