@@ -5,7 +5,9 @@ import { useEffect, useRef, useState } from "react";
 
 export default function HomePage() {
     const videoRef = useRef<HTMLVideoElement | null>(null);
+    const [isPlaying, setIsPlaying] = useState(false);
     const [showCta, setShowCta] = useState(false);
+    const [autoplayBlocked, setAutoplayBlocked] = useState(false);
 
     useEffect(() => {
         const video = videoRef.current;
@@ -14,8 +16,10 @@ export default function HomePage() {
         const attemptPlay = async () => {
             try {
                 await video.play();
+                setIsPlaying(true);
+                setAutoplayBlocked(false);
             } catch {
-                // Browsers may still require a user gesture. The poster remains visible.
+                setAutoplayBlocked(true);
             }
         };
 
@@ -67,12 +71,53 @@ export default function HomePage() {
                                         preload="auto"
                                         poster="/frontend/brew_logo.png"
                                         onEnded={() => setShowCta(true)}
+                                        onPlay={() => {
+                                            setIsPlaying(true);
+                                            setAutoplayBlocked(false);
+                                        }}
+                                        onPause={() => {
+                                            if (!showCta) {
+                                                setIsPlaying(false);
+                                            }
+                                        }}
                                         onLoadedMetadata={() => {
                                             if (videoRef.current) {
                                                 void videoRef.current.play().catch(() => undefined);
                                             }
                                         }}
                                     />
+
+                                    {!isPlaying ? (
+                                        <button
+                                            type="button"
+                                            onClick={async () => {
+                                                const video = videoRef.current;
+                                                if (!video) return;
+                                                try {
+                                                    await video.play();
+                                                    setIsPlaying(true);
+                                                    setAutoplayBlocked(false);
+                                                } catch {
+                                                    setAutoplayBlocked(true);
+                                                }
+                                            }}
+                                            className="absolute inset-0 flex items-center justify-center bg-black/35 px-6 text-center backdrop-blur-[2px]"
+                                        >
+                                            <div className="max-w-sm rounded-[24px] border border-white/10 bg-black/60 px-6 py-5 text-white shadow-[0_0_30px_rgba(0,0,0,0.28)]">
+                                                <div className="text-[12px] uppercase tracking-[0.18em] text-white/42">
+                                                    {autoplayBlocked ? "Autoplay blocked" : "Tap to start"}
+                                                </div>
+                                                <div className="mt-2 text-[18px] font-semibold text-[#f7ddb3]">
+                                                    BrewLotto reel
+                                                </div>
+                                                <div className="mt-2 text-[14px] leading-6 text-white/66">
+                                                    {autoplayBlocked
+                                                        ? "Your browser blocked autoplay. Tap once to begin the video."
+                                                        : "The video will try to start automatically. If it stalls, tap once to play."}
+                                                </div>
+                                            </div>
+                                        </button>
+                                    ) : null}
                                 </div>
                             </div>
 
