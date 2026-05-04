@@ -1,7 +1,35 @@
 # BrewLotto V1 - Current State & Next Steps
 
-**Last Updated:** 2026-05-02 ET (All NC games live, ingestion retry deployed, onboarding added)
-**Phase:** D8.1 — Delayed Draw Retry + Onboarding Flow Complete → Targeting CA Live Scraper
+**Last Updated:** 2026-05-04 ET (menu truth pass, blob-backed landing reel, tier/billing QA pending)
+**Phase:** Shared UI/UX framework and product truth pass
+
+## 2026-05-04 Truth Update
+
+### ✅ Already Real
+- Public landing page, login page, pricing page, onboarding flow, and dashboard entry points are live on the `brew2-overhaul` branch.
+- Landing reel now uses a Vercel Blob-backed source with muted autoplay plus explicit `Play with sound`, `Replay`, and `Expand` controls.
+- `SectionCard` is centralized in `components/brewlotto/dashboard/SectionCard.tsx` and the duplicated copies are gone.
+- Dropdown menu destinations are wired to live routes for gameplay, account, and system surfaces.
+- `scrapeCA_Live.js` and `scrapeNC_Live.js` exist and are wired into `scripts/ingestionJob.js`.
+- Strategy Locker, Billing, Notifications, Settings, Profile, Results, My Picks, Learn, Legal, and Admin routes all exist in the App Router.
+- Dashboard/results freshness gating is real and blocks stale/failed output.
+
+### ⚠️ Still Partial Or Needs Verification
+- `scripts/ingestionScheduler.js` still points at legacy scraper commands in a few places and should be normalized against the live scraper set.
+- Billing is entitlement-aware, but Stripe checkout, webhook, and customer portal wiring still need the full end-to-end pass.
+- Strategy Locker is live and tier-aware, but the dedicated "Run Strategy" / strategy replay polish still needs verification.
+- Learn and Legal are lightweight V1 shells, not full CMS/legal surfaces yet.
+- Settings stores values, but full theme application across the UI is still future work.
+- Notifications stores preferences and reads history, but real delivery wiring still needs a full verification pass.
+- Menu/tab and mockup QA still needs another visual pass against the current rendered routes.
+- Tier gating still needs a deliberate test matrix across dashboard, strategy locker, pricing, billing, and AI surfaces.
+
+### 🎯 Current Truth Priority
+1. Verify the current dropdown/menu tabs against the rendered routes and mockups.
+2. Verify strategy behavior and tier gating across free, trial, Brew, and Master contexts.
+3. Finish Stripe + billing entitlement wiring.
+4. Normalize the ingestion scheduler to the live scraper commands.
+5. Keep the onboarding tutorial and future Opus Clip clips aligned with the landing/login flow.
 
 ---
 
@@ -79,6 +107,12 @@ NC scrapers reported "Success" but no data was inserted into `official_draws`. R
 7. **`scripts/ingestionHealth.js`** - Health monitor for ingestion pipeline
    - Checks data freshness and ingestion status
    - Command: `node scripts/ingestionHealth.js`
+
+### ✅ Live Scrapers Now Present
+1. **`scripts/scrapeCA_Live.js`** - Live CA scraper for calottery.com pages
+2. **`scripts/scrapeNC_Live.js`** - Live NC scraper for nclottery.com pages
+
+These are already referenced by `scripts/ingestionJob.js`; the scheduler still needs to be aligned with them.
 
 ### Data Source Summary
 | Game | State | Source | Script |
@@ -252,6 +286,27 @@ npm run ingest-all
 - Do not present stale stats as current
 - Do not generate predictions from delayed, stale, failed, or unknown freshness states
 - Use `draw_freshness_status` / `v_ingestion_health_summary` as the UI gating source of truth
+
+## Updated Todo List
+
+### High Priority
+1. Normalize `scripts/ingestionScheduler.js` to the live scraper commands and verify retry timing against the actual draw windows.
+2. Run a visual QA pass on the dropdown/menu destinations against the current mockups and rendered pages.
+3. Finish Stripe checkout, webhook, and customer portal wiring so `/billing` becomes a real self-serve flow.
+4. Run a tier matrix test across dashboard, strategy locker, pricing, billing, and AI commentary surfaces.
+5. Verify the strategy replay / run-strategy affordance and tighten the comparison/animation polish where needed.
+
+### Medium Priority
+1. Replace the lightweight Learn and Legal shells with fuller CMS-backed and policy-backed content.
+2. Wire settings theme application into the actual UI so stored settings affect the experience.
+3. Complete notifications delivery integration so in-app history and delivery are fully connected.
+4. Add/update the Opus Clip tutorial prompts for onboarding once the current flow is stable.
+5. Add the remaining Playwright/E2E coverage for the public landing, login, onboarding, and menu flows.
+
+### Low Priority
+1. Add Chart.js or equivalent stats visualizations if they still add value after the live data pass.
+2. Clean up lint debt after the current product passes stabilize.
+3. Expand profile polish such as avatar upload if it remains in scope.
 
 ## Package.json Updates
 

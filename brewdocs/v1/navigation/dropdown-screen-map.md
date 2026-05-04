@@ -2,9 +2,12 @@
 
 **Purpose:** Define each normalized dropdown destination in implementation terms so UI, API, and data work stay aligned.
 
+**Truth Status:** The menu routes are wired, but a few destinations are still intentionally lightweight shells or partial surfaces. The remaining gaps are mostly Stripe billing, Learn/Legal depth, settings theme application, and strategy-locker replay polish.
+
 ## 1. Profile
 
 - Route: `/profile`
+- Status: Live
 - Purpose: identity, account details, state preference, security entrypoints
 - Core sections:
   - hero profile card
@@ -17,6 +20,7 @@
 ## 2. My Picks
 
 - Route: `/my-picks`
+- Status: Live
 - Purpose: saved/generated picks and current statuses
 - Core sections:
   - filter bar
@@ -29,6 +33,7 @@
 ## 3. Today's Results
 
 - Route: `/results`
+- Status: Live
 - Purpose: latest draw outcomes and user match context
 - Core sections:
   - latest official draw card
@@ -41,6 +46,7 @@
 ## 4. Stats & Performance
 
 - Route: `/stats`
+- Status: Live
 - Purpose: user habit/performance tracking and breakdowns
 - Core sections:
   - top-level metrics
@@ -54,6 +60,7 @@
 ## 5. Strategy Locker
 
 - Route: `/strategy-locker`
+- Status: Live, partial polish
 - Purpose: premium strategy insights, saved methods, explainability surface
 - Core sections:
   - strategy cards
@@ -67,6 +74,7 @@
 ## 6. Notifications
 
 - Route: `/notifications`
+- Status: Live, partial delivery
 - Purpose: notification preferences and recent events
 - Core sections:
   - preference toggles
@@ -79,6 +87,7 @@
 ## 7. Settings
 
 - Route: `/settings`
+- Status: Partial
 - Purpose: app configuration controls that are not profile-specific
 - Core sections:
   - default state
@@ -89,6 +98,7 @@
 ## 8. Subscription & Billing
 
 - Route: `/billing`
+- Status: Partial
 - Purpose: authenticated billing/account-management surface
 - Core sections:
   - current plan
@@ -102,6 +112,7 @@
 ## 9. Help / Learn
 
 - Route: `/learn`
+- Status: Shell
 - Purpose: education, FAQs, BrewUniversity Lite, explainers
 - Core sections:
   - common explanations (`hot`, `cold`, momentum, confidence)
@@ -111,6 +122,7 @@
 ## 10. Terms & Privacy
 
 - Route: `/legal`
+- Status: Shell
 - Purpose: legal document index
 - Core sections:
   - terms of use
@@ -120,6 +132,7 @@
 ## 11. Logout
 
 - UI model: menu action with confirm dialog
+- Status: Live
 - Execution:
   - user taps `Logout`
   - confirm modal appears
