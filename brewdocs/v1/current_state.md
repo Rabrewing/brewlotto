@@ -13,6 +13,7 @@
 - `scrapeCA_Live.js` and `scrapeNC_Live.js` exist and are wired into `scripts/ingestionJob.js`.
 - Strategy Locker, Billing, Notifications, Settings, Profile, Results, My Picks, Learn, Legal, and Admin routes all exist in the App Router.
 - Dashboard/results freshness gating is real and blocks stale/failed output.
+- Login is temporarily locked to BrewCommand superadmin allowlist accounts only; remove that gate before public V1 launch.
 
 ### ⚠️ Still Partial Or Needs Verification
 - `scripts/ingestionScheduler.js` has been archived; Cloud Scheduler + Cloud Run are the active production ingestion path.

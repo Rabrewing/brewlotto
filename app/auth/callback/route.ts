@@ -1,6 +1,8 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
+import { isBrewCommandAdminUser } from '@/lib/auth/brewcommandShared';
+
 type CookieEntry = {
   name: string;
   value: string;
@@ -30,6 +32,19 @@ export async function GET(request: NextRequest) {
 
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user || !isBrewCommandAdminUser(user)) {
+        await supabase.auth.signOut();
+        const redirectResponse = NextResponse.redirect(`${origin}/login?error=not-authorized`);
+        supabaseResponse.cookies.getAll().forEach(({ name, value, ...options }) => {
+          redirectResponse.cookies.set(name, value, options);
+        });
+        return redirectResponse;
+      }
+
       const redirectResponse = NextResponse.redirect(`${origin}${next}`);
       supabaseResponse.cookies.getAll().forEach(({ name, value, ...options }) => {
         redirectResponse.cookies.set(name, value, options);

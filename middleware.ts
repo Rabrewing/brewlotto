@@ -49,7 +49,14 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (pathname.startsWith('/admin') && isBrewCommandAdminUser(user)) {
+  if (!isBrewCommandAdminUser(user)) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/login';
+    url.searchParams.set('error', 'not-authorized');
+    return NextResponse.redirect(url);
+  }
+
+  if (pathname.startsWith('/admin')) {
     return supabaseResponse;
   }
 

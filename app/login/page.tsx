@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { type FormEvent, useEffect, useState } from "react";
 
+import { isBrewCommandAdminUser, parseBrewCommandAdminEmails } from "../../lib/auth/brewcommandShared";
 import { supabase } from "../../lib/supabase/browserClient";
 
 export default function LoginPage() {
@@ -12,10 +13,13 @@ export default function LoginPage() {
     const [submitting, setSubmitting] = useState(false);
     const [checkingSession, setCheckingSession] = useState(true);
     const router = useRouter();
+    const searchParams = useSearchParams();
 
     const videoSrc =
         process.env.NEXT_PUBLIC_LANDING_VIDEO_MP4_URL ||
         "/landing/brewlotto-cta.mp4";
+
+    const adminEmails = parseBrewCommandAdminEmails();
 
     useEffect(() => {
         let active = true;
@@ -25,7 +29,26 @@ export default function LoginPage() {
 
             if (!active) return;
 
+            const accessError = searchParams.get("error");
+            if (accessError === "not-authorized") {
+                setMessage({
+                    type: "error",
+                    text: "Access is restricted to BrewCommand superadmin accounts.",
+                });
+            }
+
             if (!user) {
+                setCheckingSession(false);
+                return;
+            }
+
+            if (!isBrewCommandAdminUser(user)) {
+                await supabase.auth.signOut();
+                if (!active) return;
+                setMessage({
+                    type: "error",
+                    text: "Access is restricted to BrewCommand superadmin accounts.",
+                });
                 setCheckingSession(false);
                 return;
             }
@@ -53,8 +76,18 @@ export default function LoginPage() {
         setSubmitting(true);
         setMessage(null);
 
+        const normalizedEmail = email.trim().toLowerCase();
+        if (!adminEmails.includes(normalizedEmail)) {
+            setMessage({
+                type: "error",
+                text: "Access is restricted to BrewCommand superadmin accounts.",
+            });
+            setSubmitting(false);
+            return;
+        }
+
         const { error } = await supabase.auth.signInWithOtp({
-            email,
+            email: normalizedEmail,
             options: {
                 shouldCreateUser: true,
                 emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/auth/callback`,

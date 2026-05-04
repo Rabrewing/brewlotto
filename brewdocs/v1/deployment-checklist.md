@@ -187,6 +187,7 @@ Expected runtime:
   - raw confirmation URL fallback
   - responsible-use footer copy
 - [ ] Test magic-link delivery on the production domain and verify the `/auth/callback` redirect returns a live session
+- [ ] Remove the temporary BrewCommand superadmin-only login gate before public V1 launch
 
 ### Landing Video
 
