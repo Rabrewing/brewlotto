@@ -22,23 +22,18 @@ export function NavigationTabs() {
 
   return (
     <nav className="mb-4">
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+      <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {TABS.map((tab) => (
           <Link
             key={tab.id}
             href={tab.href}
-            className={`relative pb-2 text-[15px] font-medium transition-colors ${
+            className={`relative inline-flex shrink-0 items-center rounded-full border px-4 py-2 text-[14px] font-medium transition-all ${
               pathname === tab.href
-                ? 'text-[#ffc742]'
-                : 'text-white/70 hover:text-white'
+                ? 'border-[#ffc742]/28 bg-[#ffc742]/12 text-[#ffe39a] shadow-[0_0_16px_rgba(255,199,66,0.12)]'
+                : 'border-white/8 bg-white/[0.03] text-white/70 hover:border-white/14 hover:text-white'
             }`}
           >
             {tab.label}
-            
-            {/* Active indicator */}
-              {pathname === tab.href && (
-               <div className="absolute bottom-0 left-0 right-0 h-[3px] rounded-full bg-gradient-to-r from-[#ffc742] via-[#ffd364] to-[#ffc742] shadow-[0_0_12px_rgba(255,199,66,0.9),0_0_24px_rgba(255,174,42,0.28)]" />
-             )}
           </Link>
         ))}
       </div>
