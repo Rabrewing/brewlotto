@@ -3,7 +3,7 @@
 1. Clone repo: `git clone https://github.com/<org>/brewgold`
 2. Install deps: `pnpm install`
 3. Copy `.env.local.example` → `.env.local`
-4. Fill Supabase + OpenAI keys
+4. Fill Supabase + AI provider keys
 5. Run local Supabase instance
 6. Start dev: `pnpm dev`
 
@@ -13,10 +13,16 @@
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE=
+AI_PROVIDER=
 OPENAI_API_KEY=
+OPENAI_MODEL=
+DEEPSEEK_API_KEY=
+DEEPSEEK_MODEL=
 NVIDIA_NIM_KEY=
 GOOGLE_TTS_KEY=
 ```
+
+`AI_PROVIDER` supports `auto`, `openai`, or `deepseek`. In `auto`, the app prefers DeepSeek when its key is present, otherwise it falls back to OpenAI.
 
 ### Commands
 

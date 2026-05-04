@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import OpenAI from "openai";
+import { getAiRuntimeConfig } from "@/lib/ai/client";
 
 // 🔧 Shell command simulation logic
 function simulateShellCommand(cmd: string): string {
@@ -40,17 +40,19 @@ export async function POST(req: Request) {
 
     // 🧠 GPT response
     try {
-        const apiKey = process.env.OPENAI_API_KEY;
-        if (!apiKey) {
+        const ai = getAiRuntimeConfig();
+        if (!ai) {
             return NextResponse.json(
-                { reply: "Brew is not configured yet because OPENAI_API_KEY is missing." },
+                {
+                    reply:
+                        "Brew is not configured yet because no AI provider credentials are available.",
+                },
                 { status: 500 }
             );
         }
 
-        const openai = new OpenAI({ apiKey });
-        const completion = await openai.chat.completions.create({
-            model: "gpt-4",
+        const completion = await ai.client.chat.completions.create({
+            model: ai.model,
             temperature: 0.7,
             messages: [
                 ...(systemPrompt
@@ -68,7 +70,7 @@ export async function POST(req: Request) {
 
         const reply =
             completion.choices?.[0]?.message?.content?.trim() || "(no reply)";
-        return NextResponse.json({ reply }, { status: 200 });
+        return NextResponse.json({ reply, provider: ai.provider }, { status: 200 });
     } catch (error) {
         console.error("🔴 OpenAI Error:", error);
         return NextResponse.json({ reply: "Brew encountered an error connecting to the AI core." }, { status: 500 });

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { analyzeEntropy } from '@/lib/audit/entropyTools'; // optional helper
+import { getAiRuntimeConfig } from "@/lib/ai/client";
 
 export async function POST(req: Request) {
     const { path: filePath, code: overrideCode } = await req.json();
@@ -11,6 +12,14 @@ export async function POST(req: Request) {
     }
 
     try {
+        const ai = getAiRuntimeConfig();
+        if (!ai) {
+            return NextResponse.json(
+                { error: "No AI provider credentials are configured." },
+                { status: 500 }
+            );
+        }
+
         const fullPath = path.join(process.cwd(), 'public', filePath);
         const rawCode = overrideCode || fs.readFileSync(fullPath, 'utf-8');
 
@@ -18,28 +27,21 @@ export async function POST(req: Request) {
         const entropyReport = analyzeEntropy?.(rawCode);
 
         // 👇 Brew AI fix prompt (abstracted here)
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                model: 'gpt-4',
-                messages: [
-                    {
-                        role: 'system',
-                        content: 'You are Brew Da AI, a helpful assistant focused on clean, readable, and resilient JavaScript.'
-                    },
-                    {
-                        role: 'user',
-                        content: `Here is some JS code from a file called ${filePath}. Suggest a patch with brief reasoning. Only suggest changes if they're meaningful.\n\n${rawCode}`
-                    }
-                ]
-            })
+        const completion = await ai.client.chat.completions.create({
+            model: ai.model,
+            messages: [
+                {
+                    role: 'system',
+                    content: 'You are Brew Da AI, a helpful assistant focused on clean, readable, and resilient JavaScript.'
+                },
+                {
+                    role: 'user',
+                    content: `Here is some JS code from a file called ${filePath}. Suggest a patch with brief reasoning. Only suggest changes if they're meaningful.\n\n${rawCode}`
+                }
+            ]
         });
 
-        const { choices } = await response.json();
+        const { choices } = completion;
         const aiReply = choices?.[0]?.message?.content || '';
 
         return NextResponse.json({
