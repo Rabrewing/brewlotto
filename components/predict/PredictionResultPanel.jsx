@@ -19,12 +19,12 @@ export default function PredictionResultPanel({
     const { currentTier } = useUserTier();
     const { prompt } = useBrewBotContext();
 
-    const unlocked = hasTierAccess(currentTier, "brew");
+    const unlocked = hasTierAccess(currentTier, "starter");
     const label = STRATEGY_EXPLAINERS?.[strategy]?.label || strategy;
 
     const handleBlocked = () => {
-        toast("Upgrade to Brew Tier to reveal match insights.");
-        prompt("Want to see how accurate your predictions are? Brew Tier unlocks win/loss insights.");
+        toast("Upgrade to Starter tier to reveal match insights.");
+        prompt("Want to see how accurate your predictions are? Starter tier unlocks win/loss insights.");
     };
 
     return (
@@ -56,7 +56,7 @@ export default function PredictionResultPanel({
                     onClick={handleBlocked}
                     className="text-sm text-yellow-300 hover:text-yellow-100 cursor-pointer"
                 >
-                    🔒 Match details available in Brew Tier
+                    🔒 Match details available in Starter tier
                 </div>
             )}
         </div>

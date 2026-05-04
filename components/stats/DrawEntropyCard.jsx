@@ -13,8 +13,8 @@ export default function DrawEntropyCard({ entropy = 0 }) {
     const unlocked = hasTierAccess(currentTier, "master");
 
     const handleLocked = () => {
-        toast("Entropy scores are a Master Tier feature.");
-        prompt("Entropy analytics require Master Tier. Upgrade to reveal randomness patterns and predictability.");
+        toast("Entropy scores are a Master tier feature.");
+        prompt("Entropy analytics require Master tier. Upgrade to reveal randomness patterns and predictability.");
     };
 
     if (!unlocked) {
@@ -25,7 +25,7 @@ export default function DrawEntropyCard({ entropy = 0 }) {
             >
                 <div className="text-yellow-400 font-semibold mb-1">🔒 Draw Entropy</div>
                 <div className="text-sm text-neutral-400">
-                    Available in <strong>Master Tier</strong>
+                    Available in <strong>Master tier</strong>
                 </div>
             </div>
         );

@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { type FormEvent, useEffect, useState } from "react";
+import { Suspense, type FormEvent, useEffect, useState } from "react";
 
 import { isBrewCommandAdminUser, parseBrewCommandAdminEmails } from "../../lib/auth/brewcommandShared";
 import { supabase } from "../../lib/supabase/browserClient";
 
-export default function LoginPage() {
+function LoginPageContent() {
     const [email, setEmail] = useState("");
     const [message, setMessage] = useState<{ type: "error" | "success"; text: string } | null>(null);
     const [submitting, setSubmitting] = useState(false);
@@ -237,5 +237,19 @@ export default function LoginPage() {
                 </section>
             </div>
         </main>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense
+            fallback={
+                <main className="flex min-h-screen items-center justify-center bg-[#050505] text-white/55">
+                    Loading sign-in...
+                </main>
+            }
+        >
+            <LoginPageContent />
+        </Suspense>
     );
 }

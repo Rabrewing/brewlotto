@@ -59,8 +59,8 @@ export default function PredictionStrategyToggle({ selected, onChange }) {
                         onMouseLeave={() => setHovered(null)}
                         title={
                             unlocked
-                                ? `Toggle ${label}`
-                                : `Unlock ${label} with Brew Tier ${s.tier}`
+                            ? `Toggle ${label}`
+                            : `Unlock ${label} with tier ${s.tier}`
                         }
                     >
                         <span>{s.icon}</span>

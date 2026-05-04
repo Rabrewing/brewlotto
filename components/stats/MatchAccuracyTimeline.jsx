@@ -10,11 +10,11 @@ export default function MatchAccuracyTimeline({ history = [] }) {
     const { currentTier } = useUserTier();
     const { prompt } = useBrewBotContext();
 
-    const unlocked = hasTierAccess(currentTier, "brew");
+    const unlocked = hasTierAccess(currentTier, "starter");
 
     const handleClick = () => {
-        toast("Match tracking is available with Brew Tier or higher.");
-        prompt("Want to track prediction accuracy over time? Brew Tier unlocks match trend analytics.");
+        toast("Match tracking is available with Starter tier or higher.");
+        prompt("Want to track prediction accuracy over time? Starter tier unlocks match trend analytics.");
     };
 
     if (!unlocked) {
@@ -23,7 +23,7 @@ export default function MatchAccuracyTimeline({ history = [] }) {
                 onClick={handleClick}
                 className="opacity-60 hover:opacity-90 cursor-pointer border border-yellow-600 rounded p-4 bg-neutral-900 text-yellow-200 text-sm text-center"
             >
-                🔒 Match Accuracy Timeline <br /> Available with Brew Tier or higher
+                🔒 Match Accuracy Timeline <br /> Available with Starter tier or higher
             </div>
         );
     }

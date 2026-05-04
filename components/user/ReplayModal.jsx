@@ -24,8 +24,8 @@ export default function ReplayModal({
     const unlocked = hasTierAccess(currentTier, "master");
 
     const handleBlocked = () => {
-        toast("Replay is a Master Tier feature.");
-        prompt("Replay is a Master Tier feature. Unlock to visualize your strategy in action.");
+        toast("Replay is a Master tier feature.");
+        prompt("Replay is a Master tier feature. Unlock to visualize your strategy in action.");
         onClose();
     };
 
@@ -43,7 +43,7 @@ export default function ReplayModal({
 
                             {!unlocked ? (
                                 <div className="text-center text-yellow-300 text-sm space-y-4">
-                                    <p>🔒 Replay is available in <strong>Master Tier</strong>.</p>
+                                    <p>🔒 Replay is available in <strong>Master tier</strong>.</p>
                                     <button
                                         onClick={handleBlocked}
                                         className="w-full mt-2 bg-yellow-500 hover:bg-yellow-400 text-black py-2 rounded font-semibold"
