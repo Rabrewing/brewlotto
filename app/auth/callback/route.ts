@@ -30,7 +30,11 @@ export async function GET(request: NextRequest) {
 
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
+      const redirectResponse = NextResponse.redirect(`${origin}${next}`);
+      supabaseResponse.cookies.getAll().forEach(({ name, value, ...options }) => {
+        redirectResponse.cookies.set(name, value, options);
+      });
+      return redirectResponse;
     }
   }
 
