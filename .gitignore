@@ -149,3 +149,4 @@ Co_P_History.csv
 
 # Generated public fallback assets
 public/fallback-*.js
+.vercel
