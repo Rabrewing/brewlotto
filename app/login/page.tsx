@@ -119,7 +119,7 @@ export default function LoginPage() {
                     <div className="max-w-xl">
                         <div className="inline-flex items-center gap-2 rounded-full border border-[#ffc742]/18 bg-[#ffc742]/10 px-3 py-1 text-[12px] uppercase tracking-[0.16em] text-[#ffd988]">
                             <span className="h-2 w-2 rounded-full bg-[#ffcb4d] shadow-[0_0_8px_rgba(255,203,77,0.8)] animate-brew-pulse" />
-                            Secure magic link sign-in
+                            Confirm your BrewLotto sign-in
                         </div>
 
                         <h1 className="mt-5 text-[40px] font-semibold tracking-[-0.05em] text-[#fff1d3] sm:text-[54px] lg:text-[64px]">
@@ -127,7 +127,7 @@ export default function LoginPage() {
                         </h1>
 
                         <p className="mt-4 max-w-xl text-[17px] leading-8 text-white/68 sm:text-[18px]">
-                            Enter your email to get a branded magic link, then continue through onboarding and into the dashboard.
+                            Enter your email to receive a BrewLotto magic link, then continue through onboarding and into the dashboard.
                         </p>
 
                         <div className="mt-6 flex flex-wrap gap-2 text-[13px] text-white/55">
@@ -170,7 +170,7 @@ export default function LoginPage() {
                                 </button>
 
                                 <p className="text-[12px] leading-5 text-white/42">
-                                    On this device, BrewLotto can keep you signed in during a 14-day inactivity window, if Supabase session settings are configured that way.
+                                    On this device, BrewLotto can keep you signed in during a 14-day inactivity window if Supabase session settings are configured that way.
                                 </p>
 
                                 {message ? (
