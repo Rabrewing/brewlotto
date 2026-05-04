@@ -125,6 +125,7 @@ BrewLotto is designed with modularity and AI-first strategy in mind — here’s
 - `/docs/data-pipeline-manual.md`: How to ingest, audit, and validate draw data  
 - `/docs/TODO.md`: Dev checklist grouped by system area  
 - `/docs/init.sh`: Shell script to scaffold new strategies + log entries  
+- `npm run video:frames -- <input.mp4> [output-dir] [frame-count]`: Extract evenly spaced PNG frames and a contact sheet from a video clip. Requires `ffmpeg` and `ffprobe` on `PATH`.
 
 ---
 
