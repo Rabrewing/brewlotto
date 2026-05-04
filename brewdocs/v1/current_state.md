@@ -19,12 +19,16 @@
 - `scripts/ingestionScheduler.js` has been archived; Cloud Scheduler + Cloud Run are the active production ingestion path.
 - Billing is entitlement-aware, but Stripe checkout, webhook, and customer portal wiring still need the full end-to-end pass.
 - Strategy Locker is live and tier-aware, but the dedicated "Run Strategy" / strategy replay polish still needs verification.
+- `My Picks` still uses a scroll-to-top placeholder for `Replay`; a true replay action is not wired yet.
+- `Today's Results` still uses a dashboard shortcut for `Replay`; it is not a true replay interaction yet.
+- `Logout` signs out immediately; the confirm-modal UX called for in the screen map is still pending.
 - Learn and Legal are lightweight V1 shells, not full CMS/legal surfaces yet.
 - Settings stores values, but full theme application across the UI is still future work.
 - Notifications stores preferences and reads history, but real delivery wiring still needs a full verification pass.
 - Menu/tab and mockup QA still needs another visual pass against the current rendered routes.
 - Tier gating still needs a deliberate test matrix across dashboard, strategy locker, pricing, billing, and AI surfaces.
 - Referral growth loop is now captured as a deferred V1.5 plan in `brewdocs/v1/referral-growth-plan.md`; do not wire it into the core launch path until the launch stack is stable.
+- The superadmin-only login gate is temporary and must be removed before public V1 launch.
 
 ### 🎯 Current Truth Priority
 1. Verify the current dropdown/menu tabs against the rendered routes and mockups.

@@ -29,6 +29,8 @@
   - replay/save/delete actions
 - V1 dependency:
   - predictions + play log / outcome state
+- Notes:
+  - `Replay` is still a scroll-to-top placeholder, not a real replay flow yet.
 
 ## 3. Today's Results
 
@@ -42,6 +44,8 @@
 - V1 dependency:
   - official draws
   - user pick matching
+- Notes:
+  - `Replay` currently routes back to `/dashboard`; a true contextual replay action is still pending.
 
 ## 4. Stats & Performance
 
@@ -70,6 +74,8 @@
 - V1 dependency:
   - prediction strategies
   - entitlements / billing tiers
+- Notes:
+  - the dedicated `Run Strategy` / strategy comparison flow is still partial.
 
 ## 6. Notifications
 
@@ -135,8 +141,10 @@
 - Status: Live
 - Execution:
   - user taps `Logout`
-  - confirm modal appears
+  - confirm modal should appear
   - confirmed action uses `/logout`
+- Notes:
+  - current implementation signs out immediately; the confirm modal is still pending.
 
 ## 12. Build-Safety Rules
 
