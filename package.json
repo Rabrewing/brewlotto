@@ -21,7 +21,6 @@
     "scrape-nc-games": "node scripts/scrapeNC_Pick3.js && node scripts/scrapeNC_Pick4.js && node scripts/scrapeNC_Cash5.js",
     "scrape-multi-state": "node scripts/scrapePowerball.js && node scripts/scrapeMega.js",
     "ingest-all": "node scripts/ingestionJob.js",
-    "scheduler": "node scripts/ingestionScheduler.js",
     "scheduler:predict": "node scripts/predictionScheduler.js",
     "predict": "node scripts/runPrediction.js",
     "predict:all": "node -e \"import('./lib/prediction/predictionGenerator.js').then(m => m.runAllPredictions().then(console.log))\"",

@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
 /**
- * Ingestion Scheduler
- * Schedules ingestion around actual draw windows with follow-up retries.
+ * Archived local ingestion scheduler.
+ * Cloud Scheduler + Cloud Run are the production source of truth.
+ * Keep this only as a reference for historical local cron behavior.
  */
 
 import { execSync } from 'child_process';
@@ -12,63 +13,63 @@ import 'dotenv/config';
 const JOBS = [
   {
     name: 'CA Daily 3 Day',
-    command: 'node scripts/scrapeCA_Data.js daily3 100',
+    command: 'node scripts/scrapeCA_Live.js',
     cron: '10 13 * * *',
     timezone: 'America/Los_Angeles',
     retryOffsetsMinutes: [8, 20, 40],
   },
   {
     name: 'CA Daily 3 Evening',
-    command: 'node scripts/scrapeCA_Data.js daily3 100',
+    command: 'node scripts/scrapeCA_Live.js',
     cron: '40 18 * * *',
     timezone: 'America/Los_Angeles',
     retryOffsetsMinutes: [10, 25, 45],
   },
   {
     name: 'CA Daily 4 Evening',
-    command: 'node scripts/scrapeCA_Data.js daily4 100',
+    command: 'node scripts/scrapeCA_Live.js',
     cron: '40 18 * * *',
     timezone: 'America/Los_Angeles',
     retryOffsetsMinutes: [10, 25, 45],
   },
   {
     name: 'CA Fantasy 5 Night',
-    command: 'node scripts/fetchCAData.js',
+    command: 'node scripts/scrapeCA_Live.js',
     cron: '40 18 * * *',
     timezone: 'America/Los_Angeles',
     retryOffsetsMinutes: [10, 25, 45],
   },
   {
     name: 'NC Pick 3 Day',
-    command: 'node scripts/scrapeNC_Pick3.cjs',
+    command: 'node scripts/scrapeNC_Live.js',
     cron: '5 15 * * *',
     timezone: 'America/New_York',
     retryOffsetsMinutes: [8, 20, 40],
   },
   {
     name: 'NC Pick 3 Evening',
-    command: 'node scripts/scrapeNC_Pick3.cjs',
+    command: 'node scripts/scrapeNC_Live.js',
     cron: '27 23 * * *',
     timezone: 'America/New_York',
     retryOffsetsMinutes: [10, 25, 45],
   },
   {
     name: 'NC Pick 4 Day',
-    command: 'node scripts/scrapeNC_Pick4.cjs',
+    command: 'node scripts/scrapeNC_Live.js',
     cron: '5 15 * * *',
     timezone: 'America/New_York',
     retryOffsetsMinutes: [8, 20, 40],
   },
   {
     name: 'NC Pick 4 Evening',
-    command: 'node scripts/scrapeNC_Pick4.cjs',
+    command: 'node scripts/scrapeNC_Live.js',
     cron: '27 23 * * *',
     timezone: 'America/New_York',
     retryOffsetsMinutes: [10, 25, 45],
   },
   {
     name: 'NC Cash 5 Night',
-    command: 'node scripts/scrapeNC_Cash5.cjs',
+    command: 'node scripts/scrapeNC_Live.js',
     cron: '27 23 * * *',
     timezone: 'America/New_York',
     retryOffsetsMinutes: [10, 25, 45],

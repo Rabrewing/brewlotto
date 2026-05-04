@@ -15,7 +15,7 @@
 - Dashboard/results freshness gating is real and blocks stale/failed output.
 
 ### ⚠️ Still Partial Or Needs Verification
-- `scripts/ingestionScheduler.js` still points at legacy scraper commands in a few places and should be normalized against the live scraper set.
+- `scripts/ingestionScheduler.js` has been archived; Cloud Scheduler + Cloud Run are the active production ingestion path.
 - Billing is entitlement-aware, but Stripe checkout, webhook, and customer portal wiring still need the full end-to-end pass.
 - Strategy Locker is live and tier-aware, but the dedicated "Run Strategy" / strategy replay polish still needs verification.
 - Learn and Legal are lightweight V1 shells, not full CMS/legal surfaces yet.
@@ -102,9 +102,9 @@ NC scrapers reported "Success" but no data was inserted into `official_draws`. R
    - Runs all scrapers and ingests data into Supabase
    - Command: `node scripts/ingestionJob.js`
 
-6. **`scripts/ingestionScheduler.js`** - Draw-window scheduler using node-cron
-   - Runs around actual draw windows with follow-up retries
-   - Command: `node scripts/ingestionScheduler.js`
+6. **`scripts/archive/ingestionScheduler.js`** - Archived local cron scheduler reference only
+   - Do not use for production ingestion
+   - Historical command: `node scripts/archive/ingestionScheduler.js`
 
 7. **`scripts/ingestionHealth.js`** - Health monitor for ingestion pipeline
    - Checks data freshness and ingestion status
@@ -201,7 +201,7 @@ npx tsx scripts/testCAIngestion.ts
 1. **`lib/ingestion/adapters/multiStatePowerballAdapter.ts`** - Powerball adapter for NC/CA
 2. **`lib/ingestion/adapters/multiStateMegaMillionsAdapter.ts`** - Mega Millions adapter for NC/CA
 3. **`scripts/ingestionJob.js`** - Unified ingestion job with retry logic
-4. **`scripts/ingestionScheduler.js`** - Daily scheduler using node-cron (runs at 12:00 AM PT)
+4. **`scripts/archive/ingestionScheduler.js`** - Archived local scheduler reference
 5. **`scripts/ingestionHealth.js`** - Health monitor for ingestion pipeline
 6. **`scripts/scrapePowerball.js`** - Powerball scraper with NCEL fallback
 7. **`scripts/scrapeMega.js`** - Mega Millions scraper with NCEL fallback
@@ -292,7 +292,7 @@ npm run ingest-all
 ## Updated Todo List
 
 ### High Priority
-1. Normalize `scripts/ingestionScheduler.js` to the live scraper commands and verify retry timing against the actual draw windows.
+1. Keep ingestion on the Cloud Scheduler + Cloud Run path and leave the local cron helper archived.
 2. Run a visual QA pass on the dropdown/menu destinations against the current mockups and rendered pages.
 3. Finish Stripe checkout, webhook, and customer portal wiring so `/billing` becomes a real self-serve flow.
 4. Run a tier matrix test across dashboard, strategy locker, pricing, billing, and AI commentary surfaces.

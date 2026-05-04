@@ -794,8 +794,8 @@ node scripts/scrapeMega.js
 # Unified ingestion job (with retry logic)
 node scripts/ingestionJob.js
 
-# Daily scheduler (runs at 12:00 AM PT)
-node scripts/ingestionScheduler.js
+# Archived local scheduler reference only
+node scripts/archive/ingestionScheduler.js
 
 # Health monitor
 node scripts/ingestionHealth.js
