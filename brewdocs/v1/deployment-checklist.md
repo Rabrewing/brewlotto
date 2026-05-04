@@ -176,6 +176,18 @@ Expected runtime:
 - [ ] `NIM_MODEL`
 - [ ] `NIM_BASE_URL`
 
+### Auth + Magic Link Email
+
+- [ ] Verify Resend domain for `brewlotto.app`
+- [ ] Set Supabase custom SMTP sender to `no-reply@brewlotto.app`
+- [ ] Use `smtp.resend.com` with the Resend SMTP credentials
+- [ ] Confirm the Magic Link template uses the final email-safe copy:
+  - solid gold CTA
+  - `Confirm Magic Link` button label
+  - raw confirmation URL fallback
+  - responsible-use footer copy
+- [ ] Test magic-link delivery on the production domain and verify the `/auth/callback` redirect returns a live session
+
 ### Landing Video
 
 - [ ] `NEXT_PUBLIC_LANDING_VIDEO_MP4_URL`

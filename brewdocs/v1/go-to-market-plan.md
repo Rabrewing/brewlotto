@@ -194,7 +194,7 @@ Supabase's built-in email is fine for development but unreliable for production.
 | Port | `587` |
 | Username | `smtp` (literal, not your email) |
 | Password | Your Resend SMTP API key |
-| Sender email | `noreply@brewlotto.app` |
+| Sender email | `no-reply@brewlotto.app` |
 
 #### Why Resend Over Alternatives
 
@@ -255,7 +255,28 @@ Supabase's built-in email is fine for development but unreliable for production.
 
 ## Email Template
 
-The magic link email template uses BrewLotto dark/gold branding (`#050509` background, `#FFD700` gold, `#f7d6ab` warm text, gradient gold CTA button). Template is configured in Supabase Dashboard → Auth → Email Templates → Magic Link. Variables: `{{ .ConfirmationURL }}`, `{{ .ExpirationHours }}`.
+Use the finalized Resend-safe magic link template in Supabase Dashboard → Auth → Email Templates → Magic Link.
+
+Template rules:
+
+- Sender: `no-reply@brewlotto.app`
+- Subject/heading: confirm the BrewLotto sign-in
+- CTA label: `Confirm Magic Link`
+- Button style: solid gold background for dark-mode safety, not a gradient
+- Fallback copy: include the raw confirmation URL below the button
+- Footer copy: `BrewLotto AI - Smart Picks. Sharper Odds.` and responsible-use language
+
+Template variables:
+
+- `{{ .ConfirmationURL }}`
+- `{{ .ExpirationHours }}`
+
+Reference intent:
+
+- dark shell
+- gold brand accents
+- high-contrast CTA
+- email-client-safe layout for Gmail, Apple Mail, and Outlook
 
 ---
 
