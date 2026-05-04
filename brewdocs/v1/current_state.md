@@ -19,6 +19,7 @@
 - `scripts/ingestionScheduler.js` has been archived; Cloud Scheduler + Cloud Run are the active production ingestion path.
 - Billing is entitlement-aware, but Stripe checkout, webhook, and customer portal wiring still need the full end-to-end pass.
 - Strategy Locker is live and tier-aware, but the dedicated "Run Strategy" / strategy replay polish still needs verification.
+- The dashboard "Generate Numbers" action is wired to `POST /api/predictions`, and a historical-style strategy smoke test now covers the current strategy engine across Pick 3, Pick 4, Cash 5, Powerball, and Mega Millions ranges.
 - `My Picks` still uses a scroll-to-top placeholder for `Replay`; a true replay action is not wired yet.
 - `Today's Results` still uses a dashboard shortcut for `Replay`; it is not a true replay interaction yet.
 - `Logout` signs out immediately; the confirm-modal UX called for in the screen map is still pending.
