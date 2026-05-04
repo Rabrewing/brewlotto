@@ -64,11 +64,10 @@ export default function HomePage() {
                                     <video
                                         ref={videoRef}
                                         className="block h-[62vh] w-full object-contain"
-                                        src="/landing/brewlotto-cta-silent.mp4"
                                         autoPlay
                                         muted
                                         playsInline
-                                        preload="auto"
+                                        preload="metadata"
                                         poster="/frontend/brew_logo.png"
                                         controls
                                         onEnded={() => setShowCta(true)}
@@ -86,7 +85,12 @@ export default function HomePage() {
                                                 void videoRef.current.play().catch(() => undefined);
                                             }
                                         }}
-                                    />
+                                        >
+                                        <source src="/landing/brewlotto-cta-mobile.webm" type="video/webm" />
+                                        <source src="/landing/brewlotto-cta-mobile.mp4" type="video/mp4" />
+                                        <source src="/landing/brewlotto-cta-silent.mp4" type="video/mp4" />
+                                        <source src="/landing/brewlotto-cta.mp4" type="video/mp4" />
+                                    </video>
                                 </div>
                             </div>
 
