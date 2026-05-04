@@ -53,6 +53,12 @@ This is the required Git and Vercel branch model for BrewLotto V1.
 
 If work is not ready for public production, it stays off `main`.
 
+### Current Branch Note
+
+- `brew2-overhaul` is the active development branch for landing-page and AI-provider work.
+- `main` remains the production source of truth.
+- If the live site still shows the old sign-in page, the Vercel production branch is still pointing at `main` or at an older deployment, not at `brew2-overhaul`.
+
 ## GitHub + Vercel Setup Instructions
 
 ### In GitHub
@@ -94,6 +100,8 @@ If work is not ready for public production, it stays off `main`.
 4. `NEXT_PUBLIC_APP_URL`
 5. `BREWCOMMAND_ADMIN_EMAILS`
 6. `BREWCOMMAND_ADMIN_SECRET`
+7. `AI_PROVIDER`
+8. `OPENAI_API_KEY` or `DEEPSEEK_API_KEY` or `NIM_API_KEY`
 
 If billing is in scope now, also prepare:
 
@@ -152,6 +160,17 @@ Expected runtime:
 
 - [ ] `STRIPE_SECRET_KEY`
 - [ ] `STRIPE_WEBHOOK_SECRET`
+
+### AI Provider
+
+- [ ] `AI_PROVIDER`
+- [ ] `OPENAI_API_KEY`
+- [ ] `OPENAI_MODEL`
+- [ ] `DEEPSEEK_API_KEY`
+- [ ] `DEEPSEEK_MODEL`
+- [ ] `NIM_API_KEY`
+- [ ] `NIM_MODEL`
+- [ ] `NIM_BASE_URL`
 
 ## Phase 4: Post-Deploy Validation
 

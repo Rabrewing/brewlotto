@@ -18,11 +18,13 @@ OPENAI_API_KEY=
 OPENAI_MODEL=
 DEEPSEEK_API_KEY=
 DEEPSEEK_MODEL=
-NVIDIA_NIM_KEY=
+NIM_API_KEY=
+NIM_MODEL=
+NIM_BASE_URL=
 GOOGLE_TTS_KEY=
 ```
 
-`AI_PROVIDER` supports `auto`, `openai`, or `deepseek`. In `auto`, the app prefers DeepSeek when its key is present, otherwise it falls back to OpenAI.
+`AI_PROVIDER` supports `auto`, `openai`, `deepseek`, or `nim`. In `auto`, the app prefers DeepSeek when its key is present, then OpenAI, then NIM.
 
 ### Commands
 

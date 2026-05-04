@@ -183,7 +183,7 @@ Predictive lottery analytics, North Carolina + California.
 1. Clone repo: `git clone https://github.com/<org>/brewgold`
 2. Install deps: `pnpm install`
 3. Copy `.env.local.example` → `.env.local`
-4. Fill Supabase + OpenAI keys
+4. Fill Supabase + AI provider keys
 5. Run local Supabase instance
 6. Start dev: `pnpm dev`
 
@@ -194,7 +194,12 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE=
 OPENAI_API_KEY=
-NVIDIA_NIM_KEY=
+OPENAI_MODEL=
+DEEPSEEK_API_KEY=
+DEEPSEEK_MODEL=
+NIM_API_KEY=
+NIM_MODEL=
+NIM_BASE_URL=
 GOOGLE_TTS_KEY=
 ```
 

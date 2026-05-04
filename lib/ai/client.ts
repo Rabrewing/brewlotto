@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 
-export type AiProviderName = "openai" | "deepseek";
+export type AiProviderName = "openai" | "deepseek" | "nim";
 
 export interface AiRuntimeConfig {
     provider: AiProviderName;
@@ -22,6 +22,7 @@ export function getAiRuntimeConfig(): AiRuntimeConfig | null {
     const providerSetting = normalizeProvider(process.env.AI_PROVIDER);
     const openaiKey = process.env.OPENAI_API_KEY?.trim();
     const deepseekKey = process.env.DEEPSEEK_API_KEY?.trim();
+    const nimKey = process.env.NIM_API_KEY?.trim();
 
     const getDeepSeekConfig = (): AiRuntimeConfig | null => {
         if (!deepseekKey) {
@@ -50,6 +51,21 @@ export function getAiRuntimeConfig(): AiRuntimeConfig | null {
         };
     };
 
+    const getNimConfig = (): AiRuntimeConfig | null => {
+        if (!nimKey) {
+            return null;
+        }
+
+        return {
+            provider: "nim",
+            model: process.env.NIM_MODEL?.trim() || "meta/llama-3.1-70b-instruct",
+            client: new OpenAI({
+                apiKey: nimKey,
+                baseURL: process.env.NIM_BASE_URL?.trim() || "https://integrate.api.nvidia.com/v1",
+            }),
+        };
+    };
+
     if (providerSetting === "deepseek") {
         return getDeepSeekConfig();
     }
@@ -58,5 +74,9 @@ export function getAiRuntimeConfig(): AiRuntimeConfig | null {
         return getOpenAIConfig();
     }
 
-    return getDeepSeekConfig() || getOpenAIConfig();
+    if (providerSetting === "nim") {
+        return getNimConfig();
+    }
+
+    return getDeepSeekConfig() || getOpenAIConfig() || getNimConfig();
 }
