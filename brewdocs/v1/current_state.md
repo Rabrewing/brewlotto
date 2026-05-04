@@ -1,6 +1,6 @@
 # BrewLotto V1 - Current State & Next Steps
 
-**Last Updated:** 2026-05-04 ET (menu truth pass, blob-backed landing reel, tier/billing QA pending)
+**Last Updated:** 2026-05-04 ET (menu truth pass, blob-backed landing reel, referral plan normalized, tier/billing QA pending)
 **Phase:** Shared UI/UX framework and product truth pass
 
 ## 2026-05-04 Truth Update
@@ -23,6 +23,7 @@
 - Notifications stores preferences and reads history, but real delivery wiring still needs a full verification pass.
 - Menu/tab and mockup QA still needs another visual pass against the current rendered routes.
 - Tier gating still needs a deliberate test matrix across dashboard, strategy locker, pricing, billing, and AI surfaces.
+- Referral growth loop is now captured as a deferred V1.5 plan in `brewdocs/v1/referral-growth-plan.md`; do not wire it into the core launch path until the launch stack is stable.
 
 ### 🎯 Current Truth Priority
 1. Verify the current dropdown/menu tabs against the rendered routes and mockups.
@@ -30,6 +31,7 @@
 3. Finish Stripe + billing entitlement wiring.
 4. Normalize the ingestion scheduler to the live scraper commands.
 5. Keep the onboarding tutorial and future Opus Clip clips aligned with the landing/login flow.
+6. Keep the referral growth loop deferred until billing, notifications, and strategy gating are stable.
 
 ---
 
@@ -308,6 +310,9 @@ npm run ingest-all
 1. Add Chart.js or equivalent stats visualizations if they still add value after the live data pass.
 2. Clean up lint debt after the current product passes stabilize.
 3. Expand profile polish such as avatar upload if it remains in scope.
+
+### Deferred / V1.5 Growth
+1. Build the referral growth loop from `brewdocs/v1/referral-growth-plan.md` after billing, notifications, and strategy gating are stable.
 
 ## Package.json Updates
 

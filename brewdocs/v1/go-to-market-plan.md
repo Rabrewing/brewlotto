@@ -136,7 +136,7 @@ Week 5: Live on App Store
 | Web | SEO, lottery forums, Reddit, Twitter | Free |
 | Google Play | Play Store search, ASO | $25 one-time |
 | Apple App Store | App Store search, ASO | $99/year |
-| Referral | Built-in referral (deferred) | Free |
+| Referral | V1.5 referral growth loop (deferred until billing, notifications, and strategy gating are stable) | Free |
 | Content | BrewU lessons, Reddit posts | Free |
 
 ### Pricing Model (V1)
