@@ -45,7 +45,7 @@ export function getAiRuntimeConfig(): AiRuntimeConfig | null {
 
         return {
             provider: "openai",
-            model: process.env.OPENAI_MODEL?.trim() || "gpt-4.1-mini",
+            model: process.env.OPENAI_MODEL?.trim() || "gpt-5.4-mini",
             client: new OpenAI({ apiKey: openaiKey }),
         };
     };

@@ -72,7 +72,7 @@ export async function POST(req: Request) {
             completion.choices?.[0]?.message?.content?.trim() || "(no reply)";
         return NextResponse.json({ reply, provider: ai.provider }, { status: 200 });
     } catch (error) {
-        console.error("🔴 OpenAI Error:", error);
+        console.error("🔴 AI Error:", error);
         return NextResponse.json({ reply: "Brew encountered an error connecting to the AI core." }, { status: 500 });
     }
 }
