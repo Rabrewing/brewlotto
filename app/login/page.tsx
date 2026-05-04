@@ -30,7 +30,12 @@ export default function LoginPage() {
         });
 
         if (error) {
-            setMessage({ type: "error", text: error.message });
+            const lower = error.message.toLowerCase();
+            const hint =
+                lower.includes("smtp") || lower.includes("email") || lower.includes("otp")
+                    ? " Check Supabase Auth SMTP, Resend sender verification, and redirect URLs."
+                    : "";
+            setMessage({ type: "error", text: `${error.message}${hint}` });
         } else {
             setMessage({
                 type: "success",
