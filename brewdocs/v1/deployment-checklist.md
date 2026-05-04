@@ -172,6 +172,14 @@ Expected runtime:
 - [ ] `NIM_MODEL`
 - [ ] `NIM_BASE_URL`
 
+### Landing Video
+
+- [ ] `NEXT_PUBLIC_LANDING_VIDEO_MP4_URL`
+- [ ] `NEXT_PUBLIC_LANDING_VIDEO_WEBM_URL`
+- [ ] `BLOB_READ_WRITE_TOKEN` if uploading the reel to Vercel Blob
+
+Use `scripts/uploadLandingVideoToBlob.mjs` to upload the landing reel, then copy the returned public URL into the landing video env vars.
+
 ## Phase 4: Post-Deploy Validation
 
 After the first live deploy, verify these routes manually:

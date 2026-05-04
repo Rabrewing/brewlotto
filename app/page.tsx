@@ -8,6 +8,13 @@ export default function HomePage() {
     const [isPlaying, setIsPlaying] = useState(false);
     const [showCta, setShowCta] = useState(false);
     const [autoplayBlocked, setAutoplayBlocked] = useState(false);
+    const videoMp4Src =
+        process.env.NEXT_PUBLIC_LANDING_VIDEO_MP4_URL ||
+        "/landing/brewlotto-cta-mobile.mp4";
+    const videoWebmSrc =
+        process.env.NEXT_PUBLIC_LANDING_VIDEO_WEBM_URL ||
+        "/landing/brewlotto-cta-mobile.webm";
+    const videoFallbackSrc = "/landing/brewlotto-cta.mp4";
 
     useEffect(() => {
         const video = videoRef.current;
@@ -86,10 +93,9 @@ export default function HomePage() {
                                             }
                                         }}
                                         >
-                                        <source src="/landing/brewlotto-cta-mobile.webm" type="video/webm" />
-                                        <source src="/landing/brewlotto-cta-mobile.mp4" type="video/mp4" />
-                                        <source src="/landing/brewlotto-cta-silent.mp4" type="video/mp4" />
-                                        <source src="/landing/brewlotto-cta.mp4" type="video/mp4" />
+                                        <source src={videoWebmSrc} type="video/webm" />
+                                        <source src={videoMp4Src} type="video/mp4" />
+                                        <source src={videoFallbackSrc} type="video/mp4" />
                                     </video>
                                 </div>
                             </div>
