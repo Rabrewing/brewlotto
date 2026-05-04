@@ -355,37 +355,70 @@ export default function StrategyLockerPage() {
               </div>
             </section>
 
-            <SectionCard
-              title="Entitlement Snapshot"
-              description="This is the current tier framing Brew can verify on your account right now."
-            >
-              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                <div className="rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
-                  <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">Advanced strategies</div>
-                  <div className="mt-3 text-[18px] font-medium text-[#f7ddb3]">
-                    {entitlements?.advanced_strategy_access ? 'Enabled' : 'Locked'}
+            <div className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr]">
+              <SectionCard
+                title="Entitlement Snapshot"
+                description="This is the current tier framing Brew can verify on your account right now."
+              >
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
+                    <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">Advanced strategies</div>
+                    <div className="mt-3 text-[18px] font-medium text-[#f7ddb3]">
+                      {entitlements?.advanced_strategy_access ? 'Enabled' : 'Locked'}
+                    </div>
+                  </div>
+                  <div className="rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
+                    <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">Premium explanations</div>
+                    <div className="mt-3 text-[18px] font-medium text-[#f7ddb3]">
+                      {entitlements?.premium_explanations_access ? 'Enabled' : 'Locked'}
+                    </div>
+                  </div>
+                  <div className="rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
+                    <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">Comparisons</div>
+                    <div className="mt-3 text-[18px] font-medium text-[#f7ddb3]">
+                      {entitlements?.premium_comparison_access ? 'Enabled' : 'Locked'}
+                    </div>
+                  </div>
+                  <div className="rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
+                    <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">Voice commentary</div>
+                    <div className="mt-3 text-[18px] font-medium text-[#f7ddb3]">
+                      {entitlements?.voice_commentary_access ? 'Enabled' : 'Locked'}
+                    </div>
                   </div>
                 </div>
-                <div className="rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
-                  <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">Premium explanations</div>
-                  <div className="mt-3 text-[18px] font-medium text-[#f7ddb3]">
-                    {entitlements?.premium_explanations_access ? 'Enabled' : 'Locked'}
-                  </div>
+              </SectionCard>
+
+              <SectionCard
+                title="Plan Ladder"
+                description="Subscription tier rows are shown directly from the tier registry so the upgrade path stays aligned with stored pricing names."
+              >
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+                  {subscriptionTiers.map((tier) => {
+                    const active = tier.tier_key === currentTier;
+
+                    return (
+                      <div
+                        key={tier.tier_key}
+                        className={`rounded-[22px] border px-4 py-4 ${
+                          active
+                            ? 'border-[#ffc742]/30 bg-[#ffc742]/10'
+                            : 'border-white/8 bg-black/20'
+                        }`}
+                      >
+                        <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">{tier.tier_key}</div>
+                        <div className="mt-3 text-[20px] font-medium text-[#f7ddb3]">{tier.display_name}</div>
+                        <div className="mt-2 text-[14px] text-white/58">
+                          {tier.price_monthly != null ? `$${Number(tier.price_monthly).toFixed(2)}/mo` : 'Contact tier'}
+                        </div>
+                        <div className="mt-4 text-[12px] uppercase tracking-[0.14em] text-white/42">
+                          {active ? 'Current plan' : 'Upgrade target'}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-                <div className="rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
-                  <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">Comparisons</div>
-                  <div className="mt-3 text-[18px] font-medium text-[#f7ddb3]">
-                    {entitlements?.premium_comparison_access ? 'Enabled' : 'Locked'}
-                  </div>
-                </div>
-                <div className="rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
-                  <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">Voice commentary</div>
-                  <div className="mt-3 text-[18px] font-medium text-[#f7ddb3]">
-                    {entitlements?.voice_commentary_access ? 'Enabled' : 'Locked'}
-                  </div>
-                </div>
-              </div>
-            </SectionCard>
+              </SectionCard>
+            </div>
 
             <SectionCard
               title="Strategy Cards"
@@ -464,37 +497,6 @@ export default function StrategyLockerPage() {
                         ) : null}
                       </div>
                     </article>
-                  );
-                })}
-              </div>
-            </SectionCard>
-
-            <SectionCard
-              title="Plan Ladder"
-              description="Subscription tier rows are shown directly from the tier registry so the upgrade path stays aligned with stored pricing names."
-            >
-              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                {subscriptionTiers.map((tier) => {
-                  const active = tier.tier_key === currentTier;
-
-                  return (
-                    <div
-                      key={tier.tier_key}
-                      className={`rounded-[22px] border px-4 py-4 ${
-                        active
-                          ? 'border-[#ffc742]/30 bg-[#ffc742]/10'
-                          : 'border-white/8 bg-black/20'
-                      }`}
-                    >
-                      <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">{tier.tier_key}</div>
-                      <div className="mt-3 text-[20px] font-medium text-[#f7ddb3]">{tier.display_name}</div>
-                      <div className="mt-2 text-[14px] text-white/58">
-                        {tier.price_monthly != null ? `$${Number(tier.price_monthly).toFixed(2)}/mo` : 'Contact tier'}
-                      </div>
-                      <div className="mt-4 text-[12px] uppercase tracking-[0.14em] text-white/42">
-                        {active ? 'Current plan' : 'Upgrade target'}
-                      </div>
-                    </div>
                   );
                 })}
               </div>
