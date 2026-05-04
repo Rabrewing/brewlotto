@@ -64,7 +64,7 @@ export default function HomePage() {
                                     <video
                                         ref={videoRef}
                                         className="block h-[62vh] w-full object-contain"
-                                        src="/landing/brewlotto-cta.mp4"
+                                        src="/landing/brewlotto-cta-silent.mp4"
                                         autoPlay
                                         muted
                                         playsInline
