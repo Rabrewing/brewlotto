@@ -1,10 +1,6 @@
 import { NextResponse } from 'next/server';
 import OpenAI from "openai";
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY
-});
-
 // 🔧 Shell command simulation logic
 function simulateShellCommand(cmd: string): string {
     switch (true) {
@@ -44,6 +40,15 @@ export async function POST(req: Request) {
 
     // 🧠 GPT response
     try {
+        const apiKey = process.env.OPENAI_API_KEY;
+        if (!apiKey) {
+            return NextResponse.json(
+                { reply: "Brew is not configured yet because OPENAI_API_KEY is missing." },
+                { status: 500 }
+            );
+        }
+
+        const openai = new OpenAI({ apiKey });
         const completion = await openai.chat.completions.create({
             model: "gpt-4",
             temperature: 0.7,
