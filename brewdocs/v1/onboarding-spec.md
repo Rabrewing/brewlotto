@@ -2,14 +2,14 @@
 
 ## Overview
 
-The onboarding flow is the first experience every new user has after signing up. It ensures legal compliance (disclaimer acknowledgment) and educates the user on BrewLotto's purpose before they access the app.
+The onboarding flow is the first gated experience every new user has after signing in from the public landing page. It ensures legal compliance (disclaimer acknowledgment) and educates the user on BrewLotto's purpose before they access the app.
 
 ## Flow
 
 ```
-Sign up / Magic Link → Auth Callback → Onboarding Check → [Onboarding] → App
-                                                              ↓ skip
-                                                           [Dashboard]
+Landing Page → Sign in / Magic Link → Auth Callback → Onboarding Check → [Onboarding] → App
+                                                                        ↓ skip
+                                                                     [Dashboard]
 ```
 
 ## Steps
@@ -20,6 +20,10 @@ Sign up / Magic Link → Auth Callback → Onboarding Check → [Onboarding] →
 User must read and actively check a box acknowledging:
 
 > "BrewLotto provides statistical analysis and predictive modeling for lottery games. It does NOT guarantee wins. All lottery play involves risk. No strategy can overcome the mathematical house edge. Play responsibly."
+
+Recommended V1 language:
+
+> "BrewLotto provides statistical analysis, prediction commentary, and educational context. It does not guarantee wins, improve the odds, or replace the randomness of lottery outcomes. Every game involves financial risk, and no strategy, tier, or model can overcome the house edge. Use BrewLotto as a decision aid, not as a promise of results."
 
 A button "I Understand, Continue" is disabled until the checkbox is checked.
 
@@ -33,6 +37,8 @@ Two options presented side by side (or stacked on mobile):
 - **"Take the Tour"** → Launches guided tutorial (3-4 slides)
 - **"Skip Tutorial, Start Playing"** → Sets `onboarding_completed = true`, redirects to `/dashboard`
 
+The landing page should already have previewed the brand and CTA video, so onboarding can stay focused on legal acknowledgment and product orientation.
+
 ### Tutorial Slides
 
 | Slide | Title | Content |
@@ -43,6 +49,16 @@ Two options presented side by side (or stacked on mobile):
 | 4 | Track & Learn | "Save your picks, compare against official results, and learn from BrewU lessons to improve your strategy over time." |
 
 Each slide has a "Next" button. Last slide has "Done" which sets `onboarding_completed = true` and redirects to `/dashboard`.
+
+## Animated Tutorial Plan
+
+Planned follow-up content will use Opus Clip to generate short animated tutorial clips for:
+
+1. the no-guarantee disclaimer
+2. the tutorial walkthrough
+3. the dashboard introduction
+
+These clips should become the visual companion to onboarding after the landing page and login experience are locked.
 
 ## Route Protection
 
