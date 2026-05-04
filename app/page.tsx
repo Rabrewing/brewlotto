@@ -9,6 +9,7 @@ export default function HomePage() {
     const [showCta, setShowCta] = useState(false);
     const [autoplayBlocked, setAutoplayBlocked] = useState(false);
     const [isMuted, setIsMuted] = useState(true);
+    const [isExpanded, setIsExpanded] = useState(false);
     const videoMp4Src =
         process.env.NEXT_PUBLIC_LANDING_VIDEO_MP4_URL ||
         "/landing/brewlotto-cta-mobile.mp4";
@@ -40,6 +41,22 @@ export default function HomePage() {
 
         video.muted = isMuted;
     }, [isMuted]);
+
+    useEffect(() => {
+        if (!isExpanded) return;
+
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "Escape") {
+                setIsExpanded(false);
+            }
+        };
+
+        window.addEventListener("keydown", onKeyDown);
+
+        return () => {
+            window.removeEventListener("keydown", onKeyDown);
+        };
+    }, [isExpanded]);
 
     const handleReplay = async () => {
         const video = videoRef.current;
@@ -119,7 +136,24 @@ export default function HomePage() {
                             BrewLotto reel
                         </div>
 
-                        <div className="overflow-hidden rounded-[32px] border border-[#ffc742]/18 bg-[linear-gradient(145deg,rgba(28,18,14,0.96),rgba(9,8,8,0.98))] shadow-[0_0_38px_rgba(255,184,28,0.14)]">
+                        <div
+                            className={
+                                isExpanded
+                                    ? "fixed inset-4 z-50 mx-auto flex w-[min(100%,960px)] flex-col overflow-hidden rounded-[32px] border border-[#ffc742]/18 bg-[linear-gradient(145deg,rgba(28,18,14,0.98),rgba(9,8,8,0.99))] shadow-[0_0_60px_rgba(255,184,28,0.22)] backdrop-blur-xl"
+                                    : "overflow-hidden rounded-[32px] border border-[#ffc742]/18 bg-[linear-gradient(145deg,rgba(28,18,14,0.96),rgba(9,8,8,0.98))] shadow-[0_0_38px_rgba(255,184,28,0.14)]"
+                            }
+                        >
+                            {isExpanded ? (
+                                <button
+                                    type="button"
+                                    aria-label="Close expanded video"
+                                    onClick={() => setIsExpanded(false)}
+                                    className="absolute right-4 top-4 z-20 rounded-full border border-white/12 bg-black/70 px-3 py-1.5 text-[12px] font-medium text-white/78 backdrop-blur-md transition-colors hover:text-white"
+                                >
+                                    Close
+                                </button>
+                            ) : null}
+
                             <div className="px-5 pb-3 pt-5 sm:px-6">
                                 <div className="text-[13px] uppercase tracking-[0.18em] text-white/38">
                                     BrewLotto preview reel
@@ -130,10 +164,16 @@ export default function HomePage() {
                             </div>
 
                             <div className="px-3 pb-3 sm:px-4">
-                                <div className="relative overflow-hidden rounded-[26px] border border-white/8 bg-black">
+                                <div
+                                    className={
+                                        isExpanded
+                                            ? "relative overflow-hidden rounded-[26px] border border-white/8 bg-black"
+                                            : "relative overflow-hidden rounded-[26px] border border-white/8 bg-black"
+                                    }
+                                >
                                     <video
                                         ref={videoRef}
-                                        className="block h-[62vh] w-full object-contain"
+                                        className={isExpanded ? "block h-[80vh] w-full object-contain" : "block h-[62vh] w-full object-contain"}
                                         autoPlay
                                         muted={isMuted}
                                         playsInline
@@ -174,6 +214,13 @@ export default function HomePage() {
                                             className="rounded-full border border-white/12 bg-black/65 px-3 py-1.5 text-[12px] font-medium text-white/80 backdrop-blur-md transition-colors hover:text-white"
                                         >
                                             {isMuted ? "Play with sound" : "Mute"}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsExpanded((value) => !value)}
+                                            className="rounded-full border border-white/12 bg-black/65 px-3 py-1.5 text-[12px] font-medium text-white/80 backdrop-blur-md transition-colors hover:text-white"
+                                        >
+                                            {isExpanded ? "Shrink" : "Expand"}
                                         </button>
                                     </div>
                                 </div>
