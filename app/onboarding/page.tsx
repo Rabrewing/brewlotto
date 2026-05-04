@@ -109,14 +109,12 @@ export default function OnboardingPage() {
             <div className="mt-6 rounded-[16px] border border-[#ff7d67]/20 bg-[#2a1311]/60 px-4 py-4 text-[14px] leading-6 text-[#ffcdc6]">
               <div className="mb-2 flex items-start gap-2 text-[15px] font-semibold text-[#ffb5a8]">
                 <span>⚠</span>
-                <span>No Guarantee, No Hype</span>
+                <span>Not a Guaranteed Win</span>
               </div>
               <p>
-                BrewLotto provides statistical analysis, prediction commentary, and educational
-                context. It does <strong>not</strong> guarantee wins, improve the odds, or
-                replace the randomness of lottery outcomes. Every game involves financial risk,
-                and no strategy, tier, or model can overcome the house edge. Use BrewLotto as a
-                decision aid, not as a promise of results.
+                BrewLotto provides statistical analysis and predictive modeling for lottery
+                games. It does <strong>NOT</strong> guarantee wins. All lottery play involves
+                risk. No strategy can overcome the mathematical house edge. Play responsibly.
               </p>
             </div>
 
@@ -128,8 +126,8 @@ export default function OnboardingPage() {
                 className="mt-0.5 h-4 w-4 rounded border-white/20 bg-white/5 text-[#ffc742] focus:ring-[#ffc742]"
               />
               <span className="text-[13px] leading-5 text-white/70">
-                I understand that BrewLotto is informational only, does not guarantee results,
-                and that all lottery play involves financial risk. I will play responsibly.
+                I understand that BrewLotto does not guarantee lottery wins and that all play
+                involves financial risk. I will play responsibly.
               </span>
             </label>
 

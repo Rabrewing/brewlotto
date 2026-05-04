@@ -1,20 +1,10 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
-type CookieEntry = {
-  name: string;
-  value: string;
-  options: CookieOptions;
-};
+const EXEMPT_PATHS = ['/login', '/onboarding', '/auth/callback'];
 
 function isExempt(pathname: string) {
-  return pathname === '/'
-    || pathname.startsWith('/login')
-    || pathname.startsWith('/onboarding')
-    || pathname.startsWith('/auth/callback')
-    || pathname.startsWith('/pricing')
-    || pathname.startsWith('/legal')
-    || pathname.startsWith('/logout')
+  return EXEMPT_PATHS.some(p => pathname.startsWith(p))
     || pathname.startsWith('/api/')
     || pathname.startsWith('/_next/')
     || pathname === '/favicon.ico';
@@ -32,7 +22,7 @@ export async function middleware(request: NextRequest) {
     {
       cookies: {
         getAll() { return request.cookies.getAll(); },
-        setAll(cookiesToSet: CookieEntry[]) {
+        setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
           supabaseResponse = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) => supabaseResponse.cookies.set(name, value, options));

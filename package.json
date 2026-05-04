@@ -14,7 +14,6 @@
     "audit:hook": "node brew-scan.js --hook",
     "scan": "node brew/tools/initFileIndex.cjs",
     "report": "node scripts/generateMergeReadinessReport.js",
-    "video:frames": "node scripts/extractVideoFrames.js",
     "test": "jest",
     "fetch-ca-data": "node scripts/fetchCAData.js",
     "scrape-ca-daily": "node scripts/scrapeCA_Data.js both 1000",

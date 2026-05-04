@@ -143,18 +143,11 @@ Week 5: Live on App Store
 
 | Tier | Price | Features |
 |------|-------|----------|
-| Trial | 3 days, capped | Full product preview with limited AI usage |
-| Brew | TBD | Explainable picks, commentary, match tracking |
-| Master | TBD | Advanced analytics, deeper premium surfaces |
+| Free | $0 | Basic picks, limited strategies, ads |
+| Premium | TBD | All strategies, ensemble picks, explanations |
+| Pro | TBD | Unlimited, ML-assisted, priority support |
 
-*Note: Stripe integration is not yet wired, so `/pricing` is the public comparison surface and `/billing` remains the authenticated account summary.*
-
-### Trial Recommendation
-
-- Default launch trial: 3 days
-- Cap AI-heavy usage during the trial
-- Avoid an unlimited free period for cost control
-- Convert users after they have seen the landing page, onboarding, and dashboard value loop
+*Note: Stripe integration is not yet wired — `/billing` page shows placeholder.*
 
 ---
 
@@ -167,7 +160,6 @@ Week 5: Live on App Store
 | Auth method | Supabase Magic Link (`signInWithOtp`) |
 | Account creation | `shouldCreateUser: true` — auto-creates on first sign-in |
 | Post-login flow | `/auth/callback` → `/onboarding` → `/dashboard` |
-| Public entry | `/` landing page with autoplay CTA video |
 | Email delivery | Supabase built-in (rate-limited, ~2-3/hr on free plan) |
 | Custom SMTP | Not configured |
 | Admin emails | `BREWCOMMAND_ADMIN_EMAILS=command@brewlotto.app` |

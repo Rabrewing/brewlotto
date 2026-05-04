@@ -1,221 +1,77 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useMemo } from 'react';
-import { useUserTier } from '@/hooks/useUserTier';
-
-type TierCard = {
-  key: string;
-  title: string;
-  subtitle: string;
-  price: string;
-  features: string[];
-  cta: string;
-  highlight?: boolean;
-};
-
-function formatTrialEndsAt(trialEndsAt: string | null) {
-  if (!trialEndsAt) {
-    return null;
-  }
-
-  const date = new Date(trialEndsAt);
-  if (Number.isNaN(date.getTime())) {
-    return trialEndsAt;
-  }
-
-  return date.toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
-}
+import { useEffect } from "react";
+// import Head from "next/head"; // Not used in app router, metadata handled differently
+import { useUserTier } from "@/hooks/useUserTier";
+import { useBrewBotContext } from "@/components/context/BrewBotContext";
+import PricingTierCard from "@/components/landing/PricingTierCard"; // You'll build this next
 
 export default function PricingPage() {
-  const { currentTier, isTrial, trialEndsAt } = useUserTier();
+    const { currentTier } = useUserTier(); // Supabase-powered
+    const { prompt } = useBrewBotContext();
 
-  const trialDateLabel = useMemo(() => formatTrialEndsAt(trialEndsAt), [trialEndsAt]);
+    const handleUpgrade = (tier: string) => {
+        const tierPitches: { [key: string]: string } = {
+            brew: "Upgrading to Brew Tier unlocks PulsePrime™, commentary, and deep strategy tracking.",
+            master: "Master Tier grants you full access to SequenceX™, entropy scores, and cross-game insights.",
+        };
 
-  const tiers: TierCard[] = [
-    {
-      key: 'trial',
-      title: '3-Day Trial',
-      subtitle: 'Best for testing the full vibe without long-term commitment.',
-      price: '$0',
-      features: [
-        '3 days of premium access',
-        'Capped AI usage to control burn',
-        'Onboarding + dashboard experience',
-      ],
-      cta: 'Start Trial',
-      highlight: true,
-    },
-    {
-      key: 'brew',
-      title: 'Brew Tier',
-      subtitle: 'For users who want commentary, strategy, and match tracking.',
-      price: 'TBD',
-      features: [
-        'Explainable picks',
-        'Strategy context',
-        'Match tracking and saved picks',
-      ],
-      cta: 'Choose Brew',
-    },
-    {
-      key: 'master',
-      title: 'Master Tier',
-      subtitle: 'For the deepest analysis surface and premium unlocks.',
-      price: 'TBD',
-      features: [
-        'Advanced strategy access',
-        'Comparison and replay surfaces',
-        'Full premium commentary layer',
-      ],
-      cta: 'Choose Master',
-    },
-  ];
+        if (tier !== currentTier && tierPitches[tier]) {
+            prompt(tierPitches[tier]);
+        }
 
-  return (
-    <main className="min-h-screen overflow-hidden bg-[#050505] text-white">
-      <div className="relative mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 py-4 sm:px-6 lg:px-8">
-        <header className="flex items-center justify-between gap-4 rounded-[24px] border border-white/8 bg-black/20 px-4 py-4 backdrop-blur-sm">
-          <div>
-            <div className="text-[11px] uppercase tracking-[0.22em] text-white/38">BrewVerse Labs</div>
-            <div className="mt-1 text-[18px] font-semibold tracking-[-0.03em] text-[#f7ddb3]">Pricing</div>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-[14px] text-white/72 transition-colors hover:text-white"
-            >
-              Home
-            </Link>
-            <Link
-              href="/login"
-              className="rounded-full bg-gradient-to-r from-[#ffc742] to-[#ffbe27] px-5 py-2 text-[14px] font-semibold text-black shadow-[0_0_18px_rgba(255,199,66,0.18)]"
-            >
-              Sign In
-            </Link>
-          </div>
-        </header>
+        // TODO: Implement upgrade logic (Stripe, modal, etc.)
+        console.log("Upgrade to:", tier);
+    };
 
-        <section className="grid gap-8 py-6 lg:grid-cols-[0.95fr_1.05fr] lg:py-10">
-          <div className="max-w-xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#ffc742]/18 bg-[#ffc742]/10 px-3 py-1 text-[12px] uppercase tracking-[0.16em] text-[#ffd988]">
-              <span className="h-2 w-2 rounded-full bg-[#ffcb4d] shadow-[0_0_8px_rgba(255,203,77,0.8)] animate-brew-pulse" />
-              3-day capped trial
-            </div>
-            <h1 className="mt-5 text-[44px] font-semibold tracking-[-0.05em] text-[#fff1d3] sm:text-[56px] lg:text-[68px]">
-              Test the app. Cap the burn.
-            </h1>
-            <p className="mt-5 max-w-xl text-[17px] leading-8 text-white/68 sm:text-[18px]">
-              Use a short trial to prove the experience, then convert into paid access if the product feels worth it.
-              That keeps AI exposure controlled and avoids an unlimited free ride.
-            </p>
+    useEffect(() => {
+        if (currentTier === "free") {
+            prompt("Explore higher tiers to unlock smarter predictions with Brew.");
+        }
+    }, [currentTier, prompt]);
 
-            <div className="mt-7 rounded-[22px] border border-[#ffc742]/16 bg-[linear-gradient(145deg,rgba(30,20,13,0.78),rgba(8,8,8,0.96))] px-5 py-5">
-              <div className="text-[13px] uppercase tracking-[0.18em] text-white/38">Recommended launch setup</div>
-              <div className="mt-3 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-4 py-4 text-[14px] leading-6 text-white/72">
-                  3-day trial only
+    return (
+        <main className="bg-black text-white min-h-screen py-12 px-6">
+            <div className="max-w-4xl mx-auto space-y-8">
+                <h1 className="text-3xl font-bold text-yellow-400 text-center">
+                    Choose your tier. Predict smarter.
+                </h1>
+                <p className="text-center text-neutral-400 max-w-xl mx-auto">
+                    Brew’s different tiers unlock different types of prediction power — from casual picks to strategist-grade heat.
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
+                    <PricingTierCard
+                        tierId="free"
+                        title="Free"
+                        description="Try prediction basics without commentary or insights."
+                        features={["Basic Pick Support", "No Match Tracking", "No Voice Commentary"]}
+                        locked={false}
+                        current={currentTier === "free"}
+                        onUpgrade={() => handleUpgrade("brew")}
+                    />
+
+                    <PricingTierCard
+                        tierId="brew"
+                        title="Brew Tier"
+                        description="Commentary, predictions, PulsePrime™ and more."
+                        features={["PulsePrime™ Strategy", "BrewBot Voice", "Pick Tracker"]}
+                        locked={currentTier !== "brew" && currentTier !== "master"}
+                        current={currentTier === "brew"}
+                        onUpgrade={() => handleUpgrade("brew")}
+                    />
+
+                    <PricingTierCard
+                        tierId="master"
+                        title="Master Tier"
+                        description="Unlock Brew’s full brain. SequenceX™, entropy, and analytics."
+                        features={["SequenceX™ Engine", "Draw Entropy", "Full Commentary & History"]}
+                        locked={currentTier !== "master"}
+                        current={currentTier === "master"}
+                        onUpgrade={() => handleUpgrade("master")}
+                    />
                 </div>
-                <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-4 py-4 text-[14px] leading-6 text-white/72">
-                  Capped AI usage
-                </div>
-                <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-4 py-4 text-[14px] leading-6 text-white/72">
-                  No unlimited tier
-                </div>
-              </div>
             </div>
-
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              <Link
-                href="/login"
-                className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#ffc742] to-[#ffbe27] px-7 py-3 text-[15px] font-semibold text-black shadow-[0_0_18px_rgba(255,199,66,0.2)]"
-              >
-                Start 3-Day Trial
-              </Link>
-              <Link
-                href="/billing"
-                className="inline-flex items-center justify-center rounded-full border border-white/12 bg-white/[0.03] px-7 py-3 text-[15px] text-white/80 transition-colors hover:text-white"
-              >
-                View Account Billing
-              </Link>
-            </div>
-
-            {isTrial && trialDateLabel ? (
-              <div className="mt-6 rounded-[20px] border border-[#72caff]/18 bg-[linear-gradient(145deg,rgba(19,22,31,0.76),rgba(10,10,12,0.96))] px-5 py-5 text-[15px] leading-7 text-white/70">
-                Your trial is active and ends on {trialDateLabel}. Keep it short, keep it capped, and push conversion before the trial drains into free usage.
-              </div>
-            ) : null}
-
-            <div className="mt-6 rounded-[20px] border border-white/10 bg-white/[0.03] px-5 py-5 text-[15px] leading-7 text-white/68">
-              Current session tier: <span className="text-[#f7ddb3]">{currentTier}</span>
-            </div>
-          </div>
-
-          <div className="relative">
-            <div className="absolute -inset-6 rounded-[34px] bg-[#ffc742]/8 blur-2xl animate-brew-drift" />
-            <div className="relative grid gap-4 lg:grid-cols-3">
-              {tiers.map((tier) => (
-                <article
-                  key={tier.key}
-                  className={`rounded-[28px] border px-5 py-5 shadow-[0_0_24px_rgba(255,184,28,0.08)] transition-transform duration-500 hover:-translate-y-1 ${
-                    tier.highlight
-                      ? 'border-[#ffc742]/28 bg-[linear-gradient(145deg,rgba(32,19,13,0.92),rgba(13,10,10,0.98))]'
-                      : 'border-white/8 bg-white/[0.03]'
-                  }`}
-                >
-                  <div className="text-[12px] uppercase tracking-[0.18em] text-white/35">{tier.price}</div>
-                  <div className="mt-3 text-[24px] font-semibold text-[#f7ddb3]">{tier.title}</div>
-                  <div className="mt-2 text-[14px] leading-6 text-white/62">{tier.subtitle}</div>
-
-                  <div className="mt-5 space-y-3">
-                    {tier.features.map((feature) => (
-                      <div key={feature} className="rounded-[16px] border border-white/8 bg-black/20 px-4 py-3 text-[14px] leading-6 text-white/72">
-                        {feature}
-                      </div>
-                    ))}
-                  </div>
-
-                  <Link
-                    href="/login"
-                    className={`mt-6 inline-flex w-full items-center justify-center rounded-full px-5 py-3 text-[15px] font-semibold shadow-[0_0_18px_rgba(255,199,66,0.12)] ${
-                      tier.highlight
-                        ? 'bg-gradient-to-r from-[#ffc742] to-[#ffbe27] text-black'
-                        : 'border border-white/10 bg-white/[0.03] text-white/82 transition-colors hover:text-white'
-                    }`}
-                  >
-                    {tier.cta}
-                  </Link>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="grid gap-4 pb-6 lg:grid-cols-3">
-          <div className="rounded-[24px] border border-white/8 bg-white/[0.03] px-5 py-5">
-            <div className="text-[14px] uppercase tracking-[0.16em] text-white/35">Trial policy</div>
-            <div className="mt-2 text-[16px] leading-7 text-white/68">
-              Keep the trial short and capped. That gives users a real test drive without opening a long, expensive free period.
-            </div>
-          </div>
-          <div className="rounded-[24px] border border-white/8 bg-white/[0.03] px-5 py-5">
-            <div className="text-[14px] uppercase tracking-[0.16em] text-white/35">Upgrade path</div>
-            <div className="mt-2 text-[16px] leading-7 text-white/68">
-              Convert trial users into Brew or Master after onboarding and a few live interactions, not before they see the value.
-            </div>
-          </div>
-          <div className="rounded-[24px] border border-white/8 bg-white/[0.03] px-5 py-5">
-            <div className="text-[14px] uppercase tracking-[0.16em] text-white/35">Cost control</div>
-            <div className="mt-2 text-[16px] leading-7 text-white/68">
-              Unlimited AI access is the wrong launch default. Cap the trial, then let Stripe and entitlements enforce the rest.
-            </div>
-          </div>
-        </section>
-      </div>
-    </main>
-  );
+        </main>
+    );
 }
