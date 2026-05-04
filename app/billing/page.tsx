@@ -103,7 +103,9 @@ export default function BillingPage() {
                 <div>
                   <div className="text-[15px] uppercase tracking-[0.16em] text-white/38">Current plan</div>
                   <div className="mt-3 text-[26px] font-semibold text-[#f7ddb3]">{currentPlan?.display_name || currentTier}</div>
-                  <div className="mt-2 max-w-2xl text-[15px] leading-7 text-white/62">This page is authenticated account billing context. Marketing and upgrade copy still lives on `/pricing`, while this route shows current entitlement truth from your account records.</div>
+                  <div className="mt-2 max-w-2xl text-[15px] leading-7 text-white/62">
+                    This page is authenticated account billing context. Marketing and upgrade copy still lives on `/pricing`, while this route shows current entitlement truth from your account records. The planned ladder is Starter at $4.99, Pro at $9.99, and Master at $19.99, with AI beginning in Starter and expanding by tier.
+                  </div>
                 </div>
                 <Link href="/pricing" className="rounded-full bg-gradient-to-r from-[#ffc742] to-[#ffbe27] px-6 py-3 text-[15px] font-semibold text-black shadow-[0_0_18px_rgba(255,199,66,0.18)]">Manage / Upgrade</Link>
               </div>
@@ -130,6 +132,9 @@ export default function BillingPage() {
             <SectionCard title="Plan Ladder" description="Canonical billing tiers from `subscription_tiers`.">
               <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                 {tiers.map((tier) => <div key={tier.tier_key} className={`rounded-[22px] border px-4 py-4 ${tier.tier_key === currentTier ? 'border-[#ffc742]/30 bg-[#ffc742]/10' : 'border-white/8 bg-black/20'}`}><div className="text-[12px] uppercase tracking-[0.16em] text-white/35">{tier.tier_key}</div><div className="mt-3 text-[20px] font-medium text-[#f7ddb3]">{tier.display_name}</div><div className="mt-2 text-[14px] text-white/58">{tier.price_monthly != null ? `$${Number(tier.price_monthly).toFixed(2)}/mo` : 'See pricing'}</div><div className="mt-4 text-[12px] uppercase tracking-[0.14em] text-white/42">{tier.tier_key === currentTier ? 'Current plan' : 'Available tier'}</div></div>)}
+              </div>
+              <div className="mt-4 text-[14px] leading-6 text-white/58">
+                Annual billing should be marketed as a 30% savings over monthly once Stripe is wired, with Pro framed as the best-value tier and Master reserved for the heaviest AI and voice usage.
               </div>
             </SectionCard>
 

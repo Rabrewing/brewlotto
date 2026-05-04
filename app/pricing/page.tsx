@@ -43,34 +43,47 @@ export default function PricingPage() {
       subtitle: 'Best for testing the full vibe without long-term commitment.',
       price: '$0',
       features: [
-        '3 days of premium access',
+        'Full product preview across the app',
         'Capped AI usage to control burn',
-        'Onboarding + dashboard experience',
+        'Onboarding + dashboard + live route preview',
       ],
       cta: 'Start Trial',
       highlight: true,
     },
     {
-      key: 'brew',
-      title: 'Brew Tier',
-      subtitle: 'For users who want commentary, strategy, and match tracking.',
-      price: 'TBD',
+      key: 'starter',
+      title: 'Starter',
+      subtitle: 'Entry paid tier for core commentary and saved picks.',
+      price: '$4.99/mo',
       features: [
-        'Explainable picks',
-        'Strategy context',
-        'Match tracking and saved picks',
+        'Basic AI commentary',
+        'Saved picks and match tracking',
+        'Limited AI quota',
       ],
-      cta: 'Choose Brew',
+      cta: 'Choose Starter',
+    },
+    {
+      key: 'pro',
+      title: 'Pro',
+      subtitle: 'Best value for active users who want deeper explanations.',
+      price: '$9.99/mo',
+      features: [
+        'Advanced explanations',
+        'Strategy comparisons',
+        'Higher AI quota and premium surfaces',
+      ],
+      cta: 'Choose Pro',
+      highlight: true,
     },
     {
       key: 'master',
-      title: 'Master Tier',
-      subtitle: 'For the deepest analysis surface and premium unlocks.',
-      price: 'TBD',
+      title: 'Master',
+      subtitle: 'Maximum analysis, voice, and premium access.',
+      price: '$19.99/mo',
       features: [
-        'Advanced strategy access',
-        'Comparison and replay surfaces',
-        'Full premium commentary layer',
+        'Voice commentary',
+        'Largest AI quota',
+        'Full premium strategy access',
       ],
       cta: 'Choose Master',
     },
@@ -116,12 +129,15 @@ export default function PricingPage() {
 
             <div className="mt-7 rounded-[22px] border border-[#ffc742]/16 bg-[linear-gradient(145deg,rgba(30,20,13,0.78),rgba(8,8,8,0.96))] px-5 py-5">
               <div className="text-[13px] uppercase tracking-[0.18em] text-white/38">Recommended launch setup</div>
-              <div className="mt-3 grid gap-3 sm:grid-cols-3">
+              <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-4 py-4 text-[14px] leading-6 text-white/72">
                   3-day trial only
                 </div>
                 <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-4 py-4 text-[14px] leading-6 text-white/72">
-                  Capped AI usage
+                  AI starts in Starter
+                </div>
+                <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-4 py-4 text-[14px] leading-6 text-white/72">
+                  30% annual savings
                 </div>
                 <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-4 py-4 text-[14px] leading-6 text-white/72">
                   No unlimited tier
@@ -146,7 +162,7 @@ export default function PricingPage() {
 
             {isTrial && trialDateLabel ? (
               <div className="mt-6 rounded-[20px] border border-[#72caff]/18 bg-[linear-gradient(145deg,rgba(19,22,31,0.76),rgba(10,10,12,0.96))] px-5 py-5 text-[15px] leading-7 text-white/70">
-                Your trial is active and ends on {trialDateLabel}. Keep it short, keep it capped, and push conversion before the trial drains into free usage.
+                Your trial is active and ends on {trialDateLabel}. It unlocks the full product preview for 3 days with capped AI usage so users can see the whole system before choosing a paid tier.
               </div>
             ) : null}
 
@@ -157,7 +173,7 @@ export default function PricingPage() {
 
           <div className="relative">
             <div className="absolute -inset-6 rounded-[34px] bg-[#ffc742]/8 blur-2xl animate-brew-drift" />
-            <div className="relative grid gap-4 lg:grid-cols-3">
+            <div className="relative grid gap-4 xl:grid-cols-4">
               {tiers.map((tier) => (
                 <article
                   key={tier.key}
@@ -199,19 +215,19 @@ export default function PricingPage() {
           <div className="rounded-[24px] border border-white/8 bg-white/[0.03] px-5 py-5">
             <div className="text-[14px] uppercase tracking-[0.16em] text-white/35">Trial policy</div>
             <div className="mt-2 text-[16px] leading-7 text-white/68">
-              Keep the trial short and capped. That gives users a real test drive without opening a long, expensive free period.
+              Keep the trial short and capped. Give users the full product preview without opening a long, expensive free period.
             </div>
           </div>
           <div className="rounded-[24px] border border-white/8 bg-white/[0.03] px-5 py-5">
             <div className="text-[14px] uppercase tracking-[0.16em] text-white/35">Upgrade path</div>
             <div className="mt-2 text-[16px] leading-7 text-white/68">
-              Convert trial users into Brew or Master after onboarding and a few live interactions, not before they see the value.
+              Convert trial users into Starter, Pro, or Master after onboarding and a few live interactions, not before they see the value.
             </div>
           </div>
           <div className="rounded-[24px] border border-white/8 bg-white/[0.03] px-5 py-5">
             <div className="text-[14px] uppercase tracking-[0.16em] text-white/35">Cost control</div>
             <div className="mt-2 text-[16px] leading-7 text-white/68">
-              Unlimited AI access is the wrong launch default. Cap the trial, then let Stripe and entitlements enforce the rest.
+              Unlimited AI access is the wrong launch default. Start AI in Starter, expand it through Pro and Master, then let Stripe and entitlements enforce the rest.
             </div>
           </div>
         </section>

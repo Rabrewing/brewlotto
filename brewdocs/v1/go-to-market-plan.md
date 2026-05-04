@@ -143,9 +143,10 @@ Week 5: Live on App Store
 
 | Tier | Price | Features |
 |------|-------|----------|
-| Trial | 3 days, capped | Full product preview with limited AI usage |
-| Brew | TBD | Explainable picks, commentary, match tracking |
-| Master | TBD | Advanced analytics, deeper premium surfaces |
+| Trial | 3 days, capped | Full product preview across all tiers with limited AI usage |
+| Starter | $4.99/mo | Basic AI commentary, saved picks, match tracking |
+| Pro | $9.99/mo | Advanced explanations, comparisons, higher AI quota |
+| Master | $19.99/mo | Voice commentary, deepest analysis, highest AI quota |
 
 *Note: Stripe integration is not yet wired, so `/pricing` is the public comparison surface and `/billing` remains the authenticated account summary.*
 
@@ -155,6 +156,15 @@ Week 5: Live on App Store
 - Cap AI-heavy usage during the trial
 - Avoid an unlimited free period for cost control
 - Convert users after they have seen the landing page, onboarding, and dashboard value loop
+- Let the trial preview all tier surfaces, but keep the AI quota intentionally small so the demo is useful without becoming a free-for-all
+
+### AI and Margin Guidance
+
+- Start AI in `Starter` with a small quota and basic commentary
+- Put deeper explanations and comparison features in `Pro`
+- Reserve voice commentary and the heaviest AI usage for `Master`
+- Use DeepSeek as the default provider for routine commentary and keep OpenAI `gpt-5.4-mini` as the fallback or premium fallback when needed
+- A 30% annual discount is a good marketing lever and still leaves room for margin if AI usage remains capped by tier
 
 ---
 
