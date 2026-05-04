@@ -8,6 +8,7 @@ export default function HomePage() {
     const [isPlaying, setIsPlaying] = useState(false);
     const [showCta, setShowCta] = useState(false);
     const [autoplayBlocked, setAutoplayBlocked] = useState(false);
+    const [isMuted, setIsMuted] = useState(true);
     const videoMp4Src =
         process.env.NEXT_PUBLIC_LANDING_VIDEO_MP4_URL ||
         "/landing/brewlotto-cta-mobile.mp4";
@@ -33,6 +34,68 @@ export default function HomePage() {
         void attemptPlay();
     }, []);
 
+    useEffect(() => {
+        const video = videoRef.current;
+        if (!video) return;
+
+        video.muted = isMuted;
+    }, [isMuted]);
+
+    const handleReplay = async () => {
+        const video = videoRef.current;
+        if (!video) return;
+
+        setShowCta(false);
+        setIsPlaying(false);
+        video.currentTime = 0;
+
+        try {
+            await video.play();
+            setIsPlaying(true);
+            setAutoplayBlocked(false);
+        } catch {
+            setAutoplayBlocked(true);
+        }
+    };
+
+    const toggleMute = async () => {
+        const video = videoRef.current;
+        const nextMuted = !isMuted;
+
+        setIsMuted(nextMuted);
+
+        if (video) {
+            video.muted = nextMuted;
+
+            if (!video.paused && !nextMuted) {
+                try {
+                    await video.play();
+                } catch {
+                    setAutoplayBlocked(true);
+                }
+            }
+        }
+    };
+
+    const playWithSound = async () => {
+        const video = videoRef.current;
+        if (!video) return;
+
+        setShowCta(false);
+        setIsPlaying(false);
+        setIsMuted(false);
+        video.muted = false;
+        video.currentTime = 0;
+
+        try {
+            await video.play();
+            setIsPlaying(true);
+            setAutoplayBlocked(false);
+        } catch {
+            setAutoplayBlocked(true);
+        }
+    };
+
     return (
         <main className="min-h-screen bg-[#050505] text-white">
             <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-4 py-4 sm:px-6 lg:px-8">
@@ -53,7 +116,7 @@ export default function HomePage() {
                     <div className="w-full">
                         <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/30 px-3 py-1.5 text-[12px] uppercase tracking-[0.16em] text-white/72 backdrop-blur-md">
                             <span className="h-2 w-2 rounded-full bg-[#ffcb4d] shadow-[0_0_10px_rgba(255,203,77,0.85)] animate-brew-pulse" />
-                            Video first. CTA second.
+                            BrewLotto reel
                         </div>
 
                         <div className="overflow-hidden rounded-[32px] border border-[#ffc742]/18 bg-[linear-gradient(145deg,rgba(28,18,14,0.96),rgba(9,8,8,0.98))] shadow-[0_0_38px_rgba(255,184,28,0.14)]">
@@ -72,11 +135,10 @@ export default function HomePage() {
                                         ref={videoRef}
                                         className="block h-[62vh] w-full object-contain"
                                         autoPlay
-                                        muted
+                                        muted={isMuted}
                                         playsInline
                                         preload="metadata"
                                         poster="/frontend/brew_logo.png"
-                                        controls
                                         onEnded={() => setShowCta(true)}
                                         onPlay={() => {
                                             setIsPlaying(true);
@@ -93,10 +155,27 @@ export default function HomePage() {
                                             }
                                         }}
                                         >
-                                        <source src={videoWebmSrc} type="video/webm" />
                                         <source src={videoMp4Src} type="video/mp4" />
+                                        <source src={videoWebmSrc} type="video/webm" />
                                         <source src={videoFallbackSrc} type="video/mp4" />
                                     </video>
+
+                                    <div className="absolute bottom-3 right-3 flex gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => void handleReplay()}
+                                            className="rounded-full border border-white/12 bg-black/65 px-3 py-1.5 text-[12px] font-medium text-white/80 backdrop-blur-md transition-colors hover:text-white"
+                                        >
+                                            Replay
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => void (isMuted ? playWithSound() : toggleMute())}
+                                            className="rounded-full border border-white/12 bg-black/65 px-3 py-1.5 text-[12px] font-medium text-white/80 backdrop-blur-md transition-colors hover:text-white"
+                                        >
+                                            {isMuted ? "Play with sound" : "Mute"}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -106,7 +185,7 @@ export default function HomePage() {
                                         <span className="font-semibold text-[#f7ddb3]">
                                             {autoplayBlocked ? "Autoplay blocked." : "Video starting..."}
                                         </span>{" "}
-                                        Use the player controls to confirm playback.
+                                        Tap Replay or Sound on to test the reel.
                                     </div>
                                 </div>
                             ) : null}

@@ -16,12 +16,11 @@ Convert a new visitor into a sign-in click while establishing the premium look, 
 
 1. Hero headline
 2. Short supporting copy
-3. Sign in CTA
-4. Pricing CTA
-5. Autoplay CTA video
+3. Autoplay CTA video
+4. Small sound/replay affordance
+5. Sign in CTA
 6. Trust strip
-7. Onboarding flow summary
-8. Footer-level reminder that the app is informational only
+7. Footer-level reminder that the app is informational only
 
 ## Visual Direction
 
@@ -33,10 +32,12 @@ Convert a new visitor into a sign-in click while establishing the premium look, 
 
 ## Video Rules
 
-- Use `/landing/brewlotto-cta.mp4`
+- Prefer the Blob-backed reel URL from Vercel env vars when available
+- Fall back to `/landing/brewlotto-cta.mp4` only when Blob is unavailable
 - Autoplay must be muted, looped, and inline for browser compatibility
 - Do not show default controls
 - Keep the video framed as a product reveal, not a raw media embed
+- Provide a tiny replay action and a small sound-on action so the user can hear the reel on demand
 
 ## Copy Rules
 
@@ -53,8 +54,7 @@ Convert a new visitor into a sign-in click while establishing the premium look, 
 ## CTA Strategy
 
 - Primary: `Enter BrewLotto`
-- Secondary: `Watch the CTA`
-- Optional tertiary: `Pricing`
+- Secondary: `Pricing`
 
 ## Trust Strip
 
