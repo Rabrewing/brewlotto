@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 
 import { supabase } from "../../lib/supabase/browserClient";
 
@@ -10,11 +10,43 @@ export default function LoginPage() {
     const [email, setEmail] = useState("");
     const [message, setMessage] = useState<{ type: "error" | "success"; text: string } | null>(null);
     const [submitting, setSubmitting] = useState(false);
+    const [checkingSession, setCheckingSession] = useState(true);
     const router = useRouter();
 
     const videoSrc =
         process.env.NEXT_PUBLIC_LANDING_VIDEO_MP4_URL ||
         "/landing/brewlotto-cta.mp4";
+
+    useEffect(() => {
+        let active = true;
+
+        const checkSession = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+
+            if (!active) return;
+
+            if (!user) {
+                setCheckingSession(false);
+                return;
+            }
+
+            const { data: prefs } = await supabase
+                .from("user_preferences")
+                .select("onboarding_completed")
+                .eq("user_id", user.id)
+                .maybeSingle();
+
+            if (!active) return;
+
+            router.replace(prefs?.onboarding_completed ? "/dashboard" : "/onboarding");
+        };
+
+        void checkSession();
+
+        return () => {
+            active = false;
+        };
+    }, [router]);
 
     const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -45,6 +77,14 @@ export default function LoginPage() {
 
         setSubmitting(false);
     };
+
+    if (checkingSession) {
+        return (
+            <main className="flex min-h-screen items-center justify-center bg-[#050505] text-white/55">
+                Loading sign-in...
+            </main>
+        );
+    }
 
     return (
         <main className="min-h-screen overflow-hidden bg-[#050505] text-white">

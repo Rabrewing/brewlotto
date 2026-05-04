@@ -78,6 +78,9 @@ export default function OnboardingPage() {
       user_id: userId,
       onboarding_completed: true,
     }, { onConflict: 'user_id' });
+    if (typeof document !== 'undefined') {
+      document.cookie = 'brewlotto_onboarded=1; Path=/; Max-Age=31536000; SameSite=Lax';
+    }
     setSaving(false);
     router.push('/dashboard');
   }

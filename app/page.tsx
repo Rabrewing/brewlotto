@@ -1,10 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+
+import { supabase } from "../lib/supabase/browserClient";
 
 export default function HomePage() {
     const videoRef = useRef<HTMLVideoElement | null>(null);
+    const router = useRouter();
+    const [isReady, setIsReady] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
     const [showCta, setShowCta] = useState(false);
     const [autoplayBlocked, setAutoplayBlocked] = useState(false);
@@ -19,6 +24,40 @@ export default function HomePage() {
     const videoFallbackSrc = "/landing/brewlotto-cta.mp4";
 
     useEffect(() => {
+        let active = true;
+
+        const hasOnboardedCookie =
+            typeof document !== "undefined" &&
+            document.cookie.split("; ").some((part) => part.trim() === "brewlotto_onboarded=1");
+
+        const checkSession = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+
+            if (!active) return;
+
+            if (user) {
+                router.replace("/dashboard");
+                return;
+            }
+
+            if (hasOnboardedCookie) {
+                router.replace("/login");
+                return;
+            }
+
+            setIsReady(true);
+        };
+
+        void checkSession();
+
+        return () => {
+            active = false;
+        };
+    }, [router]);
+
+    useEffect(() => {
+        if (!isReady) return;
+
         const video = videoRef.current;
         if (!video) return;
 
@@ -33,7 +72,7 @@ export default function HomePage() {
         };
 
         void attemptPlay();
-    }, []);
+    }, [isReady]);
 
     useEffect(() => {
         const video = videoRef.current;
@@ -112,6 +151,14 @@ export default function HomePage() {
             setAutoplayBlocked(true);
         }
     };
+
+    if (!isReady) {
+        return (
+            <main className="flex min-h-screen items-center justify-center bg-[#050505] text-white/55">
+                Loading BrewLotto...
+            </main>
+        );
+    }
 
     return (
         <main className="min-h-screen bg-[#050505] text-white">
