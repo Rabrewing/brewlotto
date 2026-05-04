@@ -60,6 +60,16 @@ Planned follow-up content will use Opus Clip to generate short animated tutorial
 
 These clips should become the visual companion to onboarding after the landing page and login experience are locked.
 
+### Tutorial Creative Direction
+
+Keep the three clips short, branded, and easy to follow:
+
+1. Disclaimer clip - establish trust, legal clarity, and responsible-use tone.
+2. Tutorial clip - show how to choose a state, pick a game, and generate numbers.
+3. Dashboard clip - show the first successful post-onboarding landing state and explain where results, stats, and strategy live.
+
+Each clip should use the BrewLotto avatar, the matching mockup for that step, and the same gold-on-dark brand system used by the landing page.
+
 ## Route Protection
 
 All app routes except `/login`, `/onboarding`, and `/auth/callback` require:

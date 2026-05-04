@@ -44,6 +44,9 @@
 5. Keep the onboarding tutorial and future Opus Clip clips aligned with the landing/login flow.
 6. Keep the referral growth loop deferred until billing, notifications, and strategy gating are stable.
 
+### Tutorial Prompt Status
+- Opus Clip prompt pack is ready to generate for the disclaimer, walkthrough, and dashboard intro clips.
+
 ---
 
 ## 🔧 2026-05-01 INGESTION FIX SUMMARY
