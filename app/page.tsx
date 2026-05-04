@@ -60,7 +60,7 @@ export default function HomePage() {
                             </div>
 
                             <div className="px-3 pb-3 sm:px-4">
-                                <div className="overflow-hidden rounded-[26px] border border-white/8 bg-black">
+                                <div className="relative overflow-hidden rounded-[26px] border border-white/8 bg-black">
                                     <video
                                         ref={videoRef}
                                         className="block h-[62vh] w-full object-contain"
@@ -87,40 +87,19 @@ export default function HomePage() {
                                             }
                                         }}
                                     />
-
-                                    {!isPlaying ? (
-                                        <button
-                                            type="button"
-                                            onClick={async () => {
-                                                const video = videoRef.current;
-                                                if (!video) return;
-                                                try {
-                                                    await video.play();
-                                                    setIsPlaying(true);
-                                                    setAutoplayBlocked(false);
-                                                } catch {
-                                                    setAutoplayBlocked(true);
-                                                }
-                                            }}
-                                            className="absolute inset-0 flex items-center justify-center bg-black/35 px-6 text-center backdrop-blur-[2px]"
-                                        >
-                                            <div className="max-w-sm rounded-[24px] border border-white/10 bg-black/60 px-6 py-5 text-white shadow-[0_0_30px_rgba(0,0,0,0.28)]">
-                                                <div className="text-[12px] uppercase tracking-[0.18em] text-white/42">
-                                                    {autoplayBlocked ? "Autoplay blocked" : "Tap to start"}
-                                                </div>
-                                                <div className="mt-2 text-[18px] font-semibold text-[#f7ddb3]">
-                                                    BrewLotto reel
-                                                </div>
-                                                <div className="mt-2 text-[14px] leading-6 text-white/66">
-                                                    {autoplayBlocked
-                                                        ? "Your browser blocked autoplay. Tap once to begin the video."
-                                                        : "The video will try to start automatically. If it stalls, tap once to play."}
-                                                </div>
-                                            </div>
-                                        </button>
-                                    ) : null}
                                 </div>
                             </div>
+
+                            {!isPlaying ? (
+                                <div className="px-5 pb-1 sm:px-6">
+                                    <div className="rounded-[18px] border border-white/10 bg-black/35 px-4 py-3 text-[14px] leading-6 text-white/72">
+                                        <span className="font-semibold text-[#f7ddb3]">
+                                            {autoplayBlocked ? "Autoplay blocked." : "Video starting..."}
+                                        </span>{" "}
+                                        Use the player controls to confirm playback.
+                                    </div>
+                                </div>
+                            ) : null}
 
                             <div className="grid gap-3 border-t border-white/8 px-5 py-4 sm:grid-cols-[1fr_auto] sm:items-center sm:px-6">
                                 <div className="text-[15px] leading-7 text-white/68">
