@@ -1,7 +1,28 @@
 # BrewLotto V1 - Current State & Next Steps
 
-**Last Updated:** 2026-04-11 ET (Vercel deployment in progress)
-**Phase:** Phase 9 - Dashboard truthfulness plus operational freshness hardening → Vercel production deployment
+**Last Updated:** 2026-05-02 ET (All NC games live, ingestion retry deployed, onboarding added)
+**Phase:** D8.1 — Delayed Draw Retry + Onboarding Flow Complete → Targeting CA Live Scraper
+
+---
+
+## 🔧 2026-05-01 INGESTION FIX SUMMARY
+
+### Problem
+NC scrapers reported "Success" but no data was inserted into `official_draws`. Root cause: adapter schema mismatched V1 canonical schema.
+
+### Solution Applied
+1. Fixed ESM/CommonJS compatibility by renaming adapter files to `.cjs`
+2. Fixed hardcoded path `/home/brewexec/brewlotto/data` → `process.cwd() + '/data'`
+3. Fixed typo in require statement (mismatched quotes)
+4. Updated adapter to use proper V1 schema: `game_id` (uuid), `source_id` (uuid), `primary_numbers`, etc.
+5. Reduced scrape count from 1000 to 50 draws per run (faster, only latest data)
+
+### Result
+- ✅ All 8/8 scrapers now insert into canonical `official_draws` table
+- ✅ NC Pick 3, Pick 4, Cash 5 data flowing
+- ✅ CA Daily 3, Daily 4, Fantasy 5 data flowing
+- ✅ Powerball, Mega Millions data flowing
+- ✅ Cloud Scheduler jobs active (7 jobs running at scheduled times)
 
 ---
 
@@ -17,9 +38,9 @@
 ### ✅ North Carolina Data
 | Game | File | Draws | Source | Status |
 |------|------|-------|--------|--------|
-| Pick 3 | `/data/nc/nc-pick3.csv` | ~13,600 | nclottery.com | ✅ In Database (adapter functional) |
-| Pick 4 | `/data/nc/nc-pick4.csv` | ~11,700 | nclottery.com | ✅ In Database (adapter functional) |
-| Cash 5 | `/data/nc/nc-cash5.csv` | ~8,800 | nclottery.com | ✅ In Database (adapter functional) |
+| Pick 3 | `/data/nc/nc-pick3.csv` | ~13,600 | nclottery.com | ✅ In Database (adapter verified 2026-05-01) |
+| Pick 4 | `/data/nc/nc-pick4.csv` | ~11,700 | nclottery.com | ✅ In Database (adapter verified 2026-05-01) |
+| Cash 5 | `/data/nc/nc-cash5.csv` | ~8,800 | nclottery.com | ✅ In Database (adapter verified 2026-05-01) |
 
 ### ✅ Multi-State Data
 | Game | File | Draws | Source | Status |

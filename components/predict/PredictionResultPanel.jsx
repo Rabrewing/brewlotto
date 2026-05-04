@@ -42,7 +42,7 @@ export default function PredictionResultPanel({
                         transition={{ delay: i * 0.2 }}
                         className="bg-neutral-800 px-3 py-2 rounded border border-neutral-700"
                     >
-                        {String(num).padStart(2, "0")}
+                        {num}
                     </motion.div>
                 ))}
             </div>

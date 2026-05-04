@@ -13,7 +13,8 @@ import {
   PredictionCard,
   GeneratePickButton,
   UtilityPills,
-  VoiceModeCard
+  VoiceModeCard,
+  LiveTrustBadge,
 } from '@/components/brewlotto/dashboard';
 import { DASHBOARD_GAME_CONFIG } from '@/lib/dashboard/game-config';
 
@@ -129,7 +130,7 @@ export default function DashboardPage() {
   const gameConfig = DASHBOARD_GAME_CONFIG[selectedGame];
   const gameLabel = gameConfig.displayLabel;
   const showBonus = selectedGame === 'powerball' || selectedGame === 'mega';
-  const freshnessBlocksLiveData = freshness.status === 'delayed' || freshness.status === 'stale' || freshness.status === 'failed' || freshness.status === 'unknown';
+  const freshnessBlocksLiveData = freshness.status === 'stale' || freshness.status === 'failed';
   const effectiveStats = freshnessBlocksLiveData ? EMPTY_STATS : stats;
   const effectiveStatsFallback = freshnessBlocksLiveData ? true : statsFallback;
   const effectiveCommentary = freshnessBlocksLiveData
@@ -348,6 +349,15 @@ export default function DashboardPage() {
             No live stats are available for this game yet
           </div>
         )}
+
+        <div className="mb-5">
+          <LiveTrustBadge
+            status={freshness.status}
+            latestDrawDate={null}
+            stalenessMinutes={freshness.stalenessMinutes}
+            expectedNextDrawAt={freshness.expectedNextDrawAt}
+          />
+        </div>
 
         <PredictionCard
           game={gameLabel}

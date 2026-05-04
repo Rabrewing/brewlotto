@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase/browserClient';
 
@@ -231,13 +232,14 @@ function MenuRow({
 }
 
 export function AvatarDropdown() {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [confirmingLogout, setConfirmingLogout] = useState(false);
   const [preferredState, setPreferredState] = useState<PreferredStateCode>('NC');
-  const [avatar] = useState<UserAvatar>({
-    type: 'initials',
-    initials: 'JD',
-    colorIndex: 0,
+  const [userData, setUserData] = useState<{ name: string; email: string; initials: string }>({
+    name: '',
+    email: '',
+    initials: '',
   });
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -268,43 +270,41 @@ export function AvatarDropdown() {
   useEffect(() => {
     let cancelled = false;
 
-    async function loadPreferredState() {
+    async function loadUserAndState() {
       try {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
+        const { data: { user } } = await supabase.auth.getUser();
 
-        if (!user) {
-          const storedState = window.localStorage.getItem('brewlotto:preferred-state');
-          if (!cancelled && (storedState === 'NC' || storedState === 'CA')) {
-            setPreferredState(storedState);
+        if (user) {
+          const name = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || '';
+          const initials = name
+            ? name.split(' ').map((s: string) => s[0]).join('').toUpperCase().slice(0, 2)
+            : (user.email?.[0]?.toUpperCase() || '?');
+          const colorIndex = name.length % AVATAR_COLORS.length;
+
+          if (!cancelled) {
+            setUserData({ name, email: user.email || '', initials });
           }
-          return;
-        }
 
-        const { data: preferencesRow } = await supabase
-          .from('user_preferences')
-          .select('default_state_code')
-          .eq('user_id', user.id)
-          .maybeSingle();
+          const { data: preferencesRow } = await supabase
+            .from('user_preferences')
+            .select('default_state_code')
+            .eq('user_id', user.id)
+            .maybeSingle();
 
-        const nextState = preferencesRow?.default_state_code?.toUpperCase() === 'CA' ? 'CA' : 'NC';
-        if (!cancelled) {
-          setPreferredState(nextState);
+          const nextState = preferencesRow?.default_state_code?.toUpperCase() === 'CA' ? 'CA' : 'NC';
+          if (!cancelled) setPreferredState(nextState);
+        } else {
+          const storedState = window.localStorage.getItem('brewlotto:preferred-state');
+          if (!cancelled && (storedState === 'NC' || storedState === 'CA')) setPreferredState(storedState);
         }
       } catch {
         const storedState = window.localStorage.getItem('brewlotto:preferred-state');
-        if (!cancelled && (storedState === 'NC' || storedState === 'CA')) {
-          setPreferredState(storedState);
-        }
+        if (!cancelled && (storedState === 'NC' || storedState === 'CA')) setPreferredState(storedState);
       }
     }
 
-    loadPreferredState();
-
-    return () => {
-      cancelled = true;
-    };
+    loadUserAndState();
+    return () => { cancelled = true; };
   }, []);
 
   async function handleStateToggle() {
@@ -330,25 +330,16 @@ export function AvatarDropdown() {
     }
   }
 
-  const colorClass = AVATAR_COLORS[avatar.colorIndex || 0];
+  const colorIndex = userData.name ? userData.name.length % AVATAR_COLORS.length : 0;
+  const colorClass = AVATAR_COLORS[colorIndex];
 
   const renderAvatar = (size: 'small' | 'large' = 'small') => {
     const dimensions = size === 'large' ? 'h-12 w-12' : 'h-full w-full';
     const textSize = size === 'large' ? 'text-base' : 'text-sm';
 
-    if ((avatar.type === 'image' || avatar.type === 'custom') && avatar.imageUrl) {
-      return (
-        <img
-          src={avatar.imageUrl}
-          alt="Profile"
-          className={`${dimensions} rounded-full object-cover`}
-        />
-      );
-    }
-
     return (
       <div className={`flex ${dimensions} items-center justify-center rounded-full bg-gradient-to-br ${colorClass}`}>
-        <span className={`${textSize} font-bold text-white drop-shadow`}>{avatar.initials || '?'}</span>
+        <span className={`${textSize} font-bold text-white drop-shadow`}>{userData.initials || '?'}</span>
       </div>
     );
   };
@@ -370,7 +361,7 @@ export function AvatarDropdown() {
         </div>
         <div className="hidden pr-1 text-left sm:block">
           <div className="text-[11px] uppercase tracking-[0.16em] text-white/35">Account</div>
-          <div className="text-[13px] font-medium text-[#f7ddb3]">John Doe</div>
+          <div className="text-[13px] font-medium text-[#f7ddb3]">{userData.name || 'Account'}</div>
         </div>
         <svg
           className={`h-4 w-4 text-[#ffc742] transition-transform ${isOpen ? 'rotate-180' : ''}`}
@@ -404,8 +395,8 @@ export function AvatarDropdown() {
                     {renderAvatar('large')}
                   </div>
                   <div className="min-w-0 flex-1 pt-0.5">
-                    <div className="truncate text-[17px] font-semibold text-[#f7ddb3]">John Doe</div>
-                    <div className="truncate text-[12px] text-white/55">john@example.com</div>
+                    <div className="truncate text-[17px] font-semibold text-[#f7ddb3]">{userData.name || 'User'}</div>
+                    <div className="truncate text-[12px] text-white/55">{userData.email || 'No email'}</div>
                   </div>
                   <button
                     type="button"
@@ -433,8 +424,8 @@ export function AvatarDropdown() {
                           onClick={
                             item.icon === 'logout'
                               ? () => setConfirmingLogout(true)
-                              : item.enabled
-                                ? () => setIsOpen(false)
+                              : item.enabled && item.href
+                                ? () => { setIsOpen(false); router.push(item.href!); }
                                 : undefined
                           }
                         />

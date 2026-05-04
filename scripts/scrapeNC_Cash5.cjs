@@ -1,18 +1,19 @@
-// /scripts/scrapeNC_Pick3.js
-// BrewLotto AI — NC Pick 3 Scraper
+// /scripts/scrapeNC_Cash5.js
+// BrewLotto AI — NC Cash 5 Scraper
 // Updated to use V1 adapter architecture
 // Last updated: 2026-03-18
 
-import 'dotenv/config';
-import { NCPick3Adapter } from '../lib/ingestion/adapters/ncPick3Adapter.js';
+require('dotenv').config();
+const path = require('path');
+const { NCCash5Adapter } = require(path.resolve(__dirname, '../lib/ingestion/adapters/js/adapters/ncCash5Adapter.cjs'));
 
 (async () => {
     try {
-        const adapter = new NCPick3Adapter();
+        const adapter = new NCCash5Adapter();
         const result = await adapter.ingest();
         
         console.log('\n📈 Final Results:');
-        console.log(`NC PICK 3:`);
+        console.log(`NC CASH 5:`);
         console.log(`  ✅ Success: ${result.success}`);
         console.log(`  📊 Processed: ${result.totalProcessed}`);
         console.log(`  ✔️ Valid: ${result.validRecords}`);
@@ -20,13 +21,13 @@ import { NCPick3Adapter } from '../lib/ingestion/adapters/ncPick3Adapter.js';
         console.log(`  📥 Inserted: ${result.insertedRecords}`);
         
         if (result.success) {
-            console.log('\n✅ NC Pick 3 history loaded via V1 adapter!');
+            console.log('\n✅ NC Cash 5 history loaded via V1 adapter!');
         } else {
-            console.log('\n⚠️ NC Pick 3 ingestion had issues.');
+            console.log('\n⚠️ NC Cash 5 ingestion had issues.');
             process.exit(1);
         }
     } catch (error) {
-        console.error('❌ Failed to ingest NC Pick 3 data:', error);
+        console.error('❌ Failed to ingest NC Cash 5 data:', error);
         process.exit(1);
     }
 })();

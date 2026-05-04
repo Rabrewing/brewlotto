@@ -9,6 +9,7 @@ import {
   GameTabs,
   type GameId,
   LotteryBall,
+  LiveTrustBadge,
 } from '@/components/brewlotto/dashboard';
 import { DASHBOARD_GAME_CONFIG } from '@/lib/dashboard/game-config';
 
@@ -105,7 +106,7 @@ export default function ResultsPage() {
 
   const gameConfig = DASHBOARD_GAME_CONFIG[selectedGame];
   const showBonus = selectedGame === 'powerball' || selectedGame === 'mega';
-  const freshnessBlocked = results?.freshness && results.freshness.status !== 'healthy';
+  const freshnessBlocked = results?.freshness && (results.freshness.status === 'stale' || results.freshness.status === 'failed');
 
   return (
     <main className="min-h-screen bg-[#050505] text-white">
@@ -154,6 +155,14 @@ export default function ResultsPage() {
                 ) : null}
               </div>
               <div className="mt-5 text-[15px] text-white/58">Drawn: {formatDrawTime(results.latestDraw.drawnAt)}</div>
+              <div className="mt-3">
+                <LiveTrustBadge
+                  status={results.freshness?.status || 'unknown'}
+                  latestDrawDate={results.latestDraw.drawDate}
+                  stalenessMinutes={results.freshness?.stalenessMinutes}
+                  expectedNextDrawAt={results.freshness?.expectedNextDrawAt}
+                />
+              </div>
             </section>
 
             <section>

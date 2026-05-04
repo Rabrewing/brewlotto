@@ -1,0 +1,5 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-f', 'Dockerfile.ingestion', '-t', 'gcr.io/brewlotto/brewlotto-ingestion:latest', '.']
+images:
+- 'gcr.io/brewlotto/brewlotto-ingestion:latest'

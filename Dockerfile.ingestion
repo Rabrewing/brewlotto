@@ -1,0 +1,12 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm config set ignore-scripts true && npm ci --only=production
+
+COPY . .
+
+RUN npm install -g dotenv
+
+CMD ["node", "scripts/ingestionServer.js"]

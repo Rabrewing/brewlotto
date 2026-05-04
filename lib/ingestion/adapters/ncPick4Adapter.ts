@@ -6,10 +6,10 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { createClient } from '@supabase/supabase-js';
-import { parseCSV } from '../core/parser.js';
-import { normalizeDraw, type NormalizedDraw } from '../core/normalizer.js';
-import { validateDraw } from '../core/validator.js';
-import { getSourceConfig } from '../core/sourceRegistry.js';
+import { parseCSV } from __dirname + '/../core/parser.js';
+import { normalizeDraw, type NormalizedDraw } from __dirname + '/../core/normalizer.js';
+import { validateDraw } from __dirname + '/../core/validator.js';
+import { getSourceConfig } from __dirname + '/../core/sourceRegistry.js';
 
 export interface IngestionResult {
   success: boolean;

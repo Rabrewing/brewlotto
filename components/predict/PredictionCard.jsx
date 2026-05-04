@@ -42,7 +42,7 @@ export default function PredictionCard({ game = "pick3", actualDraw = [] }) {
             <div className="text-xl font-bold text-yellow-300 tracking-widest flex gap-2">
                 {predicted.map((num, i) => (
                     <span key={i} className={matchResult.hits?.[i] ? "text-green-400" : ""}>
-                        {String(num).padStart(2, "0")}
+                        {num}
                     </span>
                 ))}
             </div>

@@ -32,7 +32,7 @@ export default function MyPicks({ picks = [] }) {
                                     key={j}
                                     className={pick.hits?.[j] ? "text-green-400" : ""}
                                 >
-                                    {String(n).padStart(2, "0")}{" "}
+                                    {n}{" "}
                                 </span>
                             ))}
                         </div>

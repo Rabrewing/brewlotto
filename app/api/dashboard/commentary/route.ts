@@ -22,12 +22,12 @@ function formatPredictionNumbers(primaryNumbers: unknown, bonusNumber: unknown) 
     return null;
   }
 
-  const formattedPrimary = primary.map((value) => String(value).padStart(2, '0')).join(' ');
+  const formattedPrimary = primary.join(' ');
   if (bonus == null) {
     return formattedPrimary;
   }
 
-  return `${formattedPrimary} + ${String(bonus).padStart(2, '0')}`;
+  return `${formattedPrimary} + ${bonus}`;
 }
 
 function buildExplanationPendingSummary(

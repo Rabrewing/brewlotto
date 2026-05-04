@@ -65,7 +65,7 @@ export default function ReplayModal({
                                                         transition={{ delay: i * 0.3 }}
                                                         className="w-10 py-1 bg-neutral-800 border border-neutral-700 rounded"
                                                     >
-                                                        {String(n).padStart(2, "0")}
+                                                        {n}
                                                     </motion.span>
                                                 ))}
                                             </div>
@@ -81,7 +81,7 @@ export default function ReplayModal({
                                                         transition={{ delay: i * 0.3 + 0.15 }}
                                                         className="w-10 py-1 bg-neutral-800 border border-neutral-700 rounded"
                                                     >
-                                                        {String(n).padStart(2, "0")}
+                                                        {n}
                                                     </motion.span>
                                                 ))}
                                             </div>
