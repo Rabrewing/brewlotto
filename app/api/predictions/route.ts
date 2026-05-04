@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { DASHBOARD_GAME_CONFIG, type DashboardGameId } from '@/lib/dashboard/game-config';
+import { resolveDashboardGameConfig, type DashboardGameId, type DashboardStateCode } from '@/lib/dashboard/game-config';
 
 const getSupabase = () => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -18,13 +18,17 @@ function getWorstFreshnessStatus(statuses: string[]) {
 }
 
 function resolveDashboardConfig(gameKey: string, state: string) {
-  const entries = Object.entries(DASHBOARD_GAME_CONFIG) as Array<[DashboardGameId, (typeof DASHBOARD_GAME_CONFIG)[DashboardGameId]]>;
+  const entries = ['pick3', 'pick4', 'cash5', 'powerball', 'mega'] as DashboardGameId[];
+  const normalizedState = state === 'CA' ? 'CA' : 'NC';
 
-  return entries.find(([, config]) => {
-    const matchesRequestRoute = config.requestGameKey === gameKey && config.requestState === state;
-    const matchesPredictionRoute = config.predictionGame === gameKey && config.predictionStates.includes(state);
-    return matchesRequestRoute || matchesPredictionRoute;
-  })?.[1] || null;
+  return entries
+    .map((gameId) => resolveDashboardGameConfig(gameId, normalizedState as DashboardStateCode))
+    .filter((config): config is NonNullable<ReturnType<typeof resolveDashboardGameConfig>> => Boolean(config))
+    .find((config) => {
+      const matchesRequestRoute = config.requestGameKey === gameKey && config.requestState === state;
+      const matchesPredictionRoute = config.predictionGame === gameKey && config.predictionStates.includes(state);
+      return matchesRequestRoute || matchesPredictionRoute;
+    }) || null;
 }
 
 export async function GET(request: NextRequest) {

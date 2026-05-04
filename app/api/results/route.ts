@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { DASHBOARD_GAME_CONFIG, type DashboardGameId } from '@/lib/dashboard/game-config';
+import { resolveDashboardGameConfig, type DashboardGameId, type DashboardStateCode } from '@/lib/dashboard/game-config';
 
 const getSupabase = () => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -61,7 +61,8 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const game = (searchParams.get('game') || 'powerball') as DashboardGameId;
-    const gameConfig = DASHBOARD_GAME_CONFIG[game];
+    const state = (searchParams.get('state') || 'NC') as DashboardStateCode;
+    const gameConfig = resolveDashboardGameConfig(game, state);
     const resultConfig = RESULT_GAME_CONFIG[game];
 
     if (!gameConfig || !resultConfig) {

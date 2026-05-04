@@ -4,6 +4,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase/browserClient';
+import {
+  normalizePreferredStateCode,
+  savePreferredStateForUser,
+  setStoredPreferredStateCode,
+} from '@/hooks/usePreferredState';
 
 export type AvatarType = 'initials' | 'image' | 'custom';
 
@@ -291,8 +296,11 @@ export function AvatarDropdown() {
             .eq('user_id', user.id)
             .maybeSingle();
 
-          const nextState = preferencesRow?.default_state_code?.toUpperCase() === 'CA' ? 'CA' : 'NC';
-          if (!cancelled) setPreferredState(nextState);
+          const nextState = normalizePreferredStateCode(preferencesRow?.default_state_code);
+          if (!cancelled) {
+            setPreferredState(nextState);
+            setStoredPreferredStateCode(nextState);
+          }
         } else {
           const storedState = window.localStorage.getItem('brewlotto:preferred-state');
           if (!cancelled && (storedState === 'NC' || storedState === 'CA')) setPreferredState(storedState);
@@ -310,7 +318,7 @@ export function AvatarDropdown() {
   async function handleStateToggle() {
     const nextState: PreferredStateCode = preferredState === 'NC' ? 'CA' : 'NC';
     setPreferredState(nextState);
-    window.localStorage.setItem('brewlotto:preferred-state', nextState);
+    setStoredPreferredStateCode(nextState);
 
     try {
       const {
@@ -321,10 +329,7 @@ export function AvatarDropdown() {
         return;
       }
 
-      await supabase.from('user_preferences').upsert({
-        user_id: user.id,
-        default_state_code: nextState,
-      });
+      await savePreferredStateForUser(user.id, nextState);
     } catch {
       // Keep the UI responsive even if persistence is temporarily unavailable.
     }

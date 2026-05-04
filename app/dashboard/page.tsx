@@ -16,7 +16,8 @@ import {
   VoiceModeCard,
   LiveTrustBadge,
 } from '@/components/brewlotto/dashboard';
-import { DASHBOARD_GAME_CONFIG } from '@/lib/dashboard/game-config';
+import { resolveDashboardGameConfig } from '@/lib/dashboard/game-config';
+import { usePreferredState } from '@/hooks/usePreferredState';
 
 interface DashboardStats {
   hotNumbers: number[];
@@ -115,7 +116,8 @@ function normalizePredictionResponse(prediction: StoredPredictionResponse): Dash
 }
 
 export default function DashboardPage() {
-  const [selectedGame, setSelectedGame] = useState<GameId>('powerball');
+  const { preferredState } = usePreferredState();
+  const [selectedGame, setSelectedGame] = useState<GameId>('pick3');
   const [isGenerating, setIsGenerating] = useState(false);
   const [commentary, setCommentary] = useState<DashboardCommentary>(EMPTY_COMMENTARY);
   const [commentaryLoading, setCommentaryLoading] = useState(true);
@@ -127,7 +129,7 @@ export default function DashboardPage() {
   const [freshness, setFreshness] = useState<DashboardFreshness>(EMPTY_FRESHNESS);
   const [freshnessLoading, setFreshnessLoading] = useState(true);
 
-  const gameConfig = DASHBOARD_GAME_CONFIG[selectedGame];
+  const gameConfig = resolveDashboardGameConfig(selectedGame, preferredState) || resolveDashboardGameConfig('pick3', 'NC')!;
   const gameLabel = gameConfig.displayLabel;
   const showBonus = selectedGame === 'powerball' || selectedGame === 'mega';
   const freshnessBlocksLiveData = freshness.status === 'stale' || freshness.status === 'failed';
@@ -155,11 +157,11 @@ export default function DashboardPage() {
     commentary.summary,
   ].join(' ');
 
-  async function loadCommentary(game: GameId, signal?: { cancelled: boolean }) {
+  async function loadCommentary(game: GameId, state: string, signal?: { cancelled: boolean }) {
     setCommentaryLoading(true);
 
     try {
-      const response = await fetch(`/api/dashboard/commentary?game=${game}`, {
+      const response = await fetch(`/api/dashboard/commentary?game=${game}&state=${state}`, {
         cache: 'no-store',
       });
       const payload = await response.json();
@@ -185,11 +187,11 @@ export default function DashboardPage() {
     }
   }
 
-  async function loadStats(game: GameId, signal?: { cancelled: boolean }) {
+  async function loadStats(game: GameId, state: string, signal?: { cancelled: boolean }) {
     setStatsLoading(true);
 
     try {
-      const response = await fetch(`/api/dashboard/stats?game=${game}`, {
+      const response = await fetch(`/api/dashboard/stats?game=${game}&state=${state}`, {
         cache: 'no-store',
       });
       const payload = await response.json();
@@ -214,11 +216,11 @@ export default function DashboardPage() {
     }
   }
 
-  async function loadFreshness(game: GameId, signal?: { cancelled: boolean }) {
+  async function loadFreshness(game: GameId, state: string, signal?: { cancelled: boolean }) {
     setFreshnessLoading(true);
 
     try {
-      const response = await fetch(`/api/dashboard/freshness?game=${game}`, {
+      const response = await fetch(`/api/dashboard/freshness?game=${game}&state=${state}`, {
         cache: 'no-store',
       });
       const payload = await response.json();
@@ -244,32 +246,32 @@ export default function DashboardPage() {
   useEffect(() => {
     const signal = { cancelled: false };
 
-    loadCommentary(selectedGame, signal);
+    loadCommentary(selectedGame, preferredState, signal);
 
     return () => {
       signal.cancelled = true;
     };
-  }, [selectedGame]);
+  }, [selectedGame, preferredState]);
 
   useEffect(() => {
     const signal = { cancelled: false };
 
-    loadStats(selectedGame, signal);
+    loadStats(selectedGame, preferredState, signal);
 
     return () => {
       signal.cancelled = true;
     };
-  }, [selectedGame]);
+  }, [selectedGame, preferredState]);
 
   useEffect(() => {
     const signal = { cancelled: false };
 
-    loadFreshness(selectedGame, signal);
+    loadFreshness(selectedGame, preferredState, signal);
 
     return () => {
       signal.cancelled = true;
     };
-  }, [selectedGame]);
+  }, [selectedGame, preferredState]);
 
   const handleGenerate = async () => {
     setIsGenerating(true);
@@ -293,9 +295,9 @@ export default function DashboardPage() {
 
       setCommentary(normalizePredictionResponse(payload.data));
       await Promise.all([
-        loadCommentary(selectedGame),
-        loadStats(selectedGame),
-        loadFreshness(selectedGame),
+        loadCommentary(selectedGame, preferredState),
+        loadStats(selectedGame, preferredState),
+        loadFreshness(selectedGame, preferredState),
       ]);
     } catch (error) {
       setCommentary({
@@ -319,8 +321,9 @@ export default function DashboardPage() {
           stalenessMinutes={freshness.stalenessMinutes}
           expectedNextDrawAt={freshness.expectedNextDrawAt}
           loading={freshnessLoading}
+          stateCode={preferredState}
         />
-        <GameTabs selectedGame={selectedGame} onSelect={setSelectedGame} />
+        <GameTabs selectedGame={selectedGame} onSelect={setSelectedGame} stateCode={preferredState} />
         
         <StatsGrid
           hotNumbers={effectiveStats.hotNumbers}
@@ -356,6 +359,7 @@ export default function DashboardPage() {
             latestDrawDate={null}
             stalenessMinutes={freshness.stalenessMinutes}
             expectedNextDrawAt={freshness.expectedNextDrawAt}
+            stateCode={preferredState}
           />
         </div>
 

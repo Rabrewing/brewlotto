@@ -1,30 +1,22 @@
 'use client';
 
-export type GameId = 'pick3' | 'pick4' | 'cash5' | 'powerball' | 'mega';
+import { getDashboardGameTabs, type DashboardStateCode, type DashboardGameId } from '@/lib/dashboard/game-config';
 
-interface Game {
-  id: GameId;
-  label: string;
-}
-
-const GAMES: Game[] = [
-  { id: 'pick3', label: 'Pick 3' },
-  { id: 'pick4', label: 'Pick 4' },
-  { id: 'cash5', label: 'Cash 5' },
-  { id: 'powerball', label: 'Powerball' },
-  { id: 'mega', label: 'Mega' },
-];
+export type GameId = DashboardGameId;
 
 interface GameTabsProps {
   selectedGame?: GameId;
   onSelect?: (game: GameId) => void;
+  stateCode?: DashboardStateCode;
 }
 
-export function GameTabs({ selectedGame = 'powerball', onSelect }: GameTabsProps) {
+export function GameTabs({ selectedGame = 'pick3', onSelect, stateCode = 'NC' }: GameTabsProps) {
+  const games = getDashboardGameTabs(stateCode);
+
   return (
     <div className="mb-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <div className="flex min-w-max gap-1.5">
-        {GAMES.map((game) => (
+        {games.map((game) => (
           <button
             key={game.id}
             onClick={() => onSelect?.(game.id)}

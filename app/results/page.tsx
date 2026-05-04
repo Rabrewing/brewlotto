@@ -11,7 +11,8 @@ import {
   LotteryBall,
   LiveTrustBadge,
 } from '@/components/brewlotto/dashboard';
-import { DASHBOARD_GAME_CONFIG } from '@/lib/dashboard/game-config';
+import { resolveDashboardGameConfig } from '@/lib/dashboard/game-config';
+import { usePreferredState } from '@/hooks/usePreferredState';
 
 interface ResultsPayload {
   latestDraw: {
@@ -62,7 +63,8 @@ function formatDrawTime(value: string | null) {
 }
 
 export default function ResultsPage() {
-  const [selectedGame, setSelectedGame] = useState<GameId>('powerball');
+  const { preferredState } = usePreferredState();
+  const [selectedGame, setSelectedGame] = useState<GameId>('pick3');
   const [results, setResults] = useState<ResultsPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -75,7 +77,7 @@ export default function ResultsPage() {
       setError(null);
 
       try {
-        const response = await fetch(`/api/results?game=${selectedGame}`, { cache: 'no-store' });
+        const response = await fetch(`/api/results?game=${selectedGame}&state=${preferredState}`, { cache: 'no-store' });
         const payload = await response.json();
 
         if (!response.ok) {
@@ -102,9 +104,9 @@ export default function ResultsPage() {
     return () => {
       cancelled = true;
     };
-  }, [selectedGame]);
+  }, [selectedGame, preferredState]);
 
-  const gameConfig = DASHBOARD_GAME_CONFIG[selectedGame];
+  const gameConfig = resolveDashboardGameConfig(selectedGame, preferredState) || resolveDashboardGameConfig('pick3', 'NC')!;
   const showBonus = selectedGame === 'powerball' || selectedGame === 'mega';
   const freshnessBlocked = results?.freshness && (results.freshness.status === 'stale' || results.freshness.status === 'failed');
 
@@ -118,7 +120,7 @@ export default function ResultsPage() {
           Today&apos;s Results
         </div>
 
-        <GameTabs selectedGame={selectedGame} onSelect={setSelectedGame} />
+        <GameTabs selectedGame={selectedGame} onSelect={setSelectedGame} stateCode={preferredState} />
 
         {loading ? (
           <div className="rounded-[28px] border border-white/10 bg-white/[0.03] px-5 py-8 text-center text-white/55">
@@ -161,6 +163,7 @@ export default function ResultsPage() {
                   latestDrawDate={results.latestDraw.drawDate}
                   stalenessMinutes={results.freshness?.stalenessMinutes}
                   expectedNextDrawAt={results.freshness?.expectedNextDrawAt}
+                  stateCode={preferredState}
                 />
               </div>
             </section>

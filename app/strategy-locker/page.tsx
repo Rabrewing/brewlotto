@@ -355,12 +355,12 @@ export default function StrategyLockerPage() {
               </div>
             </section>
 
-            <div className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr]">
+            <div className="space-y-5">
               <SectionCard
                 title="Entitlement Snapshot"
                 description="This is the current tier framing Brew can verify on your account right now."
               >
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-3">
                   <div className="rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
                     <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">Advanced strategies</div>
                     <div className="mt-3 text-[18px] font-medium text-[#f7ddb3]">
@@ -392,7 +392,7 @@ export default function StrategyLockerPage() {
                 title="Plan Ladder"
                 description="Subscription tier rows are shown directly from the tier registry so the upgrade path stays aligned with stored pricing names."
               >
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+                <div className="space-y-3">
                   {subscriptionTiers.map((tier) => {
                     const active = tier.tier_key === currentTier;
 

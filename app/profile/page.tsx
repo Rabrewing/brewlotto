@@ -2,13 +2,14 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import {
+import { 
   DashboardContainer,
   Header,
   NavigationTabs,
   SectionCard,
 } from '@/components/brewlotto/dashboard';
 import { supabase } from '@/lib/supabase/browserClient';
+import { normalizePreferredStateCode, savePreferredStateForUser, setStoredPreferredStateCode } from '@/hooks/usePreferredState';
 
 type PreferredStateCode = 'NC' | 'CA';
 
@@ -147,8 +148,9 @@ export default function ProfilePage() {
           });
           setProfile(profileRow || null);
 
-          const nextPreferredState = preferencesRow?.default_state_code?.toUpperCase();
-          setPreferredState(nextPreferredState === 'CA' ? 'CA' : 'NC');
+          const nextPreferredState = normalizePreferredStateCode(preferencesRow?.default_state_code);
+          setPreferredState(nextPreferredState);
+          setStoredPreferredStateCode(nextPreferredState);
 
           const initialName =
             authUser.user_metadata?.full_name ||
@@ -238,17 +240,7 @@ export default function ProfilePage() {
     setStateMessage(null);
 
     try {
-      const { error: upsertError } = await supabase.from('user_preferences').upsert(
-        {
-          user_id: user.id,
-          default_state_code: preferredState,
-        },
-        { onConflict: 'user_id' },
-      );
-
-      if (upsertError) {
-        throw upsertError;
-      }
+      await savePreferredStateForUser(user.id, preferredState);
 
       setStateMessage(`Default state saved as ${preferredState}.`);
     } catch (saveError) {

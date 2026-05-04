@@ -5,23 +5,15 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { DASHBOARD_GAME_CONFIG, type DashboardGameId } from '@/lib/dashboard/game-config';
+import { resolveDashboardGameConfig, type DashboardGameId, type DashboardStateCode } from '@/lib/dashboard/game-config';
 
 const getSupabase = () => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const GAME_STATS_CONFIG: Record<DashboardGameId, { primaryCount: number; hasBonus: boolean }> = {
-  pick3: { primaryCount: 3, hasBonus: false },
-  pick4: { primaryCount: 4, hasBonus: false },
-  cash5: { primaryCount: 5, hasBonus: false },
-  powerball: { primaryCount: 5, hasBonus: true },
-  mega: { primaryCount: 5, hasBonus: true },
-};
-
 function buildFallback(game: string) {
-  const config = DASHBOARD_GAME_CONFIG[(game as DashboardGameId)] || DASHBOARD_GAME_CONFIG.powerball;
+  const config = resolveDashboardGameConfig((game as DashboardGameId) || 'powerball', 'NC') || resolveDashboardGameConfig('powerball', 'NC')!;
   return {
     hotNumbers: [],
     hotBonus: null,
@@ -60,10 +52,10 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const game = (searchParams.get('game') || 'powerball') as DashboardGameId;
-    const config = GAME_STATS_CONFIG[game];
-    const sourceConfig = DASHBOARD_GAME_CONFIG[game];
+    const state = (searchParams.get('state') || 'NC') as DashboardStateCode;
+    const config = resolveDashboardGameConfig(game, state);
 
-    if (!config || !sourceConfig) {
+    if (!config) {
       return NextResponse.json(
         { success: false, error: { code: 'VALIDATION_ERROR', message: 'Unsupported game key' } },
         { status: 400 }
@@ -74,8 +66,8 @@ export async function GET(request: NextRequest) {
     const drawsResult = await supabase
       .from('official_draws')
       .select('primary_numbers, bonus_numbers, draw_date, lottery_games!inner(game_key,state_code)')
-      .eq('lottery_games.game_key', sourceConfig.statsGameKey)
-      .eq('lottery_games.state_code', sourceConfig.statsStateCode)
+      .eq('lottery_games.game_key', config.statsGameKey)
+      .eq('lottery_games.state_code', config.statsStateCode)
       .order('draw_date', { ascending: false })
       .limit(120);
 
