@@ -70,6 +70,7 @@ export default function HomePage() {
                                         playsInline
                                         preload="auto"
                                         poster="/frontend/brew_logo.png"
+                                        controls
                                         onEnded={() => setShowCta(true)}
                                         onPlay={() => {
                                             setIsPlaying(true);
