@@ -37,12 +37,28 @@ official source → ingestion → Supabase → freshness view → API → UI
 | **Dropdown navigation** | `AvatarDropdown.tsx` | Fixed onClick — now calls `router.push(href) + setIsOpen(false)` instead of just closing. Removed hardcoded "John Doe"/"john@example.com"/"JD" avatar — all loaded from auth. |
 | **Superadmin added** | `.env`, `.env.local` | `BREWCOMMAND_ADMIN_EMAILS` now includes `brewmaster.rb@brewassist.app`. |
 
+### Auth & Email
+
+| Item | Status |
+|------|--------|
+| Magic link auth | ✅ Live via `signInWithOtp` |
+| Auth callback | ✅ `/auth/callback` → `/onboarding` → `/dashboard` |
+| Resend domain | ✅ `brewlotto.app` verified (SPF, DKIM, MX, DMARC added to Vercel DNS) |
+| Custom SMTP | ⏳ Add Resend SMTP to Supabase Dashboard → Auth → Custom SMTP |
+| Email template | ✅ Dark/gold themed magic link template applied in Supabase |
+
+### Landing Page
+
+| Item | Status |
+|------|--------|
+| Video animation + CTA | 🔄 In progress (separate session) |
+
 ### Deployments
 
 | Service | Status | URL |
 |---------|--------|-----|
 | **Vercel** | Auto-deploy from main | https://brewlotto.vercel.app |
-| **Cloud Run** | v00020-hzg (latest) | https://brewlotto-ingestion-119469099721.us-central1.run.app |
+| **Cloud Run** | v00021-h28 (latest) | https://brewlotto-ingestion-119469099721.us-central1.run.app |
 
 ## V1 Production Deployment (2026-04-11 ET)
 

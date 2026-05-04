@@ -245,5 +245,11 @@ Supabase's built-in email is fine for development but unreliable for production.
 
 ---
 
+## Email Template
+
+The magic link email template uses BrewLotto dark/gold branding (`#050509` background, `#FFD700` gold, `#f7d6ab` warm text, gradient gold CTA button). Template is configured in Supabase Dashboard → Auth → Email Templates → Magic Link. Variables: `{{ .ConfirmationURL }}`, `{{ .ExpirationHours }}`.
+
+---
+
 **Last Updated:** 2026-05-02  
 **Author:** BrewLotto PM / BrewExec
