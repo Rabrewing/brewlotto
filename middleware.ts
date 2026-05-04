@@ -1,5 +1,6 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { isBrewCommandAdminUser } from '@/lib/auth/brewcommandShared';
 
 type CookieEntry = {
   name: string;
@@ -46,6 +47,10 @@ export async function middleware(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     return NextResponse.redirect(url);
+  }
+
+  if (pathname.startsWith('/admin') && isBrewCommandAdminUser(user)) {
+    return supabaseResponse;
   }
 
   const { data: prefs } = await supabase

@@ -1,33 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase/serverClient';
-
-function parseAdminEmails() {
-  return (process.env.BREWCOMMAND_ADMIN_EMAILS || '')
-    .split(',')
-    .map((value) => value.trim().toLowerCase())
-    .filter(Boolean);
-}
-
-function hasAdminMetadata(user: {
-  email?: string | null;
-  user_metadata?: Record<string, unknown> | null;
-  app_metadata?: Record<string, unknown> | null;
-}) {
-  const email = user.email?.toLowerCase() || '';
-  const adminEmails = parseAdminEmails();
-
-  if (email && adminEmails.includes(email)) {
-    return true;
-  }
-
-  const metadata = [user.app_metadata || {}, user.user_metadata || {}];
-  return metadata.some((entry) =>
-    entry.role === 'admin' ||
-    entry.isAdmin === true ||
-    entry.is_admin === true ||
-    (Array.isArray(entry.roles) && entry.roles.includes('admin'))
-  );
-}
+import { isBrewCommandAdminUser } from '@/lib/auth/brewcommandShared';
 
 function hasAdminSecret(request: NextRequest) {
   const configuredSecret = process.env.BREWCOMMAND_ADMIN_SECRET;
@@ -52,7 +25,7 @@ export async function isAuthorizedBrewCommandRequest(request: NextRequest) {
     return false;
   }
 
-  return hasAdminMetadata(user);
+  return isBrewCommandAdminUser(user);
 }
 
 export async function requireBrewCommandRequest(request: NextRequest) {
@@ -84,5 +57,5 @@ export async function isAuthorizedBrewCommandViewer() {
     return false;
   }
 
-  return hasAdminMetadata(user);
+  return isBrewCommandAdminUser(user);
 }

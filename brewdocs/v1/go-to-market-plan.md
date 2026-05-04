@@ -170,7 +170,7 @@ Week 5: Live on App Store
 | Public entry | `/` landing page with autoplay CTA video |
 | Email delivery | Supabase built-in (rate-limited, ~2-3/hr on free plan) |
 | Custom SMTP | Not configured |
-| Admin emails | `BREWCOMMAND_ADMIN_EMAILS=command@brewlotto.app` |
+| Admin emails | `BREWCOMMAND_ADMIN_EMAILS=command@brewlotto.app,michael.brewington@gmail.com` |
 
 ### Recommended: Resend for Email Delivery
 
@@ -207,7 +207,7 @@ Supabase's built-in email is fine for development but unreliable for production.
 
 ### Admin Access
 
-- **Superadmin email:** `command@brewlotto.app` — sign up via magic link, middleware auto-detects admin role
+- **Superadmin emails:** `command@brewlotto.app`, `michael.brewington@gmail.com` — sign up via magic link, middleware auto-detects admin role
 - **Route:** `/admin` — ingestion health, alert console, freshness monitoring
 - **Auth check:** `BREWCOMMAND_ADMIN_EMAILS` env var + `lib/auth/brewcommand.ts`
 

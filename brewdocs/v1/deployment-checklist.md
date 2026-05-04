@@ -98,7 +98,7 @@ If work is not ready for public production, it stays off `main`.
 2. `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 3. `SUPABASE_SERVICE_ROLE_KEY`
 4. `NEXT_PUBLIC_APP_URL`
-5. `BREWCOMMAND_ADMIN_EMAILS`
+5. `BREWCOMMAND_ADMIN_EMAILS` (include `command@brewlotto.app` and `michael.brewington@gmail.com`)
 6. `BREWCOMMAND_ADMIN_SECRET`
 7. `AI_PROVIDER`
 8. `OPENAI_API_KEY` or `DEEPSEEK_API_KEY` or `NIM_API_KEY`
@@ -148,7 +148,7 @@ Expected runtime:
 
 ### BrewCommand Admin
 
-- [ ] `BREWCOMMAND_ADMIN_EMAILS`
+- [ ] `BREWCOMMAND_ADMIN_EMAILS` (`command@brewlotto.app`, `michael.brewington@gmail.com`)
 - [ ] `BREWCOMMAND_ADMIN_SECRET`
 
 ### Monitoring
