@@ -27,6 +27,7 @@ interface SubscriptionTierRecord {
   display_name: string;
   marketing_label?: string | null;
   price_monthly?: number | null;
+  price_annual?: number | null;
   sort_order: number;
 }
 interface FeatureEntitlementRecord {
@@ -47,6 +48,9 @@ export default function BillingPage() {
   const [entitlements, setEntitlements] = useState<UserEntitlementRecord | null>(null);
   const [tiers, setTiers] = useState<SubscriptionTierRecord[]>([]);
   const [features, setFeatures] = useState<FeatureEntitlementRecord[]>([]);
+  const [selectedInterval, setSelectedInterval] = useState<'month' | 'year'>('month');
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -62,7 +66,7 @@ export default function BillingPage() {
         }
         const [entitlementsResult, tiersResult, featuresResult] = await Promise.all([
           supabase.from('user_entitlements').select('tier_code, ai_quota_monthly, ai_quota_used, pick_generation_limit_daily, advanced_strategy_access, premium_explanations_access, premium_comparison_access, export_access, voice_commentary_access, notifications_premium_access, effective_from, effective_to').eq('user_id', authUser.id).maybeSingle(),
-          supabase.from('subscription_tiers').select('tier_key, display_name, marketing_label, price_monthly, sort_order').eq('is_active', true).order('sort_order', { ascending: true }),
+          supabase.from('subscription_tiers').select('tier_key, display_name, marketing_label, price_monthly, price_annual, sort_order').eq('is_active', true).order('sort_order', { ascending: true }),
           supabase.from('feature_entitlements').select('feature_key, feature_name, description, min_tier, category, sort_order').eq('is_active', true).order('sort_order', { ascending: true }),
         ]);
         if (entitlementsResult.error) throw entitlementsResult.error;
@@ -89,6 +93,81 @@ export default function BillingPage() {
   const unlockedFeatures = useMemo(() => features.filter((entry) => TIER_ORDER[currentTier] >= TIER_ORDER[entry.min_tier]), [currentTier, features]);
   const lockedFeatures = useMemo(() => features.filter((entry) => TIER_ORDER[currentTier] < TIER_ORDER[entry.min_tier]), [currentTier, features]);
   const aiQuotaRemaining = entitlements?.ai_quota_monthly != null && entitlements?.ai_quota_used != null ? Math.max(0, entitlements.ai_quota_monthly - entitlements.ai_quota_used) : null;
+
+  async function startCheckout(tier: Exclude<TierCode, 'free'>) {
+    setActionLoading(tier);
+    setActionMessage(null);
+
+    try {
+      const response = await fetch('/api/billing/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          tierKey: tier,
+          interval: selectedInterval,
+        }),
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload?.error?.message || 'Failed to start checkout');
+      }
+
+      if (payload?.data?.checkoutUrl) {
+        window.location.assign(payload.data.checkoutUrl);
+        return;
+      }
+
+      throw new Error('Checkout URL was not returned');
+    } catch (checkoutError) {
+      setActionMessage(checkoutError instanceof Error ? checkoutError.message : 'Failed to start checkout');
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
+  async function openPortal() {
+    setActionLoading('portal');
+    setActionMessage(null);
+
+    try {
+      const response = await fetch('/api/billing/portal', {
+        method: 'POST',
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload?.error?.message || 'Failed to open billing portal');
+      }
+
+      if (payload?.data?.portalUrl) {
+        window.location.assign(payload.data.portalUrl);
+        return;
+      }
+
+      throw new Error('Portal URL was not returned');
+    } catch (portalError) {
+      setActionMessage(portalError instanceof Error ? portalError.message : 'Failed to open billing portal');
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
+  function getPlanDisplayPrice(tier: Pick<SubscriptionTierRecord, 'price_monthly' | 'price_annual'>) {
+    if (selectedInterval === 'year') {
+      if (tier.price_annual != null) {
+        return `$${Number(tier.price_annual).toFixed(2)}/yr`;
+      }
+
+      if (tier.price_monthly != null) {
+        return `$${Number((Number(tier.price_monthly) * 12 * 0.7).toFixed(2))}/yr`;
+      }
+    }
+
+    return tier.price_monthly != null ? `$${Number(tier.price_monthly).toFixed(2)}/mo` : 'See pricing';
+  }
 
   return (
     <main className="min-h-screen bg-[#050505] text-white">
@@ -131,11 +210,76 @@ export default function BillingPage() {
 
             <SectionCard title="Plan Ladder" description="Canonical billing tiers from `subscription_tiers`.">
               <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                {tiers.map((tier) => <div key={tier.tier_key} className={`rounded-[22px] border px-4 py-4 ${tier.tier_key === currentTier ? 'border-[#ffc742]/30 bg-[#ffc742]/10' : 'border-white/8 bg-black/20'}`}><div className="text-[12px] uppercase tracking-[0.16em] text-white/35">{tier.tier_key}</div><div className="mt-3 text-[20px] font-medium text-[#f7ddb3]">{tier.display_name}</div><div className="mt-2 text-[14px] text-white/58">{tier.price_monthly != null ? `$${Number(tier.price_monthly).toFixed(2)}/mo` : 'See pricing'}</div><div className="mt-4 text-[12px] uppercase tracking-[0.14em] text-white/42">{tier.tier_key === currentTier ? 'Current plan' : 'Available tier'}</div></div>)}
+                {tiers.map((tier) => <div key={tier.tier_key} className={`rounded-[22px] border px-4 py-4 ${tier.tier_key === currentTier ? 'border-[#ffc742]/30 bg-[#ffc742]/10' : 'border-white/8 bg-black/20'}`}><div className="text-[12px] uppercase tracking-[0.16em] text-white/35">{tier.tier_key}</div><div className="mt-3 text-[20px] font-medium text-[#f7ddb3]">{tier.display_name}</div><div className="mt-2 text-[14px] text-white/58">{getPlanDisplayPrice(tier)}</div><div className="mt-4 text-[12px] uppercase tracking-[0.14em] text-white/42">{tier.tier_key === currentTier ? 'Current plan' : 'Available tier'}</div></div>)}
               </div>
               <div className="mt-4 text-[14px] leading-6 text-white/58">
                 Annual billing should be marketed as a 30% savings over monthly once Stripe is wired, with Pro framed as the best-value tier and Master reserved for the heaviest AI and voice usage.
               </div>
+            </SectionCard>
+
+            <SectionCard title="Billing Actions" description="Stripe checkout and customer portal are wired through API routes.">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">Billing interval</div>
+                  <div className="mt-2 flex gap-2">
+                    {(['month', 'year'] as const).map((interval) => (
+                      <button
+                        key={interval}
+                        type="button"
+                        onClick={() => setSelectedInterval(interval)}
+                        className={`rounded-full px-4 py-2 text-[13px] font-medium transition-colors ${
+                          selectedInterval === interval
+                            ? 'bg-[#ffc742] text-black'
+                            : 'border border-white/10 bg-white/[0.03] text-white/68 hover:bg-white/[0.06]'
+                        }`}
+                      >
+                        {interval === 'month' ? 'Monthly' : 'Yearly'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={openPortal}
+                  disabled={actionLoading === 'portal'}
+                  className="rounded-full border border-white/10 bg-white/[0.03] px-5 py-3 text-[14px] font-medium text-[#f2d29f] transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {actionLoading === 'portal' ? 'Opening...' : 'Open Billing Portal'}
+                </button>
+              </div>
+
+              <div className="mt-4 grid gap-3 md:grid-cols-3">
+                {(['starter', 'pro', 'master'] as const).map((tier) => {
+                  const tierRow = tiers.find((entry) => entry.tier_key === tier);
+                  const isCurrent = tier === currentTier;
+                  return (
+                    <div key={tier} className={`rounded-[22px] border px-4 py-4 ${isCurrent ? 'border-[#ffc742]/30 bg-[#ffc742]/10' : 'border-white/8 bg-black/20'}`}>
+                      <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">{tier}</div>
+                      <div className="mt-3 text-[18px] font-medium text-[#f7ddb3]">{tierRow?.display_name || tier}</div>
+                      <div className="mt-2 text-[14px] text-white/58">{getPlanDisplayPrice(tierRow || { price_monthly: null, price_annual: null })}</div>
+                      <button
+                        type="button"
+                        onClick={() => startCheckout(tier)}
+                        disabled={actionLoading === tier || isCurrent}
+                        className="mt-4 rounded-full bg-gradient-to-r from-[#ffc742] to-[#ffbe27] px-4 py-2 text-[13px] font-semibold text-black disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {actionLoading === tier ? 'Redirecting...' : isCurrent ? 'Current plan' : `Start ${tier}`}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="mt-4 text-[14px] leading-6 text-white/58">
+                Use Stripe CLI with the webhook route at `/api/webhooks/stripe` to test subscription creation, renewal, and entitlement updates before launch.
+              </div>
+
+              {actionMessage ? (
+                <div className="mt-4 rounded-[18px] border border-[#ff8d7b]/24 bg-[#2a120d]/60 px-4 py-3 text-[14px] text-[#ffc4b8]">
+                  {actionMessage}
+                </div>
+              ) : null}
             </SectionCard>
 
             <SectionCard title="Feature Access" description="This summary is derived from `feature_entitlements` and compared against your current tier.">

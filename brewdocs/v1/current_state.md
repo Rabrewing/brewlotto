@@ -1,6 +1,6 @@
 # BrewLotto V1 - Current State & Next Steps
 
-**Last Updated:** 2026-05-04 ET (menu truth pass, blob-backed landing reel, home-state preference wiring, tier/billing QA pending)
+**Last Updated:** 2026-05-04 ET (menu truth pass, blob-backed landing reel, home-state preference wiring, tier/billing scaffold pending final Stripe IDs)
 **Phase:** Shared UI/UX framework and product truth pass
 
 ## 2026-05-04 Truth Update
@@ -18,7 +18,7 @@
 
 ### ⚠️ Still Partial Or Needs Verification
 - `scripts/ingestionScheduler.js` has been archived; Cloud Scheduler + Cloud Run are the active production ingestion path.
-- Billing is entitlement-aware, but Stripe checkout, webhook, and customer portal wiring still need the full end-to-end pass.
+- Billing now has checkout, webhook, and customer portal API scaffolding, but the final Stripe dashboard products/price IDs still need to be created and plugged in.
 - Strategy Locker is live and tier-aware, but the dedicated "Run Strategy" / strategy replay polish still needs verification.
 - The dashboard "Generate Numbers" action is wired to `POST /api/predictions`, and a historical-style strategy smoke test now covers the current strategy engine across Pick 3, Pick 4, Cash 5, Powerball, and Mega Millions ranges.
 - `My Picks` still uses a scroll-to-top placeholder for `Replay`; a true replay action is not wired yet.
@@ -32,13 +32,14 @@
 - Shared tier access now normalizes legacy `brew` labels and numeric strategy tiers into the current `free / starter / pro / master` ladder, and the dashboard generate action plus strategy smoke tests now pass against historical-style feature data.
 - State analytics is intentionally deferred until the state preference flow settles, but the data model is ready for it once we instrument events.
 - Pricing direction is now locked for the next billing pass: 3-day capped trial, then Starter at $4.99, Pro at $9.99, and Master at $19.99, with AI starting in Starter and expanding upward; annual billing should target a 30% savings message.
+- Stripe setup should mirror that ladder with six price records: Starter monthly/yearly, Pro monthly/yearly, and Master monthly/yearly.
 - Referral growth loop is now captured as a deferred V1.5 plan in `brewdocs/v1/referral-growth-plan.md`; do not wire it into the core launch path until the launch stack is stable.
 - The superadmin-only login gate is temporary and must be removed before public V1 launch.
 
 ### 🎯 Current Truth Priority
 1. Verify the current dropdown/menu tabs against the rendered routes and mockups.
 2. Verify strategy behavior and tier gating across free, trial, Brew, and Master contexts.
-3. Finish Stripe + billing entitlement wiring.
+3. Finish Stripe + billing entitlement wiring and plug in the final Stripe product/price IDs.
 4. Normalize the ingestion scheduler to the live scraper commands.
 5. Keep the onboarding tutorial and future Opus Clip clips aligned with the landing/login flow.
 6. Keep the referral growth loop deferred until billing, notifications, and strategy gating are stable.

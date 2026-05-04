@@ -107,6 +107,12 @@ If billing is in scope now, also prepare:
 
 1. `STRIPE_SECRET_KEY`
 2. `STRIPE_WEBHOOK_SECRET`
+3. `STRIPE_PRICE_STARTER_MONTHLY`
+4. `STRIPE_PRICE_STARTER_YEARLY`
+5. `STRIPE_PRICE_PRO_MONTHLY`
+6. `STRIPE_PRICE_PRO_YEARLY`
+7. `STRIPE_PRICE_MASTER_MONTHLY`
+8. `STRIPE_PRICE_MASTER_YEARLY`
 
 If monitoring is being enabled right away, also prepare:
 
@@ -164,6 +170,15 @@ Expected runtime:
 
 - [ ] `STRIPE_SECRET_KEY`
 - [ ] `STRIPE_WEBHOOK_SECRET`
+- [ ] `STRIPE_PRICE_STARTER_MONTHLY`
+- [ ] `STRIPE_PRICE_STARTER_YEARLY`
+- [ ] `STRIPE_PRICE_PRO_MONTHLY`
+- [ ] `STRIPE_PRICE_PRO_YEARLY`
+- [ ] `STRIPE_PRICE_MASTER_MONTHLY`
+- [ ] `STRIPE_PRICE_MASTER_YEARLY`
+- [ ] `POST /api/billing/checkout`
+- [ ] `POST /api/billing/portal`
+- [ ] `POST /api/webhooks/stripe`
 
 ### AI Provider
 

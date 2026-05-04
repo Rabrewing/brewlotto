@@ -150,6 +150,23 @@ Week 5: Live on App Store
 
 *Note: Stripe integration is not yet wired, so `/pricing` is the public comparison surface and `/billing` remains the authenticated account summary.*
 
+### Stripe Product Matrix
+
+When you create the Stripe catalog, use one product family per tier and two prices per tier:
+
+| Tier | Product Name | Monthly Price | Yearly Price | Stripe Env Vars |
+|------|--------------|---------------|--------------|-----------------|
+| Starter | BrewStarter | $4.99/mo | 30% discounted annual | `STRIPE_PRICE_STARTER_MONTHLY`, `STRIPE_PRICE_STARTER_YEARLY` |
+| Pro | BrewPro | $9.99/mo | 30% discounted annual | `STRIPE_PRICE_PRO_MONTHLY`, `STRIPE_PRICE_PRO_YEARLY` |
+| Master | BrewMaster | $19.99/mo | 30% discounted annual | `STRIPE_PRICE_MASTER_MONTHLY`, `STRIPE_PRICE_MASTER_YEARLY` |
+
+Implementation notes:
+- The app resolves tier/interval from the Stripe price ID, so the env vars are the source of truth for the active catalog.
+- Checkout uses `/api/billing/checkout`.
+- Portal access uses `/api/billing/portal`.
+- Webhook reconciliation uses `/api/webhooks/stripe`.
+- The annual price can be left blank in Supabase and derived in the UI as 30% off monthly, but the Stripe price objects still need to exist for checkout.
+
 ### Trial Recommendation
 
 - Default launch trial: 3 days
