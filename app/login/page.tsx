@@ -132,6 +132,7 @@ export default function LoginPage() {
 
                         <div className="mt-6 flex flex-wrap gap-2 text-[13px] text-white/55">
                             <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1.5">Fast setup</span>
+                            <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1.5">Remember this device</span>
                             <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1.5">Same-device recommended</span>
                             <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1.5">Tutorial follows sign-in</span>
                         </div>
@@ -167,6 +168,10 @@ export default function LoginPage() {
                                 >
                                     {submitting ? "Sending..." : "Send Magic Link"}
                                 </button>
+
+                                <p className="text-[12px] leading-5 text-white/42">
+                                    On this device, BrewLotto can keep you signed in during a 14-day inactivity window, if Supabase session settings are configured that way.
+                                </p>
 
                                 {message ? (
                                     <p

@@ -151,6 +151,10 @@ Expected runtime:
 - [ ] `BREWCOMMAND_ADMIN_EMAILS` (`command@brewlotto.app`, `michael.brewington@gmail.com`)
 - [ ] `BREWCOMMAND_ADMIN_SECRET`
 
+### Session Retention
+
+- [ ] Configure Supabase auth session inactivity to 14 days for trusted device reuse
+
 ### Monitoring
 
 - [ ] `SENTRY_DSN`
