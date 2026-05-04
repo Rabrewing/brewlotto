@@ -521,6 +521,11 @@ Fix the baseline lint/build/test compatibility issues separately, then continue 
 6. `Strategy Locker`
 7. account/support surfaces (`Notifications`, `Settings`, `Billing`, `Help / Learn`, `Terms & Privacy`)
 
+### Legacy UI Cleanup Note
+
+- The old Brew mascot UI chain under `components/layouts/AppShell.jsx`, `components/ui/BrewLottoBotDock.jsx`, `components/ui/BrewLottoBotModal.jsx`, `components/ui/BrewAvatar.jsx`, `components/ui/BrewAvatarAnimated.jsx`, and `hooks/useBrewBot.js` is classified as dead legacy scaffolding.
+- It is not part of the current V1 App Router surfaces and has been retired to keep the active code path focused on the landing, auth, dashboard, and billing flows.
+
 ## 2026-04-09 Dropdown Destination Completion Update (12:24 EDT)
 
 ### ✅ Completed
