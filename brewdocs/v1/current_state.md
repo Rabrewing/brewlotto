@@ -295,6 +295,7 @@ npm run ingest-all
 3. Finish Stripe checkout, webhook, and customer portal wiring so `/billing` becomes a real self-serve flow.
 4. Run a tier matrix test across dashboard, strategy locker, pricing, billing, and AI commentary surfaces.
 5. Verify the strategy replay / run-strategy affordance and tighten the comparison/animation polish where needed.
+6. Do a desktop/tablet/mobile responsive pass on the landing, login, and shared framework surfaces so the structure stays polished across devices.
 
 ### Medium Priority
 1. Replace the lightweight Learn and Legal shells with fuller CMS-backed and policy-backed content.
