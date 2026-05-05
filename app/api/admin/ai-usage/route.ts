@@ -55,6 +55,7 @@ type AiUsageTierMarginRow = {
   aiQuotaUsed: number | null;
   aiQuotaRemaining: number | null;
   costPerActiveUserUsd: number | null;
+  verdict: 'profitable' | 'watch' | 'unknown';
 };
 
 const getSupabase = () =>
@@ -307,6 +308,11 @@ export async function GET(request: NextRequest) {
         const marginPct = estimatedMonthlyRevenueUsd && estimatedMonthlyRevenueUsd > 0
           ? Number((((estimatedMonthlyRevenueUsd - estimatedCostUsd) / estimatedMonthlyRevenueUsd) * 100).toFixed(2))
           : null;
+        const verdict = estimatedGrossMarginUsd == null
+          ? 'unknown'
+          : estimatedGrossMarginUsd >= 0
+            ? 'profitable'
+            : 'watch';
         const aiQuotaMonthly = tierEntitlements?.aiQuotaMonthly ?? 0;
         const aiQuotaUsed = tierEntitlements?.aiQuotaUsed ?? 0;
         const aiQuotaRemaining = Math.max(0, aiQuotaMonthly - aiQuotaUsed);
@@ -327,9 +333,15 @@ export async function GET(request: NextRequest) {
           aiQuotaUsed,
           aiQuotaRemaining,
           costPerActiveUserUsd,
+          verdict,
         };
       })
       .filter((row) => row.activeUsers > 0 || row.requestCount > 0 || row.tierCode !== 'unknown');
+
+    const totalRevenueUsd = tierRowsSummary.reduce((sum, row) => sum + (row.estimatedMonthlyRevenueUsd || 0), 0);
+    const totalCostUsd = tierRowsSummary.reduce((sum, row) => sum + row.estimatedCostUsd, 0);
+    const totalGrossMarginUsd = Number((totalRevenueUsd - totalCostUsd).toFixed(6));
+    const totalMarginPct = totalRevenueUsd > 0 ? Number((((totalRevenueUsd - totalCostUsd) / totalRevenueUsd) * 100).toFixed(2)) : null;
 
     return NextResponse.json({
       success: true,
@@ -345,6 +357,9 @@ export async function GET(request: NextRequest) {
           averageLatencyMs: summary.latencyCount > 0 ? Math.round(summary.latencyTotalMs / summary.latencyCount) : null,
           windowStart: since.toISOString(),
           windowEnd: new Date().toISOString(),
+          totalRevenueUsd: Number(totalRevenueUsd.toFixed(6)),
+          totalGrossMarginUsd,
+          totalMarginPct,
         },
         byProvider: providerRows,
         byModel: modelRows.sort((left, right) => right.tokens - left.tokens),

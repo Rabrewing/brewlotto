@@ -101,6 +101,9 @@ interface AiUsageSummary {
   averageLatencyMs: number | null;
   windowStart: string;
   windowEnd: string;
+  totalRevenueUsd: number;
+  totalGrossMarginUsd: number;
+  totalMarginPct: number | null;
 }
 
 interface AiUsageProviderRow {
@@ -134,6 +137,7 @@ interface AiUsageTierMarginRow {
   aiQuotaUsed: number;
   aiQuotaRemaining: number;
   costPerActiveUserUsd: number | null;
+  verdict: 'profitable' | 'watch' | 'unknown';
 }
 
 type RefreshTarget = 'all' | IngestionHealthRow['gameKey'];
@@ -172,6 +176,9 @@ const EMPTY_AI_SUMMARY: AiUsageSummary = {
   averageLatencyMs: null,
   windowStart: '',
   windowEnd: '',
+  totalRevenueUsd: 0,
+  totalGrossMarginUsd: 0,
+  totalMarginPct: null,
 };
 
 function formatDate(value?: string | null) {
@@ -238,6 +245,11 @@ function formatMinutes(value: number | null) {
 function formatMoney(value: number | null | undefined) {
   const amount = Number(value ?? 0);
   return `$${amount.toFixed(4)}`;
+}
+
+function formatMoneyShort(value: number | null | undefined) {
+  const amount = Number(value ?? 0);
+  return `$${amount.toFixed(2)}`;
 }
 
 function formatNumber(value: number | null | undefined) {
@@ -641,6 +653,25 @@ export default function AdminPage() {
               <SummaryCard label="Avg Latency (ms)" value={aiUsageSummary.averageLatencyMs ?? 0} accent="text-[#ffd873]" />
             </div>
 
+            <div className="mt-4 grid gap-4 sm:grid-cols-3">
+              <div className="rounded-[24px] border border-white/10 bg-black/20 p-4">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-white/40">Projected revenue</div>
+                <div className="mt-2 text-2xl font-semibold text-white">{formatMoneyShort(aiUsageSummary.totalRevenueUsd)}</div>
+              </div>
+              <div className="rounded-[24px] border border-white/10 bg-black/20 p-4">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-white/40">Projected gross margin</div>
+                <div className={`mt-2 text-2xl font-semibold ${aiUsageSummary.totalGrossMarginUsd >= 0 ? 'text-[#93efb8]' : 'text-[#ffb5a8]'}`}>
+                  {formatMoneyShort(aiUsageSummary.totalGrossMarginUsd)}
+                </div>
+              </div>
+              <div className="rounded-[24px] border border-white/10 bg-black/20 p-4">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-white/40">Margin rate</div>
+                <div className={`mt-2 text-2xl font-semibold ${aiUsageSummary.totalMarginPct == null ? 'text-white' : aiUsageSummary.totalMarginPct >= 0 ? 'text-[#93efb8]' : 'text-[#ffb5a8]'}`}>
+                  {aiUsageSummary.totalMarginPct == null ? 'N/A' : `${aiUsageSummary.totalMarginPct.toFixed(2)}%`}
+                </div>
+              </div>
+            </div>
+
             <div className="mt-6 grid gap-4 xl:grid-cols-2">
               <div className="rounded-[24px] border border-white/10 bg-white/5 p-4">
                 <div className="text-[11px] font-medium uppercase tracking-[0.22em] text-white/50">By Provider</div>
@@ -710,7 +741,7 @@ export default function AdminPage() {
               <div className="flex flex-wrap items-end justify-between gap-3">
                 <div>
                   <div className="text-[11px] font-medium uppercase tracking-[0.22em] text-white/50">Tier Margin Check</div>
-                  <div className="mt-1 text-sm text-white/55">This compares estimated AI spend against current monthly tier pricing and current active entitlement counts.</div>
+                  <div className="mt-1 text-sm text-white/55">This compares estimated AI spend against current monthly tier pricing and current active entitlement counts using the same Starter / Pro / Master language as pricing.</div>
                 </div>
                 <div className="text-[11px] uppercase tracking-[0.14em] text-white/35">
                   <span>Price ladder truth: Starter / Pro / Master</span>
@@ -724,17 +755,21 @@ export default function AdminPage() {
                     : row.estimatedGrossMarginUsd >= 0
                       ? 'text-[#93efb8]'
                       : 'text-[#ffb5a8]';
+                  const verdictLabel = row.verdict === 'profitable' ? 'Profitable' : row.verdict === 'watch' ? 'Watch burn' : 'No baseline';
                   return (
                     <div key={row.tierCode} className="rounded-2xl border border-white/10 bg-black/20 p-4">
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div>
-                          <div className="text-[11px] uppercase tracking-[0.18em] text-white/40">{row.tierCode}</div>
+                          <div className="text-[11px] uppercase tracking-[0.18em] text-white/40">{row.tierCode === 'unknown' ? 'unknown' : row.tierCode}</div>
                           <div className="mt-1 text-lg font-semibold text-white">{row.displayName}</div>
                         </div>
                         <div className={`text-right text-sm font-semibold ${marginClass}`}>
                           {row.estimatedGrossMarginUsd == null ? 'N/A margin' : formatMoney(row.estimatedGrossMarginUsd)}
                           <div className="mt-1 text-[11px] font-normal uppercase tracking-[0.14em] text-white/40">
                             {row.marginPct == null ? 'No revenue baseline' : `${row.marginPct.toFixed(2)}% margin`}
+                          </div>
+                          <div className="mt-1 text-[11px] font-normal uppercase tracking-[0.14em] text-white/40">
+                            {verdictLabel}
                           </div>
                         </div>
                       </div>
@@ -746,11 +781,11 @@ export default function AdminPage() {
                         </div>
                         <div className="rounded-xl border border-white/10 bg-white/5 p-3">
                           <div className="uppercase tracking-[0.16em]">Estimated revenue</div>
-                          <div className="mt-1 text-base text-white/80">{row.estimatedMonthlyRevenueUsd == null ? 'N/A' : formatMoney(row.estimatedMonthlyRevenueUsd)}</div>
+                          <div className="mt-1 text-base text-white/80">{row.estimatedMonthlyRevenueUsd == null ? 'N/A' : formatMoneyShort(row.estimatedMonthlyRevenueUsd)}</div>
                         </div>
                         <div className="rounded-xl border border-white/10 bg-white/5 p-3">
                           <div className="uppercase tracking-[0.16em]">AI spend</div>
-                          <div className="mt-1 text-base text-white/80">{formatMoney(row.estimatedCostUsd)}</div>
+                          <div className="mt-1 text-base text-white/80">{formatMoneyShort(row.estimatedCostUsd)}</div>
                         </div>
                         <div className="rounded-xl border border-white/10 bg-white/5 p-3">
                           <div className="uppercase tracking-[0.16em]">AI quota left</div>
@@ -759,6 +794,8 @@ export default function AdminPage() {
                       </div>
 
                       <div className="mt-4 flex flex-wrap gap-3 text-xs uppercase tracking-[0.14em] text-white/40">
+                        <span>Tier: {row.displayName}</span>
+                        <span>•</span>
                         <span>Requests: {formatNumber(row.requestCount)}</span>
                         <span>•</span>
                         <span>Tokens: {formatNumber(row.tokens)}</span>
