@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { requireBrewCommandRequest } from '@/lib/auth/brewcommand';
 
+type TierCode = 'free' | 'starter' | 'pro' | 'master' | 'unknown';
+
 type AiUsageRow = {
   id: string;
   created_at: string;
@@ -18,6 +20,41 @@ type AiUsageRow = {
   estimated_cost_usd: number | null;
   error_message: string | null;
   metadata: Record<string, unknown> | null;
+  user_id: string | null;
+};
+
+type SubscriptionTierRow = {
+  tier_key: TierCode;
+  display_name: string;
+  marketing_label: string | null;
+  price_monthly: number | null;
+  price_annual: number | null;
+  sort_order: number;
+};
+
+type UserEntitlementRow = {
+  user_id: string;
+  tier_code: TierCode | null;
+  ai_quota_monthly: number | null;
+  ai_quota_used: number | null;
+  effective_to: string | null;
+};
+
+type AiUsageTierMarginRow = {
+  tierCode: TierCode;
+  displayName: string;
+  activeUsers: number;
+  requestCount: number;
+  tokens: number;
+  estimatedCostUsd: number;
+  monthlyPrice: number | null;
+  estimatedMonthlyRevenueUsd: number | null;
+  estimatedGrossMarginUsd: number | null;
+  marginPct: number | null;
+  aiQuotaMonthly: number | null;
+  aiQuotaUsed: number | null;
+  aiQuotaRemaining: number | null;
+  costPerActiveUserUsd: number | null;
 };
 
 const getSupabase = () =>
@@ -34,6 +71,18 @@ function toNumber(value: unknown) {
   return 0;
 }
 
+function toTierCode(value: unknown): TierCode {
+  if (value === 'free' || value === 'starter' || value === 'pro' || value === 'master') {
+    return value;
+  }
+
+  return 'unknown';
+}
+
+function formatTierDisplayName(tier: SubscriptionTierRow | undefined, tierCode: TierCode) {
+  return tier?.display_name || tier?.marketing_label || tierCode;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const unauthorizedResponse = await requireBrewCommandRequest(request);
@@ -45,7 +94,8 @@ export async function GET(request: NextRequest) {
     const since = new Date();
     since.setDate(since.getDate() - 30);
 
-    const { data, error } = await supabase
+    const [usageResult, entitlementsResult, tiersResult] = await Promise.all([
+      supabase
       .from('ai_usage_events')
       .select(
         `
@@ -62,27 +112,49 @@ export async function GET(request: NextRequest) {
           total_tokens,
           estimated_cost_usd,
           error_message,
-          metadata
+          metadata,
+          user_id
         `,
       )
       .gte('created_at', since.toISOString())
       .order('created_at', { ascending: false })
-      .limit(500);
+      .limit(500),
+      supabase
+        .from('user_entitlements')
+        .select('user_id, tier_code, ai_quota_monthly, ai_quota_used, effective_to')
+        .is('effective_to', null),
+      supabase
+        .from('subscription_tiers')
+        .select('tier_key, display_name, marketing_label, price_monthly, price_annual, sort_order')
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true }),
+    ]);
 
-    if (error) {
+    const firstError = usageResult.error || entitlementsResult.error || tiersResult.error;
+
+    if (firstError) {
       return NextResponse.json(
         {
           success: false,
           error: {
             code: 'FETCH_ERROR',
-            message: error.message,
+            message: firstError.message,
           },
         },
         { status: 500 },
       );
     }
 
-    const rows = (data || []) as AiUsageRow[];
+    const rows = (usageResult.data || []) as AiUsageRow[];
+    const entitlementRows = (entitlementsResult.data || []) as UserEntitlementRow[];
+    const tierRows = (tiersResult.data || []) as SubscriptionTierRow[];
+
+    const entitlementsByUserId = new Map(
+      entitlementRows.map((row) => [row.user_id, row]),
+    );
+    const tiersByTierCode = new Map(
+      tierRows.map((row) => [row.tier_key, row]),
+    );
 
     const summary = rows.reduce(
       (acc, row) => {
@@ -102,6 +174,7 @@ export async function GET(request: NextRequest) {
         acc.estimatedCostUsd += cost;
         acc.latencyTotalMs += latency ?? 0;
         acc.latencyCount += latency != null ? 1 : 0;
+        acc.totalRows += 1;
 
         const providerBucket = acc.byProvider[row.provider] || {
           provider: row.provider,
@@ -131,6 +204,28 @@ export async function GET(request: NextRequest) {
         modelBucket.latencyCount += latency != null ? 1 : 0;
         acc.byModel[modelKey] = modelBucket;
 
+        const metadataTier = toTierCode(
+          row.metadata?.tierCode ||
+            row.metadata?.tier_code ||
+            row.metadata?.entitlementTierCode ||
+            row.metadata?.entitlement_tier_code,
+        );
+        const entitlementTier = row.user_id ? toTierCode(entitlementsByUserId.get(row.user_id)?.tier_code) : 'unknown';
+        const tierCode = entitlementTier !== 'unknown' ? entitlementTier : metadataTier;
+        const tierBucket = acc.byTier[tierCode] || {
+          tierCode,
+          requestCount: 0,
+          tokens: 0,
+          estimatedCostUsd: 0,
+          activeUsers: 0,
+          aiQuotaMonthly: 0,
+          aiQuotaUsed: 0,
+        };
+        tierBucket.requestCount += 1;
+        tierBucket.tokens += totalTokens;
+        tierBucket.estimatedCostUsd += cost;
+        acc.byTier[tierCode] = tierBucket;
+
         return acc;
       },
       {
@@ -143,9 +238,43 @@ export async function GET(request: NextRequest) {
         estimatedCostUsd: 0,
         latencyTotalMs: 0,
         latencyCount: 0,
+        totalRows: 0,
         byProvider: {} as Record<string, { provider: string; requestCount: number; tokens: number; estimatedCostUsd: number }>,
         byModel: {} as Record<string, { provider: string; model: string; requestCount: number; tokens: number; estimatedCostUsd: number; averageLatencyMs: number; latencyCount: number }>,
+        byTier: {} as Record<TierCode, {
+          tierCode: TierCode;
+          requestCount: number;
+          tokens: number;
+          estimatedCostUsd: number;
+          activeUsers: number;
+          aiQuotaMonthly: number;
+          aiQuotaUsed: number;
+        }>,
       },
+    );
+
+    const activeUsersByTier = entitlementRows.reduce((acc, row) => {
+      const tierCode = toTierCode(row.tier_code);
+      acc[tierCode] = (acc[tierCode] || 0) + 1;
+      return acc;
+    }, {} as Record<TierCode, number>);
+
+    const quotaByTier = entitlementRows.reduce(
+      (acc, row) => {
+        const tierCode = toTierCode(row.tier_code);
+        const quotaMonthly = toNumber(row.ai_quota_monthly);
+        const quotaUsed = toNumber(row.ai_quota_used);
+
+        acc[tierCode] = acc[tierCode] || {
+          aiQuotaMonthly: 0,
+          aiQuotaUsed: 0,
+        };
+
+        acc[tierCode].aiQuotaMonthly += quotaMonthly;
+        acc[tierCode].aiQuotaUsed += quotaUsed;
+        return acc;
+      },
+      {} as Record<TierCode, { aiQuotaMonthly: number; aiQuotaUsed: number }>,
     );
 
     const providerRows = Object.values(summary.byProvider).map((entry) => ({
@@ -164,6 +293,44 @@ export async function GET(request: NextRequest) {
       averageLatencyMs: entry.latencyCount > 0 ? Math.round(entry.averageLatencyMs / entry.latencyCount) : null,
     }));
 
+    const tierOrder: TierCode[] = ['free', 'starter', 'pro', 'master', 'unknown'];
+    const tierRowsSummary = tierOrder
+      .map((tierCode) => {
+        const tierUsage = summary.byTier[tierCode];
+        const tierEntitlements = quotaByTier[tierCode];
+        const tierConfig = tiersByTierCode.get(tierCode);
+        const activeUsers = activeUsersByTier[tierCode] || 0;
+        const monthlyPrice = tierConfig?.price_monthly != null ? toNumber(tierConfig.price_monthly) : null;
+        const estimatedMonthlyRevenueUsd = monthlyPrice != null ? activeUsers * monthlyPrice : null;
+        const estimatedCostUsd = Number((tierUsage?.estimatedCostUsd || 0).toFixed(6));
+        const estimatedGrossMarginUsd = estimatedMonthlyRevenueUsd != null ? Number((estimatedMonthlyRevenueUsd - estimatedCostUsd).toFixed(6)) : null;
+        const marginPct = estimatedMonthlyRevenueUsd && estimatedMonthlyRevenueUsd > 0
+          ? Number((((estimatedMonthlyRevenueUsd - estimatedCostUsd) / estimatedMonthlyRevenueUsd) * 100).toFixed(2))
+          : null;
+        const aiQuotaMonthly = tierEntitlements?.aiQuotaMonthly ?? 0;
+        const aiQuotaUsed = tierEntitlements?.aiQuotaUsed ?? 0;
+        const aiQuotaRemaining = Math.max(0, aiQuotaMonthly - aiQuotaUsed);
+        const costPerActiveUserUsd = activeUsers > 0 ? Number((estimatedCostUsd / activeUsers).toFixed(6)) : null;
+
+        return {
+          tierCode,
+          displayName: formatTierDisplayName(tierConfig, tierCode),
+          activeUsers,
+          requestCount: tierUsage?.requestCount || 0,
+          tokens: tierUsage?.tokens || 0,
+          estimatedCostUsd,
+          monthlyPrice,
+          estimatedMonthlyRevenueUsd,
+          estimatedGrossMarginUsd,
+          marginPct,
+          aiQuotaMonthly,
+          aiQuotaUsed,
+          aiQuotaRemaining,
+          costPerActiveUserUsd,
+        };
+      })
+      .filter((row) => row.activeUsers > 0 || row.requestCount > 0 || row.tierCode !== 'unknown');
+
     return NextResponse.json({
       success: true,
       data: {
@@ -181,6 +348,7 @@ export async function GET(request: NextRequest) {
         },
         byProvider: providerRows,
         byModel: modelRows.sort((left, right) => right.tokens - left.tokens),
+        byTier: tierRowsSummary,
         recent: rows.slice(0, 20),
       },
     });

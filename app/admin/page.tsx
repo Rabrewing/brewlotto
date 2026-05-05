@@ -119,6 +119,23 @@ interface AiUsageModelRow {
   averageLatencyMs: number | null;
 }
 
+interface AiUsageTierMarginRow {
+  tierCode: 'free' | 'starter' | 'pro' | 'master' | 'unknown';
+  displayName: string;
+  activeUsers: number;
+  requestCount: number;
+  tokens: number;
+  estimatedCostUsd: number;
+  monthlyPrice: number | null;
+  estimatedMonthlyRevenueUsd: number | null;
+  estimatedGrossMarginUsd: number | null;
+  marginPct: number | null;
+  aiQuotaMonthly: number;
+  aiQuotaUsed: number;
+  aiQuotaRemaining: number;
+  costPerActiveUserUsd: number | null;
+}
+
 type RefreshTarget = 'all' | IngestionHealthRow['gameKey'];
 
 const EMPTY_SUMMARY: AlertSummary = {
@@ -327,6 +344,7 @@ export default function AdminPage() {
   const [aiUsageSummary, setAiUsageSummary] = useState<AiUsageSummary>(EMPTY_AI_SUMMARY);
   const [aiUsageByProvider, setAiUsageByProvider] = useState<AiUsageProviderRow[]>([]);
   const [aiUsageByModel, setAiUsageByModel] = useState<AiUsageModelRow[]>([]);
+  const [aiUsageByTier, setAiUsageByTier] = useState<AiUsageTierMarginRow[]>([]);
   const [aiUsageRows, setAiUsageRows] = useState<AiUsageRow[]>([]);
   const [statusFilter, setStatusFilter] = useState<AlertStatusFilter>('all');
   const [severityFilter, setSeverityFilter] = useState<AlertSeverityFilter>('all');
@@ -402,6 +420,7 @@ export default function AdminPage() {
     setAiUsageSummary(aiUsagePayload.data?.summary || EMPTY_AI_SUMMARY);
     setAiUsageByProvider(aiUsagePayload.data?.byProvider || []);
     setAiUsageByModel(aiUsagePayload.data?.byModel || []);
+    setAiUsageByTier(aiUsagePayload.data?.byTier || []);
     setAiUsageRows(aiUsagePayload.data?.recent || []);
   }
 
@@ -684,6 +703,77 @@ export default function AdminPage() {
                     <div className="text-sm text-white/55">No model-level AI usage is available yet.</div>
                   )}
                 </div>
+              </div>
+            </div>
+
+            <div className="mt-6 rounded-[24px] border border-white/10 bg-white/5 p-4">
+              <div className="flex flex-wrap items-end justify-between gap-3">
+                <div>
+                  <div className="text-[11px] font-medium uppercase tracking-[0.22em] text-white/50">Tier Margin Check</div>
+                  <div className="mt-1 text-sm text-white/55">This compares estimated AI spend against current monthly tier pricing and current active entitlement counts.</div>
+                </div>
+                <div className="text-[11px] uppercase tracking-[0.14em] text-white/35">
+                  <span>Price ladder truth: Starter / Pro / Master</span>
+                </div>
+              </div>
+
+              <div className="mt-4 grid gap-4 xl:grid-cols-2">
+                {aiUsageByTier.length > 0 ? aiUsageByTier.map((row) => {
+                  const marginClass = row.estimatedGrossMarginUsd == null
+                    ? 'text-white/70'
+                    : row.estimatedGrossMarginUsd >= 0
+                      ? 'text-[#93efb8]'
+                      : 'text-[#ffb5a8]';
+                  return (
+                    <div key={row.tierCode} className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <div className="text-[11px] uppercase tracking-[0.18em] text-white/40">{row.tierCode}</div>
+                          <div className="mt-1 text-lg font-semibold text-white">{row.displayName}</div>
+                        </div>
+                        <div className={`text-right text-sm font-semibold ${marginClass}`}>
+                          {row.estimatedGrossMarginUsd == null ? 'N/A margin' : formatMoney(row.estimatedGrossMarginUsd)}
+                          <div className="mt-1 text-[11px] font-normal uppercase tracking-[0.14em] text-white/40">
+                            {row.marginPct == null ? 'No revenue baseline' : `${row.marginPct.toFixed(2)}% margin`}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 grid gap-3 text-xs text-white/45 sm:grid-cols-2 xl:grid-cols-4">
+                        <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                          <div className="uppercase tracking-[0.16em]">Active users</div>
+                          <div className="mt-1 text-base text-white/80">{formatNumber(row.activeUsers)}</div>
+                        </div>
+                        <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                          <div className="uppercase tracking-[0.16em]">Estimated revenue</div>
+                          <div className="mt-1 text-base text-white/80">{row.estimatedMonthlyRevenueUsd == null ? 'N/A' : formatMoney(row.estimatedMonthlyRevenueUsd)}</div>
+                        </div>
+                        <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                          <div className="uppercase tracking-[0.16em]">AI spend</div>
+                          <div className="mt-1 text-base text-white/80">{formatMoney(row.estimatedCostUsd)}</div>
+                        </div>
+                        <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                          <div className="uppercase tracking-[0.16em]">AI quota left</div>
+                          <div className="mt-1 text-base text-white/80">{formatNumber(row.aiQuotaRemaining)}</div>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 flex flex-wrap gap-3 text-xs uppercase tracking-[0.14em] text-white/40">
+                        <span>Requests: {formatNumber(row.requestCount)}</span>
+                        <span>•</span>
+                        <span>Tokens: {formatNumber(row.tokens)}</span>
+                        <span>•</span>
+                        <span>AI quota used: {formatNumber(row.aiQuotaUsed)} / {formatNumber(row.aiQuotaMonthly)}</span>
+                        <span>•</span>
+                        <span>Cost per active user: {row.costPerActiveUserUsd == null ? 'N/A' : formatMoney(row.costPerActiveUserUsd)}</span>
+                      </div>
+                    </div>
+                  );
+                }) : (
+                  <div className="rounded-2xl border border-white/10 bg-black/20 p-4 text-sm text-white/55">
+                    No tier-level AI margin data is available yet.
+                  </div>
+                )}
               </div>
             </div>
 
