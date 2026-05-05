@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -174,6 +173,9 @@ export default function OnboardingPage() {
                 captionsSrc="/landing/tutorial/brewlotto-tutorial.vtt"
                 transcriptTitle="Read the tutorial transcript"
                 transcript={TUTORIAL_TRANSCRIPT}
+                defaultExpanded
+                skipActionLabel="Skip video"
+                onSkipAction={completeOnboarding}
               >
                 <div className="space-y-3">
                   <button
@@ -182,14 +184,8 @@ export default function OnboardingPage() {
                     disabled={saving}
                     className="w-full rounded-full bg-gradient-to-r from-[#ffc742] to-[#ffbe27] px-6 py-3 text-[15px] font-semibold text-black shadow-[0_0_18px_rgba(255,199,66,0.22)] transition-all hover:scale-[1.02] disabled:opacity-40"
                   >
-                    {saving ? 'Loading...' : 'Skip tutorial, start playing'}
+                    {saving ? 'Loading...' : 'Enter BrewLotto'}
                   </button>
-                  <Link
-                    href="/learn#tutorial"
-                    className="flex w-full items-center justify-center rounded-full border border-white/12 px-6 py-3 text-[14px] text-white/76 transition-colors hover:border-white/20 hover:text-white"
-                  >
-                    Replay in BrewU
-                  </Link>
                 </div>
               </TutorialVideoPanel>
             </div>

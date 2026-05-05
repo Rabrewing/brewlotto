@@ -64,7 +64,7 @@ official source → ingestion → Supabase → freshness view → API → UI
 
 | Item | Status |
 |------|--------|
-| Onboarding reset action | ✅ BrewCommand-only reset endpoint and admin-console button available in test mode; remove before public V1 launch |
+| Onboarding reset action | ✅ BrewCommand-only reset endpoint and admin-console button kept in the internal admin surface for launch testing |
 
 ### Deployments
 

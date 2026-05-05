@@ -56,6 +56,7 @@ export default function LearnPage() {
             captionsSrc="/landing/tutorial/brewlotto-tutorial.vtt"
             transcriptTitle="Read the tutorial transcript"
             transcript={TUTORIAL_TRANSCRIPT}
+            defaultExpanded
           >
             <div className="text-[14px] leading-7 text-white/66">
               Need a refresher later? Come back here from BrewU, or jump back to the dashboard when

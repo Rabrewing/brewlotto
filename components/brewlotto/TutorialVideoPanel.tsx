@@ -14,6 +14,8 @@ interface TutorialVideoPanelProps {
   transcript: string[];
   autoPlay?: boolean;
   defaultExpanded?: boolean;
+  skipActionLabel?: string;
+  onSkipAction?: () => void;
   children?: ReactNode;
 }
 
@@ -28,6 +30,8 @@ export function TutorialVideoPanel({
   transcript,
   autoPlay = true,
   defaultExpanded = false,
+  skipActionLabel,
+  onSkipAction,
   children,
 }: TutorialVideoPanelProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -219,13 +223,22 @@ export function TutorialVideoPanel({
               >
                 {isExpanded ? "Shrink" : "Expand"}
               </button>
+              {skipActionLabel && onSkipAction ? (
+                <button
+                  type="button"
+                  onClick={onSkipAction}
+                  className="rounded-full border border-white/12 bg-black/65 px-3 py-1.5 text-[12px] font-medium text-white/80 backdrop-blur-md transition-colors hover:text-white"
+                >
+                  {skipActionLabel}
+                </button>
+              ) : null}
             </div>
           </div>
         </div>
       </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
-        <details className="rounded-[20px] border border-white/8 bg-black/20 px-4 py-4">
+      <div className="mt-4 space-y-4">
+        <details className="mx-auto max-w-3xl rounded-[20px] border border-white/8 bg-black/20 px-4 py-4 text-center">
           <summary className="cursor-pointer list-none text-[14px] font-medium text-[#f7ddb3] outline-none">
             {transcriptTitle}
           </summary>
@@ -237,11 +250,11 @@ export function TutorialVideoPanel({
         </details>
 
         {children ? (
-          <div className="rounded-[20px] border border-white/8 bg-black/20 px-4 py-4">
+          <div className="mx-auto max-w-3xl rounded-[20px] border border-white/8 bg-black/20 px-4 py-4">
             {children}
           </div>
         ) : (
-          <div className="rounded-[20px] border border-white/8 bg-black/20 px-4 py-4 text-[14px] leading-7 text-white/60">
+          <div className="mx-auto max-w-3xl rounded-[20px] border border-white/8 bg-black/20 px-4 py-4 text-[14px] leading-7 text-white/60">
             Captions are built into the player, and the transcript can be expanded whenever you want the text version.
           </div>
         )}
