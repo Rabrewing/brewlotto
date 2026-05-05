@@ -1,9 +1,9 @@
 # BrewLotto V1 - Current State & Next Steps
 
-**Last Updated:** 2026-05-04 ET (menu truth pass, blob-backed landing reel, home-state preference wiring, tier/billing scaffold pending final Stripe IDs)
+**Last Updated:** 2026-05-05 ET (menu truth pass, blob-backed landing reel, home-state preference wiring, tier/billing scaffold pending final Stripe IDs)
 **Phase:** Shared UI/UX framework and product truth pass
 
-## 2026-05-04 Truth Update
+## 2026-05-05 Truth Update
 
 ### ✅ Already Real
 - Public landing page, login page, pricing page, onboarding flow, and dashboard entry points are live on the `brew2-overhaul` branch.
@@ -33,6 +33,7 @@
 - State analytics is intentionally deferred until the state preference flow settles, but the data model is ready for it once we instrument events.
 - Pricing direction is now locked for the next billing pass: 3-day capped trial, then Starter at $4.99, Pro at $9.99, and Master at $19.99, with AI starting in Starter and expanding upward; annual billing should target a 30% savings message.
 - Stripe setup should mirror that ladder with six price records: Starter monthly/yearly, Pro monthly/yearly, and Master monthly/yearly.
+- Trial nudges are now contextual only and appear on dashboard, billing, and profile instead of periodic nags.
 - Referral growth loop is now captured as a deferred V1.5 plan in `brewdocs/v1/referral-growth-plan.md`; do not wire it into the core launch path until the launch stack is stable.
 - The superadmin-only login gate is temporary and must be removed before public V1 launch.
 

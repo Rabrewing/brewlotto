@@ -174,6 +174,7 @@ Implementation notes:
 - Avoid an unlimited free period for cost control
 - Convert users after they have seen the landing page, onboarding, and dashboard value loop
 - Let the trial preview all tier surfaces, but keep the AI quota intentionally small so the demo is useful without becoming a free-for-all
+- Keep upgrade nudges contextual at decision points like dashboard, billing, and profile instead of periodic popups
 
 ### AI and Margin Guidance
 

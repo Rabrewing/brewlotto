@@ -8,6 +8,7 @@ import {
   NavigationTabs,
   SectionCard,
 } from '@/components/brewlotto/dashboard';
+import { TrialUpgradeBanner } from '@/components/brewlotto/dashboard';
 import { supabase } from '@/lib/supabase/browserClient';
 import { normalizePreferredStateCode, savePreferredStateForUser, setStoredPreferredStateCode } from '@/hooks/usePreferredState';
 
@@ -255,6 +256,7 @@ export default function ProfilePage() {
       <DashboardContainer>
         <Header />
         <NavigationTabs />
+        <TrialUpgradeBanner className="mt-4" />
 
         <div className="mb-5 mt-2 text-[40px] font-medium tracking-[-0.03em] text-[#f8cf98]">
           Profile

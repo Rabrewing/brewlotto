@@ -16,4 +16,5 @@ export { GeneratePickButton } from './GeneratePickButton';
 export { UtilityPills } from './UtilityPills';
 export { VoiceModeCard } from './VoiceModeCard';
 export { LiveTrustBadge } from './LiveTrustBadge';
+export { TrialUpgradeBanner } from './TrialUpgradeBanner';
 export { SectionCard } from './SectionCard';

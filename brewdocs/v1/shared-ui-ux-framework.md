@@ -151,7 +151,7 @@ const { data, error } = await supabase
 - [x] Tier badge display
 - [ ] Apply theme selection
 - [ ] Add avatar upload
-- [ ] Add trial expiry countdown
+- [x] Add trial expiry countdown
 
 ### 3.6 `/notifications` - Delivery + Preferences
 

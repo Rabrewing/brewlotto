@@ -15,6 +15,7 @@ import {
   UtilityPills,
   VoiceModeCard,
   LiveTrustBadge,
+  TrialUpgradeBanner,
 } from '@/components/brewlotto/dashboard';
 import { resolveDashboardGameConfig } from '@/lib/dashboard/game-config';
 import { usePreferredState } from '@/hooks/usePreferredState';
@@ -315,6 +316,7 @@ export default function DashboardPage() {
       <DashboardContainer>
         <Header />
         <NavigationTabs />
+        <TrialUpgradeBanner className="mt-4" />
         <SectionKicker />
         <FreshnessBanner
           status={freshness.status}

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import { DashboardContainer, Header, NavigationTabs, SectionCard } from '@/components/brewlotto/dashboard';
+import { DashboardContainer, Header, NavigationTabs, SectionCard, TrialUpgradeBanner } from '@/components/brewlotto/dashboard';
 import { supabase } from '@/lib/supabase/browserClient';
 
 type TierCode = 'free' | 'starter' | 'pro' | 'master';
@@ -174,6 +174,7 @@ export default function BillingPage() {
       <DashboardContainer>
         <Header />
         <NavigationTabs />
+        <TrialUpgradeBanner className="mt-4" />
         <div className="mb-5 mt-2 text-[40px] font-medium tracking-[-0.03em] text-[#f8cf98]">Subscription &amp; Billing</div>
         {loading ? <div className="rounded-[28px] border border-white/10 bg-white/[0.03] px-5 py-8 text-center text-white/55">Loading billing status...</div> : error ? <div className="rounded-[28px] border border-[#ff8d7b]/25 bg-[#2a120d]/60 px-5 py-8 text-center text-[#ffc4b8]">{error}</div> : !user ? <div className="rounded-[28px] border border-white/10 bg-white/[0.03] px-5 py-8 text-center text-white/55">No active account data is available right now.</div> : (
           <div className="space-y-5">

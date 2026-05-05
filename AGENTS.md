@@ -1,6 +1,6 @@
 # AGENTS.md (BrewLotto V1)
 
-## Current Status (2026-05-01 ET)
+## Current Status (2026-05-05 ET)
 
 ### System Health — All NC Launch Games Green
 
@@ -52,6 +52,13 @@ official source → ingestion → Supabase → freshness view → API → UI
 | Item | Status |
 |------|--------|
 | Video animation + CTA | 🔄 In progress (separate session) |
+
+### Upgrade Nudges
+
+| Item | Status |
+|------|--------|
+| Trial expiry banner | ✅ Live on dashboard, billing, and profile |
+| Upgrade prompts | ✅ Contextual only at decision points; no periodic nagging |
 
 ### Deployments
 
