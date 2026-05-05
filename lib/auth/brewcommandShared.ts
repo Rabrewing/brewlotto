@@ -4,11 +4,23 @@ type BrewCommandUserLike = {
   app_metadata?: Record<string, unknown> | null;
 };
 
+const DEFAULT_BREWCOMMAND_ADMIN_EMAILS = [
+  'command@brewlotto.app',
+  'michael.brewington@gmail.com',
+];
+
 export function parseBrewCommandAdminEmails() {
-  return (process.env.BREWCOMMAND_ADMIN_EMAILS || '')
+  const configuredEmails = (process.env.BREWCOMMAND_ADMIN_EMAILS || '')
     .split(',')
     .map((value) => value.trim().toLowerCase())
     .filter(Boolean);
+
+  return Array.from(
+    new Set([
+      ...DEFAULT_BREWCOMMAND_ADMIN_EMAILS,
+      ...configuredEmails,
+    ]),
+  );
 }
 
 export function isBrewCommandAdminUser(user: BrewCommandUserLike) {

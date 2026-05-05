@@ -35,7 +35,7 @@ official source → ingestion → Supabase → freshness view → API → UI
 | **Number formatting** | `LotteryBall.tsx` + 5 inline files + API route | Removed `padStart(2, '0')` globally. Numbers display as `6` not `06`. |
 | **Timezone display** | `FreshnessBanner.tsx`, `LiveTrustBadge.tsx`, `PredictionCard.tsx` | Removed seconds from timestamps. Added ET/PT timezone labels. Format: "May 2, 2026, 1:00 PM ET". |
 | **Dropdown navigation** | `AvatarDropdown.tsx` | Fixed onClick — now calls `router.push(href) + setIsOpen(false)` instead of just closing. Removed hardcoded "John Doe"/"john@example.com"/"JD" avatar — all loaded from auth. |
-| **Superadmin added** | `.env`, `.env.local` | `BREWCOMMAND_ADMIN_EMAILS` now includes `brewmaster.rb@brewassist.app`. |
+| **Superadmin added** | `.env`, `.env.local` | `BREWCOMMAND_ADMIN_EMAILS` now includes `command@brewlotto.app` and `michael.brewington@gmail.com`; code now keeps a fallback allowlist so BrewCommand access still works if one env entry is missing. |
 
 ### Auth & Email
 

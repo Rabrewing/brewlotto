@@ -237,7 +237,7 @@ Supabase's built-in email is fine for development but unreliable for production.
 
 - **Superadmin emails:** `command@brewlotto.app`, `michael.brewington@gmail.com` — sign up via magic link, middleware auto-detects admin role
 - **Route:** `/admin` — ingestion health, alert console, freshness monitoring
-- **Auth check:** `BREWCOMMAND_ADMIN_EMAILS` env var + `lib/auth/brewcommand.ts`
+- **Auth check:** `BREWCOMMAND_ADMIN_EMAILS` env var + `lib/auth/brewcommand.ts` with a built-in fallback allowlist for `command@brewlotto.app` and `michael.brewington@gmail.com`
 
 ---
 
