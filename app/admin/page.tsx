@@ -37,6 +37,7 @@ interface AlertItem {
 type AlertStatusFilter = 'all' | AlertItem['status'];
 type AlertSeverityFilter = 'all' | AlertItem['severity'];
 type AlertCategoryFilter = 'all' | 'freshness' | 'ingestion' | 'validation' | 'system' | 'billing' | 'prediction';
+type AlertDeliveryFilter = 'all' | 'sent' | 'failed';
 
 interface IngestionHealthSummary {
   totalGames: number;
@@ -394,6 +395,7 @@ export default function AdminPage() {
   const [alertRecipient, setAlertRecipient] = useState<AlertRecipientState>(DEFAULT_ALERT_RECIPIENT);
   const [savingAlertRecipient, setSavingAlertRecipient] = useState(false);
   const [alertDeliveries, setAlertDeliveries] = useState<AlertDeliveryRow[]>([]);
+  const [alertDeliveryFilter, setAlertDeliveryFilter] = useState<AlertDeliveryFilter>('all');
   const [statusFilter, setStatusFilter] = useState<AlertStatusFilter>('all');
   const [severityFilter, setSeverityFilter] = useState<AlertSeverityFilter>('all');
   const [categoryFilter, setCategoryFilter] = useState<AlertCategoryFilter>('all');
@@ -404,6 +406,21 @@ export default function AdminPage() {
     : aiUsageByTier.some((row) => row.verdict === 'unknown')
       ? 'One or more tiers still lacks a revenue baseline, so treat the profitability view as provisional.'
       : 'Current pricing ladder remains profitable on the current AI usage snapshot.';
+  const visibleAlertDeliveries = alertDeliveries.filter((delivery) => {
+    if (alertDeliveryFilter === 'all') {
+      return true;
+    }
+
+    if (alertDeliveryFilter === 'sent') {
+      return delivery.status === 'sent' || delivery.status === 'delivered';
+    }
+
+    if (alertDeliveryFilter === 'failed') {
+      return delivery.status === 'failed';
+    }
+
+    return true;
+  });
 
   async function loadAdminData(options?: { alertsOnly?: boolean; nextRequestId?: number }) {
     setError(null);
@@ -1126,23 +1143,59 @@ export default function AdminPage() {
             </div>
           </div>
 
-          <div className="mt-8 rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(24,22,26,0.96),rgba(14,12,16,0.96))] p-5">
-            <div className="flex flex-wrap items-end justify-between gap-4">
-              <div>
-                <div className="text-[11px] font-medium uppercase tracking-[0.22em] text-white/50">Alert Email History</div>
-                <h2 className="mt-2 text-xl font-semibold text-white">Recent delivery attempts</h2>
-                <p className="mt-1 text-sm text-white/55">
-                  Read-only history of BrewCommand alert emails sent from the internal alert system to the currently selected recipient.
-                </p>
+            <div className="mt-8 rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(24,22,26,0.96),rgba(14,12,16,0.96))] p-5">
+              <div className="flex flex-wrap items-end justify-between gap-4">
+                <div>
+                  <div className="text-[11px] font-medium uppercase tracking-[0.22em] text-white/50">Alert Email History</div>
+                  <h2 className="mt-2 text-xl font-semibold text-white">Recent delivery attempts</h2>
+                  <p className="mt-1 text-sm text-white/55">
+                    Read-only history of BrewCommand alert emails sent from the internal alert system to the currently selected recipient.
+                  </p>
+                </div>
+                <div className="text-right text-[11px] uppercase tracking-[0.14em] text-white/35">
+                  One inbox at a time
+                  <div className="mt-1 normal-case tracking-normal text-white/60">{alertRecipient.recipientEmail}</div>
+                </div>
               </div>
-              <div className="text-right text-[11px] uppercase tracking-[0.14em] text-white/35">
-                One inbox at a time
-                <div className="mt-1 normal-case tracking-normal text-white/60">{alertRecipient.recipientEmail}</div>
-              </div>
-            </div>
 
-            <div className="mt-5 overflow-hidden rounded-[24px] border border-white/10 bg-black/20">
-              <div className="overflow-x-auto">
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setAlertDeliveryFilter('all')}
+                  className={`rounded-full border px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] transition ${
+                    alertDeliveryFilter === 'all'
+                      ? 'border-[#ffd978]/60 bg-[#20170a] text-[#ffd873]'
+                      : 'border-white/10 bg-white/5 text-white/70 hover:border-white/20 hover:bg-white/10'
+                  }`}
+                >
+                  All
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAlertDeliveryFilter('sent')}
+                  className={`rounded-full border px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] transition ${
+                    alertDeliveryFilter === 'sent'
+                      ? 'border-[#53d48a]/60 bg-[#102117] text-[#93efb8]'
+                      : 'border-white/10 bg-white/5 text-white/70 hover:border-white/20 hover:bg-white/10'
+                  }`}
+                >
+                  Sent
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAlertDeliveryFilter('failed')}
+                  className={`rounded-full border px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] transition ${
+                    alertDeliveryFilter === 'failed'
+                      ? 'border-[#ff7d67]/60 bg-[#2a1311] text-[#ffb5a8]'
+                      : 'border-white/10 bg-white/5 text-white/70 hover:border-white/20 hover:bg-white/10'
+                  }`}
+                >
+                  Failed
+                </button>
+              </div>
+
+              <div className="mt-5 overflow-hidden rounded-[24px] border border-white/10 bg-black/20">
+                <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-white/10 text-left text-sm">
                   <thead className="bg-white/5 text-[11px] uppercase tracking-[0.16em] text-white/45">
                     <tr>
@@ -1154,7 +1207,7 @@ export default function AdminPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5 text-white/75">
-                    {alertDeliveries.map((delivery) => {
+                    {visibleAlertDeliveries.map((delivery) => {
                       const alertLabel = delivery.alert?.title || delivery.alert?.alertName || 'Unknown alert';
                       const alertMeta = [delivery.alert?.severity, delivery.alert?.alertType, delivery.alert?.alertKey].filter(Boolean).join(' • ');
                       return (
@@ -1187,7 +1240,7 @@ export default function AdminPage() {
                         </tr>
                       );
                     })}
-                    {!loading && alertDeliveries.length === 0 ? (
+                    {!loading && visibleAlertDeliveries.length === 0 ? (
                       <tr>
                         <td colSpan={5} className="px-4 py-8 text-center text-sm text-white/55">
                           No alert deliveries are available yet.
