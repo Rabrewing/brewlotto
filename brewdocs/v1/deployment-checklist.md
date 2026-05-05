@@ -128,6 +128,12 @@ If AI usage cost tracking is being enabled right away, also prepare:
 5. `NIM_RATE_INPUT_PER_MILLION`
 6. `NIM_RATE_OUTPUT_PER_MILLION`
 
+If BrewCommand alert emails are being enabled, also prepare:
+
+1. `RESEND_API_KEY`
+2. `BREWCOMMAND_ALERT_FROM_EMAIL`
+3. `BREWCOMMAND_ALERT_FROM_NAME`
+
 ## Phase 2: Deploy To Vercel
 
 ### Recommended Path
@@ -220,6 +226,13 @@ Expected runtime:
 - [ ] Verify `/api/admin/ai-usage` returns request count, tokens, latency, and estimated spend
 - [ ] Compare provider/model spend against the current pricing ladder inside BrewCommand
 - [ ] Keep AI usage monitoring visible in the admin console until the final launch decision is locked
+
+### BrewCommand Alert Bell + Email Fanout
+
+- [ ] Keep the admin notification bell visible in BrewCommand
+- [ ] Send critical or email-worthy system alerts to the BrewCommand superadmin allowlist
+- [ ] Record alert deliveries in `alert_deliveries`
+- [ ] Keep the alert feed and email fanout tied to the same alert events so there is one source of truth
 
 ### Landing Video
 

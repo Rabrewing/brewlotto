@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { deliverAdminAlertEmail } from '@/lib/notifications/adminAlerts';
 
 const getSupabase = () => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -51,7 +52,7 @@ export async function POST(request: NextRequest) {
     // Look up the alert configuration
     const { data: alertConfig } = await supabase
       .from('system_alerts')
-      .select('id')
+      .select('id, alert_name, alert_type, severity, notification_channels')
       .eq('alert_key', alert_key)
       .eq('is_enabled', true)
       .single();
@@ -126,6 +127,32 @@ export async function POST(request: NextRequest) {
       
       alertId = newAlert?.id;
     }
+
+    const alertEventData = existingAlert?.event_data || {
+      fingerprint,
+      source_module: source_module || alert_key,
+      category: category || 'system',
+      email_required,
+      email_last_sent_at: null,
+      occurrence_count: 1,
+      metadata,
+    };
+
+    const emailDispatch = await deliverAdminAlertEmail(supabase, {
+      alertEventId: alertId,
+      alertKey: alert_key,
+      alertName: alertConfig?.alert_name || alert_key,
+      alertType: alertConfig?.alert_type || category || 'system',
+      severity,
+      title,
+      message,
+      stateCode: state || null,
+      gameName: game || null,
+      emailRequired: email_required,
+      notificationChannels: (alertConfig?.notification_channels as Record<string, unknown> | null) || null,
+      eventData: alertEventData,
+      alertStatus: 'raised',
+    });
     
     return NextResponse.json({
       success: true,
@@ -133,6 +160,7 @@ export async function POST(request: NextRequest) {
         alertId,
         status: 'open',
         createdOrUpdated,
+        emailDispatch,
       },
       meta: {}
     }, { status: createdOrUpdated === 'created' ? 201 : 200 });

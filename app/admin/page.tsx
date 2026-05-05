@@ -140,6 +140,11 @@ interface AiUsageTierMarginRow {
   verdict: 'profitable' | 'watch' | 'unknown';
 }
 
+interface AlertRecipientState {
+  recipientEmail: string;
+  choices: string[];
+}
+
 type RefreshTarget = 'all' | IngestionHealthRow['gameKey'];
 
 const EMPTY_SUMMARY: AlertSummary = {
@@ -179,6 +184,11 @@ const EMPTY_AI_SUMMARY: AiUsageSummary = {
   totalRevenueUsd: 0,
   totalGrossMarginUsd: 0,
   totalMarginPct: null,
+};
+
+const DEFAULT_ALERT_RECIPIENT: AlertRecipientState = {
+  recipientEmail: 'command@brewlotto.app',
+  choices: ['command@brewlotto.app', 'michael.brewington@gmail.com', 'tlloretta30@gmail.com'],
 };
 
 function formatDate(value?: string | null) {
@@ -358,10 +368,18 @@ export default function AdminPage() {
   const [aiUsageByModel, setAiUsageByModel] = useState<AiUsageModelRow[]>([]);
   const [aiUsageByTier, setAiUsageByTier] = useState<AiUsageTierMarginRow[]>([]);
   const [aiUsageRows, setAiUsageRows] = useState<AiUsageRow[]>([]);
+  const [alertRecipient, setAlertRecipient] = useState<AlertRecipientState>(DEFAULT_ALERT_RECIPIENT);
+  const [savingAlertRecipient, setSavingAlertRecipient] = useState(false);
   const [statusFilter, setStatusFilter] = useState<AlertStatusFilter>('all');
   const [severityFilter, setSeverityFilter] = useState<AlertSeverityFilter>('all');
   const [categoryFilter, setCategoryFilter] = useState<AlertCategoryFilter>('all');
   const latestRequestRef = useRef(0);
+  const marginWatchTier = aiUsageByTier.find((row) => row.verdict === 'watch') || null;
+  const marginRiskCopy = marginWatchTier
+    ? `${marginWatchTier.displayName} is the current watch tier: estimated AI spend is starting to press margin.`
+    : aiUsageByTier.some((row) => row.verdict === 'unknown')
+      ? 'One or more tiers still lacks a revenue baseline, so treat the profitability view as provisional.'
+      : 'Current pricing ladder remains profitable on the current AI usage snapshot.';
 
   async function loadAdminData(options?: { alertsOnly?: boolean; nextRequestId?: number }) {
     setError(null);
@@ -385,6 +403,7 @@ export default function AdminPage() {
           fetch(`/api/admin/alerts?${alertParams.toString()}`, { cache: 'no-store' }),
           fetch('/api/admin/ingestion-health', { cache: 'no-store' }),
           fetch('/api/admin/ai-usage', { cache: 'no-store' }),
+          fetch('/api/admin/alert-recipient', { cache: 'no-store' }),
         ];
 
     const responses = await Promise.all(requests);
@@ -406,8 +425,8 @@ export default function AdminPage() {
       return;
     }
 
-    const [summaryResponse, alertsResponse, ingestionResponse, aiUsageResponse] = responses;
-    const [summaryPayload, alertsPayload, ingestionPayload, aiUsagePayload] = payloads;
+    const [summaryResponse, alertsResponse, ingestionResponse, aiUsageResponse, alertRecipientResponse] = responses;
+    const [summaryPayload, alertsPayload, ingestionPayload, aiUsagePayload, alertRecipientPayload] = payloads;
 
     if (!summaryResponse.ok) {
       throw new Error(summaryPayload?.error?.message || 'Failed to load alert summary');
@@ -425,6 +444,10 @@ export default function AdminPage() {
       throw new Error(aiUsagePayload?.error?.message || 'Failed to load AI usage');
     }
 
+    if (!alertRecipientResponse.ok) {
+      throw new Error(alertRecipientPayload?.error?.message || 'Failed to load alert recipient');
+    }
+
     setSummary(summaryPayload.data || EMPTY_SUMMARY);
     setAlerts(alertsPayload.data || []);
     setIngestionSummary(ingestionPayload.meta?.summary || EMPTY_INGESTION_SUMMARY);
@@ -434,6 +457,10 @@ export default function AdminPage() {
     setAiUsageByModel(aiUsagePayload.data?.byModel || []);
     setAiUsageByTier(aiUsagePayload.data?.byTier || []);
     setAiUsageRows(aiUsagePayload.data?.recent || []);
+    setAlertRecipient({
+      recipientEmail: alertRecipientPayload.data?.recipientEmail || DEFAULT_ALERT_RECIPIENT.recipientEmail,
+      choices: alertRecipientPayload.data?.choices || DEFAULT_ALERT_RECIPIENT.choices,
+    });
   }
 
   useEffect(() => {
@@ -559,6 +586,41 @@ export default function AdminPage() {
     }
   }
 
+  async function saveAlertRecipient(recipientEmail: string) {
+    setSavingAlertRecipient(true);
+    setError(null);
+    setRefreshMessage(null);
+
+    try {
+      const response = await fetch('/api/admin/alert-recipient', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ recipientEmail }),
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload?.error?.message || 'Failed to save alert recipient');
+      }
+
+      setAlertRecipient({
+        recipientEmail: payload?.data?.recipientEmail || recipientEmail,
+        choices: payload?.data?.choices || alertRecipient.choices,
+      });
+      setRefreshMessage(`Alert emails will now go to ${recipientEmail}.`);
+    } catch (saveError) {
+      setError(saveError instanceof Error ? saveError.message : 'Failed to save alert recipient');
+    } finally {
+      setSavingAlertRecipient(false);
+    }
+  }
+
+  function scrollToAlertFeed() {
+    document.getElementById('alert-feed')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   return (
     <main className="min-h-screen bg-[#050505] px-4 py-6 text-white sm:px-6">
       <div className="mx-auto max-w-6xl">
@@ -578,6 +640,25 @@ export default function AdminPage() {
             </div>
 
             <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={scrollToAlertFeed}
+                className="inline-flex items-center gap-3 rounded-full border border-[#ffcf4a]/20 bg-[linear-gradient(180deg,rgba(255,199,66,0.12),rgba(255,255,255,0.04))] px-4 py-3 text-left transition hover:border-[#ffcf4a]/40 hover:bg-[linear-gradient(180deg,rgba(255,199,66,0.18),rgba(255,255,255,0.06))]"
+              >
+                <span className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#ffcf4a]/30 bg-[#20170a] text-[#ffd873]">
+                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5" />
+                    <path d="M9 17a3 3 0 0 0 6 0" />
+                  </svg>
+                  {summary.criticalOpenCount > 0 ? <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-[#ff7d67] ring-2 ring-[#120f0f]" /> : null}
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-[10px] uppercase tracking-[0.22em] text-white/40">Notification Bell</span>
+                  <span className="mt-1 block text-sm font-semibold text-white">
+                    {summary.openCount} open / {summary.criticalOpenCount} critical
+                  </span>
+                </span>
+              </button>
               <button
                 onClick={() => handleManualRefresh('all')}
                 disabled={Boolean(refreshTarget) || loading}
@@ -615,6 +696,37 @@ export default function AdminPage() {
               >
                 {resettingOnboarding ? 'Resetting Onboarding' : 'Reset Onboarding'}
               </button>
+            </div>
+          </div>
+
+          <div className="mt-5 rounded-[24px] border border-[#ffcf4a]/20 bg-[linear-gradient(180deg,rgba(33,24,10,0.9),rgba(18,14,14,0.92))] p-4">
+            <div className="text-[11px] font-medium uppercase tracking-[0.22em] text-[#ffd873]">Alert Recipient</div>
+            <div className="mt-2 text-sm leading-6 text-white/70">
+              Keep BrewCommand alert emails pointed at one inbox at a time. This is the address that receives critical and email-worthy admin alerts.
+            </div>
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <select
+                value={alertRecipient.recipientEmail}
+                onChange={(event) => void saveAlertRecipient(event.target.value)}
+                disabled={savingAlertRecipient}
+                className="w-full rounded-full border border-white/10 bg-black/35 px-4 py-3 text-sm text-white outline-none sm:max-w-md"
+              >
+                {alertRecipient.choices.map((email) => (
+                  <option key={email} value={email}>
+                    {email}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={() => void saveAlertRecipient(alertRecipient.recipientEmail)}
+                disabled={savingAlertRecipient}
+                className="rounded-full border border-[#ffcf4a]/30 bg-[#20170a] px-5 py-3 text-sm font-bold uppercase tracking-[0.12em] text-[#ffd873] transition hover:border-[#ffcf4a]/50 hover:bg-[#2b2210] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {savingAlertRecipient ? 'Saving Recipient' : 'Save Recipient'}
+              </button>
+            </div>
+            <div className="mt-3 text-xs uppercase tracking-[0.14em] text-white/40">
+              Current recipient: {alertRecipient.recipientEmail}
             </div>
           </div>
 
@@ -670,6 +782,11 @@ export default function AdminPage() {
                   {aiUsageSummary.totalMarginPct == null ? 'N/A' : `${aiUsageSummary.totalMarginPct.toFixed(2)}%`}
                 </div>
               </div>
+            </div>
+
+            <div className="mt-4 rounded-[24px] border border-[#ffcf4a]/18 bg-[linear-gradient(180deg,rgba(34,24,10,0.85),rgba(18,14,14,0.9))] px-4 py-4">
+              <div className="text-[11px] font-medium uppercase tracking-[0.22em] text-[#ffd873]">Margin Risk Note</div>
+              <div className="mt-2 text-sm leading-6 text-white/70">{marginRiskCopy}</div>
             </div>
 
             <div className="mt-6 grid gap-4 xl:grid-cols-2">
@@ -868,7 +985,7 @@ export default function AdminPage() {
             </div>
           </div>
 
-          <div className="mt-8">
+          <div className="mt-8" id="alert-feed">
             <div className="mb-4 flex items-end justify-between gap-4">
               <div>
                 <h2 className="text-xl font-semibold text-white">Ingestion Health</h2>
