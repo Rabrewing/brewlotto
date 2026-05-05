@@ -1,6 +1,7 @@
-'use client';
+"use client";
 
 import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface AlertSummary {
   openCount: number;
@@ -239,6 +240,7 @@ function AlertRow({
 }
 
 export default function AdminPage() {
+  const router = useRouter();
   const [summary, setSummary] = useState<AlertSummary>(EMPTY_SUMMARY);
   const [alerts, setAlerts] = useState<AlertItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -247,6 +249,9 @@ export default function AdminPage() {
   const [refreshTarget, setRefreshTarget] = useState<RefreshTarget | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [refreshMessage, setRefreshMessage] = useState<string | null>(null);
+  const [resettingOnboarding, setResettingOnboarding] = useState(false);
+  const [resetEmail, setResetEmail] = useState('command@brewlotto.app');
+  const [resetMessage, setResetMessage] = useState<string | null>(null);
   const [mutatingId, setMutatingId] = useState<string | null>(null);
   const [ingestionSummary, setIngestionSummary] = useState<IngestionHealthSummary>(EMPTY_INGESTION_SUMMARY);
   const [ingestionRows, setIngestionRows] = useState<IngestionHealthRow[]>([]);
@@ -386,6 +391,35 @@ export default function AdminPage() {
     }
   }
 
+  async function handleResetOnboarding() {
+    setResettingOnboarding(true);
+    setResetMessage(null);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/admin/reset-onboarding', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: resetEmail }),
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload?.error?.message || 'Failed to reset onboarding');
+      }
+
+      document.cookie = 'brewlotto_onboarded=; Path=/; Max-Age=0; SameSite=Lax';
+      setResetMessage(`Onboarding reset for ${resetEmail}. You can sign in again and revisit /onboarding.`);
+      router.push('/onboarding');
+    } catch (resetError) {
+      setError(resetError instanceof Error ? resetError.message : 'Failed to reset onboarding');
+    } finally {
+      setResettingOnboarding(false);
+    }
+  }
+
   async function updateAlert(id: string, action: 'acknowledge' | 'resolve') {
     setMutatingId(id);
     setError(null);
@@ -448,7 +482,31 @@ export default function AdminPage() {
             </div>
           </div>
 
+          <div className="mt-5 rounded-[24px] border border-[#72caff]/20 bg-[#111f28]/70 p-4">
+            <div className="text-[11px] font-medium uppercase tracking-[0.22em] text-[#9edcff]">BrewCommand Test Mode</div>
+            <div className="mt-2 text-sm leading-6 text-white/70">
+              Reset onboarding for a BrewCommand account so the disclaimer and tutorial can be replayed.
+            </div>
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <input
+                type="email"
+                value={resetEmail}
+                onChange={(event) => setResetEmail(event.target.value)}
+                className="w-full rounded-full border border-white/10 bg-black/35 px-4 py-3 text-sm text-white outline-none placeholder:text-white/30 sm:max-w-md"
+                placeholder="command@brewlotto.app"
+              />
+              <button
+                onClick={() => void handleResetOnboarding()}
+                disabled={resettingOnboarding || loading || !resetEmail.trim()}
+                className="rounded-full border border-[#72caff]/30 bg-[#111f28] px-5 py-3 text-sm font-bold uppercase tracking-[0.12em] text-[#9edcff] transition hover:border-[#72caff]/50 hover:bg-[#162732] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {resettingOnboarding ? 'Resetting Onboarding' : 'Reset Onboarding'}
+              </button>
+            </div>
+          </div>
+
           {refreshMessage ? <div className="mt-4 rounded-2xl border border-[#53d48a]/30 bg-[#102117] px-4 py-3 text-sm text-[#93efb8]">{refreshMessage}</div> : null}
+          {resetMessage ? <div className="mt-4 rounded-2xl border border-[#72caff]/30 bg-[#111f28] px-4 py-3 text-sm text-[#9edcff]">{resetMessage}</div> : null}
 
           <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
             <SummaryCard label="Open Alerts" value={summary.openCount} accent="text-white" />

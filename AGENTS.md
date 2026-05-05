@@ -60,6 +60,12 @@ official source → ingestion → Supabase → freshness view → API → UI
 | Trial expiry banner | ✅ Live on dashboard, billing, and profile |
 | Upgrade prompts | ✅ Contextual only at decision points; no periodic nagging |
 
+### BrewCommand Test Tools
+
+| Item | Status |
+|------|--------|
+| Onboarding reset action | ✅ BrewCommand-only reset endpoint and admin-console button available in test mode; remove before public V1 launch |
+
 ### Deployments
 
 | Service | Status | URL |

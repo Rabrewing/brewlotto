@@ -10,6 +10,8 @@
 - Landing reel now uses a Vercel Blob-backed source with muted autoplay plus explicit `Play with sound`, `Replay`, and `Expand` controls.
 - Landing reel now starts in its expanded movie-style state by default and includes captions plus a transcript toggle for accessibility.
 - The BrewU/onboarding tutorial is now Blob-backed as well, with captions, a transcript toggle, and a BrewU replay path at `/learn#tutorial`.
+- BrewCommand now has a test-mode onboarding reset action so the disclaimer/tutorial flow can be re-run without manual database edits.
+- BrewCommand onboarding reset is test-mode only and should be removed before public V1 launch.
 - `SectionCard` is centralized in `components/brewlotto/dashboard/SectionCard.tsx` and the duplicated copies are gone.
 - Dropdown menu destinations are wired to live routes for gameplay, account, and system surfaces.
 - `scrapeCA_Live.js` and `scrapeNC_Live.js` exist and are wired into `scripts/ingestionJob.js`.
