@@ -51,6 +51,16 @@ export default function BillingPage() {
   const [selectedInterval, setSelectedInterval] = useState<'month' | 'year'>('month');
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [checkoutSuccess, setCheckoutSuccess] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('checkout') === 'success') {
+      setCheckoutSuccess(true);
+      // Clean URL without reloading
+      window.history.replaceState({}, '', '/billing');
+    }
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -175,6 +185,14 @@ export default function BillingPage() {
         <Header />
         <NavigationTabs />
         <TrialUpgradeBanner className="mt-4" />
+        {checkoutSuccess ? (
+          <div className="mb-4 mt-4 rounded-[28px] border border-[#53d48a]/30 bg-[#102117] px-5 py-5 text-center shadow-[0_0_22px_rgba(83,212,138,0.12)]">
+            <div className="text-[22px] font-semibold text-[#93efb8]">🎉 Upgrade Successful!</div>
+            <div className="mt-2 text-[15px] leading-6 text-[#a8f0c5]/80">
+              Your plan has been updated. Your new entitlements are reflected below.
+            </div>
+          </div>
+        ) : null}
         <div className="mb-5 mt-2 text-[40px] font-medium tracking-[-0.03em] text-[#f8cf98]">Subscription &amp; Billing</div>
         {loading ? <div className="rounded-[28px] border border-white/10 bg-white/[0.03] px-5 py-8 text-center text-white/55">Loading billing status...</div> : error ? <div className="rounded-[28px] border border-[#ff8d7b]/25 bg-[#2a120d]/60 px-5 py-8 text-center text-[#ffc4b8]">{error}</div> : !user ? <div className="rounded-[28px] border border-white/10 bg-white/[0.03] px-5 py-8 text-center text-white/55">No active account data is available right now.</div> : (
           <div className="space-y-5">
