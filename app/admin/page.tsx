@@ -421,6 +421,12 @@ export default function AdminPage() {
 
     return true;
   });
+  const alertDeliverySummary = {
+    total: alertDeliveries.length,
+    sent: alertDeliveries.filter((delivery) => delivery.status === 'sent' || delivery.status === 'delivered').length,
+    failed: alertDeliveries.filter((delivery) => delivery.status === 'failed').length,
+    selectedRecipient: alertRecipient.recipientEmail,
+  };
 
   async function loadAdminData(options?: { alertsOnly?: boolean; nextRequestId?: number }) {
     setError(null);
@@ -1194,64 +1200,79 @@ export default function AdminPage() {
                 </button>
               </div>
 
+              <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
+                  <div className="text-[11px] uppercase tracking-[0.16em] text-white/40">Total deliveries</div>
+                  <div className="mt-2 text-2xl font-semibold text-white">{alertDeliverySummary.total}</div>
+                </div>
+                <div className="rounded-2xl border border-[#53d48a]/20 bg-[#102117] px-4 py-3">
+                  <div className="text-[11px] uppercase tracking-[0.16em] text-[#93efb8]/70">Sent</div>
+                  <div className="mt-2 text-2xl font-semibold text-[#93efb8]">{alertDeliverySummary.sent}</div>
+                </div>
+                <div className="rounded-2xl border border-[#ff7d67]/20 bg-[#2a1311] px-4 py-3">
+                  <div className="text-[11px] uppercase tracking-[0.16em] text-[#ffb5a8]/70">Failed</div>
+                  <div className="mt-2 text-2xl font-semibold text-[#ffb5a8]">{alertDeliverySummary.failed}</div>
+                </div>
+              </div>
+
               <div className="mt-5 overflow-hidden rounded-[24px] border border-white/10 bg-black/20">
                 <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-white/10 text-left text-sm">
-                  <thead className="bg-white/5 text-[11px] uppercase tracking-[0.16em] text-white/45">
-                    <tr>
-                      <th className="px-4 py-3">Time</th>
-                      <th className="px-4 py-3">Alert</th>
-                      <th className="px-4 py-3">Recipient</th>
-                      <th className="px-4 py-3">Channel / Status</th>
-                      <th className="px-4 py-3">Result</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5 text-white/75">
-                    {visibleAlertDeliveries.map((delivery) => {
-                      const alertLabel = delivery.alert?.title || delivery.alert?.alertName || 'Unknown alert';
-                      const alertMeta = [delivery.alert?.severity, delivery.alert?.alertType, delivery.alert?.alertKey].filter(Boolean).join(' • ');
-                      return (
-                        <tr key={delivery.id} className="align-top">
-                          <td className="px-4 py-4 text-white/65">{formatDate(delivery.sentAt || delivery.createdAt)}</td>
-                          <td className="px-4 py-4">
-                            <div className="font-semibold text-white">{alertLabel}</div>
-                            <div className="mt-1 text-xs uppercase tracking-[0.12em] text-white/40">{alertMeta}</div>
-                          </td>
-                          <td className="px-4 py-4">
-                            <div className="font-semibold text-white">{delivery.recipient || 'Unknown recipient'}</div>
-                            <div className="mt-1 text-xs uppercase tracking-[0.12em] text-white/40">Retries {delivery.retryCount}</div>
-                          </td>
-                          <td className="px-4 py-4">
-                            <div className="text-white/80">{delivery.channel}</div>
-                            <div className="mt-2 inline-flex rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] border-white/10 bg-white/5 text-white/70">
-                              {delivery.status}
-                            </div>
-                            {delivery.deliveredAt ? <div className="mt-2 text-xs text-white/40">delivered {formatDate(delivery.deliveredAt)}</div> : null}
-                          </td>
-                          <td className="px-4 py-4">
-                            {delivery.errorMessage ? (
-                              <div className="rounded-2xl border border-[#ff7d67]/30 bg-[#2a1311] px-3 py-2 text-xs leading-5 text-[#ffcdc6]">
-                                {delivery.errorMessage}
+                  <table className="min-w-full divide-y divide-white/10 text-left text-sm">
+                    <thead className="bg-white/5 text-[11px] uppercase tracking-[0.16em] text-white/45">
+                      <tr>
+                        <th className="px-4 py-3">Time</th>
+                        <th className="px-4 py-3">Alert</th>
+                        <th className="px-4 py-3">Recipient</th>
+                        <th className="px-4 py-3">Channel / Status</th>
+                        <th className="px-4 py-3">Result</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5 text-white/75">
+                      {visibleAlertDeliveries.map((delivery) => {
+                        const alertLabel = delivery.alert?.title || delivery.alert?.alertName || 'Unknown alert';
+                        const alertMeta = [delivery.alert?.severity, delivery.alert?.alertType, delivery.alert?.alertKey].filter(Boolean).join(' • ');
+                        return (
+                          <tr key={delivery.id} className="align-top">
+                            <td className="px-4 py-4 text-white/65">{formatDate(delivery.sentAt || delivery.createdAt)}</td>
+                            <td className="px-4 py-4">
+                              <div className="font-semibold text-white">{alertLabel}</div>
+                              <div className="mt-1 text-xs uppercase tracking-[0.12em] text-white/40">{alertMeta}</div>
+                            </td>
+                            <td className="px-4 py-4">
+                              <div className="font-semibold text-white">{delivery.recipient || 'Unknown recipient'}</div>
+                              <div className="mt-1 text-xs uppercase tracking-[0.12em] text-white/40">Retries {delivery.retryCount}</div>
+                            </td>
+                            <td className="px-4 py-4">
+                              <div className="text-white/80">{delivery.channel}</div>
+                              <div className="mt-2 inline-flex rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] border-white/10 bg-white/5 text-white/70">
+                                {delivery.status}
                               </div>
-                            ) : (
-                              <div className="text-sm text-[#93efb8]">Delivered or sent successfully.</div>
-                            )}
+                              {delivery.deliveredAt ? <div className="mt-2 text-xs text-white/40">delivered {formatDate(delivery.deliveredAt)}</div> : null}
+                            </td>
+                            <td className="px-4 py-4">
+                              {delivery.errorMessage ? (
+                                <div className="rounded-2xl border border-[#ff7d67]/30 bg-[#2a1311] px-3 py-2 text-xs leading-5 text-[#ffcdc6]">
+                                  {delivery.errorMessage}
+                                </div>
+                              ) : (
+                                <div className="text-sm text-[#93efb8]">Delivered or sent successfully.</div>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      {!loading && visibleAlertDeliveries.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="px-4 py-8 text-center text-sm text-white/55">
+                            No alert deliveries are available yet.
                           </td>
                         </tr>
-                      );
-                    })}
-                    {!loading && visibleAlertDeliveries.length === 0 ? (
-                      <tr>
-                        <td colSpan={5} className="px-4 py-8 text-center text-sm text-white/55">
-                          No alert deliveries are available yet.
-                        </td>
-                      </tr>
-                    ) : null}
-                  </tbody>
-                </table>
+                      ) : null}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
-          </div>
 
           <div className="mt-8">
             <div className="mb-4 flex items-center justify-between gap-4">
