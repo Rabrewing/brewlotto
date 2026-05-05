@@ -18,6 +18,7 @@ const RETRY_DELAY_MS = 10000;
 
 const STATE_GAME_KEYS = {
   caLive: { state: 'CA', game: ['daily3', 'daily4', 'fantasy5'] },
+  caMultiState: { state: 'CA', game: ['powerball', 'mega_millions'] },
   ncLive: { state: 'NC', game: ['pick3', 'pick4', 'cash5'] },
   powerball: { state: 'NC', game: 'powerball' },
   megaMillions: { state: 'NC', game: 'mega_millions' },
@@ -25,6 +26,7 @@ const STATE_GAME_KEYS = {
 
 const SCRAPER_COMMANDS = {
   caLive: 'node scripts/scrapeCA_Live.js',
+  caMultiState: 'node scripts/scrapeCA_MultiState.js',
   ncLive: 'node scripts/scrapeNC_Live.js',
   powerball: 'node scripts/scrapePowerball.js',
   megaMillions: 'node scripts/scrapeMega.js',
@@ -110,7 +112,7 @@ function getDelayedKeys(delayedGames) {
   }).map(([key]) => key);
 }
 
-const RUN_ORDER = ['caLive', 'ncLive', 'powerball', 'megaMillions'];
+const RUN_ORDER = ['caLive', 'caMultiState', 'ncLive', 'powerball', 'megaMillions'];
 
 async function ingestRound(results, keys, label) {
   console.log(`\n📍 ${label}`);

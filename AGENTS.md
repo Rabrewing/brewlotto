@@ -13,6 +13,8 @@
 | Mega Millions (NC) | May 5 | healthy | NCEL live |
 | CA Daily 3/4 | May 5 | healthy | calottery.com live |
 | CA Fantasy 5 | May 5 | healthy | calottery.com live |
+| Powerball (CA) | May 4 | scraping | calottery.com live (new) |
+| Mega Millions (CA) | May 1 | scraping | calottery.com live (new) |
 
 ### Trust Loop Proven (2026-05-01)
 
@@ -45,6 +47,7 @@ official source → ingestion → Supabase → freshness view → API → UI
 | **Billing success feedback** | `app/billing/page.tsx` — 2026-05-05 | Added green upgrade success banner detected from `?checkout=success` query param on Stripe redirect return. |
 | **AI provider keys** | Vercel env — 2026-05-04 | `AI_PROVIDER`, `OPENAI_MODEL`, `DEEPSEEK_API_KEY`, `DEEPSEEK_MODEL`, `OPENAI_API_KEY` set across all 3 environments. |
 | **Admin emails** | `BREWCOMMAND_ADMIN_EMAILS` (Vercel) — 2026-05-05 | Updated to `command@brewlotto.app,michael.brewington@gmail.com` across Production/Preview/Development. |
+| **CA Multi-State scraper** | `scripts/scrapeCA_MultiState.js` (new) — 2026-05-05 | New live scraper for CA Powerball and Mega Millions from calottery.com. Mirrors the scrapeCA_Live.js draw-cards pattern with bonus ball splitting. Registered in ingestionJob.js RUN_ORDER. Previous CA multi-state entries were stale — now scraped live. |
 | **BLOB_READ_WRITE_TOKEN** | Vercel Blob — 2026-05-04 | Blob store created, linked to project. Landing video + tutorial video uploaded to Blob. `NEXT_PUBLIC_LANDING_VIDEO_*_URL` and `NEXT_PUBLIC_TUTORIAL_VIDEO_URL` env vars set. |
 
 ### Auth & Email
@@ -537,9 +540,8 @@ The system is considered complete when:
 | Daily 3 | CA | ~200 | 2025-12-07 to 2026-03-16 | ✅ Validated |
 | Daily 4 | CA | ~200 | 2025-08-29 to 2026-03-16 | ✅ Validated |
 | Fantasy 5 | CA | ~97 | Dec 2025 - Mar 2026 | ✅ Validated (3 months historical) |
-| Powerball | NC/CA | ~10,000 | Historical | ✅ In Database |
-| Mega Millions | NC/CA | ~2,700 | Historical | ✅ In Database |
-
+| Powerball | NC/CA | ~10,000 | Historical + Live | ✅ In Database + Live CA scraper new |
+| Mega Millions | NC/CA | ~2,700 | Historical + Live | ✅ In Database + Live CA scraper new |
 **Total Records in Database:** ~47,397
 
 ### V1 Destination Status (Per Shared Framework)
@@ -567,7 +569,6 @@ The system is considered complete when:
 **HIGH PRIORITY — Before V1 Launch:**
 1. **Mockup Alignment** — Visually QA all 15 mockup PNGs against rendered pages and lock designs
 2. **Stripe Live Mode** — Flip the current test-mode billing path to live keys, then verify the production checkout/webhook path end-to-end
-3. **CA Powerball/Mega Live Scraper** — Mirror the NCEL pattern for California multi-state games (still stale/expected)
 
 **ONBOARDING STATUS:**
 | Component | Status |
@@ -813,12 +814,15 @@ The system is considered complete when:
 - Do not add dead routes or fake interactions to the dashboard shell
 - Keep each new destination thin and real, with route/data purpose clearly scoped before expansion
 
-### Ingestion Scripts (Updated 2026-03-18)
+### Ingestion Scripts (Updated 2026-05-05)
 
 ```bash
 # Scrape CA historical data
 node scripts/scrapeCA_Data.js daily3 2000
 node scripts/scrapeCA_Data.js daily4 2000
+
+# CA multi-state live scraper (Powerball + Mega Millions)
+node scripts/scrapeCA_MultiState.js
 
 # Scrape multi-state games
 node scripts/scrapePowerball.js
