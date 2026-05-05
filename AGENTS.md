@@ -2,17 +2,17 @@
 
 ## Current Status (2026-05-05 ET)
 
-### System Health — All NC Launch Games Green
+### System Health — All NC + CA Launch Games Green
 
 | Game | Latest Draw | Freshness | Source |
 |------|-------------|-----------|--------|
-| Pick 3 (NC) | May 1 | healthy | nclottery.com live |
-| Pick 4 (NC) | May 1 | healthy | nclottery.com live |
-| Cash 5 (NC) | May 1 | healthy | nclottery.com live |
-| Powerball (NC) | Apr 29 | healthy | NCEL live |
-| Mega Millions (NC) | May 1 | healthy | NCEL live |
-| CA Daily 3/4 | Mar 16 | stale (expected) | lotteryextreme.com |
-| CA Fantasy 5 | Mar 17 | stale (expected) | lotto-8.com |
+| Pick 3 (NC) | May 5 | healthy | nclottery.com live |
+| Pick 4 (NC) | May 5 | healthy | nclottery.com live |
+| Cash 5 (NC) | May 5 | healthy | nclottery.com live |
+| Powerball (NC) | May 5 | healthy | NCEL live |
+| Mega Millions (NC) | May 5 | healthy | NCEL live |
+| CA Daily 3/4 | May 5 | healthy | calottery.com live |
+| CA Fantasy 5 | May 5 | healthy | calottery.com live |
 
 ### Trust Loop Proven (2026-05-01)
 
@@ -20,22 +20,32 @@
 official source → ingestion → Supabase → freshness view → API → UI
 ```
 
-### Key Fixes Applied (May 1, 2026)
+### Key Fixes Applied (May 1–5, 2026)
 
 | Fix | File(s) | Impact |
 |-----|---------|--------|
-| **Live NC scraper** | `scripts/scrapeNC_Live.js` (new) | Replaced CSV-based NC scrapers with live cheerio scraping from nclottery.com. Pick3/4/Cash5 data now 1-day fresh instead of 46-day stale. |
-| **Powerball NCEL source** | `scripts/scrapePowerball.js` | Replaced powerball.com (JS-rendered, 0 rows found) with NCEL server-rendered HTML. Correct ball class parsing (.ball / .powerball). 21 new draws inserted. |
-| **Delayed-draw retry rounds** | `scripts/ingestionJob.js` | 3-round retry: primary scrape → freshness check → retry stale/delayed → check → final retry. Recovers late-posted draws automatically. |
-| **CA scrape count** | `scripts/ingestionJob.js` | Increased from 50 to 1000 draws for prediction quality. |
-| **RLS policies** | `supabase/migrations/20260501170000_add_public_read_policies.sql` | Anon SELECT on official_draws, lottery_games, draw_sources. Dashboard was returning empty because RLS blocked all reads. |
-| **Results API join** | `app/api/results/route.ts` | Fixed broken embedded join (`lottery_games!inner`) → game_id lookup. |
-| **Freshness gating** | `app/api/results/route.ts`, `app/results/page.tsx`, `app/dashboard/page.tsx` | Changed from `!== 'healthy'` to `=== 'stale' || === 'failed'`. Delayed status no longer blocks draw display. |
-| **LiveTrustBadge** | `components/brewlotto/dashboard/LiveTrustBadge.tsx` (new) | Compact inline indicator: colored status dot, Live/Delayed/Stale label, Official Source badge, latest draw date, disclaimer. |
-| **Number formatting** | `LotteryBall.tsx` + 5 inline files + API route | Removed `padStart(2, '0')` globally. Numbers display as `6` not `06`. |
-| **Timezone display** | `FreshnessBanner.tsx`, `LiveTrustBadge.tsx`, `PredictionCard.tsx` | Removed seconds from timestamps. Added ET/PT timezone labels. Format: "May 2, 2026, 1:00 PM ET". |
-| **Dropdown navigation** | `AvatarDropdown.tsx` | Fixed onClick — now calls `router.push(href) + setIsOpen(false)` instead of just closing. Removed hardcoded "John Doe"/"john@example.com"/"JD" avatar — all loaded from auth. |
-| **Superadmin added** | `.env`, `.env.local` | `BREWCOMMAND_ADMIN_EMAILS` now includes `command@brewlotto.app` and `michael.brewington@gmail.com`; code now keeps a fallback allowlist so BrewCommand access still works if one env entry is missing. |
+| **Live NC scraper** | `scripts/scrapeNC_Live.js` (new) — 2026-05-01 | Replaced CSV-based NC scrapers with live cheerio scraping from nclottery.com. Pick3/4/Cash5 data now 1-day fresh instead of 46-day stale. |
+| **Live CA scraper** | `scripts/scrapeCA_Live.js` (new) — 2026-05-02 | Replaced lotteryextreme.com CSV scrapers with live calottery.com scraping. CA Daily 3/4/Fantasy 5 now healthy with same-day data. |
+| **Powerball NCEL source** | `scripts/scrapePowerball.js` — 2026-05-01 | Replaced powerball.com (JS-rendered, 0 rows found) with NCEL server-rendered HTML. Correct ball class parsing (.ball / .powerball). 21+ draws per run. |
+| **Delayed-draw retry rounds** | `scripts/ingestionJob.js` — 2026-05-01 | 3-round retry: primary scrape → freshness check → retry stale/delayed → check → final retry. Recovers late-posted draws automatically. |
+| **CA scrape count** | `scripts/ingestionJob.js` — 2026-05-02 | Increased from 50 to 1000 draws for prediction quality. |
+| **RLS policies** | `supabase/migrations/20260501170000_add_public_read_policies.sql` — 2026-05-01 | Anon SELECT on official_draws, lottery_games, draw_sources. Dashboard was returning empty because RLS blocked all reads. |
+| **Results API join** | `app/api/results/route.ts` — 2026-05-01 | Fixed broken embedded join (`lottery_games!inner`) → game_id lookup. |
+| **Freshness gating** | `app/api/results/route.ts`, `app/results/page.tsx`, `app/dashboard/page.tsx` — 2026-05-01 | Changed from `!== 'healthy'` to `=== 'stale' || === 'failed'`. Delayed status no longer blocks draw display. |
+| **LiveTrustBadge** | `components/brewlotto/dashboard/LiveTrustBadge.tsx` (new) — 2026-05-01 | Compact inline indicator: colored status dot, Live/Delayed/Stale label, Official Source badge, latest draw date, disclaimer. |
+| **Number formatting** | `LotteryBall.tsx` + 5 inline files + API route — 2026-05-01 | Removed `padStart(2, '0')` globally. Numbers display as `6` not `06`. |
+| **Timezone display** | `FreshnessBanner.tsx`, `LiveTrustBadge.tsx`, `PredictionCard.tsx` — 2026-05-02 | Removed seconds from timestamps. Added ET/PT timezone labels. Format: "May 2, 2026, 1:00 PM ET". |
+| **Dropdown navigation** | `AvatarDropdown.tsx` — 2026-05-02 | Fixed onClick — now calls `router.push(href) + setIsOpen(false)` instead of just closing. Removed hardcoded "John Doe"/"john@example.com"/"JD" avatar — all loaded from auth. |
+| **Superadmin added** | `.env`, `.env.local` — 2026-05-02 | `BREWCOMMAND_ADMIN_EMAILS` now includes `command@brewlotto.app` and `michael.brewington@gmail.com`; code keeps fallback allowlist so BrewCommand access works if one env entry is missing. |
+| **SectionCard centralized** | `components/brewlotto/dashboard/SectionCard.tsx` (new) — 2026-05-02 | Removed 6 local duplicates across strategy-locker, profile, settings, stats, notifications, billing. Single shared component with consistent dark/gold styling. |
+| **Onboarding flow** | `app/onboarding/page.tsx`, `middleware.ts`, `app/auth/callback/route.ts` (new) — 2026-05-02 | Disclaimer acknowledgment → 4-slide tutorial → dashboard. Middleware enforces onboarding completion. Auth callback exchanges magic link codes. |
+| **Dropdown auth data** | `AvatarDropdown.tsx` — 2026-05-02 | Removed hardcoded "JD"/"John Doe"/"john@example.com". Name, email, initials loaded from `supabase.auth.getUser()` on mount. |
+| **Scheduler URL fix** | Cloud Scheduler (7 jobs) — 2026-05-05 | All 7 jobs were hitting dead URL `...jix2pwxsaa-uc.a.run.app`. Fixed to `...119469099721.us-central1.run.app`. Added IAM binding so scheduler can invoke Cloud Run. Data had been stale for 3 days — now fresh. |
+| **Stripe integration** | Vercel env, Stripe Dashboard — 2026-05-04 | Products/prices created (BrewStarter/BrewPro/BrewMaster × monthly/yearly). Webhook endpoint configured at `brewlotto.vercel.app/api/webhooks/stripe`. All keys set across Production/Preview/Development. |
+| **Billing success feedback** | `app/billing/page.tsx` — 2026-05-05 | Added green upgrade success banner detected from `?checkout=success` query param on Stripe redirect return. |
+| **AI provider keys** | Vercel env — 2026-05-04 | `AI_PROVIDER`, `OPENAI_MODEL`, `DEEPSEEK_API_KEY`, `DEEPSEEK_MODEL`, `OPENAI_API_KEY` set across all 3 environments. |
+| **Admin emails** | `BREWCOMMAND_ADMIN_EMAILS` (Vercel) — 2026-05-05 | Updated to `command@brewlotto.app,michael.brewington@gmail.com` across Production/Preview/Development. |
+| **BLOB_READ_WRITE_TOKEN** | Vercel Blob — 2026-05-04 | Blob store created, linked to project. Landing video + tutorial video uploaded to Blob. `NEXT_PUBLIC_LANDING_VIDEO_*_URL` and `NEXT_PUBLIC_TUTORIAL_VIDEO_URL` env vars set. |
 
 ### Auth & Email
 
