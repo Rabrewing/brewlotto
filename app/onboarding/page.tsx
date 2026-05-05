@@ -19,6 +19,10 @@ const TUTORIAL_TRANSCRIPT = [
   'And Strategy Locker is where the deeper tools sit.',
 ];
 
+const TUTORIAL_VIDEO_SRC =
+  process.env.NEXT_PUBLIC_TUTORIAL_VIDEO_URL ||
+  'https://qrmbod86z2yiiftp.public.blob.vercel-storage.com/brewlotto-tutorial.mp4';
+
 export default function OnboardingPage() {
   const router = useRouter();
   const [step, setStep] = useState(0);
@@ -165,7 +169,7 @@ export default function OnboardingPage() {
                 eyebrow="Step 2 of 2"
                 title="Quick BrewLotto Tour"
                 description="See how to choose your home state, pick a game, generate numbers, and land on the dashboard without getting lost."
-                videoSrc="/landing/tutorial/brewlotto-tutorial.mp4"
+                videoSrc={TUTORIAL_VIDEO_SRC}
                 poster="/frontend/brew_logo.png"
                 captionsSrc="/landing/tutorial/brewlotto-tutorial.vtt"
                 transcriptTitle="Read the tutorial transcript"

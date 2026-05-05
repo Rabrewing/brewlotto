@@ -51,7 +51,7 @@ official source → ingestion → Supabase → freshness view → API → UI
 
 | Item | Status |
 |------|--------|
-| Video animation + CTA | 🔄 In progress (movie-style expanded reel with captions/transcript; companion disclaimer/tutorial clips continue in separate session) |
+| Video animation + CTA | 🔄 In progress (movie-style expanded reel with captions/transcript; tutorial clip is Blob-backed and replayable in BrewU; companion disclaimer clip continues in separate session) |
 
 ### Upgrade Nudges
 

@@ -33,6 +33,10 @@ const TUTORIAL_TRANSCRIPT = [
   'And Strategy Locker is where the deeper tools sit.',
 ];
 
+const TUTORIAL_VIDEO_SRC =
+  process.env.NEXT_PUBLIC_TUTORIAL_VIDEO_URL ||
+  'https://qrmbod86z2yiiftp.public.blob.vercel-storage.com/brewlotto-tutorial.mp4';
+
 export default function LearnPage() {
   return (
     <main className="min-h-screen bg-[#050505] text-white">
@@ -47,7 +51,7 @@ export default function LearnPage() {
             eyebrow="BrewU Replay"
             title="Tutorial Walkthrough"
             description="This is the same skippable tutorial from onboarding. Replay it anytime to revisit the state, game, generate, and dashboard flow."
-            videoSrc="/landing/tutorial/brewlotto-tutorial.mp4"
+            videoSrc={TUTORIAL_VIDEO_SRC}
             poster="/frontend/brew_logo.png"
             captionsSrc="/landing/tutorial/brewlotto-tutorial.vtt"
             transcriptTitle="Read the tutorial transcript"
