@@ -51,6 +51,17 @@ interface PredictionRecord {
   created_at: string;
 }
 
+interface RunPreviewRecord {
+  engineKey: string;
+  gameKey: string;
+  homeState: string;
+  primaryNumbers: number[];
+  bonusNumbers: number[];
+  publicName: string;
+  strategyKey: string;
+  createdAt: string;
+}
+
 interface UserEntitlementRecord {
   tier_code?: TierCode | null;
   advanced_strategy_access?: boolean | null;
@@ -114,6 +125,8 @@ export default function StrategyLockerPage() {
   const [entitlements, setEntitlements] = useState<UserEntitlementRecord | null>(null);
   const [subscriptionTiers, setSubscriptionTiers] = useState<SubscriptionTierRecord[]>([]);
   const [savingStrategyId, setSavingStrategyId] = useState<string | null>(null);
+  const [runningStrategyId, setRunningStrategyId] = useState<string | null>(null);
+  const [runPreviews, setRunPreviews] = useState<Record<string, RunPreviewRecord>>({});
 
   useEffect(() => {
     let cancelled = false;
@@ -320,6 +333,57 @@ export default function StrategyLockerPage() {
     }
   }
 
+  async function handleRunStrategy(strategy: StrategyRecord) {
+    if (!user) {
+      return;
+    }
+
+    if (TIER_ORDER[currentTier] < TIER_ORDER[strategy.min_tier]) {
+      setError(`This strategy requires ${formatTierLabel(strategy.min_tier)} access.`);
+      return;
+    }
+
+    setRunningStrategyId(strategy.id);
+
+    try {
+      const response = await fetch('/api/strategy-locker/run', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          strategyId: strategy.id,
+        }),
+      });
+
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok || !payload?.success) {
+        const message = payload?.error?.message || 'Failed to run strategy';
+        throw new Error(message);
+      }
+
+      setRunPreviews((current) => ({
+        ...current,
+        [strategy.id]: {
+          engineKey: payload.data.engineKey,
+          gameKey: payload.data.gameKey,
+          homeState: payload.data.homeState,
+          primaryNumbers: Array.isArray(payload.data.primaryNumbers) ? payload.data.primaryNumbers : [],
+          bonusNumbers: Array.isArray(payload.data.bonusNumbers) ? payload.data.bonusNumbers : [],
+          publicName: payload.data.publicName,
+          strategyKey: payload.data.strategyKey,
+          createdAt: new Date().toISOString(),
+        },
+      }));
+      setError(null);
+    } catch (runError) {
+      setError(runError instanceof Error ? runError.message : 'Failed to run strategy');
+    } finally {
+      setRunningStrategyId(null);
+    }
+  }
+
   return (
     <main className="min-h-screen bg-[#050505] text-white">
       <DashboardContainer>
@@ -490,8 +554,16 @@ export default function StrategyLockerPage() {
                           disabled={!hasAccess || savingStrategyId === strategy.id}
                           onClick={() => handleToggleSaved(strategy)}
                           className="rounded-full border border-[#ffc742]/28 bg-[#ffc742]/10 px-4 py-2 text-[14px] font-medium text-[#ffd27e] transition-colors hover:bg-[#ffc742]/16 hover:text-white disabled:cursor-not-allowed disabled:opacity-45"
-                        >
+                          >
                           {savingStrategyId === strategy.id ? 'Saving...' : saved ? 'Remove Favorite' : 'Save to Locker'}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={!hasAccess || runningStrategyId === strategy.id}
+                          onClick={() => handleRunStrategy(strategy)}
+                          className="rounded-full border border-[#72caff]/22 bg-[#72caff]/10 px-4 py-2 text-[14px] font-medium text-[#9fdcff] transition-colors hover:bg-[#72caff]/16 hover:text-white disabled:cursor-not-allowed disabled:opacity-45"
+                        >
+                          {runningStrategyId === strategy.id ? 'Running...' : 'Run Strategy'}
                         </button>
                         {!hasAccess ? (
                           <Link
@@ -502,6 +574,22 @@ export default function StrategyLockerPage() {
                           </Link>
                         ) : null}
                       </div>
+
+                      {runPreviews[strategy.id] ? (
+                        <div className="mt-4 rounded-[22px] border border-[#72caff]/16 bg-[#72caff]/8 px-4 py-4">
+                          <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">Run preview</div>
+                          <div className="mt-3 text-[14px] text-white/72">
+                            {runPreviews[strategy.id].publicName} ran on {runPreviews[strategy.id].homeState} {runPreviews[strategy.id].gameKey.toUpperCase()} using {runPreviews[strategy.id].engineKey}.
+                          </div>
+                          <div className="mt-3 text-[20px] font-medium text-[#f7ddb3]">
+                            {runPreviews[strategy.id].primaryNumbers.join(' ')}
+                            {runPreviews[strategy.id].bonusNumbers.length > 0 ? ` + ${runPreviews[strategy.id].bonusNumbers.join(' ')}` : ''}
+                          </div>
+                          <div className="mt-2 text-[12px] uppercase tracking-[0.14em] text-white/40">
+                            Stored at {new Date(runPreviews[strategy.id].createdAt).toLocaleString()}
+                          </div>
+                        </div>
+                      ) : null}
                     </article>
                   );
                 })}

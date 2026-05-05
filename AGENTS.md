@@ -587,6 +587,7 @@ The system is considered complete when:
 1. **Shared Components** — Create `LoadingSkeleton.tsx`, `ErrorBoundary.tsx`
 2. **Dropdown UX** — Add hover previews and keyboard navigation per dropdown spec
 3. **"Run Strategy" Animation** — Wire up the animation from `strategy-locker-run-stratergy-animation.png`
+4. **BrewU Support Intake** — Add a lightweight support tab with category dropdown, comments, screenshot upload, and a 24-hour response disclaimer; route submissions to BrewCommand notifications/email.
 
 **LOW PRIORITY / FOLLOW-ON:**
 1. **Stats Charts** — Add Chart.js visualizations for trends
@@ -778,6 +779,8 @@ The system is considered complete when:
 - Added `/strategy-locker` as a live premium strategy surface backed by `strategy_registry`, `user_saved_strategies`, `user_strategy_activity`, `user_entitlements`, `subscription_tiers`, and user-owned `predictions`
   - save/favorite is now server-backed through `/api/strategy-locker/save`
   - `user_saved_strategies` is a per-user favorites list with one row per strategy, so users can save multiple strategies at once
+  - locker is still a saved-strategy library; the actual execution path remains the dashboard `Generate Numbers` action until a true `Run Strategy` CTA is added
+  - locker cards are being updated with a real run-preview action so a saved strategy can execute from the card itself
 
 #### ✅ Phase 9E Completed
 - Added `/notifications` backed by `notification_preferences` and `user_notifications`
