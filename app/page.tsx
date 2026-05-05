@@ -14,7 +14,7 @@ export default function HomePage() {
     const [showCta, setShowCta] = useState(false);
     const [autoplayBlocked, setAutoplayBlocked] = useState(false);
     const [isMuted, setIsMuted] = useState(true);
-    const [isExpanded, setIsExpanded] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(true);
     const videoMp4Src =
         process.env.NEXT_PUBLIC_LANDING_VIDEO_MP4_URL ||
         "/landing/brewlotto-cta-mobile.mp4";
@@ -22,6 +22,14 @@ export default function HomePage() {
         process.env.NEXT_PUBLIC_LANDING_VIDEO_WEBM_URL ||
         "/landing/brewlotto-cta-mobile.webm";
     const videoFallbackSrc = "/landing/brewlotto-cta.mp4";
+    const videoCaptionsSrc = "/landing/brewlotto-cta-mobile.vtt";
+    const landingTranscript = [
+        "Watch BrewLotto come alive.",
+        "Play with sound if you want the full reel.",
+        "Use replay to start over at any time.",
+        "Expand or shrink the movie-style frame.",
+        "Enter BrewLotto to sign in and continue.",
+    ];
 
     useEffect(() => {
         let active = true;
@@ -241,7 +249,8 @@ export default function HomePage() {
                                                 void videoRef.current.play().catch(() => undefined);
                                             }
                                         }}
-                                        >
+                                    >
+                                        <track kind="captions" src={videoCaptionsSrc} srcLang="en" label="English" default />
                                         <source src={videoMp4Src} type="video/mp4" />
                                         <source src={videoWebmSrc} type="video/webm" />
                                         <source src={videoFallbackSrc} type="video/mp4" />
@@ -297,6 +306,17 @@ export default function HomePage() {
                                     Enter BrewLotto
                                 </Link>
                             </div>
+
+                            <details className="border-t border-white/8 px-5 py-4 text-[14px] leading-7 text-white/64 sm:px-6">
+                                <summary className="cursor-pointer list-none font-medium text-[#f7ddb3] outline-none">
+                                    Read landing transcript
+                                </summary>
+                                <div className="mt-3 space-y-2">
+                                    {landingTranscript.map((line) => (
+                                        <p key={line}>{line}</p>
+                                    ))}
+                                </div>
+                            </details>
                         </div>
                     </div>
                 </section>

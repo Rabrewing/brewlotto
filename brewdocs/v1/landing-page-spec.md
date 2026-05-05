@@ -37,7 +37,9 @@ Convert a new visitor into a sign-in click while establishing the premium look, 
 - Autoplay must be muted, looped, and inline for browser compatibility
 - Do not show default controls
 - Keep the video framed as a product reveal, not a raw media embed
+- Start the hero in its expanded movie-style state by default when the layout allows it
 - Provide a tiny replay action and a small sound-on action so the user can hear the reel on demand
+- Include captions and a lightweight transcript toggle for accessibility
 
 ## Copy Rules
 
@@ -68,6 +70,8 @@ The landing page should remind the visitor that BrewLotto is:
 ## User Flow
 
 `Landing → Login → Onboarding Acknowledgment → Tutorial → Dashboard`
+
+The landing reel can act as the movie-style opener, while onboarding handles the skippable tutorial step and BrewU keeps the replay copy available later.
 
 ## Success Criteria
 

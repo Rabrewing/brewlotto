@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { TutorialVideoPanel } from '@/components/brewlotto/TutorialVideoPanel';
 import { DashboardContainer, Header, NavigationTabs } from '@/components/brewlotto/dashboard';
 
 const LESSONS = [
@@ -20,6 +21,18 @@ const LESSONS = [
   },
 ];
 
+const TUTORIAL_TRANSCRIPT = [
+  "Welcome to BrewLotto. I'm your guide, and I'll keep this simple.",
+  'First, choose the state you play in.',
+  'Then pick your game.',
+  'Tap Generate Numbers to get explainable strategy support behind every pick.',
+  'Save it, review it, and track how it performs over time.',
+  'And when you land on the dashboard, this is your home base.',
+  'Your latest picks and results are here.',
+  'Your stats and performance live here.',
+  'And Strategy Locker is where the deeper tools sit.',
+];
+
 export default function LearnPage() {
   return (
     <main className="min-h-screen bg-[#050505] text-white">
@@ -28,6 +41,32 @@ export default function LearnPage() {
         <NavigationTabs />
 
         <div className="mb-5 mt-2 text-[40px] font-medium tracking-[-0.03em] text-[#f8cf98]">BrewU</div>
+
+        <section id="tutorial" className="mt-1">
+          <TutorialVideoPanel
+            eyebrow="BrewU Replay"
+            title="Tutorial Walkthrough"
+            description="This is the same skippable tutorial from onboarding. Replay it anytime to revisit the state, game, generate, and dashboard flow."
+            videoSrc="/landing/tutorial/brewlotto-tutorial.mp4"
+            poster="/frontend/brew_logo.png"
+            captionsSrc="/landing/tutorial/brewlotto-tutorial.vtt"
+            transcriptTitle="Read the tutorial transcript"
+            transcript={TUTORIAL_TRANSCRIPT}
+          >
+            <div className="text-[14px] leading-7 text-white/66">
+              Need a refresher later? Come back here from BrewU, or jump back to the dashboard when
+              you're ready to play.
+            </div>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Link
+                href="/dashboard"
+                className="rounded-full bg-gradient-to-r from-[#ffc742] to-[#ffbe27] px-5 py-2.5 text-[14px] font-semibold text-black transition-transform hover:scale-[1.02]"
+              >
+                Go to dashboard
+              </Link>
+            </div>
+          </TutorialVideoPanel>
+        </section>
 
         <section className="rounded-[30px] border border-[#ffc742]/24 bg-[radial-gradient(circle_at_top_left,rgba(255,199,66,0.18),rgba(0,0,0,0)_34%),linear-gradient(145deg,rgba(30,20,13,0.88),rgba(8,8,8,0.98))] px-5 py-5 shadow-[0_0_28px_rgba(255,184,28,0.08)]">
           <div className="text-[15px] uppercase tracking-[0.16em] text-white/38">BrewUniversity Lite</div>

@@ -51,7 +51,7 @@ official source → ingestion → Supabase → freshness view → API → UI
 
 | Item | Status |
 |------|--------|
-| Video animation + CTA | 🔄 In progress (separate session) |
+| Video animation + CTA | 🔄 In progress (movie-style expanded reel with captions/transcript; companion disclaimer/tutorial clips continue in separate session) |
 
 ### Upgrade Nudges
 
@@ -556,8 +556,9 @@ The system is considered complete when:
 |-----------|--------|
 | `user_preferences` columns (migration) | ✅ Applied |
 | Disclaimer acknowledgment (step 1) | ✅ Built |
-| Tutorial carousel (step 2) | ✅ Built |
+| Tutorial video (step 2) | ✅ Built |
 | Skip to dashboard | ✅ Built |
+| BrewU tutorial replay | ✅ Built |
 | Auth callback route | ✅ Built |
 | Middleware route protection | ✅ Built |
 | Post-login redirect | ✅ Updated |

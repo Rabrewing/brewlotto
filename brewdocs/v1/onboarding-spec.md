@@ -29,26 +29,25 @@ A button "I Understand, Continue" is disabled until the checkbox is checked.
 
 **Database:** Sets `user_preferences.disclaimer_acknowledged = true`, `user_preferences.acknowledged_at = now()`
 
-### Step 2: Tutorial or Skip
-**Route:** `/onboarding?step=2`
+### Step 2: Skippable Tutorial Video
+**Route:** `/onboarding`
 
-Two options presented side by side (or stacked on mobile):
+After the disclaimer is acknowledged, the user sees a short BrewLotto avatar-led tutorial video.
 
-- **"Take the Tour"** → Launches guided tutorial (3-4 slides)
-- **"Skip Tutorial, Start Playing"** → Sets `onboarding_completed = true`, redirects to `/dashboard`
+The tutorial step must:
 
-The landing page should already have previewed the brand and CTA video, so onboarding can stay focused on legal acknowledgment and product orientation.
+- be visually branded and easy to replay
+- include captions and an optional transcript
+- be skippable without penalty
+- offer a BrewU replay link for users who want to come back later
 
-### Tutorial Slides
+Recommended V1 behavior:
 
-| Slide | Title | Content |
-|-------|-------|---------|
-| 1 | Welcome to BrewLotto | "Smart picks, sharper odds. Choose a game, generate predictions, track results." |
-| 2 | Pick a Game | "Select from Pick 3, Pick 4, Cash 5, Powerball, or Mega Millions. Each game has unique odds and draw schedules." |
-| 3 | Generate a Pick | "Brew analyzes historical draws using multiple strategies — Poisson, Momentum, Markov, and Ensemble — to generate explainable predictions." |
-| 4 | Track & Learn | "Save your picks, compare against official results, and learn from BrewU lessons to improve your strategy over time." |
+- Primary action: `Skip tutorial, start playing`
+- Secondary action: `Replay in BrewU`
+- Tutorial replay route: `/learn#tutorial`
 
-Each slide has a "Next" button. Last slide has "Done" which sets `onboarding_completed = true` and redirects to `/dashboard`.
+The landing page already previews the brand and CTA video, so onboarding can stay focused on legal acknowledgment and product orientation.
 
 ## Animated Tutorial Plan
 
