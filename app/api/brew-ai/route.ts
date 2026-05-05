@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAiRuntimeConfig } from "@/lib/ai/client";
+import { estimateAiUsageCostUsd, recordAiUsageEvent } from '@/lib/ai/usage';
 
 // 🔧 Shell command simulation logic
 function simulateShellCommand(cmd: string): string {
@@ -51,6 +52,7 @@ export async function POST(req: Request) {
             );
         }
 
+        const startedAt = Date.now();
         const completion = await ai.client.chat.completions.create({
             model: ai.model,
             temperature: 0.7,
@@ -70,9 +72,51 @@ export async function POST(req: Request) {
 
         const reply =
             completion.choices?.[0]?.message?.content?.trim() || "(no reply)";
+
+        const usageSnapshot = estimateAiUsageCostUsd(ai.provider, ai.model, completion.usage);
+        void recordAiUsageEvent({
+            route: '/api/brew-ai',
+            operation: 'chat_completion',
+            provider: ai.provider,
+            model: ai.model,
+            status: 'success',
+            latencyMs: Date.now() - startedAt,
+            inputTokens: usageSnapshot.inputTokens,
+            outputTokens: usageSnapshot.outputTokens,
+            totalTokens: usageSnapshot.totalTokens,
+            estimatedCostUsd: usageSnapshot.estimatedCostUsd,
+            metadata: {
+                mode,
+                messageCount: messages.length,
+                systemPromptProvided: Boolean(systemPrompt),
+            },
+        }).catch((logError) => {
+            console.error('AI usage log error:', logError);
+        });
+
         return NextResponse.json({ reply, provider: ai.provider }, { status: 200 });
     } catch (error) {
         console.error("🔴 AI Error:", error);
+
+        const ai = getAiRuntimeConfig();
+        if (ai) {
+            void recordAiUsageEvent({
+                route: '/api/brew-ai',
+                operation: 'chat_completion',
+                provider: ai.provider,
+                model: ai.model,
+                status: 'error',
+                errorMessage: error instanceof Error ? error.message : 'Unknown AI error',
+                metadata: {
+                    mode,
+                    messageCount: messages.length,
+                    systemPromptProvided: Boolean(systemPrompt),
+                },
+            }).catch((logError) => {
+                console.error('AI usage log error:', logError);
+            });
+        }
+
         return NextResponse.json({ reply: "Brew encountered an error connecting to the AI core." }, { status: 500 });
     }
 }

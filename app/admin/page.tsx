@@ -72,6 +72,53 @@ interface IngestionHealthRow {
   errorCount: number;
 }
 
+interface AiUsageRow {
+  id: string;
+  created_at: string;
+  route: string;
+  operation: string;
+  provider: string;
+  model: string;
+  status: 'success' | 'error';
+  latency_ms: number | null;
+  input_tokens: number | null;
+  output_tokens: number | null;
+  total_tokens: number | null;
+  estimated_cost_usd: number | null;
+  user_email: string | null;
+  error_message: string | null;
+  metadata: Record<string, unknown> | null;
+}
+
+interface AiUsageSummary {
+  requestCount: number;
+  successCount: number;
+  errorCount: number;
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
+  estimatedCostUsd: number;
+  averageLatencyMs: number | null;
+  windowStart: string;
+  windowEnd: string;
+}
+
+interface AiUsageProviderRow {
+  provider: string;
+  requestCount: number;
+  tokens: number;
+  estimatedCostUsd: number;
+}
+
+interface AiUsageModelRow {
+  provider: string;
+  model: string;
+  requestCount: number;
+  tokens: number;
+  estimatedCostUsd: number;
+  averageLatencyMs: number | null;
+}
+
 type RefreshTarget = 'all' | IngestionHealthRow['gameKey'];
 
 const EMPTY_SUMMARY: AlertSummary = {
@@ -95,6 +142,19 @@ const EMPTY_INGESTION_SUMMARY: IngestionHealthSummary = {
     failed: 0,
     unknown: 0,
   },
+};
+
+const EMPTY_AI_SUMMARY: AiUsageSummary = {
+  requestCount: 0,
+  successCount: 0,
+  errorCount: 0,
+  inputTokens: 0,
+  outputTokens: 0,
+  totalTokens: 0,
+  estimatedCostUsd: 0,
+  averageLatencyMs: null,
+  windowStart: '',
+  windowEnd: '',
 };
 
 function formatDate(value?: string | null) {
@@ -156,6 +216,15 @@ function formatMinutes(value: number | null) {
   const hours = Math.floor(value / 60);
   const minutes = value % 60;
   return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+}
+
+function formatMoney(value: number | null | undefined) {
+  const amount = Number(value ?? 0);
+  return `$${amount.toFixed(4)}`;
+}
+
+function formatNumber(value: number | null | undefined) {
+  return new Intl.NumberFormat('en-US').format(Number(value ?? 0));
 }
 
 function AlertRow({
@@ -255,6 +324,10 @@ export default function AdminPage() {
   const [mutatingId, setMutatingId] = useState<string | null>(null);
   const [ingestionSummary, setIngestionSummary] = useState<IngestionHealthSummary>(EMPTY_INGESTION_SUMMARY);
   const [ingestionRows, setIngestionRows] = useState<IngestionHealthRow[]>([]);
+  const [aiUsageSummary, setAiUsageSummary] = useState<AiUsageSummary>(EMPTY_AI_SUMMARY);
+  const [aiUsageByProvider, setAiUsageByProvider] = useState<AiUsageProviderRow[]>([]);
+  const [aiUsageByModel, setAiUsageByModel] = useState<AiUsageModelRow[]>([]);
+  const [aiUsageRows, setAiUsageRows] = useState<AiUsageRow[]>([]);
   const [statusFilter, setStatusFilter] = useState<AlertStatusFilter>('all');
   const [severityFilter, setSeverityFilter] = useState<AlertSeverityFilter>('all');
   const [categoryFilter, setCategoryFilter] = useState<AlertCategoryFilter>('all');
@@ -281,6 +354,7 @@ export default function AdminPage() {
           fetch('/api/admin/alerts/summary', { cache: 'no-store' }),
           fetch(`/api/admin/alerts?${alertParams.toString()}`, { cache: 'no-store' }),
           fetch('/api/admin/ingestion-health', { cache: 'no-store' }),
+          fetch('/api/admin/ai-usage', { cache: 'no-store' }),
         ];
 
     const responses = await Promise.all(requests);
@@ -302,8 +376,8 @@ export default function AdminPage() {
       return;
     }
 
-    const [summaryResponse, alertsResponse, ingestionResponse] = responses;
-    const [summaryPayload, alertsPayload, ingestionPayload] = payloads;
+    const [summaryResponse, alertsResponse, ingestionResponse, aiUsageResponse] = responses;
+    const [summaryPayload, alertsPayload, ingestionPayload, aiUsagePayload] = payloads;
 
     if (!summaryResponse.ok) {
       throw new Error(summaryPayload?.error?.message || 'Failed to load alert summary');
@@ -317,10 +391,18 @@ export default function AdminPage() {
       throw new Error(ingestionPayload?.error?.message || 'Failed to load ingestion health');
     }
 
+    if (!aiUsageResponse.ok) {
+      throw new Error(aiUsagePayload?.error?.message || 'Failed to load AI usage');
+    }
+
     setSummary(summaryPayload.data || EMPTY_SUMMARY);
     setAlerts(alertsPayload.data || []);
     setIngestionSummary(ingestionPayload.meta?.summary || EMPTY_INGESTION_SUMMARY);
     setIngestionRows(ingestionPayload.data || []);
+    setAiUsageSummary(aiUsagePayload.data?.summary || EMPTY_AI_SUMMARY);
+    setAiUsageByProvider(aiUsagePayload.data?.byProvider || []);
+    setAiUsageByModel(aiUsagePayload.data?.byModel || []);
+    setAiUsageRows(aiUsagePayload.data?.recent || []);
   }
 
   useEffect(() => {
@@ -514,6 +596,149 @@ export default function AdminPage() {
             <SummaryCard label="Warnings" value={summary.warningOpenCount} accent="text-[#ffd873]" />
             <SummaryCard label="Acknowledged" value={summary.acknowledgedCount} accent="text-[#9edcff]" />
             <SummaryCard label="Resolved Today" value={summary.resolvedTodayCount} accent="text-[#93efb8]" />
+          </div>
+
+          <div className="mt-8 rounded-[30px] border border-[#72caff]/20 bg-[linear-gradient(180deg,rgba(18,22,30,0.96),rgba(10,12,18,0.96))] p-5">
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <div className="text-[11px] font-medium uppercase tracking-[0.22em] text-[#9edcff]">AI Usage Ledger</div>
+                <h2 className="mt-2 text-xl font-semibold text-white">Tokens, latency, and estimated spend</h2>
+                <p className="mt-1 text-sm text-white/55">
+                  BrewCommand tracks AI activity by provider and model so you can compare usage cost against pricing and tier margins.
+                </p>
+              </div>
+              <div className="text-right text-[11px] uppercase tracking-[0.16em] text-white/35">
+                <div>Window start</div>
+                <div className="mt-1 text-white/60 normal-case tracking-normal">
+                  {aiUsageSummary.windowStart ? formatDate(aiUsageSummary.windowStart) : 'Last 30 days'}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <SummaryCard label="AI Requests" value={aiUsageSummary.requestCount} accent="text-white" />
+              <SummaryCard label="Total Tokens" value={aiUsageSummary.totalTokens} accent="text-[#9edcff]" />
+              <SummaryCard label="Estimated Spend" value={Number(aiUsageSummary.estimatedCostUsd.toFixed(4))} accent="text-[#93efb8]" />
+              <SummaryCard label="Avg Latency (ms)" value={aiUsageSummary.averageLatencyMs ?? 0} accent="text-[#ffd873]" />
+            </div>
+
+            <div className="mt-6 grid gap-4 xl:grid-cols-2">
+              <div className="rounded-[24px] border border-white/10 bg-white/5 p-4">
+                <div className="text-[11px] font-medium uppercase tracking-[0.22em] text-white/50">By Provider</div>
+                <div className="mt-4 space-y-3">
+                  {aiUsageByProvider.length > 0 ? aiUsageByProvider.map((row) => (
+                    <div key={row.provider} className="rounded-2xl border border-white/10 bg-black/20 p-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="font-semibold text-white">{row.provider}</div>
+                        <div className="text-sm text-white/65">{formatMoney(row.estimatedCostUsd)}</div>
+                      </div>
+                      <div className="mt-2 grid grid-cols-3 gap-3 text-xs text-white/45">
+                        <div>
+                          <div className="uppercase tracking-[0.16em]">Requests</div>
+                          <div className="mt-1 text-sm text-white/75">{formatNumber(row.requestCount)}</div>
+                        </div>
+                        <div>
+                          <div className="uppercase tracking-[0.16em]">Tokens</div>
+                          <div className="mt-1 text-sm text-white/75">{formatNumber(row.tokens)}</div>
+                        </div>
+                        <div>
+                          <div className="uppercase tracking-[0.16em]">Spend</div>
+                          <div className="mt-1 text-sm text-white/75">{formatMoney(row.estimatedCostUsd)}</div>
+                        </div>
+                      </div>
+                    </div>
+                  )) : (
+                    <div className="text-sm text-white/55">No AI usage has been recorded yet.</div>
+                  )}
+                </div>
+              </div>
+
+              <div className="rounded-[24px] border border-white/10 bg-white/5 p-4">
+                <div className="text-[11px] font-medium uppercase tracking-[0.22em] text-white/50">By Model</div>
+                <div className="mt-4 space-y-3">
+                  {aiUsageByModel.length > 0 ? aiUsageByModel.map((row) => (
+                    <div key={`${row.provider}:${row.model}`} className="rounded-2xl border border-white/10 bg-black/20 p-3">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <div className="font-semibold text-white">{row.model}</div>
+                          <div className="text-xs uppercase tracking-[0.14em] text-white/40">{row.provider}</div>
+                        </div>
+                        <div className="text-sm text-white/65">{formatMoney(row.estimatedCostUsd)}</div>
+                      </div>
+                      <div className="mt-2 grid grid-cols-3 gap-3 text-xs text-white/45">
+                        <div>
+                          <div className="uppercase tracking-[0.16em]">Requests</div>
+                          <div className="mt-1 text-sm text-white/75">{formatNumber(row.requestCount)}</div>
+                        </div>
+                        <div>
+                          <div className="uppercase tracking-[0.16em]">Tokens</div>
+                          <div className="mt-1 text-sm text-white/75">{formatNumber(row.tokens)}</div>
+                        </div>
+                        <div>
+                          <div className="uppercase tracking-[0.16em]">Avg Latency</div>
+                          <div className="mt-1 text-sm text-white/75">{row.averageLatencyMs ?? 'N/A'}</div>
+                        </div>
+                      </div>
+                    </div>
+                  )) : (
+                    <div className="text-sm text-white/55">No model-level AI usage is available yet.</div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 overflow-hidden rounded-[24px] border border-white/10 bg-black/20">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-white/10 text-left text-sm">
+                  <thead className="bg-white/5 text-[11px] uppercase tracking-[0.16em] text-white/45">
+                    <tr>
+                      <th className="px-4 py-3">Time</th>
+                      <th className="px-4 py-3">Route</th>
+                      <th className="px-4 py-3">Provider / Model</th>
+                      <th className="px-4 py-3">Status</th>
+                      <th className="px-4 py-3">Tokens</th>
+                      <th className="px-4 py-3">Estimated Cost</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5 text-white/75">
+                    {aiUsageRows.map((row) => (
+                      <tr key={row.id} className="align-top">
+                        <td className="px-4 py-4 text-white/65">{formatDate(row.created_at)}</td>
+                        <td className="px-4 py-4">
+                          <div className="font-semibold text-white">{row.route}</div>
+                          <div className="mt-1 text-xs uppercase tracking-[0.12em] text-white/40">{row.operation}</div>
+                        </td>
+                        <td className="px-4 py-4">
+                          <div className="font-semibold text-white">{row.provider}</div>
+                          <div className="mt-1 text-xs uppercase tracking-[0.12em] text-white/40">{row.model}</div>
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className={`rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] ${row.status === 'success' ? 'border-[#53d48a]/30 bg-[#102117] text-[#93efb8]' : 'border-[#ff7d67]/30 bg-[#2a1311] text-[#ffb5a8]'}`}>
+                            {row.status}
+                          </span>
+                          <div className="mt-2 text-xs text-white/40">latency: {row.latency_ms ?? 'N/A'}ms</div>
+                        </td>
+                        <td className="px-4 py-4">
+                          <div>in {formatNumber(row.input_tokens)} / out {formatNumber(row.output_tokens)}</div>
+                          <div className="mt-1 text-xs text-white/40">total {formatNumber(row.total_tokens)}</div>
+                        </td>
+                        <td className="px-4 py-4">
+                          <div className="font-semibold text-white">{formatMoney(row.estimated_cost_usd)}</div>
+                          {row.error_message ? <div className="mt-2 text-xs text-[#ffb5a8]">{row.error_message}</div> : null}
+                        </td>
+                      </tr>
+                    ))}
+                    {!loading && aiUsageRows.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="px-4 py-8 text-center text-sm text-white/55">
+                          No AI usage events have been recorded yet.
+                        </td>
+                      </tr>
+                    ) : null}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
 
           <div className="mt-8">

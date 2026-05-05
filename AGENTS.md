@@ -514,6 +514,7 @@ The system is considered complete when:
 | 10 | Cloud Infrastructure | ✅ Complete | Cloud Run + 7 Scheduler jobs deployed, Sentry configured |
 | 11 | Vercel Production Deploy | ✅ Complete | Build fixed, lint disabled, Sentry DSN added, preview mode active |
 | 12 | Shared UI/UX Framework | 🔄 In Progress | `shared-ui-ux-framework.md` created, implementation pending |
+| 13 | AI Usage Ledger | 🔄 In Progress | `ai_usage_events` ledger + BrewCommand spend dashboard are being added |
 
 ### Data Collection Status
 
@@ -584,6 +585,10 @@ The system is considered complete when:
 5. **Avatar Upload** — Add profile image upload
 6. **E2E Tests** — Playwright tests for critical paths
 7. **Lint Debt** — Fix unused vars, re-enable ESLint
+
+**INTERNAL ADMIN / TEST-ONLY SURFACES:**
+1. BrewCommand onboarding reset stays in the admin console for launch testing.
+2. AI usage monitoring stays visible in BrewCommand so token, latency, and estimated spend can be compared against tier pricing and customer billing.
 
 ### Mockup-to-Code Alignment Summary
 

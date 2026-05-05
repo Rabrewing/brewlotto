@@ -11,6 +11,7 @@
 - Landing reel now starts in its expanded movie-style state by default and includes captions plus a transcript toggle for accessibility.
 - The BrewU/onboarding tutorial is now Blob-backed as well, with captions, a transcript toggle, and a BrewU replay path at `/learn#tutorial`.
 - BrewCommand now has an internal onboarding reset action so the disclaimer/tutorial flow can be re-run without manual database edits during launch testing.
+- BrewCommand AI usage monitoring is being added so request count, tokens, latency, and estimated spend can be compared against tier pricing and customer billing.
 - `SectionCard` is centralized in `components/brewlotto/dashboard/SectionCard.tsx` and the duplicated copies are gone.
 - Dropdown menu destinations are wired to live routes for gameplay, account, and system surfaces.
 - `scrapeCA_Live.js` and `scrapeNC_Live.js` exist and are wired into `scripts/ingestionJob.js`.
@@ -40,14 +41,16 @@
 - The onboarding tutorial is now a skippable BrewLotto avatar-led video step, and the same replayable tutorial is exposed from BrewU at `/learn#tutorial`.
 - Referral growth loop is now captured as a deferred V1.5 plan in `brewdocs/v1/referral-growth-plan.md`; do not wire it into the core launch path until the launch stack is stable.
 - The superadmin-only login gate is temporary and must be removed before public V1 launch.
+- AI usage logging now feeds an internal BrewCommand spend dashboard so token usage and estimated model cost can be audited before margin-sensitive launch decisions.
 
 ### 🎯 Current Truth Priority
 1. Verify the current dropdown/menu tabs against the rendered routes and mockups.
 2. Verify strategy behavior and tier gating across free, trial, Brew, and Master contexts.
 3. Finish Stripe + billing entitlement wiring and plug in the final Stripe product/price IDs.
 4. Normalize the ingestion scheduler to the live scraper commands.
-5. Keep the onboarding tutorial and future Opus Clip clips aligned with the landing/login flow.
-6. Keep the referral growth loop deferred until billing, notifications, and strategy gating are stable.
+5. Finish the BrewCommand AI usage ledger, then verify model cost against pricing/tier margins.
+6. Keep the onboarding tutorial and future Opus Clip clips aligned with the landing/login flow.
+7. Keep the referral growth loop deferred until billing, notifications, and strategy gating are stable.
 
 ### Tutorial Prompt Status
 - Opus Clip prompt pack is ready to generate for the disclaimer, walkthrough, and dashboard intro clips.

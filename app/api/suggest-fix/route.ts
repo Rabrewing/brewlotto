@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { analyzeEntropy } from '@/lib/audit/entropyTools'; // optional helper
 import { getAiRuntimeConfig } from "@/lib/ai/client";
+import { estimateAiUsageCostUsd, recordAiUsageEvent } from '@/lib/ai/usage';
 
 export async function POST(req: Request) {
     const { path: filePath, code: overrideCode } = await req.json();
@@ -22,6 +23,7 @@ export async function POST(req: Request) {
 
         const fullPath = path.join(process.cwd(), 'public', filePath);
         const rawCode = overrideCode || fs.readFileSync(fullPath, 'utf-8');
+        const startedAt = Date.now();
 
         // (Optional) Perform pre-analysis
         const entropyReport = analyzeEntropy?.(rawCode);
@@ -43,6 +45,26 @@ export async function POST(req: Request) {
 
         const { choices } = completion;
         const aiReply = choices?.[0]?.message?.content || '';
+        const usageSnapshot = estimateAiUsageCostUsd(ai.provider, ai.model, completion.usage);
+
+        void recordAiUsageEvent({
+            route: '/api/suggest-fix',
+            operation: 'code_suggestion',
+            provider: ai.provider,
+            model: ai.model,
+            status: 'success',
+            latencyMs: Date.now() - startedAt,
+            inputTokens: usageSnapshot.inputTokens,
+            outputTokens: usageSnapshot.outputTokens,
+            totalTokens: usageSnapshot.totalTokens,
+            estimatedCostUsd: usageSnapshot.estimatedCostUsd,
+            metadata: {
+                filePath,
+                entropyScore: entropyReport?.score ?? null,
+            },
+        }).catch((logError) => {
+            console.error('AI usage log error:', logError);
+        });
 
         return NextResponse.json({
             suggestion: aiReply,
@@ -51,6 +73,24 @@ export async function POST(req: Request) {
         }, { status: 200 });
     } catch (err: any) {
         console.error('[suggest-fix]', err);
+
+        const ai = getAiRuntimeConfig();
+        if (ai) {
+            void recordAiUsageEvent({
+                route: '/api/suggest-fix',
+                operation: 'code_suggestion',
+                provider: ai.provider,
+                model: ai.model,
+                status: 'error',
+                errorMessage: err instanceof Error ? err.message : 'Unknown AI error',
+                metadata: {
+                    filePath,
+                },
+            }).catch((logError) => {
+                console.error('AI usage log error:', logError);
+            });
+        }
+
         return NextResponse.json({ error: 'Unable to analyze file' }, { status: 500 });
     }
 }

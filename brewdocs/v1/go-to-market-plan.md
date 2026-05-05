@@ -183,6 +183,7 @@ Implementation notes:
 - Reserve voice commentary and the heaviest AI usage for `Master`
 - Use DeepSeek as the default provider for routine commentary and keep OpenAI `gpt-5.4-mini` as the fallback or premium fallback when needed
 - A 30% annual discount is a good marketing lever and still leaves room for margin if AI usage remains capped by tier
+- Track model tokens, latency, and estimated spend in BrewCommand before raising quotas or relaxing trial caps so pricing stays aligned with real inference cost
 
 ---
 
@@ -198,7 +199,7 @@ Implementation notes:
 | Public entry | `/` landing page with autoplay CTA video |
 | Email delivery | Supabase built-in (rate-limited, ~2-3/hr on free plan) |
 | Custom SMTP | Not configured |
-| Admin emails | `BREWCOMMAND_ADMIN_EMAILS=command@brewlotto.app,michael.brewington@gmail.com` |
+| Admin emails | `BREWCOMMAND_ADMIN_EMAILS=command@brewlotto.app,michael.brewington@gmail.com,tlloretta30@gmail.com` |
 
 ### Recommended: Resend for Email Delivery
 
@@ -237,7 +238,7 @@ Supabase's built-in email is fine for development but unreliable for production.
 
 - **Superadmin emails:** `command@brewlotto.app`, `michael.brewington@gmail.com` — sign up via magic link, middleware auto-detects admin role
 - **Route:** `/admin` — ingestion health, alert console, freshness monitoring
-- **Auth check:** `BREWCOMMAND_ADMIN_EMAILS` env var + `lib/auth/brewcommand.ts` with a built-in fallback allowlist for `command@brewlotto.app` and `michael.brewington@gmail.com`
+- **Auth check:** `BREWCOMMAND_ADMIN_EMAILS` env var + `lib/auth/brewcommand.ts` with a built-in fallback allowlist for `command@brewlotto.app`, `michael.brewington@gmail.com`, and `tlloretta30@gmail.com`
 
 ---
 

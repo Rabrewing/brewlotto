@@ -98,7 +98,7 @@ If work is not ready for public production, it stays off `main`.
 2. `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 3. `SUPABASE_SERVICE_ROLE_KEY`
 4. `NEXT_PUBLIC_APP_URL`
-5. `BREWCOMMAND_ADMIN_EMAILS` (include `command@brewlotto.app` and `michael.brewington@gmail.com`)
+5. `BREWCOMMAND_ADMIN_EMAILS` (include `command@brewlotto.app`, `michael.brewington@gmail.com`, and `tlloretta30@gmail.com`)
 6. `BREWCOMMAND_ADMIN_SECRET`
 7. `AI_PROVIDER`
 8. `OPENAI_API_KEY` or `DEEPSEEK_API_KEY` or `NIM_API_KEY`
@@ -118,6 +118,15 @@ If monitoring is being enabled right away, also prepare:
 
 1. `SENTRY_DSN`
 2. `NEXT_PUBLIC_SENTRY_DSN`
+
+If AI usage cost tracking is being enabled right away, also prepare:
+
+1. `OPENAI_RATE_INPUT_PER_MILLION`
+2. `OPENAI_RATE_OUTPUT_PER_MILLION`
+3. `DEEPSEEK_RATE_INPUT_PER_MILLION`
+4. `DEEPSEEK_RATE_OUTPUT_PER_MILLION`
+5. `NIM_RATE_INPUT_PER_MILLION`
+6. `NIM_RATE_OUTPUT_PER_MILLION`
 
 ## Phase 2: Deploy To Vercel
 
@@ -154,7 +163,7 @@ Expected runtime:
 
 ### BrewCommand Admin
 
-- [ ] `BREWCOMMAND_ADMIN_EMAILS` (`command@brewlotto.app`, `michael.brewington@gmail.com`)
+- [ ] `BREWCOMMAND_ADMIN_EMAILS` (`command@brewlotto.app`, `michael.brewington@gmail.com`, `tlloretta30@gmail.com`)
 - [ ] `BREWCOMMAND_ADMIN_SECRET`
 
 ### Session Retention
@@ -190,6 +199,7 @@ Expected runtime:
 - [ ] `NIM_API_KEY`
 - [ ] `NIM_MODEL`
 - [ ] `NIM_BASE_URL`
+- [ ] AI usage rate env vars for estimated cost tracking
 
 ### Auth + Magic Link Email
 
@@ -203,6 +213,13 @@ Expected runtime:
   - responsible-use footer copy
 - [ ] Test magic-link delivery on the production domain and verify the `/auth/callback` redirect returns a live session
 - [ ] Remove the temporary BrewCommand superadmin-only login gate before public V1 launch
+
+### AI Usage Ledger
+
+- [ ] Create the `ai_usage_events` table in Supabase
+- [ ] Verify `/api/admin/ai-usage` returns request count, tokens, latency, and estimated spend
+- [ ] Compare provider/model spend against the current pricing ladder inside BrewCommand
+- [ ] Keep AI usage monitoring visible in the admin console until the final launch decision is locked
 
 ### Landing Video
 

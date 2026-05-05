@@ -7,6 +7,7 @@ type BrewCommandUserLike = {
 const DEFAULT_BREWCOMMAND_ADMIN_EMAILS = [
   'command@brewlotto.app',
   'michael.brewington@gmail.com',
+  'tlloretta30@gmail.com',
 ];
 
 export function parseBrewCommandAdminEmails() {
