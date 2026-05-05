@@ -776,6 +776,8 @@ The system is considered complete when:
 #### ✅ Phase 9D Completed
 - Added `/stats` as a live account performance surface backed by `play_logs`, `pick_results`, `user_daily_stats`, and user-owned `predictions`
 - Added `/strategy-locker` as a live premium strategy surface backed by `strategy_registry`, `user_saved_strategies`, `user_strategy_activity`, `user_entitlements`, `subscription_tiers`, and user-owned `predictions`
+  - save/favorite is now server-backed through `/api/strategy-locker/save`
+  - `user_saved_strategies` is a per-user favorites list with one row per strategy, so users can save multiple strategies at once
 
 #### ✅ Phase 9E Completed
 - Added `/notifications` backed by `notification_preferences` and `user_notifications`

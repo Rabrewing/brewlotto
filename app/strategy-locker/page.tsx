@@ -278,35 +278,41 @@ export default function StrategyLockerPage() {
     setSavingStrategyId(strategy.id);
 
     try {
-      if (existing) {
-        const { error: deleteError } = await supabase
-          .from('user_saved_strategies')
-          .delete()
-          .eq('user_id', user.id)
-          .eq('strategy_id', strategy.id);
+      const response = await fetch('/api/strategy-locker/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          strategyId: strategy.id,
+          action: existing ? 'remove' : 'save',
+        }),
+      });
 
-        if (deleteError) {
-          throw deleteError;
-        }
+      const payload = await response.json().catch(() => null);
 
-        setSavedStrategies((current) => current.filter((entry) => entry.strategy_id !== strategy.id));
-      } else {
-        const { data, error: insertError } = await supabase
-          .from('user_saved_strategies')
-          .insert({
-            user_id: user.id,
-            strategy_id: strategy.id,
-            is_favorite: true,
-          })
-          .select('strategy_id, is_favorite, nickname, updated_at')
-          .single();
-
-        if (insertError) {
-          throw insertError;
-        }
-
-        setSavedStrategies((current) => [data as SavedStrategyRecord, ...current]);
+      if (!response.ok || !payload?.success) {
+        const message = payload?.error?.message || 'Failed to update saved strategy';
+        throw new Error(message);
       }
+
+      if (payload.data?.action === 'remove') {
+        setSavedStrategies((current) => current.filter((entry) => entry.strategy_id !== strategy.id));
+      } else if (payload.data?.action === 'save') {
+        setSavedStrategies((current) => {
+          const nextEntry: SavedStrategyRecord = {
+            strategy_id: payload.data.strategyId,
+            is_favorite: Boolean(payload.data.isFavorite),
+            nickname: existing?.nickname || null,
+            updated_at: new Date().toISOString(),
+          };
+
+          const filtered = current.filter((entry) => entry.strategy_id !== strategy.id);
+          return [nextEntry, ...filtered];
+        });
+      }
+
+      setError(null);
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : 'Failed to update saved strategy');
     } finally {

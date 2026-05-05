@@ -1,6 +1,6 @@
 # BrewLotto V1 - Current State & Next Steps
 
-**Last Updated:** 2026-05-05 ET (admin alerting cleanup, branch truth update, blob-backed landing reel, home-state preference wiring, billing live-mode verification, docs timestamp rule added)
+**Last Updated:** 2026-05-05 ET (admin alerting cleanup, branch truth update, blob-backed landing reel, home-state preference wiring, billing live-mode verification, strategy locker save flow fix, docs timestamp rule added)
 **Phase:** Shared UI/UX framework and product truth pass
 
 ## 2026-05-05 Truth Update
@@ -18,6 +18,7 @@
 - Dropdown menu destinations are wired to live routes for gameplay, account, and system surfaces.
 - `scrapeCA_Live.js` and `scrapeNC_Live.js` exist and are wired into `scripts/ingestionJob.js`.
 - Strategy Locker, Billing, Notifications, Settings, Profile, Results, My Picks, Learn, Legal, and Admin routes all exist in the App Router.
+- Strategy Locker saves now route through a server-side save endpoint and the underlying `user_saved_strategies` table supports multiple saved strategies per user, one row per strategy.
 - Dashboard/results freshness gating is real and blocks stale/failed output.
 - Login is temporarily locked to BrewCommand superadmin allowlist accounts only; remove that gate before public V1 launch.
 - BrewCommand does not yet have a full internal RBAC / user-provisioning system; it still relies on the superadmin allowlist and should stay that way until V1 launch pressure justifies more complexity.
@@ -26,7 +27,7 @@
 ### ⚠️ Still Partial Or Needs Verification
 - `scripts/ingestionScheduler.js` has been archived; Cloud Scheduler + Cloud Run are the active production ingestion path.
 - Billing has checkout, webhook, and customer portal API scaffolding, and the remaining step is live-mode verification plus production transaction confirmation.
-- Strategy Locker is live and tier-aware, but the dedicated "Run Strategy" / strategy replay polish still needs verification.
+- Strategy Locker is live and tier-aware, the save/favorite flow is now server-backed, and the dedicated "Run Strategy" / strategy replay polish still needs verification.
 - The dashboard "Generate Numbers" action is wired to `POST /api/predictions`, and a historical-style strategy smoke test now covers the current strategy engine across Pick 3, Pick 4, Cash 5, Powerball, and Mega Millions ranges.
 - `My Picks` still uses a scroll-to-top placeholder for `Replay`; a true replay action is not wired yet.
 - `Today's Results` still uses a dashboard shortcut for `Replay`; it is not a true replay interaction yet.
