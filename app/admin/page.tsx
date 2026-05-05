@@ -145,6 +145,29 @@ interface AlertRecipientState {
   choices: string[];
 }
 
+interface AlertDeliveryRow {
+  id: string;
+  channel: string;
+  recipient: string | null;
+  status: 'pending' | 'sent' | 'delivered' | 'failed';
+  sentAt: string | null;
+  deliveredAt: string | null;
+  errorMessage: string | null;
+  retryCount: number;
+  createdAt: string;
+  updatedAt: string;
+  alert: {
+    id: string;
+    title: string;
+    severity: 'critical' | 'warning' | 'info';
+    status: 'raised' | 'acknowledged' | 'resolved' | 'escalated';
+    triggeredAt: string;
+    alertKey: string | null;
+    alertName: string | null;
+    alertType: string | null;
+  } | null;
+}
+
 type RefreshTarget = 'all' | IngestionHealthRow['gameKey'];
 
 const EMPTY_SUMMARY: AlertSummary = {
@@ -370,6 +393,7 @@ export default function AdminPage() {
   const [aiUsageRows, setAiUsageRows] = useState<AiUsageRow[]>([]);
   const [alertRecipient, setAlertRecipient] = useState<AlertRecipientState>(DEFAULT_ALERT_RECIPIENT);
   const [savingAlertRecipient, setSavingAlertRecipient] = useState(false);
+  const [alertDeliveries, setAlertDeliveries] = useState<AlertDeliveryRow[]>([]);
   const [statusFilter, setStatusFilter] = useState<AlertStatusFilter>('all');
   const [severityFilter, setSeverityFilter] = useState<AlertSeverityFilter>('all');
   const [categoryFilter, setCategoryFilter] = useState<AlertCategoryFilter>('all');
@@ -404,6 +428,7 @@ export default function AdminPage() {
           fetch('/api/admin/ingestion-health', { cache: 'no-store' }),
           fetch('/api/admin/ai-usage', { cache: 'no-store' }),
           fetch('/api/admin/alert-recipient', { cache: 'no-store' }),
+          fetch('/api/admin/alert-deliveries', { cache: 'no-store' }),
         ];
 
     const responses = await Promise.all(requests);
@@ -425,8 +450,8 @@ export default function AdminPage() {
       return;
     }
 
-    const [summaryResponse, alertsResponse, ingestionResponse, aiUsageResponse, alertRecipientResponse] = responses;
-    const [summaryPayload, alertsPayload, ingestionPayload, aiUsagePayload, alertRecipientPayload] = payloads;
+    const [summaryResponse, alertsResponse, ingestionResponse, aiUsageResponse, alertRecipientResponse, alertDeliveriesResponse] = responses;
+    const [summaryPayload, alertsPayload, ingestionPayload, aiUsagePayload, alertRecipientPayload, alertDeliveriesPayload] = payloads;
 
     if (!summaryResponse.ok) {
       throw new Error(summaryPayload?.error?.message || 'Failed to load alert summary');
@@ -448,6 +473,10 @@ export default function AdminPage() {
       throw new Error(alertRecipientPayload?.error?.message || 'Failed to load alert recipient');
     }
 
+    if (!alertDeliveriesResponse.ok) {
+      throw new Error(alertDeliveriesPayload?.error?.message || 'Failed to load alert deliveries');
+    }
+
     setSummary(summaryPayload.data || EMPTY_SUMMARY);
     setAlerts(alertsPayload.data || []);
     setIngestionSummary(ingestionPayload.meta?.summary || EMPTY_INGESTION_SUMMARY);
@@ -461,6 +490,7 @@ export default function AdminPage() {
       recipientEmail: alertRecipientPayload.data?.recipientEmail || DEFAULT_ALERT_RECIPIENT.recipientEmail,
       choices: alertRecipientPayload.data?.choices || DEFAULT_ALERT_RECIPIENT.choices,
     });
+    setAlertDeliveries(alertDeliveriesPayload.data || []);
   }
 
   useEffect(() => {
@@ -1092,6 +1122,80 @@ export default function AdminPage() {
                 ) : (
                   <span className="text-sm text-white/55">No active categories.</span>
                 )}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-8 rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(24,22,26,0.96),rgba(14,12,16,0.96))] p-5">
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <div className="text-[11px] font-medium uppercase tracking-[0.22em] text-white/50">Alert Email History</div>
+                <h2 className="mt-2 text-xl font-semibold text-white">Recent delivery attempts</h2>
+                <p className="mt-1 text-sm text-white/55">
+                  Read-only history of BrewCommand alert emails sent from the internal alert system to the currently selected recipient.
+                </p>
+              </div>
+              <div className="text-right text-[11px] uppercase tracking-[0.14em] text-white/35">
+                One inbox at a time
+                <div className="mt-1 normal-case tracking-normal text-white/60">{alertRecipient.recipientEmail}</div>
+              </div>
+            </div>
+
+            <div className="mt-5 overflow-hidden rounded-[24px] border border-white/10 bg-black/20">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-white/10 text-left text-sm">
+                  <thead className="bg-white/5 text-[11px] uppercase tracking-[0.16em] text-white/45">
+                    <tr>
+                      <th className="px-4 py-3">Time</th>
+                      <th className="px-4 py-3">Alert</th>
+                      <th className="px-4 py-3">Recipient</th>
+                      <th className="px-4 py-3">Channel / Status</th>
+                      <th className="px-4 py-3">Result</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5 text-white/75">
+                    {alertDeliveries.map((delivery) => {
+                      const alertLabel = delivery.alert?.title || delivery.alert?.alertName || 'Unknown alert';
+                      const alertMeta = [delivery.alert?.severity, delivery.alert?.alertType, delivery.alert?.alertKey].filter(Boolean).join(' • ');
+                      return (
+                        <tr key={delivery.id} className="align-top">
+                          <td className="px-4 py-4 text-white/65">{formatDate(delivery.sentAt || delivery.createdAt)}</td>
+                          <td className="px-4 py-4">
+                            <div className="font-semibold text-white">{alertLabel}</div>
+                            <div className="mt-1 text-xs uppercase tracking-[0.12em] text-white/40">{alertMeta}</div>
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="font-semibold text-white">{delivery.recipient || 'Unknown recipient'}</div>
+                            <div className="mt-1 text-xs uppercase tracking-[0.12em] text-white/40">Retries {delivery.retryCount}</div>
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="text-white/80">{delivery.channel}</div>
+                            <div className="mt-2 inline-flex rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] border-white/10 bg-white/5 text-white/70">
+                              {delivery.status}
+                            </div>
+                            {delivery.deliveredAt ? <div className="mt-2 text-xs text-white/40">delivered {formatDate(delivery.deliveredAt)}</div> : null}
+                          </td>
+                          <td className="px-4 py-4">
+                            {delivery.errorMessage ? (
+                              <div className="rounded-2xl border border-[#ff7d67]/30 bg-[#2a1311] px-3 py-2 text-xs leading-5 text-[#ffcdc6]">
+                                {delivery.errorMessage}
+                              </div>
+                            ) : (
+                              <div className="text-sm text-[#93efb8]">Delivered or sent successfully.</div>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {!loading && alertDeliveries.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="px-4 py-8 text-center text-sm text-white/55">
+                          No alert deliveries are available yet.
+                        </td>
+                      </tr>
+                    ) : null}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>

@@ -12,7 +12,7 @@
 - The BrewU/onboarding tutorial is now Blob-backed as well, with captions, a transcript toggle, and a BrewU replay path at `/learn#tutorial`.
 - BrewCommand now has an internal onboarding reset action so the disclaimer/tutorial flow can be re-run without manual database edits during launch testing.
 - BrewCommand AI usage monitoring is being added so request count, tokens, latency, and estimated spend can be compared against tier pricing and customer billing.
-- BrewCommand now has a notification bell for the admin surface, and critical/email-worthy alerts are fanned out to the superadmin allowlist by email while still living in the shared alert center.
+- BrewCommand now has a notification bell for the admin surface, critical/email-worthy alerts are fanned out to one selected superadmin inbox by email, and the admin console shows recent alert delivery history alongside the shared alert center.
 - Sentry remains an external observability tool; BrewCommand should track product/business truth directly and only mirror Sentry status if we later decide we need a lightweight dashboard summary.
 - `SectionCard` is centralized in `components/brewlotto/dashboard/SectionCard.tsx` and the duplicated copies are gone.
 - Dropdown menu destinations are wired to live routes for gameplay, account, and system surfaces.
@@ -20,6 +20,7 @@
 - Strategy Locker, Billing, Notifications, Settings, Profile, Results, My Picks, Learn, Legal, and Admin routes all exist in the App Router.
 - Dashboard/results freshness gating is real and blocks stale/failed output.
 - Login is temporarily locked to BrewCommand superadmin allowlist accounts only; remove that gate before public V1 launch.
+- BrewCommand does not yet have a full internal RBAC / user-provisioning system; it still relies on the superadmin allowlist and should stay that way until V1 launch pressure justifies more complexity.
 - Home-state preference is now a first-class V1 preference (`user_preferences.default_state_code`) and is being used to drive dashboard/result labels, freshness, and default game selection; it can become a future analytics dimension later.
 
 ### ⚠️ Still Partial Or Needs Verification

@@ -589,6 +589,8 @@ The system is considered complete when:
 **INTERNAL ADMIN / TEST-ONLY SURFACES:**
 1. BrewCommand onboarding reset stays in the admin console for launch testing.
 2. AI usage monitoring stays visible in BrewCommand so token, latency, and estimated spend can be compared against tier pricing and customer billing.
+3. BrewCommand alert email history is visible in the admin console so the team can verify what sent, to whom, and whether delivery succeeded.
+4. BrewCommand still uses a superadmin allowlist rather than a full internal RBAC/user-provisioning system.
 
 ### Mockup-to-Code Alignment Summary
 

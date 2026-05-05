@@ -233,6 +233,8 @@ Expected runtime:
 - [ ] Send critical or email-worthy system alerts to the BrewCommand superadmin allowlist
 - [ ] Record alert deliveries in `alert_deliveries`
 - [ ] Keep the alert feed and email fanout tied to the same alert events so there is one source of truth
+- [ ] Show recent alert email history in BrewCommand so admin can verify recipient, status, and error details
+- [ ] Keep BrewCommand on allowlist-based access for V1; do not add full admin user provisioning or granular roles until the launch path needs them
 
 ### Landing Video
 
