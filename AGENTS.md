@@ -87,8 +87,8 @@ official source → ingestion → Supabase → freshness view → API → UI
 
 ### Deployment Status
 - Deployment Target: Vercel (preview mode, custom domain removed until V1 launch)
-- Production URL: brewlotto.vercel.app (preview)
-- Deployment Branch: main (production source of truth)
+- Production URL: www.brewlotto.app (production)
+- Deployment Branch: brewlotto-v1 (production source of truth)
 - Build Configuration: ESLint disabled for V1 launch (no-unused-vars off)
 - Sentry: Configured (DSN added to Vercel env vars)
 - Google Cloud: Ingestion deployed to Cloud Run + 7 Scheduler jobs active
@@ -98,17 +98,18 @@ Set these in Vercel project Settings → Environment Variables:
 - NEXT_PUBLIC_SUPABASE_URL
 - NEXT_PUBLIC_SUPABASE_ANON_KEY
 - SUPABASE_SERVICE_ROLE_KEY
-- NEXT_PUBLIC_APP_URL (production URL, e.g., https://brewlotto.app)
+- NEXT_PUBLIC_APP_URL (production URL, e.g., https://www.brewlotto.app)
 - BREWCOMMAND_ADMIN_EMAILS (comma-separated admin emails)
 - BREWCOMMAND_ADMIN_SECRET (secure random value)
 - SENTRY_DSN (optional, for error monitoring)
 - NEXT_PUBLIC_SENTRY_DSN (optional)
 
 ### Git Branch Strategy
-- main = V1 production truth (only push approved/ready code)
-- brew2-overhaul = active development branch
-- Vercel Production Branch set to main
-- Do NOT merge incomplete/wip code directly to main
+- brewlotto-v1 = production truth (live www.brewlotto.app)
+- brew2-overhaul = active preview development branch
+- main = preview-only branch
+- Vercel Production Branch set to brewlotto-v1
+- Do NOT merge incomplete/wip code directly to brewlotto-v1
 
 ### Post-Deploy Validation
 After successful build, manually verify:
@@ -564,9 +565,9 @@ The system is considered complete when:
 ### Remaining Work (Todo List)
 
 **HIGH PRIORITY — Before V1 Launch:**
-1. **CA Live Scraper** — Build `scrapeCA_Live.js` mirroring the NC pattern (live from calottery.com)
-2. **Shared SectionCard** — Centralize the duplicated component into `components/brewlotto/dashboard/SectionCard.tsx`
-3. **Mockup Alignment** — Visually QA all 15 mockup PNGs against rendered pages and lock designs
+1. **Mockup Alignment** — Visually QA all 15 mockup PNGs against rendered pages and lock designs
+2. **Stripe Live Mode** — Flip the current test-mode billing path to live keys, then verify the production checkout/webhook path end-to-end
+3. **CA Powerball/Mega Live Scraper** — Mirror the NCEL pattern for California multi-state games (still stale/expected)
 
 **ONBOARDING STATUS:**
 | Component | Status |
@@ -582,12 +583,11 @@ The system is considered complete when:
 | Spec doc (`brewdocs/v1/onboarding-spec.md`) | ✅ Created |
 
 **MEDIUM PRIORITY:**
-1. **Stripe Billing** — Wire up Stripe subscriptions, webhooks, customer portal
+1. **Shared Components** — Create `LoadingSkeleton.tsx`, `ErrorBoundary.tsx`
 2. **Dropdown UX** — Add hover previews and keyboard navigation per dropdown spec
-3. **Shared Components** — Create `LoadingSkeleton.tsx`, `ErrorBoundary.tsx`
-4. **"Run Strategy" Animation** — Wire up the animation from `strategy-locker-run-stratergy-animation.png`
+3. **"Run Strategy" Animation** — Wire up the animation from `strategy-locker-run-stratergy-animation.png`
 
-**LOW PRIORITY:**
+**LOW PRIORITY / FOLLOW-ON:**
 1. **Stats Charts** — Add Chart.js visualizations for trends
 2. **BrewU/Learn CMS** — Create `brewu_lessons` table, populate lessons
 3. **Legal Policies** — Add full Terms of Service, Privacy Policy, Responsible Use
@@ -595,6 +595,7 @@ The system is considered complete when:
 5. **Avatar Upload** — Add profile image upload
 6. **E2E Tests** — Playwright tests for critical paths
 7. **Lint Debt** — Fix unused vars, re-enable ESLint
+8. **PWABuilder / Capacitor** — Package the PWA for Android/iOS after core V1 launch pressure is cleared
 
 **INTERNAL ADMIN / TEST-ONLY SURFACES:**
 1. BrewCommand onboarding reset stays in the admin console for launch testing.
@@ -807,6 +808,7 @@ The system is considered complete when:
 - Treat `brewdocs/v1/navigation/dropdown-menu-normalized.md` as the IA source of truth
 - Treat `brewdocs/v1/navigation/dropdown-screen-map.md` as the route-definition source of truth
 - Treat `brewdocs/v1/navigation/dropdown-execution-plan.md` as the build-order source of truth
+- Every `brewdocs/v1/*.md` file and AGENTS note that changes meaningfully must carry a clear `Last Updated` timestamp so future AI sessions can read the state without guessing.
 - Do not implement directly from `dropdown-menu-v1.md` without first normalizing against the above docs
 - Do not add dead routes or fake interactions to the dashboard shell
 - Keep each new destination thin and real, with route/data purpose clearly scoped before expansion

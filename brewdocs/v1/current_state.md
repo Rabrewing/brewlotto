@@ -1,12 +1,12 @@
 # BrewLotto V1 - Current State & Next Steps
 
-**Last Updated:** 2026-05-05 ET (menu truth pass, blob-backed landing reel, home-state preference wiring, tier/billing scaffold pending final Stripe IDs)
+**Last Updated:** 2026-05-05 ET (admin alerting cleanup, branch truth update, blob-backed landing reel, home-state preference wiring, billing live-mode verification, docs timestamp rule added)
 **Phase:** Shared UI/UX framework and product truth pass
 
 ## 2026-05-05 Truth Update
 
 ### ✅ Already Real
-- Public landing page, login page, pricing page, onboarding flow, and dashboard entry points are live on the `brew2-overhaul` branch.
+- Public landing page, login page, pricing page, onboarding flow, and dashboard entry points are live on the `brew2-overhaul` preview branch; production tracks `brewlotto-v1`.
 - Landing reel now uses a Vercel Blob-backed source with muted autoplay plus explicit `Play with sound`, `Replay`, and `Expand` controls.
 - Landing reel now starts in its expanded movie-style state by default and includes captions plus a transcript toggle for accessibility.
 - The BrewU/onboarding tutorial is now Blob-backed as well, with captions, a transcript toggle, and a BrewU replay path at `/learn#tutorial`.
@@ -25,7 +25,7 @@
 
 ### ⚠️ Still Partial Or Needs Verification
 - `scripts/ingestionScheduler.js` has been archived; Cloud Scheduler + Cloud Run are the active production ingestion path.
-- Billing now has checkout, webhook, and customer portal API scaffolding, but the final Stripe dashboard products/price IDs still need to be created and plugged in.
+- Billing has checkout, webhook, and customer portal API scaffolding, and the remaining step is live-mode verification plus production transaction confirmation.
 - Strategy Locker is live and tier-aware, but the dedicated "Run Strategy" / strategy replay polish still needs verification.
 - The dashboard "Generate Numbers" action is wired to `POST /api/predictions`, and a historical-style strategy smoke test now covers the current strategy engine across Pick 3, Pick 4, Cash 5, Powerball, and Mega Millions ranges.
 - `My Picks` still uses a scroll-to-top placeholder for `Replay`; a true replay action is not wired yet.
@@ -40,7 +40,7 @@
 - Shared tier access now normalizes legacy `brew` labels and numeric strategy tiers into the current `free / starter / pro / master` ladder, and the dashboard generate action plus strategy smoke tests now pass against historical-style feature data.
 - State analytics is intentionally deferred until the state preference flow settles, but the data model is ready for it once we instrument events.
 - Pricing direction is now locked for the next billing pass: 3-day capped trial, then Starter at $4.99, Pro at $9.99, and Master at $19.99, with AI starting in Starter and expanding upward; annual billing should target a 30% savings message.
-- Stripe setup should mirror that ladder with six price records: Starter monthly/yearly, Pro monthly/yearly, and Master monthly/yearly.
+- Stripe setup should mirror that ladder with six price records: Starter monthly/yearly, Pro monthly/yearly, and Master monthly/yearly, with live-mode confirmation still pending.
 - Trial nudges are now contextual only and appear on dashboard, billing, and profile instead of periodic nags.
 - The onboarding tutorial is now a skippable BrewLotto avatar-led video step, and the same replayable tutorial is exposed from BrewU at `/learn#tutorial`.
 - Referral growth loop is now captured as a deferred V1.5 plan in `brewdocs/v1/referral-growth-plan.md`; do not wire it into the core launch path until the launch stack is stable.
@@ -48,13 +48,14 @@
 - AI usage logging now feeds an internal BrewCommand spend dashboard so token usage and estimated model cost can be audited before margin-sensitive launch decisions.
 
 ### 🎯 Current Truth Priority
-1. Verify the current dropdown/menu tabs against the rendered routes and mockups.
-2. Verify strategy behavior and tier gating across free, trial, Brew, and Master contexts.
-3. Finish Stripe + billing entitlement wiring and plug in the final Stripe product/price IDs.
-4. Normalize the ingestion scheduler to the live scraper commands.
-5. Finish the BrewCommand AI usage ledger, then verify model cost against pricing/tier margins.
-6. Keep the onboarding tutorial and future Opus Clip clips aligned with the landing/login flow.
-7. Keep the referral growth loop deferred until billing, notifications, and strategy gating are stable.
+1. Run a visual QA pass on the dropdown/menu destinations against the current mockups and rendered pages.
+2. Run a tier matrix test across dashboard, strategy locker, pricing, billing, and AI commentary surfaces.
+3. Verify Stripe live-mode checkout/webhook flow against the current billing ladder.
+4. Do a desktop/tablet/mobile responsive pass on the landing, login, and shared framework surfaces so the structure stays polished across devices.
+5. Finish the CA Powerball/Mega live scraper work that remains stale/expected.
+6. Keep the BrewCommand AI usage ledger visible while live-mode billing is validated.
+7. Keep the onboarding tutorial and future Opus Clip clips aligned with the landing/login flow.
+8. Keep the referral growth loop deferred until billing, notifications, and strategy gating are stable.
 
 ### Tutorial Prompt Status
 - Opus Clip prompt pack is ready to generate for the disclaimer, walkthrough, and dashboard intro clips.
@@ -300,7 +301,7 @@ npm run ingest-all
 - The same app should support website, mobile web, and PWA delivery
 - Production ingestion must run outside local development through dedicated scheduled infrastructure
 - Google Play packaging is a later distribution step, not the launch hosting model
-- `main` is the intended V1 production truth branch; active development continues on non-production branches until merge approval
+- `brewlotto-v1` is the intended V1 production truth branch; active development continues on non-production branches until merge approval
 
 ### ✅ Operational Hardening Added
 - BrewCommand server routes now require authorized admin access instead of being openly callable

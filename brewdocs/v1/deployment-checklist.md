@@ -1,7 +1,7 @@
 # BrewLotto V1 Deployment Checklist
 
 **Status:** Working deployment reference
-**Last Updated:** 2026-04-10 ET
+**Last Updated:** 2026-05-05 ET (branch truth updated, alerting and billing live-mode notes synced)
 
 ## Purpose
 
@@ -29,9 +29,9 @@ This is the required Git and Vercel branch model for BrewLotto V1.
 
 ### Production Source Of Truth
 
-1. `main` is the production source of truth for V1
-2. only `main` should drive the live Vercel production deployment
-3. `main` should contain approved, production-ready code only
+1. `brewlotto-v1` is the production source of truth for V1
+2. only `brewlotto-v1` should drive the live Vercel production deployment
+3. `brewlotto-v1` should contain approved, production-ready code only
 
 ### Development Branches
 
@@ -44,44 +44,45 @@ This is the required Git and Vercel branch model for BrewLotto V1.
 
 ### Vercel Behavior Required
 
-1. set the Vercel **Production Branch** to `main`
-2. pushes to `main` deploy the live production app
-3. pushes to non-`main` branches must not replace production
-4. non-`main` branches may use Vercel preview deploys for testing when helpful
+1. set the Vercel **Production Branch** to `brewlotto-v1`
+2. pushes to `brewlotto-v1` deploy the live production app
+3. pushes to non-`brewlotto-v1` branches must not replace production
+4. non-`brewlotto-v1` branches may use Vercel preview deploys for testing when helpful
 
 ### Operational Rule
 
-If work is not ready for public production, it stays off `main`.
+If work is not ready for public production, it stays off `brewlotto-v1`.
 
 ### Current Branch Note
 
-- `brew2-overhaul` is the active development branch for landing-page and AI-provider work.
-- `main` remains the production source of truth.
-- If the live site still shows the old sign-in page, the Vercel production branch is still pointing at `main` or at an older deployment, not at `brew2-overhaul`.
+- `brew2-overhaul` is the active preview branch for landing-page and AI-provider work.
+- `main` remains preview-only.
+- `brewlotto-v1` is the production source of truth.
+- If the live site still shows the old sign-in page, the Vercel production branch is still pointing at `main` or `brew2-overhaul`, not at `brewlotto-v1`.
 
 ## GitHub + Vercel Setup Instructions
 
 ### In GitHub
 
-1. keep `main` as the canonical production branch
-2. optionally protect `main` with branch protection rules
-3. require review or final validation before merging into `main`
+1. keep `brewlotto-v1` as the canonical production branch
+2. optionally protect `brewlotto-v1` with branch protection rules
+3. require review or final validation before merging into `brewlotto-v1`
 
 ### In Vercel
 
 1. import the GitHub repository
 2. open project settings
-3. set **Production Branch** to `main`
+3. set **Production Branch** to `brewlotto-v1`
 4. leave preview deployments enabled only for non-production testing if desired
 5. do not manually promote unfinished preview builds to production
 
 ### Recommended Workflow
 
-1. build locally on `brew2-overhaul` or another dev branch
+1. build locally on `brew2-overhaul` or another preview branch
 2. push branch changes to GitHub
 3. test locally and optionally with Vercel preview deployments
-4. merge into `main` only when the V1 change is approved and stable
-5. let Vercel deploy production from `main`
+4. merge into `brewlotto-v1` only when the V1 change is approved and stable
+5. let Vercel deploy production from `brewlotto-v1`
 
 ## Phase 1: Prepare For Vercel
 
