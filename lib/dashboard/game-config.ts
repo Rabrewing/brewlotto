@@ -3,7 +3,7 @@ export type DashboardGameId = 'pick3' | 'pick4' | 'cash5' | 'powerball' | 'mega'
 
 interface DashboardGameConfigEntry {
   requestGameKey: string;
-  statsGameKey: string;
+  statsGameKey: Record<DashboardStateCode, string>;
   predictionGame: string;
   primaryCount: number;
   hasBonus: boolean;
@@ -12,9 +12,10 @@ interface DashboardGameConfigEntry {
   displayLabelByState: Record<DashboardStateCode, string>;
 }
 
-interface ResolvedDashboardGameConfig extends DashboardGameConfigEntry {
+interface ResolvedDashboardGameConfig extends Omit<DashboardGameConfigEntry, 'statsGameKey'> {
   requestState: DashboardStateCode | 'MULTI';
   statsStateCode: DashboardStateCode;
+  statsGameKey: string;
   predictionStates: string[];
   tabLabel: string;
   displayLabel: string;
@@ -23,7 +24,7 @@ interface ResolvedDashboardGameConfig extends DashboardGameConfigEntry {
 const DASHBOARD_GAME_CONFIG_BASE: Record<DashboardGameId, DashboardGameConfigEntry> = {
   pick3: {
     requestGameKey: 'pick3',
-    statsGameKey: 'pick3',
+    statsGameKey: { NC: 'pick3', CA: 'daily3' },
     predictionGame: 'pick3',
     primaryCount: 3,
     hasBonus: false,
@@ -39,7 +40,7 @@ const DASHBOARD_GAME_CONFIG_BASE: Record<DashboardGameId, DashboardGameConfigEnt
   },
   pick4: {
     requestGameKey: 'pick4',
-    statsGameKey: 'pick4',
+    statsGameKey: { NC: 'pick4', CA: 'daily4' },
     predictionGame: 'pick4',
     primaryCount: 4,
     hasBonus: false,
@@ -55,7 +56,7 @@ const DASHBOARD_GAME_CONFIG_BASE: Record<DashboardGameId, DashboardGameConfigEnt
   },
   cash5: {
     requestGameKey: 'cash5',
-    statsGameKey: 'cash5',
+    statsGameKey: { NC: 'cash5', CA: 'fantasy5' },
     predictionGame: 'cash5',
     primaryCount: 5,
     hasBonus: false,
@@ -71,7 +72,7 @@ const DASHBOARD_GAME_CONFIG_BASE: Record<DashboardGameId, DashboardGameConfigEnt
   },
   powerball: {
     requestGameKey: 'powerball',
-    statsGameKey: 'powerball',
+    statsGameKey: { NC: 'powerball', CA: 'powerball' },
     predictionGame: 'powerball',
     primaryCount: 5,
     hasBonus: true,
@@ -87,7 +88,7 @@ const DASHBOARD_GAME_CONFIG_BASE: Record<DashboardGameId, DashboardGameConfigEnt
   },
   mega: {
     requestGameKey: 'megamillions',
-    statsGameKey: 'mega_millions',
+    statsGameKey: { NC: 'mega_millions', CA: 'mega_millions' },
     predictionGame: 'mega_millions',
     primaryCount: 5,
     hasBonus: true,
@@ -115,10 +116,13 @@ export function resolveDashboardGameConfig(
     return null;
   }
 
+  const { statsGameKey: _statsGameKey, ...baseConfig } = base;
+
   return {
-    ...base,
+    ...baseConfig,
     requestState: state === 'CA' || state === 'NC' ? state : 'NC',
     statsStateCode: state,
+    statsGameKey: base.statsGameKey[state],
     predictionStates: base.hasBonus
       ? MULTI_STATE_PREDICTION_STATES
       : [state],

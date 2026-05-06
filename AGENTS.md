@@ -48,6 +48,9 @@ official source → ingestion → Supabase → freshness view → API → UI
 | **AI provider keys** | Vercel env — 2026-05-04 | `AI_PROVIDER`, `OPENAI_MODEL`, `DEEPSEEK_API_KEY`, `DEEPSEEK_MODEL`, `OPENAI_API_KEY` set across all 3 environments. |
 | **Admin emails** | `BREWCOMMAND_ADMIN_EMAILS` (Vercel) — 2026-05-05 | Updated to `command@brewlotto.app,michael.brewington@gmail.com` across Production/Preview/Development. |
 | **CA Multi-State scraper** | `scripts/scrapeCA_MultiState.js` (new) — 2026-05-05 | New live scraper for CA Powerball and Mega Millions from calottery.com. Mirrors the scrapeCA_Live.js draw-cards pattern with bonus ball splitting. Registered in ingestionJob.js RUN_ORDER. Previous CA multi-state entries were stale — now scraped live. |
+| **CA Results/Stats game_key fix** | `lib/dashboard/game-config.ts` — 2026-05-05 | statsGameKey now maps correctly per state: CA pick3→daily3, pick4→daily4, cash5→fantasy5. Previously CA daily games looked up with wrong game_key ('pick3' instead of 'daily3'), returning 500 errors. |
+| **Results API cache prevention** | `app/api/results/route.ts`, `app/results/page.tsx` — 2026-05-05 | Added `force-dynamic` + `Cache-Control: no-store`. Fixed `.single()`→`.maybeSingle()` to handle empty draws gracefully. Fixed `getWorstStatus` ranking so 'unknown' (rank 2) doesn't mask stale data. Added 2min auto-poll on Results page. |
+| **Dashboard Stats API cache prevention** | `app/api/dashboard/stats/route.ts` — 2026-05-05 | Added `force-dynamic` + `Cache-Control: no-store` headers. Added 2min auto-poll on dashboard. |
 | **BLOB_READ_WRITE_TOKEN** | Vercel Blob — 2026-05-04 | Blob store created, linked to project. Landing video + tutorial video uploaded to Blob. `NEXT_PUBLIC_LANDING_VIDEO_*_URL` and `NEXT_PUBLIC_TUTORIAL_VIDEO_URL` env vars set. |
 
 ### Auth & Email
@@ -781,6 +784,10 @@ The system is considered complete when:
   - `user_saved_strategies` is a per-user favorites list with one row per strategy, so users can save multiple strategies at once
   - locker is still a saved-strategy library; the actual execution path remains the dashboard `Generate Numbers` action until a true `Run Strategy` CTA is added
   - locker cards are being updated with a real run-preview action so a saved strategy can execute from the card itself
+
+#### ✅ BrewU Systems Area
+- BrewU now shows a Systems area with links for BrewU, Support, Terms & Privacy, and Logout.
+- A support intake page and submission route are being added so users can report issues, attach screenshots, and notify BrewCommand through the existing alert/email pipeline.
 
 #### ✅ Phase 9E Completed
 - Added `/notifications` backed by `notification_preferences` and `user_notifications`

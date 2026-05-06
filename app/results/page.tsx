@@ -101,8 +101,15 @@ export default function ResultsPage() {
 
     loadResults();
 
+    const interval = setInterval(() => {
+      if (!cancelled) {
+        loadResults();
+      }
+    }, 120000);
+
     return () => {
       cancelled = true;
+      clearInterval(interval);
     };
   }, [selectedGame, preferredState]);
 

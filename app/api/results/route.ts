@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { resolveDashboardGameConfig, type DashboardGameId, type DashboardStateCode } from '@/lib/dashboard/game-config';
 
+export const dynamic = 'force-dynamic';
+
+const NO_CACHE = { headers: { 'Cache-Control': 'no-store, must-revalidate' } };
+
 const getSupabase = () => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -53,7 +57,7 @@ function buildInsights(matchCount: number, hotHits: number, coldHits: number) {
 }
 
 function getWorstStatus(statuses: string[]) {
-  const rank = { failed: 0, stale: 1, delayed: 2, healthy: 3, unknown: 4 } as const;
+  const rank = { failed: 0, stale: 1, unknown: 2, delayed: 3, healthy: 4 } as const;
   return [...statuses].sort((a, b) => (rank[a as keyof typeof rank] ?? 5) - (rank[b as keyof typeof rank] ?? 5))[0] || 'unknown';
 }
 
@@ -68,7 +72,7 @@ export async function GET(request: NextRequest) {
     if (!gameConfig || !resultConfig) {
       return NextResponse.json(
         { success: false, error: { code: 'VALIDATION_ERROR', message: 'Unsupported game key' } },
-        { status: 400 },
+        { status: 400, ...NO_CACHE },
       );
     }
 
@@ -83,7 +87,7 @@ export async function GET(request: NextRequest) {
     if (freshnessResult.error) {
       return NextResponse.json(
         { success: false, error: { code: 'FETCH_ERROR', message: freshnessResult.error.message } },
-        { status: 500 },
+        { status: 500, ...NO_CACHE },
       );
     }
 
@@ -125,7 +129,7 @@ export async function GET(request: NextRequest) {
           },
         },
         meta: { fallback: true, freshnessBlocked: true },
-      });
+      }, NO_CACHE);
     }
 
     // Get game_id from lottery_games first (avoid embedding issues)
@@ -146,8 +150,8 @@ export async function GET(request: NextRequest) {
             .eq('game_id', gameId)
             .order('draw_date', { ascending: false })
             .limit(1)
-            .single()
-        : { data: null, error: { message: 'Game not found' } },
+            .maybeSingle()
+        : { data: null, error: null },
       supabase
         .from('predictions')
         .select('id, game, state, created_at, predicted_numbers, bonus_number, is_saved, source_strategy_key, confidence_score')
@@ -168,21 +172,21 @@ export async function GET(request: NextRequest) {
     if (drawResult.error) {
       return NextResponse.json(
         { success: false, error: { code: 'FETCH_ERROR', message: drawResult.error.message } },
-        { status: 500 },
+        { status: 500, ...NO_CACHE },
       );
     }
 
     if (predictionResult.error) {
       return NextResponse.json(
         { success: false, error: { code: 'FETCH_ERROR', message: predictionResult.error.message } },
-        { status: 500 },
+        { status: 500, ...NO_CACHE },
       );
     }
 
     if (statsResult.error) {
       return NextResponse.json(
         { success: false, error: { code: 'FETCH_ERROR', message: statsResult.error.message } },
-        { status: 500 },
+        { status: 500, ...NO_CACHE },
       );
     }
 
@@ -197,7 +201,7 @@ export async function GET(request: NextRequest) {
           insights: ['No official draw is available yet for this game.'],
         },
         meta: { fallback: true },
-      });
+      }, NO_CACHE);
     }
 
     const drawNumbers = Array.isArray(draw.primary_numbers)
@@ -301,7 +305,7 @@ export async function GET(request: NextRequest) {
         },
       },
       meta: { fallback: false },
-    });
+    }, NO_CACHE);
   } catch (error: unknown) {
     console.error('Results GET error:', error);
     return NextResponse.json(
@@ -312,7 +316,7 @@ export async function GET(request: NextRequest) {
           message: error instanceof Error ? error.message : 'Unknown server error',
         },
       },
-      { status: 500 },
+      { status: 500, ...NO_CACHE },
     );
   }
 }
