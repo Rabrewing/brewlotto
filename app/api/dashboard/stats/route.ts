@@ -7,6 +7,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { resolveDashboardGameConfig, type DashboardGameId, type DashboardStateCode } from '@/lib/dashboard/game-config';
 
+export const dynamic = 'force-dynamic';
+
+const NO_CACHE = { headers: { 'Cache-Control': 'no-store, must-revalidate' } };
+
 const getSupabase = () => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -58,7 +62,7 @@ export async function GET(request: NextRequest) {
     if (!config) {
       return NextResponse.json(
         { success: false, error: { code: 'VALIDATION_ERROR', message: 'Unsupported game key' } },
-        { status: 400 }
+        { status: 400, ...NO_CACHE }
       );
     }
 
@@ -75,7 +79,7 @@ export async function GET(request: NextRequest) {
       const message = drawsResult.error.message || 'Failed to load dashboard stats';
       return NextResponse.json(
         { success: false, error: { code: 'FETCH_ERROR', message } },
-        { status: 500 }
+        { status: 500, ...NO_CACHE }
       );
     }
 
@@ -85,7 +89,7 @@ export async function GET(request: NextRequest) {
         success: true,
         data: buildFallback(game),
         meta: { fallback: true },
-      });
+      }, NO_CACHE);
     }
 
     const primaryFrequency = new Map<number, number>();
@@ -136,7 +140,7 @@ export async function GET(request: NextRequest) {
         sourceGames: [...sourceGames],
       },
       meta: { fallback: false },
-    });
+    }, NO_CACHE);
   } catch (error: unknown) {
     console.error('Dashboard stats GET error:', error);
     return NextResponse.json(
@@ -147,7 +151,7 @@ export async function GET(request: NextRequest) {
           message: error instanceof Error ? error.message : 'Unknown server error',
         },
       },
-      { status: 500 }
+      { status: 500, ...NO_CACHE }
     );
   }
 }

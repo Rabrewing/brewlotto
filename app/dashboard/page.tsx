@@ -259,8 +259,15 @@ export default function DashboardPage() {
 
     loadStats(selectedGame, preferredState, signal);
 
+    const interval = setInterval(() => {
+      if (!signal.cancelled) {
+        loadStats(selectedGame, preferredState, signal);
+      }
+    }, 120000);
+
     return () => {
       signal.cancelled = true;
+      clearInterval(interval);
     };
   }, [selectedGame, preferredState]);
 
