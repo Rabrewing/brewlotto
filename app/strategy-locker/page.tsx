@@ -529,9 +529,6 @@ export default function StrategyLockerPage() {
                             {strategy.description || 'No strategy description stored yet.'}
                           </div>
                         </div>
-                        <div className={`rounded-full px-3 py-1 text-[11px] uppercase tracking-[0.14em] ${hasAccess ? 'border border-[#72caff]/18 bg-[#72caff]/10 text-[#9fdcff]' : 'border border-[#ff8d7b]/18 bg-[#ff8d7b]/10 text-[#ffc4b8]'}`}>
-                          {hasAccess ? 'Unlocked' : `Requires ${formatTierLabel(strategy.min_tier)}`}
-                        </div>
                       </div>
 
                       <div className="mt-4 flex flex-wrap gap-2 text-[12px] uppercase tracking-[0.14em] text-white/40">
@@ -548,7 +545,11 @@ export default function StrategyLockerPage() {
                           : 'No account-linked activity has been recorded for this strategy yet.'}
                       </div>
 
-                      <div className="mt-4 flex flex-wrap gap-3">
+                      <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                        <div className={`inline-flex w-fit items-center rounded-full px-3 py-1 text-[11px] uppercase tracking-[0.14em] ${hasAccess ? 'border border-[#72caff]/18 bg-[#72caff]/10 text-[#9fdcff]' : 'border border-[#ff8d7b]/18 bg-[#ff8d7b]/10 text-[#ffc4b8]'}`}>
+                          {hasAccess ? 'Unlocked' : `Requires ${formatTierLabel(strategy.min_tier)}`}
+                        </div>
+                        <div className="flex flex-wrap gap-3">
                         <button
                           type="button"
                           disabled={!hasAccess || savingStrategyId === strategy.id}
@@ -573,6 +574,7 @@ export default function StrategyLockerPage() {
                             View Upgrade Path
                           </Link>
                         ) : null}
+                        </div>
                       </div>
 
                       {runPreviews[strategy.id] ? (
