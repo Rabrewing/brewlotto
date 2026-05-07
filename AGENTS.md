@@ -1,6 +1,6 @@
 # AGENTS.md (BrewLotto V1)
 
-## Current Status (2026-05-06 ET)
+## Current Status (2026-05-07 ET)
 
 ### System Health — All NC + CA Launch Games Green
 
@@ -40,7 +40,11 @@ official source → ingestion → Supabase → freshness view → API → UI
 | **Dropdown navigation** | `AvatarDropdown.tsx` — 2026-05-02 | Fixed onClick — now calls `router.push(href) + setIsOpen(false)` instead of just closing. Removed hardcoded "John Doe"/"john@example.com"/"JD" avatar — all loaded from auth. |
 | **Superadmin added** | `.env`, `.env.local` — 2026-05-02 | `BREWCOMMAND_ADMIN_EMAILS` now includes `command@brewlotto.app` and `michael.brewington@gmail.com`; code keeps fallback allowlist so BrewCommand access works if one env entry is missing. |
 | **SectionCard centralized** | `components/brewlotto/dashboard/SectionCard.tsx` (new) — 2026-05-02 | Removed 6 local duplicates across strategy-locker, profile, settings, stats, notifications, billing. Single shared component with consistent dark/gold styling. |
-| **Onboarding flow** | `app/onboarding/page.tsx`, `middleware.ts`, `app/auth/callback/route.ts` (new) — 2026-05-02 | Disclaimer acknowledgment → 4-slide tutorial → dashboard. Middleware enforces onboarding completion. Auth callback exchanges magic link codes. |
+| **Play log bridge** | `app/api/play/log/route.ts` — 2026-05-07 | Legacy browser write path now inserts into canonical `play_logs` with auth validation and normalized draw-time / number payloads. This is the settlement source of truth for future winnings alerts. |
+| **Support inbox notifications** | `app/api/admin/support-requests/[id]/route.ts`, `lib/notifications/supportRequests.ts` — 2026-05-07 | Resolved support tickets now send the branded customer email and also create an in-app `user_notifications` record so BrewLotto support updates reach both inboxes. |
+| **Settlement sweep** | `app/api/admin/settlements/run/route.ts`, `lib/notifications/playSettlements.ts` — 2026-05-07 | BrewCommand can sweep unsettled `play_logs`, settle NC and CA games against official draws, write `user_notifications`, and send winning emails back to the customer inbox. |
+| **Odds / play-style matrix** | `lib/brewwu/playStyleMatrix.ts` + docs — 2026-05-07 | Capture every launch game’s official play styles and odds so BrewLotto AI and BrewU/help can explain straight, box, straight/box, 50/50, combo, pair, Fireball, Power Play, Double Play, and related game-specific options in a customer-friendly way. |
+| **Onboarding flow** | `app/onboarding/page.tsx`, `middleware.ts`, `app/auth/callback/route.ts` (new) — 2026-05-02 | Disclaimer acknowledgment → tutorial video → dashboard. Middleware enforces onboarding completion. Auth callback exchanges magic link codes. |
 | **Dropdown auth data** | `AvatarDropdown.tsx` — 2026-05-02 | Removed hardcoded "JD"/"John Doe"/"john@example.com". Name, email, initials loaded from `supabase.auth.getUser()` on mount. |
 | **Scheduler URL fix** | Cloud Scheduler (7 jobs) — 2026-05-05 | All 7 jobs were hitting dead URL `...jix2pwxsaa-uc.a.run.app`. Fixed to `...119469099721.us-central1.run.app`. Added IAM binding so scheduler can invoke Cloud Run. Data had been stale for 3 days — now fresh. |
 | **Stripe integration** | Vercel env, Stripe Dashboard — 2026-05-04 | Products/prices created (BrewStarter/BrewPro/BrewMaster × monthly/yearly). Webhook endpoint configured at `brewlotto.vercel.app/api/webhooks/stripe`. All keys set across Production/Preview/Development. |
@@ -591,7 +595,9 @@ The system is considered complete when:
 1. **Shared Components** — Create `LoadingSkeleton.tsx`, `ErrorBoundary.tsx`
 2. **Dropdown UX** — Add hover previews and keyboard navigation per dropdown spec
 3. **"Run Strategy" Animation** — Wire up the animation from `strategy-locker-run-stratergy-animation.png`
-4. **BrewU Support Intake** — Add a lightweight support tab with category dropdown, comments, screenshot upload, and a 24-hour response disclaimer; route submissions to BrewCommand notifications/email.
+4. **Customer Notifications / Winnings Alerts** — Normalize the settled-play flow against `play_logs`, insert support updates and settled-play events into `user_notifications`, and send customer emails with a BrewLotto return link when support tickets or winnings are resolved.
+5. **Odds & Play-Style Intelligence** — Capture every launch game’s official play styles and odds, then teach BrewLotto AI and BrewU/help content to explain straight vs box vs straight/box vs 50/50 vs combo vs add-on choices as educational options per game.
+6. **BrewU Support Intake** — Add a lightweight support tab with category dropdown, comments, screenshot upload, and a 24-hour response disclaimer; route submissions to BrewCommand notifications/email.
 
 **LOW PRIORITY / FOLLOW-ON:**
 1. **Stats Charts** — Add Chart.js visualizations for trends
@@ -788,7 +794,9 @@ The system is considered complete when:
 
 #### ✅ BrewU Systems Area
 - BrewU now shows a Systems area with links for BrewU, Support, Terms & Privacy, and Logout.
-- A support intake page and submission route are being added so users can report issues, attach screenshots, and notify BrewCommand through the existing alert/email pipeline.
+- A support intake page and submission route now create a tracked `support_requests` row so BrewCommand can manage status, attach screenshots, and notify the customer when a ticket is resolved.
+- A private `support-screenshots` Supabase storage bucket is also seeded in migrations so screenshot storage stays in schema sync.
+- Customer notifications still need the canonical play-history flow wired so winnings / settlement events can create in-app notifications and customer emails with return links.
 
 #### ✅ Phase 9E Completed
 - Added `/notifications` backed by `notification_preferences` and `user_notifications`

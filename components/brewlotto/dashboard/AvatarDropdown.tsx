@@ -50,6 +50,7 @@ interface MenuItem {
   icon: MenuIconKey;
   href?: string;
   enabled: boolean;
+  emphasis?: 'normal' | 'help';
 }
 
 interface MenuSection {
@@ -80,6 +81,7 @@ const MENU_SECTIONS: MenuSection[] = [
     title: 'Systems',
     items: [
       { label: 'BrewU', icon: 'learn', href: '/learn', enabled: true },
+      { label: 'Support', icon: 'notifications', href: '/support', enabled: true, emphasis: 'help' },
       { label: 'Terms & Privacy', icon: 'legal', href: '/legal', enabled: true },
       { label: 'Logout', icon: 'logout', href: '/logout', enabled: true },
     ],
@@ -199,6 +201,11 @@ function MenuRow({
         <MenuIcon icon={item.icon} />
       </span>
       <span className="flex-1 text-left">{item.label}</span>
+      {item.emphasis === 'help' ? (
+        <span className="rounded-full border border-[#72caff]/18 bg-[#72caff]/10 px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-[#bde7ff]">
+          help
+        </span>
+      ) : null}
       {item.enabled ? (
         <svg className="h-4 w-4 text-[#d39b46]" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8">
           <path d="M7 4l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
@@ -213,7 +220,9 @@ function MenuRow({
 
   const className = `flex w-full items-center gap-3 rounded-[14px] px-3 py-2.5 text-[15px] transition-all ${
     item.enabled
-      ? 'text-[#f6ddb2] hover:bg-[#ffc742]/8 hover:text-white hover:shadow-[0_0_12px_rgba(255,199,66,0.12)]'
+      ? item.emphasis === 'help'
+        ? 'border border-[#72caff]/12 bg-[#72caff]/8 text-[#d8f1ff] hover:bg-[#72caff]/12 hover:text-white hover:shadow-[0_0_12px_rgba(114,202,255,0.12)]'
+        : 'text-[#f6ddb2] hover:bg-[#ffc742]/8 hover:text-white hover:shadow-[0_0_12px_rgba(255,199,66,0.12)]'
       : 'cursor-default text-white/48'
   }`;
 

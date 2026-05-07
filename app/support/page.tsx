@@ -21,18 +21,18 @@ type SupportCategory =
   | 'other';
 
 const SUPPORT_CATEGORIES: Array<{ value: SupportCategory; label: string; description: string }> = [
-  { value: 'dashboard', label: 'Dashboard', description: 'Prediction cards, commentary, and home flow' },
-  { value: 'my-picks', label: 'My Picks', description: 'Saved picks, logs, and replay issues' },
-  { value: 'results', label: 'Results', description: 'Recent draws, comparisons, and recap cards' },
-  { value: 'stats', label: 'Stats & Performance', description: 'Hot/cold, momentum, and history views' },
-  { value: 'strategy-locker', label: 'Strategy Locker', description: 'Saved strategies, tier gating, and run preview' },
-  { value: 'billing', label: 'Billing', description: 'Pricing, checkout, entitlements, and upgrades' },
-  { value: 'notifications', label: 'Notifications', description: 'Delivery preferences and inbox flow' },
-  { value: 'learn', label: 'BrewU', description: 'Tutorials, explainers, and systems links' },
-  { value: 'legal', label: 'Terms & Privacy', description: 'Policies, responsible use, and trust text' },
-  { value: 'login', label: 'Login / Auth', description: 'Magic link, callback, or access errors' },
-  { value: 'settings', label: 'Settings', description: 'Theme, defaults, and profile preferences' },
-  { value: 'other', label: 'Other', description: 'Something else that needs BrewCommand attention' },
+  { value: 'dashboard', label: 'Dashboard', description: 'Home flow, picks, and commentary' },
+  { value: 'my-picks', label: 'My Picks', description: 'Saved picks and replay issues' },
+  { value: 'results', label: 'Results', description: 'Draws, recaps, and comparisons' },
+  { value: 'stats', label: 'Stats & Performance', description: 'Trends, momentum, and history' },
+  { value: 'strategy-locker', label: 'Strategy Locker', description: 'Saved strategies and run preview' },
+  { value: 'billing', label: 'Billing', description: 'Plans, checkout, and upgrades' },
+  { value: 'notifications', label: 'Notifications', description: 'Delivery and inbox flow' },
+  { value: 'learn', label: 'BrewU', description: 'Tutorials and explainers' },
+  { value: 'legal', label: 'Terms & Privacy', description: 'Policies and responsible use' },
+  { value: 'login', label: 'Login / Auth', description: 'Magic link or callback errors' },
+  { value: 'settings', label: 'Settings', description: 'Theme and profile defaults' },
+  { value: 'other', label: 'Other', description: 'Anything else BrewCommand should know' },
 ];
 
 const MAX_SCREENSHOTS = 3;
@@ -135,14 +135,14 @@ export default function SupportPage() {
           <div className="text-[15px] uppercase tracking-[0.16em] text-white/38">Systems support intake</div>
           <div className="mt-3 text-[26px] font-semibold text-[#f7ddb3]">Tell BrewCommand what needs attention</div>
           <div className="mt-2 max-w-3xl text-[15px] leading-7 text-white/62">
-            Use this form for issues, bugs, or confusion anywhere in BrewLotto. Pick the section that applies, leave a clear note, and attach a screenshot if it helps. We’ll respond within 24 hours.
+            Use this form for issues, bugs, or confusion anywhere in BrewLotto. Choose the section, add a clear note, and attach a screenshot if it helps. We’ll respond within 24 hours.
           </div>
         </section>
 
         <section className="mt-5 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-          <SectionCard
-            title="Support Form"
-            description="Category, comments, and screenshots are routed to BrewCommand as a tracked alert."
+            <SectionCard
+              title="Support Form"
+              description="Category, comments, and screenshots are routed to BrewCommand."
           >
             <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="space-y-2">
@@ -189,7 +189,7 @@ export default function SupportPage() {
                   name="message"
                   value={message}
                   onChange={(event) => setMessage(event.target.value)}
-                  placeholder="Tell us what happened, what you expected, and what page or button you were using."
+                  placeholder="Tell us what happened, what you expected, and where you were."
                   rows={7}
                   className="w-full rounded-[18px] border border-white/10 bg-black/30 px-4 py-3 text-white outline-none transition focus:border-[#ffc742]/45"
                 />
@@ -216,7 +216,7 @@ export default function SupportPage() {
               <div className="space-y-3 rounded-[20px] border border-white/8 bg-black/20 px-4 py-4">
                 <div className="text-[13px] font-medium text-[#f7ddb3]">Response window</div>
                 <div className="text-[14px] leading-7 text-white/62">
-                  BrewCommand will review support requests and respond within 24 hours during active launch support windows.
+                  BrewCommand will review your request and respond within 24 hours.
                 </div>
               </div>
 
@@ -253,31 +253,31 @@ export default function SupportPage() {
           <div className="space-y-4">
             <SectionCard
               title="Systems"
-              description="BrewU keeps product education and system access together."
+              description="Quick links for product help and account access."
             >
               <div className="space-y-3">
                 <Link href="/learn" className="block rounded-[20px] border border-white/8 bg-black/20 px-4 py-4 transition-colors hover:border-[#ffc742]/20 hover:bg-[#ffc742]/8">
                   <div className="text-[18px] font-medium text-[#f7ddb3]">BrewU</div>
-                  <div className="mt-2 text-[14px] leading-7 text-white/60">Tutorial replay, core explainers, and the product learning surface.</div>
+                  <div className="mt-2 text-[14px] leading-7 text-white/60">Tutorial replay and core explainers.</div>
                 </Link>
                 <Link href="/support" className="block rounded-[20px] border border-[#ffc742]/20 bg-[#ffc742]/10 px-4 py-4 transition-colors hover:border-[#ffc742]/35 hover:bg-[#ffc742]/14">
                   <div className="text-[18px] font-medium text-[#f7ddb3]">Support</div>
-                  <div className="mt-2 text-[14px] leading-7 text-white/60">Report issues, attach screenshots, and notify BrewCommand.</div>
+                  <div className="mt-2 text-[14px] leading-7 text-white/60">Report issues and attach screenshots.</div>
                 </Link>
                 <Link href="/legal" className="block rounded-[20px] border border-white/8 bg-black/20 px-4 py-4 transition-colors hover:border-[#ffc742]/20 hover:bg-[#ffc742]/8">
                   <div className="text-[18px] font-medium text-[#f7ddb3]">Terms &amp; Privacy</div>
-                  <div className="mt-2 text-[14px] leading-7 text-white/60">Legal index, privacy posture, and responsible-use notes.</div>
+                  <div className="mt-2 text-[14px] leading-7 text-white/60">Policies and responsible-use notes.</div>
                 </Link>
                 <Link href="/logout" className="block rounded-[20px] border border-white/8 bg-black/20 px-4 py-4 transition-colors hover:border-[#ffc742]/20 hover:bg-[#ffc742]/8">
                   <div className="text-[18px] font-medium text-[#f7ddb3]">Logout</div>
-                  <div className="mt-2 text-[14px] leading-7 text-white/60">Sign out from the current BrewLotto session.</div>
+                  <div className="mt-2 text-[14px] leading-7 text-white/60">Sign out of the current session.</div>
                 </Link>
               </div>
             </SectionCard>
 
             <SectionCard
               title="What to include"
-              description="Keep the report short and actionable."
+              description="Keep the report short and clear."
             >
               <div className="space-y-3 text-[14px] leading-7 text-white/62">
                 <p>Say what section you were in, what you clicked, what happened, and what you expected to see.</p>

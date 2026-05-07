@@ -169,6 +169,36 @@ interface AlertDeliveryRow {
   } | null;
 }
 
+interface SupportRequestRow {
+  id: string;
+  userId: string | null;
+  contactEmail: string | null;
+  category: string;
+  subject: string;
+  message: string;
+  page: string | null;
+  status: 'open' | 'in_progress' | 'waiting_on_user' | 'resolved' | 'closed' | string;
+  priority: 'low' | 'normal' | 'high' | 'urgent' | string;
+  screenshotCount: number;
+  screenshotPayload: Array<{ url?: string; path?: string; name?: string }>;
+  adminNotes: string | null;
+  firstResponseAt: string | null;
+  resolvedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  alertEventId: string | null;
+  alert: {
+    id: string;
+    title: string;
+    severity: 'critical' | 'warning' | 'info';
+    status: 'raised' | 'acknowledged' | 'resolved' | 'escalated';
+    triggeredAt: string;
+    alertKey: string | null;
+    alertName: string | null;
+    alertType: string | null;
+  } | null;
+}
+
 type RefreshTarget = 'all' | IngestionHealthRow['gameKey'];
 
 const EMPTY_SUMMARY: AlertSummary = {
@@ -385,6 +415,7 @@ export default function AdminPage() {
   const [resetEmail, setResetEmail] = useState('command@brewlotto.app');
   const [resetMessage, setResetMessage] = useState<string | null>(null);
   const [mutatingId, setMutatingId] = useState<string | null>(null);
+  const [supportMutatingId, setSupportMutatingId] = useState<string | null>(null);
   const [ingestionSummary, setIngestionSummary] = useState<IngestionHealthSummary>(EMPTY_INGESTION_SUMMARY);
   const [ingestionRows, setIngestionRows] = useState<IngestionHealthRow[]>([]);
   const [aiUsageSummary, setAiUsageSummary] = useState<AiUsageSummary>(EMPTY_AI_SUMMARY);
@@ -396,6 +427,9 @@ export default function AdminPage() {
   const [savingAlertRecipient, setSavingAlertRecipient] = useState(false);
   const [alertDeliveries, setAlertDeliveries] = useState<AlertDeliveryRow[]>([]);
   const [alertDeliveryFilter, setAlertDeliveryFilter] = useState<AlertDeliveryFilter>('all');
+  const [supportRequests, setSupportRequests] = useState<SupportRequestRow[]>([]);
+  const [runningSettlementSweep, setRunningSettlementSweep] = useState(false);
+  const [settlementSweepMessage, setSettlementSweepMessage] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<AlertStatusFilter>('all');
   const [severityFilter, setSeverityFilter] = useState<AlertSeverityFilter>('all');
   const [categoryFilter, setCategoryFilter] = useState<AlertCategoryFilter>('all');
@@ -452,6 +486,7 @@ export default function AdminPage() {
           fetch('/api/admin/ai-usage', { cache: 'no-store' }),
           fetch('/api/admin/alert-recipient', { cache: 'no-store' }),
           fetch('/api/admin/alert-deliveries', { cache: 'no-store' }),
+          fetch('/api/admin/support-requests', { cache: 'no-store' }),
         ];
 
     const responses = await Promise.all(requests);
@@ -473,8 +508,8 @@ export default function AdminPage() {
       return;
     }
 
-    const [summaryResponse, alertsResponse, ingestionResponse, aiUsageResponse, alertRecipientResponse, alertDeliveriesResponse] = responses;
-    const [summaryPayload, alertsPayload, ingestionPayload, aiUsagePayload, alertRecipientPayload, alertDeliveriesPayload] = payloads;
+    const [summaryResponse, alertsResponse, ingestionResponse, aiUsageResponse, alertRecipientResponse, alertDeliveriesResponse, supportRequestsResponse] = responses;
+    const [summaryPayload, alertsPayload, ingestionPayload, aiUsagePayload, alertRecipientPayload, alertDeliveriesPayload, supportRequestsPayload] = payloads;
 
     if (!summaryResponse.ok) {
       throw new Error(summaryPayload?.error?.message || 'Failed to load alert summary');
@@ -500,6 +535,10 @@ export default function AdminPage() {
       throw new Error(alertDeliveriesPayload?.error?.message || 'Failed to load alert deliveries');
     }
 
+    if (!supportRequestsResponse.ok) {
+      throw new Error(supportRequestsPayload?.error?.message || 'Failed to load support requests');
+    }
+
     setSummary(summaryPayload.data || EMPTY_SUMMARY);
     setAlerts(alertsPayload.data || []);
     setIngestionSummary(ingestionPayload.meta?.summary || EMPTY_INGESTION_SUMMARY);
@@ -514,6 +553,7 @@ export default function AdminPage() {
       choices: alertRecipientPayload.data?.choices || DEFAULT_ALERT_RECIPIENT.choices,
     });
     setAlertDeliveries(alertDeliveriesPayload.data || []);
+    setSupportRequests(supportRequestsPayload.data || []);
   }
 
   useEffect(() => {
@@ -639,6 +679,32 @@ export default function AdminPage() {
     }
   }
 
+  async function updateSupportRequest(id: string, status: 'open' | 'in_progress' | 'waiting_on_user' | 'resolved' | 'closed') {
+    setSupportMutatingId(id);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/admin/support-requests/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status }),
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload?.error?.message || 'Failed to update support request');
+      }
+
+      await loadAdminData();
+    } catch (actionError) {
+      setError(actionError instanceof Error ? actionError.message : 'Failed to update support request');
+    } finally {
+      setSupportMutatingId(null);
+    }
+  }
+
   async function saveAlertRecipient(recipientEmail: string) {
     setSavingAlertRecipient(true);
     setError(null);
@@ -667,6 +733,37 @@ export default function AdminPage() {
       setError(saveError instanceof Error ? saveError.message : 'Failed to save alert recipient');
     } finally {
       setSavingAlertRecipient(false);
+    }
+  }
+
+  async function runSettlementSweep() {
+    setRunningSettlementSweep(true);
+    setError(null);
+    setSettlementSweepMessage(null);
+
+    try {
+      const response = await fetch('/api/admin/settlements/run', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ limit: 100 }),
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload?.error?.message || 'Failed to run settlement sweep');
+      }
+
+      const result = payload?.data || {};
+      setSettlementSweepMessage(
+        `Settled ${result.settled || 0} plays, found ${result.wins || 0} wins, created ${result.notificationsCreated || 0} inbox items, and sent ${result.emailsSent || 0} winning emails.`,
+      );
+      await loadAdminData();
+    } catch (settlementError) {
+      setError(settlementError instanceof Error ? settlementError.message : 'Failed to run settlement sweep');
+    } finally {
+      setRunningSettlementSweep(false);
     }
   }
 
@@ -1046,7 +1143,7 @@ export default function AdminPage() {
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <SummaryCard label="Tracked Games" value={ingestionSummary.totalGames} accent="text-white" />
               <SummaryCard label="Healthy" value={ingestionSummary.byFreshness.healthy} accent="text-[#93efb8]" />
               <SummaryCard label="Needs Attention" value={ingestionSummary.byFreshness.stale + ingestionSummary.byFreshness.failed + ingestionSummary.failedRuns} accent="text-[#ff9f92]" />
@@ -1271,8 +1368,131 @@ export default function AdminPage() {
                     </tbody>
                   </table>
                 </div>
+            </div>
+          </div>
+
+          <div className="mt-8">
+            <div className="mb-4 flex items-end justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-semibold text-white">Settlement Sweep</h2>
+                <p className="mt-1 text-sm text-white/55">Runs the current play log settlement flow against official NC and CA draws, writes inbox notifications, and sends winning emails.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => void runSettlementSweep()}
+                disabled={runningSettlementSweep}
+                className="rounded-full border border-[#53d48a]/20 bg-[#102117] px-4 py-2 text-sm font-semibold uppercase tracking-[0.12em] text-[#93efb8] transition hover:border-[#53d48a]/35 hover:bg-[#15311d] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {runningSettlementSweep ? 'Running...' : 'Run Settlement Sweep'}
+              </button>
+            </div>
+            {settlementSweepMessage ? (
+              <div className="rounded-[24px] border border-[#53d48a]/20 bg-[#102117] px-4 py-3 text-sm text-[#c8f4d8]">
+                {settlementSweepMessage}
+              </div>
+            ) : null}
+          </div>
+
+          <div className="mt-8">
+            <div className="mb-4 flex items-end justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-semibold text-white">Support Queue</h2>
+                <p className="mt-1 text-sm text-white/55">Tracked support requests from BrewU Systems. This is the ticket table BrewCommand can work from directly.</p>
               </div>
             </div>
+
+            <div className="overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(24,22,26,0.96),rgba(14,12,16,0.96))]">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-white/10 text-left text-sm">
+                  <thead className="bg-white/5 text-[11px] uppercase tracking-[0.16em] text-white/45">
+                    <tr>
+                      <th className="px-4 py-3">Time</th>
+                      <th className="px-4 py-3">Ticket</th>
+                      <th className="px-4 py-3">Status / Priority</th>
+                      <th className="px-4 py-3">Screenshots</th>
+                      <th className="px-4 py-3">Response</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5 text-white/75">
+                    {supportRequests.map((request) => {
+                      const screenshotLink = request.screenshotPayload?.[0]?.url || null;
+                      return (
+                        <tr key={request.id} className="align-top">
+                          <td className="px-4 py-4 text-white/65">{formatDate(request.createdAt)}</td>
+                          <td className="px-4 py-4">
+                            <div className="font-semibold text-white">{request.subject}</div>
+                            <div className="mt-1 text-xs uppercase tracking-[0.12em] text-white/40">{request.category} • {request.contactEmail || 'No contact email'}</div>
+                            <div className="mt-2 text-sm text-white/60 line-clamp-3">{request.message}</div>
+                            {request.page ? <div className="mt-2 text-xs uppercase tracking-[0.12em] text-white/35">{request.page}</div> : null}
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="flex flex-wrap gap-2">
+                              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">
+                                {request.status}
+                              </span>
+                              <span className="rounded-full border border-[#ffc742]/20 bg-[#ffc742]/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#f7ddb3]">
+                                {request.priority}
+                              </span>
+                            </div>
+                            {request.alert?.title ? (
+                              <div className="mt-2 text-xs uppercase tracking-[0.12em] text-white/40">{request.alert.title}</div>
+                            ) : null}
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="font-semibold text-white">{request.screenshotCount}</div>
+                            <div className="mt-1 text-xs text-white/40">attached</div>
+                            {screenshotLink ? (
+                              <a
+                                href={screenshotLink}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="mt-2 inline-flex rounded-full border border-[#72caff]/20 bg-[#72caff]/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#d8f1ff] transition hover:border-[#72caff]/35 hover:bg-[#72caff]/14"
+                              >
+                                View screenshot
+                              </a>
+                            ) : null}
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="text-white/80">
+                              {request.firstResponseAt ? `First response: ${formatDate(request.firstResponseAt)}` : 'Awaiting response'}
+                            </div>
+                            <div className="mt-2 text-xs text-white/40">
+                              {request.resolvedAt ? `Resolved: ${formatDate(request.resolvedAt)}` : `Updated: ${formatDate(request.updatedAt)}`}
+                            </div>
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              <button
+                                type="button"
+                                onClick={() => void updateSupportRequest(request.id, 'in_progress')}
+                                disabled={Boolean(supportMutatingId) || request.status === 'in_progress' || request.status === 'resolved'}
+                                className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/72 transition hover:border-[#72caff]/25 hover:bg-[#72caff]/10 disabled:cursor-not-allowed disabled:opacity-50"
+                              >
+                                {supportMutatingId === request.id && request.status !== 'resolved' ? 'Updating...' : 'In progress'}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => void updateSupportRequest(request.id, 'resolved')}
+                                disabled={Boolean(supportMutatingId) || request.status === 'resolved'}
+                                className="rounded-full border border-[#53d48a]/20 bg-[#102117] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#93efb8] transition hover:border-[#53d48a]/35 hover:bg-[#15311d] disabled:cursor-not-allowed disabled:opacity-50"
+                              >
+                                {supportMutatingId === request.id && request.status === 'resolved' ? 'Resolving...' : 'Resolve + email'}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {!loading && supportRequests.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="px-4 py-8 text-center text-sm text-white/55">
+                          No support requests are available yet.
+                        </td>
+                      </tr>
+                    ) : null}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
 
           <div className="mt-8">
             <div className="mb-4 flex items-center justify-between gap-4">

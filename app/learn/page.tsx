@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { TutorialVideoPanel } from '@/components/brewlotto/TutorialVideoPanel';
 import { DashboardContainer, Header, NavigationTabs } from '@/components/brewlotto/dashboard';
+import { BREWU_PLAY_STYLE_GUIDES } from '@/lib/brewwu/playStyleMatrix';
 
 const LESSONS = [
   {
@@ -86,6 +87,59 @@ export default function LearnPage() {
               <div className="mt-3 text-[15px] leading-7 text-white/62">{lesson.summary}</div>
             </article>
           ))}
+        </section>
+
+        <section className="mt-5 rounded-[30px] border border-[#53d48a]/18 bg-[radial-gradient(circle_at_top_left,rgba(83,212,138,0.14),rgba(0,0,0,0)_34%),linear-gradient(145deg,rgba(16,26,18,0.88),rgba(8,8,8,0.98))] px-5 py-5 shadow-[0_0_28px_rgba(83,212,138,0.08)]">
+          <div className="text-[15px] uppercase tracking-[0.16em] text-white/38">Play styles by game</div>
+          <div className="mt-3 text-[26px] font-semibold text-[#ddf7e2]">Teach the game before the bet</div>
+          <div className="mt-2 max-w-3xl text-[15px] leading-7 text-white/62">
+            This section turns the official game rules into plain-English guidance so BrewLotto
+            can show customers what straight, box, straight/box, 50/50, combo, or add-on play
+            actually means for the game they are viewing.
+          </div>
+          <div className="mt-5 grid gap-4 xl:grid-cols-2">
+            {BREWU_PLAY_STYLE_GUIDES.map((guide) => (
+              <article
+                key={guide.title}
+                className="rounded-[24px] border border-white/8 bg-black/20 px-5 py-5 shadow-[0_0_18px_rgba(83,212,138,0.04)]"
+              >
+                <div className="text-[12px] uppercase tracking-[0.16em] text-[#93efb8]">{guide.label}</div>
+                <div className="mt-2 text-[21px] font-semibold text-white">{guide.title}</div>
+                <div className="mt-3 text-[13px] uppercase tracking-[0.16em] text-white/42">{guide.odds}</div>
+                <div className="mt-3 text-[15px] leading-7 text-white/66">{guide.summary}</div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {guide.playStyles.map((style) => (
+                    <div
+                      key={`${guide.id}-${style.name}`}
+                      className="rounded-full border border-[#93efb8]/18 bg-[#0f1912] px-3 py-1.5 text-[12px] text-[#d9f7e5]"
+                    >
+                      <span className="font-medium text-white">{style.name}</span>
+                      {style.odds ? <span className="ml-2 text-white/55">{style.odds}</span> : null}
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 rounded-[18px] border border-[#53d48a]/18 bg-[#102117] px-4 py-4 text-[14px] leading-7 text-[#c8f4d8]">
+                  <span className="font-semibold text-white">Brew AI help: </span>
+                  {guide.aiHint}
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-5 rounded-[28px] border border-[#72caff]/18 bg-[linear-gradient(145deg,rgba(19,22,31,0.76),rgba(10,10,12,0.96))] px-6 py-6 shadow-[0_0_20px_rgba(114,202,255,0.05)]">
+          <div className="text-[20px] font-medium text-[#d8e6f8]">How Brew AI helps without overpromising</div>
+          <div className="mt-3 grid gap-3 md:grid-cols-3">
+            <div className="rounded-[20px] border border-white/8 bg-black/20 px-4 py-4 text-[15px] text-white/78">
+              Explain the play style in plain English before the user picks anything.
+            </div>
+            <div className="rounded-[20px] border border-white/8 bg-black/20 px-4 py-4 text-[15px] text-white/78">
+              Compare straight, box, straight/box, combo, and add-ons so users understand the tradeoffs.
+            </div>
+            <div className="rounded-[20px] border border-white/8 bg-black/20 px-4 py-4 text-[15px] text-white/78">
+              Keep the guidance educational. No strategy beats randomness or guarantees a win.
+            </div>
+          </div>
         </section>
 
         <section className="mt-5 rounded-[28px] border border-[#72caff]/18 bg-[linear-gradient(145deg,rgba(19,22,31,0.76),rgba(10,10,12,0.96))] px-6 py-6 shadow-[0_0_20px_rgba(114,202,255,0.05)]">

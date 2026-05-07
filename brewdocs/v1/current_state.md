@@ -1,6 +1,6 @@
 # BrewLotto V1 - Current State & Next Steps
 
-**Last Updated:** 2026-05-06 ET (admin alerting cleanup, branch truth update, blob-backed landing reel, home-state preference wiring, billing live-mode verification, strategy locker save/run flow fix, BrewU Systems support scaffold, docs timestamp rule added)
+**Last Updated:** 2026-05-07 ET (admin alerting cleanup, branch truth update, blob-backed landing reel, home-state preference wiring, billing live-mode verification, strategy locker save/run flow fix, BrewU Systems support scaffold, support screenshots bucket added, canonical play log bridge, support inbox notifications, settlement sweep, customer notifications plan added, docs timestamp rule added, BrewU play-style guidance live, shared play-style matrix centralized)
 **Phase:** Shared UI/UX framework and product truth pass
 
 ## 2026-05-05 Truth Update
@@ -24,7 +24,13 @@
 - Login is temporarily locked to BrewCommand superadmin allowlist accounts only; remove that gate before public V1 launch.
 - BrewCommand does not yet have a full internal RBAC / user-provisioning system; it still relies on the superadmin allowlist and should stay that way until V1 launch pressure justifies more complexity.
 - Home-state preference is now a first-class V1 preference (`user_preferences.default_state_code`) and is being used to drive dashboard/result labels, freshness, and default game selection; it can become a future analytics dimension later.
-- BrewU now has a Systems area and a support intake scaffold with category dropdown, comments, screenshots, and a 24-hour response disclaimer; submissions route into BrewCommand alerting and email fan-out to the selected superadmin inbox.
+- BrewU now has a Systems area and a support intake scaffold with category dropdown, comments, screenshots, and a 24-hour response disclaimer; submissions route into BrewCommand alerting, a tracked `support_requests` ticket table, and email fan-out to the selected superadmin inbox. A private `support-screenshots` Supabase bucket is also seeded for storage sync, and resolved tickets now trigger a customer-facing status email.
+- Resolved support tickets now also create an in-app `user_notifications` record so the customer notification center reflects support updates in addition to email.
+- The legacy play-log path now writes into the canonical `play_logs` table with auth validation and normalized draw-time / number payloads, which makes it possible to build settlement and winnings alerts on one source of truth.
+- BrewCommand now has a settlement sweep endpoint and admin trigger that can settle unsettled `play_logs` against official draws, covering both NC and CA through the same state/game mapping the dashboard uses.
+- Customer-facing notifications are still only partially wired: the notification center exists, support updates now land in inbox + email, and winnings/settlement alerts still need a settlement job that reads `play_logs` and emits the proper notification/email fan-out.
+- The next strategy-intelligence pass should capture each launch game’s official play styles and odds so the AI layer can explain straight, box, straight/box, 50/50, combo, pair, Fireball, Power Play, Double Play, and similar choices in a customer-friendly way.
+- The BrewU/help surface now turns that same play-style matrix into plain-English strategy guidance so customers can learn when a straight play, box play, or game-specific add-on is the better educational option. That guidance now comes from a shared BrewU matrix module so future AI copy and help surfaces can stay aligned.
 
 ### ⚠️ Still Partial Or Needs Verification
 - `scripts/ingestionScheduler.js` has been archived; Cloud Scheduler + Cloud Run are the active production ingestion path.
@@ -40,7 +46,7 @@
 - Menu/tab and mockup QA still needs another visual pass against the current rendered routes.
 - Tier gating still needs a deliberate test matrix across dashboard, strategy locker, pricing, billing, and AI surfaces.
 - BrewCommand alerting is now operational with a single selected recipient plus history/filtering, but full internal RBAC and user provisioning are still deferred.
-- BrewCommand receives BrewU support submissions so reported issues can be tracked with notifications and email escalation.
+- BrewCommand receives BrewU support submissions so reported issues can be tracked with notifications, ticket status, and email escalation back to the customer when resolved.
 - Shared tier access now normalizes legacy `brew` labels and numeric strategy tiers into the current `free / starter / pro / master` ladder, and the dashboard generate action plus strategy smoke tests now pass against historical-style feature data.
 - State analytics is intentionally deferred until the state preference flow settles, but the data model is ready for it once we instrument events.
 - Pricing direction is now locked for the next billing pass: 3-day capped trial, then Starter at $4.99, Pro at $9.99, and Master at $19.99, with AI starting in Starter and expanding upward; annual billing should target a 30% savings message.
@@ -60,7 +66,9 @@
 6. Keep the BrewCommand AI usage ledger visible while live-mode billing is validated.
 7. Keep the onboarding tutorial and future Opus Clip clips aligned with the landing/login flow.
 8. Tighten the BrewU support intake flow and verify screenshot upload / notification delivery.
-9. Keep the referral growth loop deferred until billing, notifications, and strategy gating are stable.
+9. Normalize the customer notification pipeline so support updates, settlement events, and winnings alerts can write to `user_notifications` and email the correct BrewLotto return link.
+10. Capture every launch game’s play-style odds and teach the AI layer plus BrewU/help content to offer educational straight/box/50-50/combo suggestions per game.
+11. Keep the referral growth loop deferred until billing, notifications, and strategy gating are stable.
 
 ### Tutorial Prompt Status
 - Opus Clip prompt pack is ready to generate for the disclaimer, walkthrough, and dashboard intro clips.

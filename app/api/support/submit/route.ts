@@ -1,11 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
-import { put } from '@vercel/blob';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { createSupabaseServerClient } from '@/lib/supabase/serverClient';
 import { deliverAdminAlertEmail } from '@/lib/notifications/adminAlerts';
 
 const SUPPORT_ALERT_KEY = 'support-submission';
+const SUPPORT_SCREENSHOTS_BUCKET = 'support-screenshots';
 
 function getAdminClient() {
   return createClient(
@@ -24,27 +24,37 @@ function safeFileName(input: string) {
 }
 
 async function uploadScreenshot(
+  adminClient: ReturnType<typeof getAdminClient>,
   userId: string,
   file: File,
-): Promise<{ name: string; url: string; size: number; type: string } | null> {
-  const token = process.env.BLOB_READ_WRITE_TOKEN?.trim();
-
-  if (!token) {
-    return null;
-  }
-
+): Promise<{ name: string; path: string; url: string; size: number; type: string } | null> {
   const buffer = Buffer.from(await file.arrayBuffer());
   const fileName = `${Date.now()}-${safeFileName(file.name || 'screenshot')}`;
+  const storagePath = `${userId}/${fileName}`;
 
-  const result = await put(`support/${userId}/${fileName}`, buffer, {
-    access: 'public',
-    contentType: file.type || 'application/octet-stream',
-    token,
-  });
+  const { error: uploadError } = await adminClient.storage
+    .from(SUPPORT_SCREENSHOTS_BUCKET)
+    .upload(storagePath, buffer, {
+      contentType: file.type || 'application/octet-stream',
+      upsert: false,
+    });
+
+  if (uploadError) {
+    throw new Error(uploadError.message);
+  }
+
+  const { data: signedUrlData, error: signedUrlError } = await adminClient.storage
+    .from(SUPPORT_SCREENSHOTS_BUCKET)
+    .createSignedUrl(storagePath, 60 * 60 * 24 * 7);
+
+  if (signedUrlError) {
+    throw new Error(signedUrlError.message);
+  }
 
   return {
     name: file.name || fileName,
-    url: result.url,
+    path: storagePath,
+    url: signedUrlData?.signedUrl || '',
     size: file.size,
     type: file.type || 'application/octet-stream',
   };
@@ -109,15 +119,15 @@ export async function POST(request: NextRequest) {
       .filter((entry): entry is File => entry instanceof File && entry.size > 0)
       .slice(0, 3);
 
+    const admin = getAdminClient();
     const uploads = [];
     for (const file of screenshots) {
-      const uploaded = await uploadScreenshot(user.id, file);
+      const uploaded = await uploadScreenshot(admin, user.id, file);
       if (uploaded) {
         uploads.push(uploaded);
       }
     }
 
-    const admin = getAdminClient();
     const alertMessage = [
       `Support request from ${user.email || 'unknown user'}.`,
       `Category: ${category}`,
@@ -170,6 +180,33 @@ export async function POST(request: NextRequest) {
           },
         },
         { status: 404 },
+      );
+    }
+
+    const { error: supportRequestError } = await admin.from('support_requests').insert({
+      user_id: user.id,
+      contact_email: contactEmail,
+      category,
+      subject,
+      message,
+      page: page || null,
+      status: 'open',
+      priority: 'normal',
+      screenshot_count: uploads.length,
+      screenshot_payload: uploads,
+      alert_event_id: eventId,
+    });
+
+    if (supportRequestError) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'SUPPORT_REQUEST_ERROR',
+            message: supportRequestError.message,
+          },
+        },
+        { status: 500 },
       );
     }
 
