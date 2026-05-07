@@ -98,8 +98,28 @@ export default function LearnPage() {
         </section>
 
         <section className="mt-5 rounded-[28px] border border-white/10 bg-white/[0.03] px-6 py-6">
-          <div className="text-[18px] font-medium text-[#f7ddb3]">Support Notes</div>
-          <div className="mt-3 text-[15px] leading-7 text-white/62">BrewLotto is built around transparency, not promises. If a term or score is not yet explained inline, use this route as the canonical V1 explainer surface while deeper BrewU APIs remain future work.</div>
+          <div className="text-[18px] font-medium text-[#f7ddb3]">Systems</div>
+          <div className="mt-3 text-[15px] leading-7 text-white/62">
+            BrewU keeps product learning and system access in one place. Use this area to replay the tutorial, reach support, review policies, or sign out.
+          </div>
+          <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <Link href="/learn" className="rounded-[18px] border border-[#ffc742]/20 bg-[#ffc742]/10 px-4 py-4 transition-colors hover:border-[#ffc742]/35 hover:bg-[#ffc742]/14">
+              <div className="text-[16px] font-medium text-[#f7ddb3]">BrewU</div>
+              <div className="mt-2 text-[14px] leading-7 text-white/60">Tutorial replay and explainers.</div>
+            </Link>
+            <Link href="/support" className="rounded-[18px] border border-white/10 bg-black/20 px-4 py-4 transition-colors hover:border-[#ffc742]/20 hover:bg-[#ffc742]/8">
+              <div className="text-[16px] font-medium text-[#f7ddb3]">Support</div>
+              <div className="mt-2 text-[14px] leading-7 text-white/60">Report an issue and notify BrewCommand.</div>
+            </Link>
+            <Link href="/legal" className="rounded-[18px] border border-white/10 bg-black/20 px-4 py-4 transition-colors hover:border-[#ffc742]/20 hover:bg-[#ffc742]/8">
+              <div className="text-[16px] font-medium text-[#f7ddb3]">Terms &amp; Privacy</div>
+              <div className="mt-2 text-[14px] leading-7 text-white/60">Policies and responsible-use notes.</div>
+            </Link>
+            <Link href="/logout" className="rounded-[18px] border border-white/10 bg-black/20 px-4 py-4 transition-colors hover:border-[#ffc742]/20 hover:bg-[#ffc742]/8">
+              <div className="text-[16px] font-medium text-[#f7ddb3]">Logout</div>
+              <div className="mt-2 text-[14px] leading-7 text-white/60">Sign out of the current session.</div>
+            </Link>
+          </div>
         </section>
       </DashboardContainer>
     </main>

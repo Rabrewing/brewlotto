@@ -77,7 +77,7 @@ const MENU_SECTIONS: MenuSection[] = [
     ],
   },
   {
-    title: 'System',
+    title: 'Systems',
     items: [
       { label: 'BrewU', icon: 'learn', href: '/learn', enabled: true },
       { label: 'Terms & Privacy', icon: 'legal', href: '/legal', enabled: true },

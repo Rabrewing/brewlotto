@@ -1,6 +1,6 @@
 # BrewLotto V1 - Current State & Next Steps
 
-**Last Updated:** 2026-05-05 ET (admin alerting cleanup, branch truth update, blob-backed landing reel, home-state preference wiring, billing live-mode verification, strategy locker save/run flow fix, support intake todo added, docs timestamp rule added)
+**Last Updated:** 2026-05-06 ET (admin alerting cleanup, branch truth update, blob-backed landing reel, home-state preference wiring, billing live-mode verification, strategy locker save/run flow fix, BrewU Systems support scaffold, docs timestamp rule added)
 **Phase:** Shared UI/UX framework and product truth pass
 
 ## 2026-05-05 Truth Update
@@ -24,7 +24,7 @@
 - Login is temporarily locked to BrewCommand superadmin allowlist accounts only; remove that gate before public V1 launch.
 - BrewCommand does not yet have a full internal RBAC / user-provisioning system; it still relies on the superadmin allowlist and should stay that way until V1 launch pressure justifies more complexity.
 - Home-state preference is now a first-class V1 preference (`user_preferences.default_state_code`) and is being used to drive dashboard/result labels, freshness, and default game selection; it can become a future analytics dimension later.
-- BrewU still needs a lightweight support intake tab so users can report issues with a category dropdown, comments, screenshots, and a 24-hour response disclaimer; that flow should notify BrewCommand and fan out an email to the selected superadmin inbox.
+- BrewU now has a Systems area and a support intake scaffold with category dropdown, comments, screenshots, and a 24-hour response disclaimer; submissions route into BrewCommand alerting and email fan-out to the selected superadmin inbox.
 
 ### ⚠️ Still Partial Or Needs Verification
 - `scripts/ingestionScheduler.js` has been archived; Cloud Scheduler + Cloud Run are the active production ingestion path.
@@ -40,7 +40,7 @@
 - Menu/tab and mockup QA still needs another visual pass against the current rendered routes.
 - Tier gating still needs a deliberate test matrix across dashboard, strategy locker, pricing, billing, and AI surfaces.
 - BrewCommand alerting is now operational with a single selected recipient plus history/filtering, but full internal RBAC and user provisioning are still deferred.
-- BrewCommand should also receive BrewU support submissions so reported issues can be tracked with notifications and email escalation.
+- BrewCommand receives BrewU support submissions so reported issues can be tracked with notifications and email escalation.
 - Shared tier access now normalizes legacy `brew` labels and numeric strategy tiers into the current `free / starter / pro / master` ladder, and the dashboard generate action plus strategy smoke tests now pass against historical-style feature data.
 - State analytics is intentionally deferred until the state preference flow settles, but the data model is ready for it once we instrument events.
 - Pricing direction is now locked for the next billing pass: 3-day capped trial, then Starter at $4.99, Pro at $9.99, and Master at $19.99, with AI starting in Starter and expanding upward; annual billing should target a 30% savings message.
@@ -59,7 +59,7 @@
 5. Finish the CA Powerball/Mega live scraper work that remains stale/expected.
 6. Keep the BrewCommand AI usage ledger visible while live-mode billing is validated.
 7. Keep the onboarding tutorial and future Opus Clip clips aligned with the landing/login flow.
-8. Add the BrewU support intake tab with screenshot upload and BrewCommand notification routing.
+8. Tighten the BrewU support intake flow and verify screenshot upload / notification delivery.
 9. Keep the referral growth loop deferred until billing, notifications, and strategy gating are stable.
 
 ### Tutorial Prompt Status
