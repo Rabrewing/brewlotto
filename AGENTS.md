@@ -1,6 +1,6 @@
 # AGENTS.md (BrewLotto V1)
 
-## Current Status (2026-05-05 ET)
+## Current Status (2026-05-06 ET)
 
 ### System Health — All NC + CA Launch Games Green
 
@@ -51,6 +51,7 @@ official source → ingestion → Supabase → freshness view → API → UI
 | **CA Results/Stats game_key fix** | `lib/dashboard/game-config.ts` — 2026-05-05 | statsGameKey now maps correctly per state: CA pick3→daily3, pick4→daily4, cash5→fantasy5. Previously CA daily games looked up with wrong game_key ('pick3' instead of 'daily3'), returning 500 errors. |
 | **Results API cache prevention** | `app/api/results/route.ts`, `app/results/page.tsx` — 2026-05-05 | Added `force-dynamic` + `Cache-Control: no-store`. Fixed `.single()`→`.maybeSingle()` to handle empty draws gracefully. Fixed `getWorstStatus` ranking so 'unknown' (rank 2) doesn't mask stale data. Added 2min auto-poll on Results page. |
 | **Dashboard Stats API cache prevention** | `app/api/dashboard/stats/route.ts` — 2026-05-05 | Added `force-dynamic` + `Cache-Control: no-store` headers. Added 2min auto-poll on dashboard. |
+| **DST timezone fix** | All 5 scrapers — 2026-05-05 | Changed hardcoded timezone offsets from EST/PST (-05:00/-08:00) to EDT/PDT (-04:00/-07:00) for DST. Previous offset caused all draw times to display 1 hour off during daylight saving. Also fixed LiveTrustBadge date-only string handling (no longer treats date-only 'YYYY-MM-DD' as UTC midnight, avoiding off-by-one-day display). |
 | **BLOB_READ_WRITE_TOKEN** | Vercel Blob — 2026-05-04 | Blob store created, linked to project. Landing video + tutorial video uploaded to Blob. `NEXT_PUBLIC_LANDING_VIDEO_*_URL` and `NEXT_PUBLIC_TUTORIAL_VIDEO_URL` env vars set. |
 
 ### Auth & Email

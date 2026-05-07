@@ -15,6 +15,16 @@ interface LiveTrustBadgeProps {
 
 function formatDate(value: string | null, stateCode: string) {
   if (!value) return null;
+
+  // Date-only string (YYYY-MM-DD) — show as-is, no timezone conversion
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const d = new Date(value + 'T12:00:00Z');
+    if (Number.isNaN(d.getTime())) return value;
+    return d.toLocaleString('en-US', {
+      timeZone: 'UTC', month: 'short', day: 'numeric', year: 'numeric',
+    });
+  }
+
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   const tz = TZ_MAP[stateCode] || TZ_MAP.NC;

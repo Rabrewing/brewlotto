@@ -130,7 +130,7 @@ async function scrapeGame(config, gameName) {
       game_id: config.gameId,
       draw_date: drawDate,
       draw_window_label: windowIdx,
-      draw_datetime_local: `${drawDate}T${timeStr}:00-05:00`,
+      draw_datetime_local: `${drawDate}T${timeStr}:00-04:00`,
       primary_numbers: d.numbers,
       bonus_numbers: [],
       fireball_value: d.fireball || null,

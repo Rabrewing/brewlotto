@@ -130,7 +130,7 @@ async function scrape() {
         game_id: config.gameId,
         draw_date: d.date,
         draw_window_label: d.window,
-        draw_datetime_local: `${d.date}T${config.timeMap[d.window] || config.timeMap.daily}:00-08:00`,
+        draw_datetime_local: `${d.date}T${config.timeMap[d.window] || config.timeMap.daily}:00-07:00`,
         primary_numbers: d.numbers,
         bonus_numbers: [],
         source_id: config.sourceId,

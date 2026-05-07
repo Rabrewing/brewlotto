@@ -150,7 +150,7 @@ const MONTHS_BACK = 6; // Look back 6 months for more data
                 game_id: ncGameId,
                 draw_date: draw.draw_date,
                 draw_window_label: 'nightly',
-                draw_datetime_local: `${draw.draw_date}T23:00:00-05:00`,
+                draw_datetime_local: `${draw.draw_date}T23:00:00-04:00`,
                 primary_numbers: draw.numbers,
                 bonus_numbers: [draw.bonus_number],
                 multiplier_value: draw.multiplier ? parseInt(draw.multiplier) : null,

@@ -138,7 +138,7 @@ async function scrape() {
         game_id: gameId,
         draw_date: d.date,
         draw_window_label: d.window,
-        draw_datetime_local: `${d.date}T${config.drawTime}:00-08:00`,
+        draw_datetime_local: `${d.date}T${config.drawTime}:00-07:00`,
         primary_numbers: d.numbers,
         bonus_numbers: d.bonus,
         source_id: sourceId,
