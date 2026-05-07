@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { TutorialVideoPanel } from '@/components/brewlotto/TutorialVideoPanel';
 import { DashboardContainer, Header, NavigationTabs } from '@/components/brewlotto/dashboard';
 import { BREWU_PLAY_STYLE_GUIDES } from '@/lib/brewwu/playStyleMatrix';
+import { BREWU_PAYOUT_GUIDES } from '@/lib/brewwu/payoutMatrix';
 
 const LESSONS = [
   {
@@ -119,6 +120,44 @@ export default function LearnPage() {
                   ))}
                 </div>
                 <div className="mt-4 rounded-[18px] border border-[#53d48a]/18 bg-[#102117] px-4 py-4 text-[14px] leading-7 text-[#c8f4d8]">
+                  <span className="font-semibold text-white">Brew AI help: </span>
+                  {guide.aiHint}
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-5 rounded-[30px] border border-[#f7b84d]/18 bg-[radial-gradient(circle_at_top_left,rgba(247,184,77,0.14),rgba(0,0,0,0)_34%),linear-gradient(145deg,rgba(28,20,12,0.92),rgba(8,8,8,0.98))] px-5 py-5 shadow-[0_0_28px_rgba(247,184,77,0.08)]">
+          <div className="text-[15px] uppercase tracking-[0.16em] text-white/38">Payout ladders by game</div>
+          <div className="mt-3 text-[26px] font-semibold text-[#f7ddb3]">Show the prize shape, not hype</div>
+          <div className="mt-2 max-w-3xl text-[15px] leading-7 text-white/62">
+            This section gives BrewLotto a single place to explain how a play style maps to the
+            game&apos;s prize ladder so customers can see the difference between a precision play,
+            a coverage play, and a standard number-match game.
+          </div>
+          <div className="mt-5 grid gap-4 xl:grid-cols-2">
+            {BREWU_PAYOUT_GUIDES.map((guide) => (
+              <article
+                key={guide.title}
+                className="rounded-[24px] border border-white/8 bg-black/20 px-5 py-5 shadow-[0_0_18px_rgba(247,184,77,0.04)]"
+              >
+                <div className="text-[12px] uppercase tracking-[0.16em] text-[#f5cf84]">{guide.label}</div>
+                <div className="mt-2 text-[21px] font-semibold text-white">{guide.title}</div>
+                <div className="mt-3 text-[15px] leading-7 text-white/66">{guide.summary}</div>
+                <div className="mt-4 space-y-2">
+                  {guide.tiers.map((tier) => (
+                    <div
+                      key={`${guide.id}-${tier.name}`}
+                      className="rounded-[18px] border border-[#f5cf84]/12 bg-[#171208] px-4 py-3 text-[13px] leading-6 text-[#f1dfc0]"
+                    >
+                      <div className="font-semibold text-white">{tier.name}</div>
+                      <div className="text-white/54">{tier.odds || 'Odds vary by style and state'}</div>
+                      <div className="mt-1 text-white/72">{tier.note}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 rounded-[18px] border border-[#f5cf84]/14 bg-[#24190b] px-4 py-4 text-[14px] leading-7 text-[#f6e2bc]">
                   <span className="font-semibold text-white">Brew AI help: </span>
                   {guide.aiHint}
                 </div>

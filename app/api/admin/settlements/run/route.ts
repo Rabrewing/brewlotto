@@ -6,6 +6,7 @@ import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { requireBrewCommandRequest } from '@/lib/auth/brewcommand';
+import { classifySettlementOutcome } from '@/lib/brewwu/payoutMatrix';
 import { sendPlaySettlementEmail } from '@/lib/notifications/playSettlements';
 
 type PlayLogRow = {
@@ -20,6 +21,7 @@ type PlayLogRow = {
   amount_spent: number | null;
   prediction_id: string | null;
   user_pick_id: string | null;
+  metadata: unknown;
 };
 
 type LotteryGameRow = {
@@ -137,62 +139,6 @@ function countIntersection(a: number[], b: number[]) {
   return hits;
 }
 
-function buildResultCode({
-  exactPrimary,
-  bonusMatch,
-  matchCount,
-}: {
-  exactPrimary: boolean;
-  bonusMatch: boolean;
-  matchCount: number;
-}) {
-  if (exactPrimary && bonusMatch) {
-    return 'exact_primary_bonus';
-  }
-
-  if (exactPrimary) {
-    return 'exact_primary';
-  }
-
-  if (bonusMatch) {
-    return 'bonus_match';
-  }
-
-  if (matchCount > 0) {
-    return `partial_match_${matchCount}`;
-  }
-
-  return 'no_match';
-}
-
-function buildPayoutTier({
-  exactPrimary,
-  bonusMatch,
-  matchCount,
-}: {
-  exactPrimary: boolean;
-  bonusMatch: boolean;
-  matchCount: number;
-}) {
-  if (exactPrimary && bonusMatch) {
-    return 'jackpot';
-  }
-
-  if (exactPrimary) {
-    return 'top_prize';
-  }
-
-  if (bonusMatch) {
-    return 'bonus_prize';
-  }
-
-  if (matchCount >= 3) {
-    return `match_${matchCount}`;
-  }
-
-  return null;
-}
-
 function gameLabelFromKey(gameKey: string) {
   const labels: Record<string, string> = {
     pick3: 'Pick 3',
@@ -206,6 +152,41 @@ function gameLabelFromKey(gameKey: string) {
   };
 
   return labels[gameKey] || gameKey;
+}
+
+function canonicalGameId(gameKey: string): 'pick3' | 'pick4' | 'cash5' | 'powerball' | 'mega' {
+  const normalized = gameKey.trim().toLowerCase();
+
+  if (normalized === 'daily3') {
+    return 'pick3';
+  }
+
+  if (normalized === 'daily4') {
+    return 'pick4';
+  }
+
+  if (normalized === 'fantasy5') {
+    return 'cash5';
+  }
+
+  if (normalized === 'mega_millions') {
+    return 'mega';
+  }
+
+  if (normalized === 'pick3' || normalized === 'pick4' || normalized === 'cash5' || normalized === 'powerball' || normalized === 'mega') {
+    return normalized;
+  }
+
+  return 'cash5';
+}
+
+function extractStrategyHint(metadata: unknown) {
+  if (!metadata || typeof metadata !== 'object') {
+    return null;
+  }
+
+  const value = metadata as Record<string, unknown>;
+  return value.strategy ?? value.add_on ?? value.play_style ?? null;
 }
 
 async function getOfficialDraw(
@@ -255,7 +236,7 @@ export async function POST(request: NextRequest) {
 
     let logsQuery = supabase
       .from('play_logs')
-      .select('id, user_id, state, game, draw_date, draw_time, played_numbers, played_bonus_number, amount_spent, prediction_id, user_pick_id')
+      .select('id, user_id, state, game, draw_date, draw_time, played_numbers, played_bonus_number, amount_spent, prediction_id, user_pick_id, metadata')
       .eq('is_settled', false)
       .order('created_at', { ascending: true })
       .limit(limit);
@@ -352,32 +333,39 @@ export async function POST(request: NextRequest) {
       const officialNumbers = normalizeNumbers(officialDraw.primary_numbers);
       const officialBonusNumbers = normalizeNumbers(officialDraw.bonus_numbers);
       const playedBonusNumber = log.played_bonus_number;
-      const bonusMatch =
-        playedBonusNumber != null && officialBonusNumbers.length > 0
-          ? officialBonusNumbers.includes(playedBonusNumber)
-          : false;
       const matchCount = countIntersection(playedNumbers, officialNumbers);
       const positionalMatchCount = countExactPositions(playedNumbers, officialNumbers);
-      const exactPrimary = playedNumbers.length === officialNumbers.length && positionalMatchCount === officialNumbers.length;
-      const isWin = exactPrimary || bonusMatch;
-      const resultCode = buildResultCode({ exactPrimary, bonusMatch, matchCount });
-      const payoutTier = buildPayoutTier({ exactPrimary, bonusMatch, matchCount });
-      const payoutAmount = isWin ? (log.amount_spent != null ? Number(log.amount_spent) : null) : null;
+      const classification = classifySettlementOutcome({
+        gameId: canonicalGameId(game.game_key),
+        playedNumbers,
+        officialNumbers,
+        strategyHint: extractStrategyHint(log.metadata),
+        bonusMatch:
+          playedBonusNumber != null && officialBonusNumbers.length > 0
+            ? officialBonusNumbers.includes(playedBonusNumber)
+            : false,
+        playedBonusNumber,
+        officialBonusNumbers,
+      });
+      const payoutAmount = null;
 
       const { error: updateError } = await supabase
         .from('play_logs')
         .update({
           is_settled: true,
           settled_at: new Date().toISOString(),
-          outcome_result_code: resultCode,
+          outcome_result_code: classification.resultCode,
           outcome_match_count: matchCount,
-          outcome_bonus_match: bonusMatch,
+          outcome_bonus_match: classification.bonusMatch,
           outcome_payout_amount: payoutAmount,
           metadata: {
+            ...(log.metadata && typeof log.metadata === 'object' ? (log.metadata as Record<string, unknown>) : {}),
             settled_by: 'admin-settlement-sweep',
             official_draw_id: officialDraw.id,
-            payout_tier: payoutTier,
-            exact_primary: exactPrimary,
+            payout_tier: classification.payoutTier,
+            payout_label: classification.payoutLabel,
+            payout_summary: classification.payoutSummary,
+            exact_primary: positionalMatchCount === officialNumbers.length && officialNumbers.length > 0,
           },
         })
         .eq('id', log.id);
@@ -389,9 +377,9 @@ export async function POST(request: NextRequest) {
 
       settled += 1;
 
-      const notificationTitle = isWin ? 'Your BrewLotto pick won' : 'Your BrewLotto pick settled';
-      const notificationBody = isWin
-        ? `Your ${game.display_name} pick settled against the official draw and matched ${matchCount} number${matchCount === 1 ? '' : 's'}.`
+      const notificationTitle = classification.isWin ? 'Your BrewLotto pick won' : 'Your BrewLotto pick settled';
+      const notificationBody = classification.isWin
+        ? `Your ${game.display_name} pick settled against the official draw: ${classification.payoutSummary}`
         : `Your ${game.display_name} pick settled against the official draw.`;
 
       const { error: notificationError } = await supabase.from('user_notifications').insert({
@@ -402,26 +390,27 @@ export async function POST(request: NextRequest) {
         cta_label: 'View Result',
         cta_url: `${process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') || 'https://brewlotto.app'}/notifications`,
         priority: isWin ? 'high' : 'normal',
-        metadata: {
-          source: 'settlement-sweep',
-          play_log_id: log.id,
-          game_key: normalizedGameKey,
-          state: log.state,
-          draw_id: officialDraw.id,
-          is_win: isWin,
-          match_count: matchCount,
-          positional_match_count: positionalMatchCount,
-          bonus_match: bonusMatch,
-          payout_tier: payoutTier,
-          result_code: resultCode,
-        },
-      });
+          metadata: {
+            source: 'settlement-sweep',
+            play_log_id: log.id,
+            game_key: normalizedGameKey,
+            state: log.state,
+            draw_id: officialDraw.id,
+            is_win: classification.isWin,
+            match_count: matchCount,
+            positional_match_count: positionalMatchCount,
+            bonus_match: classification.bonusMatch,
+            payout_tier: classification.payoutTier,
+            payout_label: classification.payoutLabel,
+            result_code: classification.resultCode,
+          },
+        });
 
       if (!notificationError) {
         notificationsCreated += 1;
       }
 
-      if (isWin) {
+      if (classification.isWin) {
         wins += 1;
         const {
           data: authUser,
@@ -440,11 +429,13 @@ export async function POST(request: NextRequest) {
             officialNumbers,
             matchCount,
             positionalMatchCount,
-            bonusMatch,
-            isWin,
-            payoutTier,
-            resultCode,
+            bonusMatch: classification.bonusMatch,
+            isWin: classification.isWin,
+            payoutTier: classification.payoutTier,
+            resultCode: classification.resultCode,
             payoutAmount,
+            payoutLabel: classification.payoutLabel,
+            payoutSummary: classification.payoutSummary,
           });
 
           if (!emailResult.skipped) {

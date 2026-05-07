@@ -1,6 +1,6 @@
 # BrewLotto V1 - Current State & Next Steps
 
-**Last Updated:** 2026-05-07 ET (admin alerting cleanup, branch truth update, blob-backed landing reel, home-state preference wiring, billing live-mode verification, strategy locker save/run flow fix, BrewU Systems support scaffold, support screenshots bucket added, canonical play log bridge, support inbox notifications, settlement sweep, customer notifications plan added, docs timestamp rule added, BrewU play-style guidance live, shared play-style matrix centralized)
+**Last Updated:** 2026-05-07 ET (admin alerting cleanup, branch truth update, blob-backed landing reel, home-state preference wiring, billing live-mode verification, strategy locker save/run flow fix, BrewU Systems support scaffold, support screenshots bucket added, canonical play log bridge, support inbox notifications, settlement sweep, customer notifications plan added, docs timestamp rule added, BrewU play-style guidance live, shared play-style and payout matrix centralized, settlement classification upgraded)
 **Phase:** Shared UI/UX framework and product truth pass
 
 ## 2026-05-05 Truth Update
@@ -28,9 +28,10 @@
 - Resolved support tickets now also create an in-app `user_notifications` record so the customer notification center reflects support updates in addition to email.
 - The legacy play-log path now writes into the canonical `play_logs` table with auth validation and normalized draw-time / number payloads, which makes it possible to build settlement and winnings alerts on one source of truth.
 - BrewCommand now has a settlement sweep endpoint and admin trigger that can settle unsettled `play_logs` against official draws, covering both NC and CA through the same state/game mapping the dashboard uses.
-- Customer-facing notifications are still only partially wired: the notification center exists, support updates now land in inbox + email, and winnings/settlement alerts still need a settlement job that reads `play_logs` and emits the proper notification/email fan-out.
+- Customer-facing notifications are still only partially wired: the notification center exists, support updates now land in inbox + email, and winnings/settlement alerts now read from `play_logs` but still need a real cash-value prize-table source before they become fully precise.
 - The next strategy-intelligence pass should capture each launch game’s official play styles and odds so the AI layer can explain straight, box, straight/box, 50/50, combo, pair, Fireball, Power Play, Double Play, and similar choices in a customer-friendly way.
-- The BrewU/help surface now turns that same play-style matrix into plain-English strategy guidance so customers can learn when a straight play, box play, or game-specific add-on is the better educational option. That guidance now comes from a shared BrewU matrix module so future AI copy and help surfaces can stay aligned.
+- The BrewU/help surface now turns that same play-style matrix into plain-English strategy guidance so customers can learn when a straight play, box play, or game-specific add-on is the better educational option. That guidance now comes from shared BrewU matrix modules so future AI copy, help surfaces, and settlement labels can stay aligned.
+- Settlement classification now uses the shared payout matrix, so exact-order, box-style, and standard match-number games are no longer all treated as the same generic result label.
 
 ### ⚠️ Still Partial Or Needs Verification
 - `scripts/ingestionScheduler.js` has been archived; Cloud Scheduler + Cloud Run are the active production ingestion path.
@@ -67,7 +68,7 @@
 7. Keep the onboarding tutorial and future Opus Clip clips aligned with the landing/login flow.
 8. Tighten the BrewU support intake flow and verify screenshot upload / notification delivery.
 9. Normalize the customer notification pipeline so support updates, settlement events, and winnings alerts can write to `user_notifications` and email the correct BrewLotto return link.
-10. Capture every launch game’s play-style odds and teach the AI layer plus BrewU/help content to offer educational straight/box/50-50/combo suggestions per game.
+10. Capture every launch game’s play-style odds and payout ladders, then teach the AI layer plus BrewU/help content to offer educational straight/box/50-50/combo suggestions per game.
 11. Keep the referral growth loop deferred until billing, notifications, and strategy gating are stable.
 
 ### Tutorial Prompt Status

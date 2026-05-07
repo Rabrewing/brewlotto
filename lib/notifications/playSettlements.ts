@@ -16,6 +16,8 @@ type SettlementNotificationInput = {
   payoutTier: string | null;
   resultCode: string;
   payoutAmount: number | null;
+  payoutLabel: string;
+  payoutSummary: string;
 };
 
 function getResendConfig() {
@@ -42,7 +44,7 @@ function escapeHtml(value: string) {
 function buildResultSummary(input: SettlementNotificationInput) {
   const drawWindow = input.drawWindowLabel ? input.drawWindowLabel.replace(/_/g, ' ') : 'official draw';
   const resultSummary = input.isWin
-    ? 'You have a winning BrewLotto result.'
+    ? input.payoutSummary
     : input.matchCount > 0
       ? `Your pick settled with ${input.matchCount} matched number${input.matchCount === 1 ? '' : 's'}.`
       : 'Your pick settled without a winning match.';
@@ -94,7 +96,7 @@ function buildSettlementEmailHtml(input: SettlementNotificationInput) {
               Match count: ${input.matchCount}<br />
               Positional match count: ${input.positionalMatchCount}<br />
               Result code: ${escapeHtml(input.resultCode)}<br />
-              Payout tier: ${escapeHtml(input.payoutTier || 'Not awarded')}
+              Payout tier: ${escapeHtml(input.payoutLabel || input.payoutTier || 'Not awarded')}
             </div>
           </div>
           <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:20px;">
@@ -195,7 +197,7 @@ export async function sendPlaySettlementEmail(
     `Positional match count: ${input.positionalMatchCount}`,
     `Bonus match: ${input.bonusMatch ? 'yes' : 'no'}`,
     `Result code: ${input.resultCode}`,
-    `Payout tier: ${input.payoutTier || 'not awarded'}`,
+    `Payout tier: ${input.payoutLabel || input.payoutTier || 'not awarded'}`,
     '',
     'Open BrewLotto to view the full result history.',
   ].join('\n');
@@ -212,4 +214,3 @@ export async function sendPlaySettlementEmail(
 
   return { skipped: false };
 }
-
