@@ -22,7 +22,6 @@ const RESULT_GAME_CONFIG: Record<DashboardGameId, { primaryCount: number; hasBon
 function intersectCount(source: number[], target: number[]) {
   const remaining = [...target];
   let hits = 0;
-
   for (const value of source) {
     const index = remaining.indexOf(value);
     if (index >= 0) {
@@ -30,29 +29,24 @@ function intersectCount(source: number[], target: number[]) {
       remaining.splice(index, 1);
     }
   }
-
   return hits;
 }
 
 function buildInsights(matchCount: number, hotHits: number, coldHits: number) {
   const insights: string[] = [];
-
   if (hotHits > 0) {
     insights.push(hotHits > 1 ? 'Hot trend hit again' : 'A hot number showed up again');
   }
-
   if (coldHits === 0) {
     insights.push('Cold numbers missed this draw');
   } else {
     insights.push('Cold numbers stayed in the mix');
   }
-
   if (matchCount >= 2) {
     insights.push('Pattern shift detected around your closest pick');
   } else {
     insights.push('No strong player match pattern yet');
   }
-
   return insights.slice(0, 3);
 }
 
@@ -95,10 +89,7 @@ export async function GET(request: NextRequest) {
     const freshnessStatus = getWorstStatus(freshnessRows.map((row) => row.freshness_status || 'unknown'));
     const freshnessBlocked = freshnessStatus === 'stale' || freshnessStatus === 'failed';
     const stalenessMinutes = freshnessRows.reduce<number | null>((maxValue, row) => {
-      if (row.staleness_minutes == null) {
-        return maxValue;
-      }
-
+      if (row.staleness_minutes == null) return maxValue;
       return maxValue == null ? row.staleness_minutes : Math.max(maxValue, row.staleness_minutes);
     }, null);
     const expectedNextDrawAt = freshnessRows
@@ -110,7 +101,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: true,
         data: {
-          latestDraw: null,
+          draws: [],
           closestPrediction: null,
           matchCount: 0,
           insights: [
@@ -132,7 +123,6 @@ export async function GET(request: NextRequest) {
       }, NO_CACHE);
     }
 
-    // Get game_id from lottery_games first (avoid embedding issues)
     const gameIdResult = await supabase
       .from('lottery_games')
       .select('id, display_name')
@@ -146,12 +136,11 @@ export async function GET(request: NextRequest) {
       gameId
         ? supabase
             .from('official_draws')
-            .select('draw_date, draw_datetime_local, primary_numbers, bonus_numbers')
+            .select('draw_date, draw_datetime_local, draw_window_label, primary_numbers, bonus_numbers')
             .eq('game_id', gameId)
             .order('draw_date', { ascending: false })
-            .limit(1)
-            .maybeSingle()
-        : { data: null, error: null },
+            .limit(5)
+        : { data: [], error: null },
       supabase
         .from('predictions')
         .select('id, game, state, created_at, predicted_numbers, bonus_number, is_saved, source_strategy_key, confidence_score')
@@ -190,12 +179,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const draw = drawResult.data;
-    if (!draw) {
+    const draws = drawResult.data || [];
+    if (draws.length === 0) {
       return NextResponse.json({
         success: true,
         data: {
-          latestDraw: null,
+          draws: [],
           closestPrediction: null,
           matchCount: 0,
           insights: ['No official draw is available yet for this game.'],
@@ -204,14 +193,6 @@ export async function GET(request: NextRequest) {
       }, NO_CACHE);
     }
 
-    const drawNumbers = Array.isArray(draw.primary_numbers)
-      ? draw.primary_numbers.filter((value): value is number => typeof value === 'number')
-      : [];
-    const drawBonusNumbers = Array.isArray(draw.bonus_numbers)
-      ? draw.bonus_numbers.filter((value): value is number => typeof value === 'number')
-      : [];
-    const drawBonus = drawBonusNumbers[0] ?? null;
-
     const hotFrequency = new Map<number, number>();
     const coldFrequency = new Map<number, number>();
 
@@ -219,7 +200,6 @@ export async function GET(request: NextRequest) {
       const primaryNumbers = Array.isArray(row.primary_numbers)
         ? row.primary_numbers.filter((value): value is number => typeof value === 'number')
         : [];
-
       for (const value of primaryNumbers) {
         hotFrequency.set(value, (hotFrequency.get(value) || 0) + 1);
         coldFrequency.set(value, (coldFrequency.get(value) || 0) + 1);
@@ -241,63 +221,114 @@ export async function GET(request: NextRequest) {
     );
 
     const predictions = predictionResult.data || [];
-    const scoredPredictions = predictions.map((prediction) => {
-      const predictedNumbers = Array.isArray(prediction.predicted_numbers)
-        ? prediction.predicted_numbers.filter((value): value is number => typeof value === 'number')
+
+    const drawEntries = draws.map((draw) => {
+      const drawNumbers = Array.isArray(draw.primary_numbers)
+        ? draw.primary_numbers.filter((value): value is number => typeof value === 'number')
         : [];
-      const primaryMatches = intersectCount(predictedNumbers, drawNumbers);
-      const bonusMatch = drawBonus != null && prediction.bonus_number === drawBonus ? 1 : 0;
-      const totalMatches = primaryMatches + bonusMatch;
+      const drawBonusNumbers = Array.isArray(draw.bonus_numbers)
+        ? draw.bonus_numbers.filter((value): value is number => typeof value === 'number')
+        : [];
+      const drawBonus = drawBonusNumbers[0] ?? null;
+
+      const scoredPredictions = predictions.map((prediction) => {
+        const predictedNumbers = Array.isArray(prediction.predicted_numbers)
+          ? prediction.predicted_numbers.filter((value): value is number => typeof value === 'number')
+          : [];
+        const primaryMatches = intersectCount(predictedNumbers, drawNumbers);
+        const bonusMatch = drawBonus != null && prediction.bonus_number === drawBonus ? 1 : 0;
+        const totalMatches = primaryMatches + bonusMatch;
+
+        return {
+          ...prediction,
+          predicted_numbers: predictedNumbers,
+          primaryMatches,
+          bonusMatch,
+          totalMatches,
+          drawNumbers,
+          drawBonus,
+        };
+      });
+
+      const best = scoredPredictions.sort((a, b) => {
+        if (b.totalMatches !== a.totalMatches) return b.totalMatches - a.totalMatches;
+        return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+      })[0] || null;
 
       return {
-        ...prediction,
-        predicted_numbers: predictedNumbers,
-        primaryMatches,
-        bonusMatch,
-        totalMatches,
+        drawDate: draw.draw_date,
+        drawnAt: draw.draw_datetime_local,
+        windowLabel: draw.draw_window_label,
+        primaryNumbers: drawNumbers,
+        bonusNumber: drawBonus,
+        bestPrediction: best,
       };
     });
 
-    const closestPrediction = scoredPredictions.sort((a, b) => {
-      if (b.totalMatches !== a.totalMatches) {
-        return b.totalMatches - a.totalMatches;
-      }
+    const allScored = drawEntries.flatMap((entry) => {
+      if (!entry.bestPrediction) return [];
+      return [{
+        drawDate: entry.drawDate,
+        totalMatches: entry.bestPrediction.totalMatches,
+        primaryMatches: entry.bestPrediction.primaryMatches,
+        bonusMatch: entry.bestPrediction.bonusMatch,
+        predictedNumbers: entry.bestPrediction.predicted_numbers,
+        prediction: entry.bestPrediction,
+      }];
+    });
 
-      return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+    const bestOverall = allScored.sort((a, b) => {
+      if (b.totalMatches !== a.totalMatches) return b.totalMatches - a.totalMatches;
+      return 0;
     })[0] || null;
 
-    const hotHits = drawNumbers.filter((value) => hotSet.has(value)).length;
-    const coldHits = drawNumbers.filter((value) => coldSet.has(value)).length;
+    const matchCounts = drawEntries.map((entry) => {
+      const predNumbers = entry.bestPrediction?.predicted_numbers ?? [];
+      const matchCount = entry.bestPrediction?.primaryMatches ?? 0;
+      const bonusMatch = Boolean(entry.bestPrediction?.bonusMatch);
+      return {
+        drawDate: entry.drawDate,
+        matchCount,
+        bonusMatch,
+        predictedNumbers: predNumbers,
+      };
+    });
+
+    const allDrawNumbersFlat = drawEntries.flatMap((e) => e.primaryNumbers);
+    const hotHits = allDrawNumbersFlat.filter((value) => hotSet.has(value)).length;
+    const coldHits = allDrawNumbersFlat.filter((value) => coldSet.has(value)).length;
+
+    const apiDraws = drawEntries.map((entry) => ({
+      drawDate: entry.drawDate,
+      drawnAt: entry.drawnAt,
+      windowLabel: entry.windowLabel,
+      primaryNumbers: entry.primaryNumbers,
+      bonusNumber: entry.bonusNumber,
+      bonusLabel: gameConfig.bonusLabel,
+    }));
 
     return NextResponse.json({
       success: true,
       data: {
-        latestDraw: {
-          game: gameConfig.displayLabel,
-          state: gameConfig.statsStateCode,
-          drawnAt: draw.draw_datetime_local,
-          drawDate: draw.draw_date,
-          primaryNumbers: drawNumbers,
-          bonusNumber: drawBonus,
-          bonusLabel: gameConfig.bonusLabel,
-        },
-        closestPrediction: closestPrediction
+        draws: apiDraws,
+        closestPrediction: bestOverall
           ? {
-              id: closestPrediction.id,
-              game: closestPrediction.game,
-              state: closestPrediction.state,
-              createdAt: closestPrediction.created_at,
-              strategyLabel: closestPrediction.source_strategy_key,
-              confidenceScore: closestPrediction.confidence_score,
-              primaryNumbers: closestPrediction.predicted_numbers,
-              bonusNumber: closestPrediction.bonus_number,
-              matchCount: closestPrediction.totalMatches,
-              bonusMatch: Boolean(closestPrediction.bonusMatch),
-              isSaved: Boolean(closestPrediction.is_saved),
+              id: bestOverall.prediction.id,
+              game: bestOverall.prediction.game,
+              state: bestOverall.prediction.state,
+              createdAt: bestOverall.prediction.created_at,
+              strategyLabel: bestOverall.prediction.source_strategy_key,
+              confidenceScore: bestOverall.prediction.confidence_score,
+              primaryNumbers: bestOverall.predictedNumbers,
+              bonusNumber: bestOverall.prediction.bonus_number,
+              matchCount: bestOverall.totalMatches,
+              bonusMatch: Boolean(bestOverall.bonusMatch),
+              isSaved: Boolean(bestOverall.prediction.is_saved),
             }
           : null,
-        matchCount: closestPrediction?.totalMatches || 0,
-        insights: buildInsights(closestPrediction?.totalMatches || 0, hotHits, coldHits),
+        matchCount: bestOverall?.totalMatches || 0,
+        matchCounts,
+        insights: buildInsights(bestOverall?.totalMatches || 0, hotHits, coldHits),
         freshness: {
           status: freshnessStatus,
           stalenessMinutes,

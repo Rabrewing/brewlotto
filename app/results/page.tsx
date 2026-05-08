@@ -14,16 +14,24 @@ import {
 import { resolveDashboardGameConfig } from '@/lib/dashboard/game-config';
 import { usePreferredState } from '@/hooks/usePreferredState';
 
+interface DrawEntry {
+  drawDate: string | null;
+  drawnAt: string | null;
+  windowLabel: string | null;
+  primaryNumbers: number[];
+  bonusNumber: number | null;
+  bonusLabel: string;
+}
+
+interface MatchCountEntry {
+  drawDate: string | null;
+  matchCount: number;
+  bonusMatch: boolean;
+  predictedNumbers: number[];
+}
+
 interface ResultsPayload {
-  latestDraw: {
-    game: string;
-    state: string;
-    drawnAt: string | null;
-    drawDate: string | null;
-    primaryNumbers: number[];
-    bonusNumber: number | null;
-    bonusLabel: string;
-  } | null;
+  draws: DrawEntry[];
   closestPrediction: {
     id: string;
     game: string | null;
@@ -38,6 +46,7 @@ interface ResultsPayload {
     isSaved: boolean;
   } | null;
   matchCount: number;
+  matchCounts: MatchCountEntry[];
   insights: string[];
   freshness?: {
     status: 'healthy' | 'delayed' | 'stale' | 'failed' | 'unknown';
@@ -47,15 +56,9 @@ interface ResultsPayload {
 }
 
 function formatDrawTime(value: string | null) {
-  if (!value) {
-    return 'Time unavailable';
-  }
-
+  if (!value) return 'Time unavailable';
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-
+  if (Number.isNaN(date.getTime())) return value;
   return date.toLocaleTimeString([], {
     hour: 'numeric',
     minute: '2-digit',
@@ -65,6 +68,7 @@ function formatDrawTime(value: string | null) {
 export default function ResultsPage() {
   const { preferredState } = usePreferredState();
   const [selectedGame, setSelectedGame] = useState<GameId>('pick3');
+  const [selectedWindow, setSelectedWindow] = useState<string | null>(null);
   const [results, setResults] = useState<ResultsPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -102,9 +106,7 @@ export default function ResultsPage() {
     loadResults();
 
     const interval = setInterval(() => {
-      if (!cancelled) {
-        loadResults();
-      }
+      if (!cancelled) loadResults();
     }, 120000);
 
     return () => {
@@ -113,9 +115,27 @@ export default function ResultsPage() {
     };
   }, [selectedGame, preferredState]);
 
+  useEffect(() => {
+    setSelectedWindow(null);
+  }, [selectedGame, preferredState]);
+
   const gameConfig = resolveDashboardGameConfig(selectedGame, preferredState) || resolveDashboardGameConfig('pick3', 'NC')!;
   const showBonus = selectedGame === 'powerball' || selectedGame === 'mega';
   const freshnessBlocked = results?.freshness && (results.freshness.status === 'stale' || results.freshness.status === 'failed');
+  const draws = results?.draws || [];
+
+  const windowLabels = [...new Set(draws.map(d => d.windowLabel).filter(Boolean))] as string[];
+  const activeWindow = selectedWindow || windowLabels[0] || null;
+  const filteredDraws = activeWindow ? draws.filter(d => d.windowLabel === activeWindow) : draws;
+  const latestDraw = draws[0] || null;
+
+  const windowDisplayName: Record<string, string> = {
+    midday: 'Midday',
+    day: 'Midday',
+    evening: 'Evening',
+    daily: 'Daily',
+    nightly: 'Nightly',
+  };
 
   return (
     <main className="min-h-screen bg-[#050505] text-white">
@@ -129,6 +149,27 @@ export default function ResultsPage() {
 
         <GameTabs selectedGame={selectedGame} onSelect={setSelectedGame} stateCode={preferredState} />
 
+        {windowLabels.length > 1 ? (
+          <div className="-mt-2 mb-5 flex gap-1.5">
+            {windowLabels.map((w) => {
+              const active = activeWindow === w;
+              return (
+                <button
+                  key={w}
+                  onClick={() => setSelectedWindow(w)}
+                  className={`rounded-full px-4 py-1.5 text-[13px] font-medium uppercase tracking-[0.06em] transition-all ${
+                    active
+                      ? 'bg-[#ffbd39]/15 text-[#ffbd39] shadow-[0_0_10px_rgba(255,184,28,0.08)]'
+                      : 'bg-white/[0.04] text-white/45 hover:bg-white/[0.08] hover:text-white/70'
+                  }`}
+                >
+                  {windowDisplayName[w] || w}
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
+
         {loading ? (
           <div className="rounded-[28px] border border-white/10 bg-white/[0.03] px-5 py-8 text-center text-white/55">
             Loading latest draw results...
@@ -137,43 +178,59 @@ export default function ResultsPage() {
           <div className="rounded-[28px] border border-[#ff8d7b]/25 bg-[#2a120d]/60 px-5 py-8 text-center text-[#ffc4b8]">
             {error}
           </div>
-        ) : !results?.latestDraw ? (
+        ) : filteredDraws.length === 0 ? (
           <div className={`rounded-[28px] px-5 py-8 text-center ${freshnessBlocked ? 'border border-[#ff8d7b]/25 bg-[#2a120d]/60 text-[#ffc4b8]' : 'border border-white/10 bg-white/[0.03] text-white/55'}`}>
             {freshnessBlocked
               ? results?.insights?.[0] || `Official ${gameConfig.displayLabel} results are temporarily withheld until freshness returns to healthy.`
-              : `No official draw is available yet for ${gameConfig.displayLabel}.`}
+              : draws.length > 0
+                ? `No ${windowDisplayName[activeWindow || ''] || ''} draw available yet.`
+                : `No official draw is available yet for ${gameConfig.displayLabel}.`}
           </div>
         ) : (
           <div className="space-y-5">
-            <section className="rounded-[28px] border border-[#ffbd39]/22 bg-[linear-gradient(145deg,rgba(32,19,13,0.82),rgba(13,10,10,0.96))] px-5 py-4 shadow-[0_0_22px_rgba(255,184,28,0.08)]">
-              <div className="text-[16px] font-semibold text-[#f7d6ab]">
-                {results.latestDraw.game}
-                <span className="ml-1 text-white/45">• {results.latestDraw.state}</span>
-              </div>
-              <div className="mt-5 flex flex-wrap items-start gap-3">
-                {results.latestDraw.primaryNumbers.map((value, index) => (
-                  <LotteryBall key={`draw-${value}-${index}`} number={value} variant="hot" size="small" />
-                ))}
-                {showBonus && results.latestDraw.bonusNumber !== null ? (
-                  <LotteryBall
-                    number={results.latestDraw.bonusNumber}
-                    variant="bonus-hot"
-                    size="small"
-                    label={results.latestDraw.bonusLabel}
-                  />
-                ) : null}
-              </div>
-              <div className="mt-5 text-[15px] text-white/58">Drawn: {formatDrawTime(results.latestDraw.drawnAt)}</div>
-              <div className="mt-3">
-                <LiveTrustBadge
-                  status={results.freshness?.status || 'unknown'}
-                  latestDrawDate={results.latestDraw.drawDate}
-                  stalenessMinutes={results.freshness?.stalenessMinutes}
-                  expectedNextDrawAt={results.freshness?.expectedNextDrawAt}
-                  stateCode={preferredState}
-                />
-              </div>
-            </section>
+            {filteredDraws.map((draw, index) => {
+              const matchCountEntry = results?.matchCounts?.[index] || null;
+              return (
+                <section
+                  key={`${draw.drawDate}-${draw.windowLabel || index}`}
+                  className="rounded-[28px] border border-[#ffbd39]/22 bg-[linear-gradient(145deg,rgba(32,19,13,0.82),rgba(13,10,10,0.96))] px-5 py-4 shadow-[0_0_22px_rgba(255,184,28,0.08)]"
+                >
+                  <div className="text-[16px] font-semibold text-[#f7d6ab]">
+                    {gameConfig.displayLabel}
+                    <span className="ml-1 text-white/45">• {gameConfig.statsStateCode}</span>
+                  </div>
+
+                  {draw.windowLabel ? (
+                    <div className="mt-1 text-[13px] font-medium uppercase tracking-[0.06em] text-[#ffbd39]/70">
+                      {draw.windowLabel} Draw
+                    </div>
+                  ) : null}
+
+                  <div className="mt-4 flex flex-wrap items-start gap-2">
+                    {draw.primaryNumbers.map((value, i) => (
+                      <LotteryBall key={`draw-${index}-${value}-${i}`} number={value} variant="hot" size="tiny" />
+                    ))}
+                    {showBonus && draw.bonusNumber !== null ? (
+                      <LotteryBall
+                        number={draw.bonusNumber}
+                        variant="bonus-hot"
+                        size="tiny"
+                        label={draw.bonusLabel}
+                      />
+                    ) : null}
+                  </div>
+
+                  <div className="mt-4 text-[13px] text-white/50">Drawn: {formatDrawTime(draw.drawnAt)}</div>
+
+                  {matchCountEntry ? (
+                    <div className="mt-2 text-[13px] text-[#ffd27e]">
+                      Closest pick matched {matchCountEntry.matchCount} number{matchCountEntry.matchCount === 1 ? '' : 's'}
+                      {showBonus && matchCountEntry.bonusMatch ? ' + bonus' : ''}
+                    </div>
+                  ) : null}
+                </section>
+              );
+            })}
 
             <section>
               <div className="mb-3 text-[18px] font-medium text-[#f7d6ab]">
@@ -185,15 +242,15 @@ export default function ResultsPage() {
               {results.closestPrediction ? (
                 <div className="rounded-[28px] border border-[#72caff]/20 bg-[linear-gradient(145deg,rgba(19,22,31,0.76),rgba(10,10,12,0.96))] px-5 py-4 shadow-[0_0_22px_rgba(114,202,255,0.06)]">
                   <div className="text-[16px] font-semibold text-[#d8e6f8]">Closest Pick</div>
-                  <div className="mt-5 flex flex-wrap items-start gap-3">
-                    {results.closestPrediction.primaryNumbers.map((value, index) => (
-                      <LotteryBall key={`pick-${value}-${index}`} number={value} variant="cold" size="small" />
+                  <div className="mt-5 flex flex-wrap items-start gap-2">
+                    {results.closestPrediction.primaryNumbers.map((value, i) => (
+                      <LotteryBall key={`pick-${value}-${i}`} number={value} variant="cold" size="tiny" />
                     ))}
                     {showBonus && results.closestPrediction.bonusNumber !== null ? (
                       <LotteryBall
                         number={results.closestPrediction.bonusNumber}
                         variant="bonus-cold"
-                        size="small"
+                        size="tiny"
                         label={gameConfig.bonusLabel}
                       />
                     ) : null}
@@ -227,6 +284,18 @@ export default function ResultsPage() {
                 ))}
               </div>
             </section>
+
+            {latestDraw ? (
+              <div className="mt-2 mb-4">
+                <LiveTrustBadge
+                  status={results.freshness?.status || 'unknown'}
+                  latestDrawDate={latestDraw.drawDate}
+                  stalenessMinutes={results.freshness?.stalenessMinutes}
+                  expectedNextDrawAt={results.freshness?.expectedNextDrawAt}
+                  stateCode={preferredState}
+                />
+              </div>
+            ) : null}
 
             <section className="rounded-[28px] border border-[#ffbd39]/18 bg-[linear-gradient(145deg,rgba(30,19,12,0.76),rgba(12,10,10,0.95))] px-6 py-6 text-center shadow-[0_0_20px_rgba(255,184,28,0.05)]">
               <div className="text-[20px] font-medium text-[#f7d6ab]">Don&apos;t miss the next drawing.</div>
