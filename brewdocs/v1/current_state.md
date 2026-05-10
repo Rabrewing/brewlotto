@@ -1,6 +1,6 @@
 # BrewLotto V1 - Current State & Next Steps
 
-**Last Updated:** 2026-05-10 ET (desktop/tablet shell widened, changelog + responsive checklist added, admin alerting cleanup, branch truth update, blob-backed landing reel, home-state preference wiring, billing live-mode verification, strategy locker save/run flow fix, BrewU Systems support scaffold, support screenshots bucket added, canonical play log bridge, support inbox notifications, settlement sweep, customer notifications plan added, docs timestamp rule added, BrewU play-style guidance live, shared play-style and payout matrix centralized, settlement classification upgraded, strategy validation pass queued, landing video replacement queued)
+**Last Updated:** 2026-05-10 ET (desktop/tablet shell widened, changelog + responsive checklist added, admin alerting cleanup, branch truth update, blob-backed landing reel, home-state preference wiring, billing live-mode verification, strategy locker save/run flow fix, compact entitlement summary + collapsible ladder, BrewU Systems support scaffold, support screenshots bucket added, canonical play log bridge, support inbox notifications, settlement sweep, customer notifications plan added, docs timestamp rule added, BrewU play-style guidance live, shared play-style and payout matrix centralized, settlement classification upgraded, strategy validation pass queued, landing video replacement queued)
 **Phase:** Shared UI/UX framework and product truth pass
 
 ## 2026-05-05 Truth Update
@@ -19,7 +19,7 @@
 - `scrapeCA_Live.js` and `scrapeNC_Live.js` exist and are wired into `scripts/ingestionJob.js`.
 - Strategy Locker, Billing, Notifications, Settings, Profile, Results, My Picks, Learn, Legal, and Admin routes all exist in the App Router.
 - Strategy Locker saves now route through a server-side save endpoint and the underlying `user_saved_strategies` table supports multiple saved strategies per user, one row per strategy.
-- Strategy Locker currently acts as a saved-strategy library and entitlement surface, and it now exposes a real run-preview action from each card; the dashboard `Generate Numbers` action remains the main app generate path.
+- Strategy Locker currently acts as a saved-strategy library and entitlement surface, and it now exposes a real run-preview action from each card while the entitlement ladder is compact by default; the dashboard `Generate Numbers` action remains the main app generate path.
 - Dashboard/results freshness gating is real and blocks stale/failed output.
 - Login is temporarily locked to BrewCommand superadmin allowlist accounts only; remove that gate before public V1 launch.
 - BrewCommand does not yet have a full internal RBAC / user-provisioning system; it still relies on the superadmin allowlist and should stay that way until V1 launch pressure justifies more complexity.
@@ -37,7 +37,7 @@
 ### ⚠️ Still Partial Or Needs Verification
 - `scripts/ingestionScheduler.js` has been archived; Cloud Scheduler + Cloud Run are the active production ingestion path.
 - Billing has checkout, webhook, and customer portal API scaffolding, and the remaining step is live-mode verification plus production transaction confirmation.
-- Strategy Locker is live and tier-aware, the save/favorite flow is server-backed, and the run-preview action is now exposed; the remaining verification is whether each registry label still matches the intended strategy behavior.
+- Strategy Locker is live and tier-aware, the save/favorite flow is server-backed, the run-preview action is exposed, and the entitlement snapshot now collapses by default; the remaining verification is whether each registry label still matches the intended strategy behavior.
 - The dashboard "Generate Numbers" action is wired to `POST /api/predictions`, and a historical-style strategy smoke test now covers the current strategy engine across Pick 3, Pick 4, Cash 5, Powerball, and Mega Millions ranges.
 - The live strategy engine is intentionally narrow in V1: `lib/prediction/strategyEngine.js` currently registers the core deterministic trio (`poisson`, `momentum`, `markov`) plus the ensemble combiner, while the older `lib/strategies/*.js` wrappers and `hooks/usePredictionEngine.js` are legacy compatibility layers that should not be mistaken for the current spec truth.
 - `My Picks` still uses a scroll-to-top placeholder for `Replay`; a true replay action is not wired yet.
@@ -46,7 +46,7 @@
 - Learn and Legal are lightweight V1 shells, not full CMS/legal surfaces yet.
 - Settings stores values, but full theme application across the UI is still future work.
 - Notifications stores preferences and reads history, but real delivery wiring still needs a full verification pass.
-- Menu/tab and mockup QA still needs another visual pass against the current rendered routes.
+- Menu/tab and mockup QA still needs another visual pass against the current rendered routes, with Strategy Locker and Learn/BrewU still the highest-priority polish pages.
 - The watermark-free landing-page video still needs a replacement pass once the new Blob asset lands locally; keep the Vercel CLI deploy/update step tracked with that media swap.
 - Tier gating still needs a deliberate test matrix across dashboard, strategy locker, pricing, billing, and AI surfaces.
 - Route wiring is now cleaner, but the next visual pass should still check whether the shared dashboard surfaces breathe as well on desktop/tablet as they do on mobile mockups.

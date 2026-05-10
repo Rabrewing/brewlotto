@@ -41,6 +41,7 @@ official source → ingestion → Supabase → freshness view → API → UI
 | **Legacy header link cleanup** | `components/Header.tsx` — 2026-05-10 | Repointed the old shared header's `Account` button from dead `/account` to the live `/profile` surface so the route audit stays clean. |
 | **Responsive shell widening** | `components/brewlotto/dashboard/DashboardContainer.tsx`, `brewdocs/v1/shared-ui-ux-framework.md`, `brewdocs/v1/responsive-layout-checklist.md` — 2026-05-10 | Widened the shared shell on tablet/desktop while keeping the current mobile stack so larger screens breathe horizontally without changing phone behavior. |
 | **Strategy validation checklist** | `brewdocs/v1/strategy-validation-checklist.md` — 2026-05-10 | Tracks the live strategy-engine scope (`poisson`, `momentum`, `markov`, `ensemble`) and keeps the legacy wrapper files clearly labeled as transitional only. |
+| **Strategy Locker compact ladder** | `app/strategy-locker/page.tsx`, `brewdocs/v1/current_state.md`, `brewdocs/v1/CHANGELOG.md` — 2026-05-10 | Collapsed the entitlement surface into a compact summary by default with a user-triggered full ladder reveal so the strategy cards stay visually primary on desktop and mobile. |
 | **Superadmin added** | `.env`, `.env.local` — 2026-05-02 | `BREWCOMMAND_ADMIN_EMAILS` now includes `command@brewlotto.app` and `michael.brewington@gmail.com`; code keeps fallback allowlist so BrewCommand access works if one env entry is missing. |
 | **SectionCard centralized** | `components/brewlotto/dashboard/SectionCard.tsx` (new) — 2026-05-02 | Removed 6 local duplicates across strategy-locker, profile, settings, stats, notifications, billing. Single shared component with consistent dark/gold styling. |
 | **Play log bridge** | `app/api/play/log/route.ts` — 2026-05-07 | Legacy browser write path now inserts into canonical `play_logs` with auth validation and normalized draw-time / number payloads. This is the settlement source of truth for future winnings alerts. |
@@ -578,7 +579,7 @@ The system is considered complete when:
 ### Remaining Work (Todo List)
 
 **HIGH PRIORITY — Before V1 Launch:**
-1. **Mockup Alignment** — Visually QA all 15 mockup PNGs against rendered pages and lock designs
+1. **Mockup Alignment** — Visually QA all 15 mockup PNGs against rendered pages and lock designs, starting with Strategy Locker and Learn/BrewU
 2. **Stripe Live Mode** — Flip the current test-mode billing path to live keys, then verify the production checkout/webhook path end-to-end
 3. **Landing Video Swap** — Replace the current landing-page reel with the watermark-free Blob asset once it lands locally, then deploy/update through the Vercel CLI path.
 
@@ -795,7 +796,7 @@ The system is considered complete when:
   - save/favorite is now server-backed through `/api/strategy-locker/save`
   - `user_saved_strategies` is a per-user favorites list with one row per strategy, so users can save multiple strategies at once
   - locker is still a saved-strategy library; the actual execution path remains the dashboard `Generate Numbers` action until a true `Run Strategy` CTA is added
-  - locker cards are being updated with a real run-preview action so a saved strategy can execute from the card itself
+  - locker cards now sit behind a compact entitlement summary with a collapsible full ladder so the saved strategies stay visually primary
 
 #### ✅ BrewU Systems Area
 - BrewU now shows a Systems area with links for BrewU, Support, Terms & Privacy, and Logout.

@@ -118,6 +118,7 @@ export default function StrategyLockerPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [showFullLadder, setShowFullLadder] = useState(false);
   const [strategies, setStrategies] = useState<StrategyRecord[]>([]);
   const [savedStrategies, setSavedStrategies] = useState<SavedStrategyRecord[]>([]);
   const [strategyActivity, setStrategyActivity] = useState<StrategyActivityRecord[]>([]);
@@ -235,6 +236,24 @@ export default function StrategyLockerPage() {
   const currentTier = useMemo<TierCode>(() => {
     return entitlements?.tier_code || 'free';
   }, [entitlements?.tier_code]);
+
+  const currentTierIndex = TIER_ORDER[currentTier];
+
+  const currentTierRow = useMemo(() => {
+    return subscriptionTiers.find((tier) => tier.tier_key === currentTier) || null;
+  }, [currentTier, subscriptionTiers]);
+
+  const nextTierRow = useMemo(() => {
+    return (
+      subscriptionTiers.find((tier) => TIER_ORDER[tier.tier_key] === currentTierIndex + 1) ||
+      subscriptionTiers.find((tier) => TIER_ORDER[tier.tier_key] > currentTierIndex) ||
+      null
+    );
+  }, [currentTierIndex, subscriptionTiers]);
+
+  const remainingUpgradeTiers = useMemo(() => {
+    return subscriptionTiers.filter((tier) => TIER_ORDER[tier.tier_key] > currentTierIndex);
+  }, [currentTierIndex, subscriptionTiers]);
 
   const savedMap = useMemo(() => {
     return new Map(savedStrategies.map((entry) => [entry.strategy_id, entry]));
@@ -414,7 +433,7 @@ export default function StrategyLockerPage() {
                   <div className="text-[15px] uppercase tracking-[0.16em] text-white/38">Current access</div>
                   <div className="mt-3 text-[26px] font-semibold text-[#f7ddb3]">{formatTierLabel(currentTier)}</div>
                   <div className="mt-2 max-w-2xl text-[15px] leading-7 text-white/62">
-                    Strategy Locker reads live strategy registry rows plus your saved methods, activity history, and tier entitlements. Locked cards stay visible so upgrade boundaries are truthful.
+                    Strategy Locker shows your current plan, what is unlocked now, and what is still next in line. Expand the ladder only when you want the full tree.
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2 text-[12px] uppercase tracking-[0.14em] text-white/42">
@@ -428,66 +447,107 @@ export default function StrategyLockerPage() {
             <div className="space-y-5">
               <SectionCard
                 title="Entitlement Snapshot"
-                description="This is the current tier framing Brew can verify on your account right now."
+                description="A compact ladder shows what you have now and what still sits above it."
               >
-                <div className="space-y-3">
+                <div className="grid gap-3 md:grid-cols-3">
                   <div className="rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
-                    <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">Advanced strategies</div>
-                    <div className="mt-3 text-[18px] font-medium text-[#f7ddb3]">
-                      {entitlements?.advanced_strategy_access ? 'Enabled' : 'Locked'}
+                    <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">Current plan</div>
+                    <div className="mt-3 text-[18px] font-medium text-[#f7ddb3]">{currentTierRow?.display_name || formatTierLabel(currentTier)}</div>
+                    <div className="mt-2 text-[13px] text-white/54">
+                      {currentTierRow?.price_monthly != null ? `$${Number(currentTierRow.price_monthly).toFixed(2)}/mo` : 'Current tier loaded from entitlements'}
                     </div>
                   </div>
                   <div className="rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
-                    <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">Premium explanations</div>
-                    <div className="mt-3 text-[18px] font-medium text-[#f7ddb3]">
-                      {entitlements?.premium_explanations_access ? 'Enabled' : 'Locked'}
+                    <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">Unlocked now</div>
+                    <div className="mt-3 text-[18px] font-medium text-[#f7ddb3]">{unlockedCount} strategies</div>
+                    <div className="mt-2 text-[13px] text-white/54">
+                      {entitlements?.advanced_strategy_access || entitlements?.premium_explanations_access || entitlements?.premium_comparison_access || entitlements?.voice_commentary_access
+                        ? 'Your tier opens the related access rows below.'
+                        : 'Starter view stays compact until you upgrade.'}
                     </div>
                   </div>
                   <div className="rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
-                    <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">Comparisons</div>
-                    <div className="mt-3 text-[18px] font-medium text-[#f7ddb3]">
-                      {entitlements?.premium_comparison_access ? 'Enabled' : 'Locked'}
-                    </div>
-                  </div>
-                  <div className="rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
-                    <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">Voice commentary</div>
-                    <div className="mt-3 text-[18px] font-medium text-[#f7ddb3]">
-                      {entitlements?.voice_commentary_access ? 'Enabled' : 'Locked'}
+                    <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">Next unlock</div>
+                    <div className="mt-3 text-[18px] font-medium text-[#f7ddb3]">{nextTierRow?.display_name || 'No higher tier'}</div>
+                    <div className="mt-2 text-[13px] text-white/54">
+                      {nextTierRow?.price_monthly != null
+                        ? `$${Number(nextTierRow.price_monthly).toFixed(2)}/mo keeps the ladder moving.`
+                        : 'You are already at the top of the current ladder.'}
                     </div>
                   </div>
                 </div>
-              </SectionCard>
 
-              <SectionCard
-                title="Plan Ladder"
-                description="Subscription tier rows are shown directly from the tier registry so the upgrade path stays aligned with stored pricing names."
-              >
-                <div className="space-y-3">
-                  {subscriptionTiers.map((tier) => {
-                    const active = tier.tier_key === currentTier;
+                <div className="mt-4 flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowFullLadder((current) => !current)}
+                    className="rounded-full border border-[#ffc742]/25 bg-[#ffc742]/10 px-4 py-2 text-[14px] font-medium text-[#ffd27e] transition-colors hover:bg-[#ffc742]/16 hover:text-white"
+                  >
+                    {showFullLadder ? 'Hide full ladder' : 'View full ladder'}
+                  </button>
+                  <div className="text-[12px] uppercase tracking-[0.14em] text-white/38">
+                    {remainingUpgradeTiers.length > 0 ? `${remainingUpgradeTiers.length} tier${remainingUpgradeTiers.length === 1 ? '' : 's'} above current plan` : 'No higher tiers left'}
+                  </div>
+                </div>
 
-                    return (
-                      <div
-                        key={tier.tier_key}
-                        className={`rounded-[22px] border px-4 py-4 ${
-                          active
-                            ? 'border-[#ffc742]/30 bg-[#ffc742]/10'
-                            : 'border-white/8 bg-black/20'
-                        }`}
-                      >
-                        <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">{tier.tier_key}</div>
-                        <div className="mt-3 text-[20px] font-medium text-[#f7ddb3]">{tier.display_name}</div>
-                        <div className="mt-2 text-[14px] text-white/58">
-                          {tier.price_monthly != null ? `$${Number(tier.price_monthly).toFixed(2)}/mo` : 'Contact tier'}
+                {showFullLadder ? (
+                  <div className="mt-5 grid gap-3 lg:grid-cols-2">
+                    <div className="rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
+                      <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">Feature rows</div>
+                      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                        <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-4 py-3">
+                          <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">Advanced strategies</div>
+                          <div className="mt-2 text-[16px] font-medium text-[#f7ddb3]">{entitlements?.advanced_strategy_access ? 'Enabled' : 'Locked'}</div>
                         </div>
-                        <div className="mt-4 text-[12px] uppercase tracking-[0.14em] text-white/42">
-                          {active ? 'Current plan' : 'Upgrade target'}
+                        <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-4 py-3">
+                          <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">Premium explanations</div>
+                          <div className="mt-2 text-[16px] font-medium text-[#f7ddb3]">{entitlements?.premium_explanations_access ? 'Enabled' : 'Locked'}</div>
+                        </div>
+                        <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-4 py-3">
+                          <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">Comparisons</div>
+                          <div className="mt-2 text-[16px] font-medium text-[#f7ddb3]">{entitlements?.premium_comparison_access ? 'Enabled' : 'Locked'}</div>
+                        </div>
+                        <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-4 py-3">
+                          <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">Voice commentary</div>
+                          <div className="mt-2 text-[16px] font-medium text-[#f7ddb3]">{entitlements?.voice_commentary_access ? 'Enabled' : 'Locked'}</div>
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
+                    </div>
+
+                    <div className="rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
+                      <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">Plan ladder</div>
+                      <div className="mt-3 space-y-3">
+                        {subscriptionTiers.map((tier) => {
+                          const active = tier.tier_key === currentTier;
+
+                          return (
+                            <div
+                              key={tier.tier_key}
+                              className={`rounded-[18px] border px-4 py-4 ${
+                                active ? 'border-[#ffc742]/30 bg-[#ffc742]/10' : 'border-white/8 bg-white/[0.03]'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between gap-3">
+                                <div>
+                                  <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">{tier.tier_key}</div>
+                                  <div className="mt-2 text-[18px] font-medium text-[#f7ddb3]">{tier.display_name}</div>
+                                </div>
+                                <div className="text-right text-[13px] text-white/56">
+                                  {tier.price_monthly != null ? `$${Number(tier.price_monthly).toFixed(2)}/mo` : 'Contact tier'}
+                                  <div className="mt-2 text-[11px] uppercase tracking-[0.14em] text-white/40">
+                                    {active ? 'Current plan' : 'Upgrade target'}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
               </SectionCard>
+
             </div>
 
             <SectionCard
