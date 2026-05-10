@@ -8,6 +8,7 @@
 import { execSync } from 'child_process';
 import { createClient } from '@supabase/supabase-js';
 import 'dotenv/config';
+import { sendStrategySignalNotifications } from '../lib/notifications/strategySignals.js';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
@@ -31,6 +32,8 @@ const SCRAPER_COMMANDS = {
   powerball: 'node scripts/scrapePowerball.js',
   megaMillions: 'node scripts/scrapeMega.js',
 };
+
+const STRATEGY_SIGNAL_GAME_KEYS = ['pick3', 'daily3', 'pick4', 'daily4', 'cash5', 'fantasy5', 'powerball', 'mega_millions'];
 
 function runCommand(command, description, maxRetries = 3) {
   console.log(`\n🔄 ${description}...`);
@@ -147,6 +150,72 @@ async function printSummary(results) {
   });
 }
 
+async function runStrategySignalSweep() {
+  try {
+    console.log('\n🧠 Running strategy signal sweep...');
+    const { data: lotteryGames, error: lotteryGamesError } = await supabase
+      .from('lottery_games')
+      .select('id, state_code, game_key, display_name, primary_count, primary_min, primary_max, has_bonus, bonus_min, bonus_max')
+      .in('game_key', STRATEGY_SIGNAL_GAME_KEYS)
+      .in('state_code', ['NC', 'CA']);
+
+    if (lotteryGamesError) {
+      console.log(`   ⚠️ Strategy signal sweep skipped: ${lotteryGamesError.message}`);
+      return;
+    }
+
+    let processed = 0;
+    let notificationsCreated = 0;
+    let emailsSent = 0;
+
+    for (const game of lotteryGames || []) {
+      const { data: draws, error: drawsError } = await supabase
+        .from('official_draws')
+        .select('id, draw_date, draw_window_label, primary_numbers, bonus_numbers, draw_datetime_local')
+        .eq('game_id', game.id)
+        .order('draw_datetime_local', { ascending: false })
+        .limit(120);
+
+      if (drawsError) {
+        console.log(`   ⚠️ ${game.state_code} ${game.display_name} skipped: ${drawsError.message}`);
+        continue;
+      }
+
+      const latestDraw = (draws || [])[0];
+      if (!latestDraw) {
+        continue;
+      }
+
+      const result = await sendStrategySignalNotifications(supabase, {
+        stateCode: game.state_code,
+        gameKey: game.game_key,
+        gameLabel: game.display_name,
+        drawId: latestDraw.id,
+        drawDate: latestDraw.draw_date,
+        drawWindowLabel: latestDraw.draw_window_label,
+        primaryCount: Number(game.primary_count || 0),
+        primaryMin: Number(game.primary_min || 0),
+        primaryMax: Number(game.primary_max || 0),
+        hasBonus: Boolean(game.has_bonus),
+        bonusMin: Number(game.bonus_min || 0) || null,
+        bonusMax: Number(game.bonus_max || 0) || null,
+        draws,
+      });
+
+      if (!result?.skipped) {
+        processed += 1;
+        notificationsCreated += Number(result.notificationsCreated || 0);
+        emailsSent += Number(result.emailsSent || 0);
+        console.log(`   ✅ ${game.state_code} ${game.display_name}: ${result.signalType} (${result.momentumPercent}% momentum)`);
+      }
+    }
+
+    console.log(`   ℹ️ Strategy signal sweep complete (${processed} game(s), ${notificationsCreated} notification(s), ${emailsSent} email(s))`);
+  } catch (error) {
+    console.log(`   ⚠️ Strategy signal sweep failed: ${error.message}`);
+  }
+}
+
 async function runIngestionJob() {
   console.log('🚀 Starting Unified Ingestion Job');
   console.log(`📅 Date: ${new Date().toISOString()}`);
@@ -212,6 +281,8 @@ async function runIngestionJob() {
   }
 
   await printSummary(results);
+
+  await runStrategySignalSweep();
 
   console.log('\n' + '═'.repeat(60));
   console.log('🎉 Ingestion job completed!');

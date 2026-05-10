@@ -13,6 +13,7 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Tightened Settings with a centered account-style hero and clearer Gameplay / Notifications / Account section rhythm to better match the mockup flow.
 - Polished Billing with a centered account-style hero, clearer benefits / billing / quick-link flow, and polished Notifications with New / All tabs so both routes better match their mockups.
 - Documented the decision to keep the momentum meter as a single gauge, while tracking Brew AI strategy-detection alerts as event-driven, deduplicated notifications that can email a BrewLotto return link when the user is away.
+- Wired an ingestion-driven strategy signal sweep that uses a branded Brew AI email template, writes `user_notifications` for eligible users, and keeps the momentum meter as the single visible gauge.
 - Added a BrewU play-style matrix and payout ladder matrix so help content, AI guidance, and settlement classification share one source of truth.
 - Upgraded settlement classification to distinguish exact-order, box-style, and standard match-number outcomes more cleanly.
 - Centralized support intake, support tickets, BrewCommand notifications, and customer resolution emails.
