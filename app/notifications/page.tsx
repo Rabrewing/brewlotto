@@ -73,6 +73,7 @@ export default function NotificationsPage() {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [preferences, setPreferences] = useState<NotificationPreferenceRecord>(DEFAULT_PREFERENCES);
   const [notifications, setNotifications] = useState<UserNotificationRecord[]>([]);
+  const [selectedTab, setSelectedTab] = useState<'new' | 'all'>('new');
   const [savingPreferences, setSavingPreferences] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -145,6 +146,13 @@ export default function NotificationsPage() {
   }, []);
 
   const unreadCount = useMemo(() => notifications.filter((entry) => !entry.is_read).length, [notifications]);
+  const visibleNotifications = useMemo(() => {
+    if (selectedTab === 'all') {
+      return notifications;
+    }
+
+    return notifications.filter((entry) => !entry.is_read);
+  }, [notifications, selectedTab]);
 
   async function savePreferences() {
     if (!user) {
@@ -237,13 +245,41 @@ export default function NotificationsPage() {
             <section className="rounded-[30px] border border-[#ffc742]/24 bg-[radial-gradient(circle_at_top_left,rgba(255,199,66,0.18),rgba(0,0,0,0)_34%),linear-gradient(145deg,rgba(30,20,13,0.88),rgba(8,8,8,0.98))] px-5 py-5 shadow-[0_0_28px_rgba(255,184,28,0.08)]">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <div className="text-[15px] uppercase tracking-[0.16em] text-white/38">In-app center</div>
+                  <div className="text-[15px] uppercase tracking-[0.16em] text-white/38">Brew Alerts</div>
                   <div className="mt-3 text-[26px] font-semibold text-[#f7ddb3]">{unreadCount} unread notification{unreadCount === 1 ? '' : 's'}</div>
                   <div className="mt-2 max-w-2xl text-[15px] leading-7 text-white/62">This page uses your real notification preference row plus any in-app notifications currently stored for your account.</div>
                 </div>
                 <button type="button" onClick={markAllRead} disabled={unreadCount === 0} className="rounded-full border border-[#ffc742]/28 bg-[#ffc742]/10 px-5 py-2 text-[14px] font-medium text-[#ffd27e] transition-colors hover:bg-[#ffc742]/16 hover:text-white disabled:cursor-not-allowed disabled:opacity-45">
                   Mark All Read
                 </button>
+              </div>
+
+              <div className="mt-5 flex items-center gap-3 border-t border-white/8 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setSelectedTab('new')}
+                  className={`rounded-full px-4 py-2 text-[14px] font-medium transition-colors ${
+                    selectedTab === 'new'
+                      ? 'bg-[#ffc742] text-black'
+                      : 'border border-white/10 bg-white/[0.03] text-white/72 hover:bg-white/[0.06]'
+                  }`}
+                >
+                  New
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedTab('all')}
+                  className={`rounded-full px-4 py-2 text-[14px] font-medium transition-colors ${
+                    selectedTab === 'all'
+                      ? 'bg-[#ffc742] text-black'
+                      : 'border border-white/10 bg-white/[0.03] text-white/72 hover:bg-white/[0.06]'
+                  }`}
+                >
+                  All
+                </button>
+                <div className="ml-auto text-[14px] text-white/48">
+                  {selectedTab === 'new' ? 'Unread alerts only' : 'All stored alerts'}
+                </div>
               </div>
             </section>
 
@@ -298,11 +334,11 @@ export default function NotificationsPage() {
             </SectionCard>
 
             <SectionCard title="Recent Alerts" description="This feed reads from the `user_notifications` table. Empty state is explicit until events start landing.">
-              {notifications.length === 0 ? (
+              {visibleNotifications.length === 0 ? (
                 <div className="rounded-[20px] border border-white/8 bg-black/20 px-4 py-4 text-[14px] leading-6 text-white/58">No in-app notifications are stored for this account yet. As draw, streak, subscription, and system events land, they will appear here.</div>
               ) : (
                 <div className="space-y-3">
-                  {notifications.map((entry) => (
+                  {visibleNotifications.map((entry) => (
                     <article key={entry.id} className={`rounded-[22px] border px-4 py-4 ${entry.is_read ? 'border-white/8 bg-black/20' : 'border-[#ffc742]/20 bg-[#ffc742]/8'}`}>
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <div>

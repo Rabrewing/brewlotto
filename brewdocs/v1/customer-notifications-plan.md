@@ -1,6 +1,6 @@
 # BrewLotto V1 - Customer Notifications & Winnings Alerts Plan
 
-**Last Updated:** 2026-05-07 ET (payout ladder and settlement classifier added)
+**Last Updated:** 2026-05-10 ET (AI strategy notifications tracked, momentum meter kept single)
 
 ## Purpose
 Track the customer-facing notification flow so BrewLotto can notify users about:
@@ -16,6 +16,7 @@ Track the customer-facing notification flow so BrewLotto can notify users about:
 - BrewCommand now has a settlement sweep endpoint that can settle unsettled `play_logs` against official draws for both NC and CA using the same state/game mapping the dashboard uses.
 - The legacy `app/api/play/log/route.ts` now writes into the canonical `play_logs` table with auth validation, normalized draw times, and normalized numbers. That source is ready for settlement automation.
 - Winnings alerts are now wired through the settlement sweep, and the payout-tier classifier now uses the shared BrewU payout matrix so the customer event flow can distinguish exact-order, box-style, and match-number outcomes more clearly.
+- Brew AI strategy-detection alerts should behave like the rest of the customer notification system: event-driven, deduplicated, and only emailed when the user is away or the event is high priority.
 
 ## Required Notification Flows
 
@@ -62,3 +63,4 @@ Track the customer-facing notification flow so BrewLotto can notify users about:
 3. Add the support ticket status-change insertion into `user_notifications` if it is ever removed or needs to be mirrored through a worker instead of the current direct insert.
 4. Expand winning notifications and email fan-out to use the prize-tier outcome once the payout-table layer is connected to real cash-value prize tables.
 5. Tune the email CTA route per delivery context.
+6. Keep the momentum meter as a single gauge; if strategy signals ever need more visual explanation, use a separate customer notification or card, not a second meter inside the same widget.

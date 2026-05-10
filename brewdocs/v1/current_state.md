@@ -1,6 +1,6 @@
 # BrewLotto V1 - Current State & Next Steps
 
-**Last Updated:** 2026-05-10 ET (desktop/tablet shell widened, changelog + responsive checklist added, admin alerting cleanup, branch truth update, blob-backed landing reel, home-state preference wiring, billing live-mode verification, strategy locker save/run flow fix, compact entitlement summary + collapsible ladder, BrewU Systems support scaffold, support screenshots bucket added, canonical play log bridge, support inbox notifications, settlement sweep, customer notifications plan added, docs timestamp rule added, BrewU play-style guidance live, shared play-style and payout matrix centralized, settlement classification upgraded, strategy validation pass queued, landing video replacement queued)
+**Last Updated:** 2026-05-10 ET (desktop/tablet shell widened, changelog + responsive checklist added, admin alerting cleanup, branch truth update, blob-backed landing reel, home-state preference wiring, billing live-mode verification, strategy locker save/run flow fix, compact entitlement summary + collapsible ladder, BrewU Systems support scaffold, support screenshots bucket added, canonical play log bridge, support inbox notifications, settlement sweep, customer notifications plan added, docs timestamp rule added, BrewU play-style guidance live, shared play-style and payout matrix centralized, settlement classification upgraded, strategy validation pass queued, landing video replacement queued, AI strategy notifications tracked, momentum meter kept single)
 **Phase:** Shared UI/UX framework and product truth pass
 
 ## 2026-05-05 Truth Update
@@ -34,6 +34,7 @@
 - The BrewU/help surface now turns that same play-style matrix into plain-English strategy guidance so customers can learn when a straight play, box play, or game-specific add-on is the better educational option. That guidance now comes from shared BrewU matrix modules so future AI copy, help surfaces, and settlement labels can stay aligned.
 - Settlement classification now uses the shared payout matrix, so exact-order, box-style, and standard match-number games are no longer all treated as the same generic result label.
 - BrewU/help copy, support categories, and tutorial transcript content remain static by design for V1; a DB/CMS-backed content pass is tracked separately in `brewdocs/v1/content-externalization-plan.md` if launch pressure later justifies content management.
+- Brew AI strategy-detection alerts are intentionally modeled as event-driven, deduplicated notifications that can write to `user_notifications` and send an email with a BrewLotto return link when the user is off-app or the event is high priority; the main momentum meter remains a single gauge, with hot/cold still presented as separate cards.
 
 ### ⚠️ Still Partial Or Needs Verification
 - `scripts/ingestionScheduler.js` has been archived; Cloud Scheduler + Cloud Run are the active production ingestion path.
@@ -49,6 +50,7 @@
 - Notifications stores preferences and reads history, but real delivery wiring still needs a full verification pass.
 - Menu/tab and mockup QA still needs another visual pass against the current rendered routes, with Strategy Locker and Learn/BrewU still the highest-priority polish pages.
 - Settings now uses a centered account-style hero with clearer Gameplay / Notifications / Account groupings, which brings it closer to the mockup rhythm without inventing fake profile data.
+- Billing now uses a centered account-style hero with clearer benefits / billing / quick-links flow, and Notifications now has a New / All tab strip so the live feed reads closer to the mockup rhythm.
 - The watermark-free landing-page video still needs a replacement pass once the new Blob asset lands locally; keep the Vercel CLI deploy/update step tracked with that media swap.
 - Tier gating still needs a deliberate test matrix across dashboard, strategy locker, pricing, billing, and AI surfaces.
 - Route wiring is now cleaner, but the next visual pass should still check whether the shared dashboard surfaces breathe as well on desktop/tablet as they do on mobile mockups.
@@ -68,14 +70,14 @@
 
 ### 🎯 Current Truth Priority
 1. Do a desktop/tablet/mobile responsive pass on the landing, login, and shared framework surfaces so the structure stays polished across devices. The new checklist lives in `brewdocs/v1/responsive-layout-checklist.md`.
-2. Run a visual QA pass on the dropdown/menu destinations against the current mockups and rendered pages.
+2. Run a visual QA pass on the dropdown/menu destinations against the current mockups and rendered pages, focusing next on any remaining spacing or rhythm gaps in Billing and Notifications.
 3. Run a tier matrix test across dashboard, strategy locker, pricing, billing, and AI commentary surfaces.
 4. Verify Stripe live-mode checkout/webhook flow against the current billing ladder.
 5. Finish the CA Powerball/Mega live scraper work that remains stale/expected.
 6. Keep the BrewCommand AI usage ledger visible while live-mode billing is validated.
 7. Keep the onboarding tutorial and future Opus Clip clips aligned with the landing/login flow.
 8. Tighten the BrewU support intake flow and verify screenshot upload / notification delivery.
-9. Normalize the customer notification pipeline so support updates, settlement events, and winnings alerts can write to `user_notifications` and email the correct BrewLotto return link.
+9. Normalize the customer notification pipeline so support updates, settlement events, and Brew AI strategy detections can write to `user_notifications` and email the correct BrewLotto return link.
 10. Capture every launch game’s play-style odds and payout ladders, then teach the AI layer plus BrewU/help content to offer educational straight/box/50-50/combo suggestions per game.
 11. Replace the landing-page video with the watermark-free Blob asset once it lands, and use the Vercel CLI deployment path for the swap.
 12. Keep the referral growth loop deferred until billing, notifications, and strategy gating are stable.

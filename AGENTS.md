@@ -44,6 +44,8 @@ official source → ingestion → Supabase → freshness view → API → UI
 | **Strategy Locker compact ladder** | `app/strategy-locker/page.tsx`, `brewdocs/v1/current_state.md`, `brewdocs/v1/CHANGELOG.md` — 2026-05-10 | Collapsed the entitlement surface into a compact summary by default with a user-triggered full ladder reveal so the strategy cards stay visually primary on desktop and mobile. |
 | **BrewU content externalization plan** | `brewdocs/v1/content-externalization-plan.md` — 2026-05-10 | Tracks the decision to keep BrewU/help copy, support categories, and tutorial transcript static for V1 while reserving DB/CMS-backed content as a later follow-on if launch needs justify it. |
 | **Settings hero polish** | `app/settings/page.tsx`, `brewdocs/v1/current_state.md`, `brewdocs/v1/CHANGELOG.md` — 2026-05-10 | Reworked Settings into a centered account-style hero with clearer Gameplay / Notifications / Account groupings so the route better mirrors the settings mockup without using fake profile data. |
+| **Billing / notifications polish** | `app/billing/page.tsx`, `app/notifications/page.tsx`, `brewdocs/v1/current_state.md`, `brewdocs/v1/CHANGELOG.md` — 2026-05-10 | Reworked Billing into a centered account-style hero with a clearer benefits / billing / quick-links flow, and added New / All tabs to Notifications so the feed mirrors the mockup rhythm more closely. |
+| **AI strategy notifications** | `brewdocs/v1/customer-notifications-plan.md`, `brewdocs/v1/current_state.md`, `brewdocs/v1/CHANGELOG.md` — 2026-05-10 | Brew AI strategy-detection alerts are tracked as an event-driven, deduplicated notification flow that writes `user_notifications` and emails a BrewLotto return link only when the user is off-app or the event is high priority. The main momentum meter stays a single gauge; hot/cold remain separate cards. |
 | **Superadmin added** | `.env`, `.env.local` — 2026-05-02 | `BREWCOMMAND_ADMIN_EMAILS` now includes `command@brewlotto.app` and `michael.brewington@gmail.com`; code keeps fallback allowlist so BrewCommand access works if one env entry is missing. |
 | **SectionCard centralized** | `components/brewlotto/dashboard/SectionCard.tsx` (new) — 2026-05-02 | Removed 6 local duplicates across strategy-locker, profile, settings, stats, notifications, billing. Single shared component with consistent dark/gold styling. |
 | **Play log bridge** | `app/api/play/log/route.ts` — 2026-05-07 | Legacy browser write path now inserts into canonical `play_logs` with auth validation and normalized draw-time / number payloads. This is the settlement source of truth for future winnings alerts. |
@@ -581,9 +583,10 @@ The system is considered complete when:
 ### Remaining Work (Todo List)
 
 **HIGH PRIORITY — Before V1 Launch:**
-1. **Mockup Alignment** — Visually QA all 15 mockup PNGs against rendered pages and lock designs, starting with Strategy Locker and Learn/BrewU
+1. **Mockup Alignment** — Visually QA all 15 mockup PNGs against rendered pages and lock designs, starting with Strategy Locker, Learn/BrewU, Billing, and Notifications
 2. **Stripe Live Mode** — Flip the current test-mode billing path to live keys, then verify the production checkout/webhook path end-to-end
 3. **Landing Video Swap** — Replace the current landing-page reel with the watermark-free Blob asset once it lands locally, then deploy/update through the Vercel CLI path.
+4. **Customer Strategy Alerts** — When Brew detects meaningful strategy signals, write an event-driven `user_notifications` record and send email only for off-app or high-priority events, keeping the momentum meter as a single gauge and exposing hot/cold as separate cards.
 
 **ONBOARDING STATUS:**
 | Component | Status |
