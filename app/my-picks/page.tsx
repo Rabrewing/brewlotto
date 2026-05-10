@@ -253,7 +253,10 @@ export default function MyPicksPage() {
       setError(null);
 
       try {
-        const params = new URLSearchParams({ limit: '24' });
+        const params = new URLSearchParams({ limit: '100' });
+        const createdAfter = new Date();
+        createdAfter.setDate(createdAfter.getDate() - 30);
+        params.set('created_after', createdAfter.toISOString());
 
         if (selectedState !== 'ALL') {
           params.set('state', selectedState);
@@ -416,7 +419,7 @@ export default function MyPicksPage() {
         <div className="mb-6 flex rounded-full border border-[#ffbd39]/25 bg-[linear-gradient(145deg,rgba(35,19,12,0.74),rgba(10,8,8,0.92))] shadow-[0_0_18px_rgba(255,184,28,0.08)]">
           <SummaryMetric label="Saved Picks" value={String(savedCount)} />
           <div className="my-4 w-px bg-white/10" />
-          <SummaryMetric label="Visible Picks" value={String(predictions.length)} />
+          <SummaryMetric label="30-Day Picks" value={String(predictions.length)} />
           <div className="my-4 w-px bg-white/10" />
           <SummaryMetric label="Primary Game" value={predictions.length > 0 ? primaryGame : '--'} />
         </div>

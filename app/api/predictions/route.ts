@@ -40,6 +40,7 @@ export async function GET(request: NextRequest) {
     const game = searchParams.get('game');
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
+    const createdAfter = searchParams.get('created_after');
     
     let query = supabase
       .from('predictions')
@@ -56,6 +57,9 @@ export async function GET(request: NextRequest) {
     }
     if (game) {
       query = query.eq('game', game);
+    }
+    if (createdAfter) {
+      query = query.gte('created_at', createdAfter);
     }
     
     const { data, error, count } = await query;

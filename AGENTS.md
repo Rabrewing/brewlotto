@@ -47,6 +47,7 @@ official source → ingestion → Supabase → freshness view → API → UI
 | **Billing / notifications polish** | `app/billing/page.tsx`, `app/notifications/page.tsx`, `brewdocs/v1/current_state.md`, `brewdocs/v1/CHANGELOG.md` — 2026-05-10 | Reworked Billing into a centered account-style hero with a clearer benefits / billing / quick-links flow, and added New / All tabs to Notifications so the feed mirrors the mockup rhythm more closely. |
 | **AI strategy notifications** | `scripts/ingestionJob.js`, `lib/notifications/strategySignals.js`, `brewdocs/v1/customer-notifications-plan.md`, `brewdocs/v1/current_state.md`, `brewdocs/v1/CHANGELOG.md` — 2026-05-10 | Brew AI strategy-detection alerts now run as an ingestion-driven, event-based sweep that writes `user_notifications` and emails a BrewLotto return link only when the user is eligible and the signal is strong enough. The main momentum meter stays a single gauge; hot/cold remain separate cards. |
 | **Results history / win ratios** | `brewdocs/v1/results-history-win-ratios-plan.md`, `brewdocs/v1/current_state.md`, `brewdocs/v1/CHANGELOG.md` — 2026-05-10 | Track confirmed wins only when the play was actually logged for the winning draw date/time, expand result history across NC/CA, and expose strategy-specific win ratios in `/stats` and BrewCommand so retroactive close matches never masquerade as same-day wins. |
+| **My Picks 30-day history** | `app/my-picks/page.tsx`, `app/api/predictions/route.ts`, `brewdocs/v1/current_state.md`, `brewdocs/v1/CHANGELOG.md` — 2026-05-10 | Keep the personal pick history window broad enough to show roughly the last 30 days of picks so the user can confirm plays without leaving BrewLotto, while still preserving the same-day win confirmation rule. |
 | **Superadmin added** | `.env`, `.env.local` — 2026-05-02 | `BREWCOMMAND_ADMIN_EMAILS` now includes `command@brewlotto.app` and `michael.brewington@gmail.com`; code keeps fallback allowlist so BrewCommand access works if one env entry is missing. |
 | **SectionCard centralized** | `components/brewlotto/dashboard/SectionCard.tsx` (new) — 2026-05-02 | Removed 6 local duplicates across strategy-locker, profile, settings, stats, notifications, billing. Single shared component with consistent dark/gold styling. |
 | **Play log bridge** | `app/api/play/log/route.ts` — 2026-05-07 | Legacy browser write path now inserts into canonical `play_logs` with auth validation and normalized draw-time / number payloads. This is the settlement source of truth for future winnings alerts. |
@@ -590,6 +591,7 @@ The system is considered complete when:
 4. **Customer Strategy Alerts** — When Brew detects meaningful strategy signals, write an event-driven `user_notifications` record and send email only for off-app or high-priority events, keeping the momentum meter as a single gauge and exposing hot/cold as separate cards. BrewCommand should surface the recent signals, recipients, and reasons in a dedicated Strategy Signals section so alerting can be audited.
 5. **Play Confirmation Nudges** — When a settled play has a near-hit or meaningful match, write a customer nudge that says “if you played this, confirm it” so the result history can stay honest before the confirmed-play workflow is fully interactive.
 6. **Strategy Locker Win Ratios** — Surface a compact hit / win ratio beside each saved strategy so users can see which saved strategy is actually working once confirmed plays and result matches are compared.
+7. **My Picks 30-Day History** — Expand the personal pick history window so `My Picks` can show about 30 days of stored picks, making it easier to confirm played entries without leaving BrewLotto.
 
 **ONBOARDING STATUS:**
 | Component | Status |
@@ -614,6 +616,7 @@ The system is considered complete when:
 7. **BrewU Support Intake** — Add a lightweight support tab with category dropdown, comments, screenshot upload, and a 24-hour response disclaimer; route submissions to BrewCommand notifications/email.
 8. **Strategy Validation** — Cross-check `lib/prediction/strategyEngine.js` and the live strategy modules against the BrewLotto V1 strategy spec, and keep the legacy wrapper files clearly marked as transitional only.
 9. **BrewU Content Externalization** — If V1 content editing needs increase, move BrewU/help copy, support categories, and tutorial transcript content into DB/CMS-backed tables using the new plan doc as the handoff.
+10. **My Picks 30-Day History** — Expand the personal pick history window to roughly 30 days so the user can review and confirm played entries directly from BrewLotto before ratio calculations lean on those confirmations.
 
 **LOW PRIORITY / FOLLOW-ON:**
 1. **Stats Charts** — Add Chart.js visualizations for trends

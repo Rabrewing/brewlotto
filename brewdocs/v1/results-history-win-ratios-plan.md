@@ -1,6 +1,6 @@
 # BrewLotto V1 - Results History, Win Ratios, and Play Confirmation Plan
 
-**Last Updated:** 2026-05-10 ET (results page now groups draws by date with explicit time chips, near-hit play confirmation nudge added, strategy locker ratio chips queued)
+**Last Updated:** 2026-05-10 ET (results page now groups draws by date with explicit time chips, near-hit play confirmation nudge added, My Picks now carries a broader 30-day history window, strategy locker ratio chips queued)
 
 ## Purpose
 Define the customer and admin workflow for:
@@ -15,6 +15,7 @@ Define the customer and admin workflow for:
 - Near-hit settlement events now create a customer nudge that says “if you played this, confirm it,” which gives the app a bridge toward a true confirmed-play flow without confusing close matches for confirmed wins.
 - The same confirmed-play signal should eventually feed a compact hit / win ratio chip in Strategy Locker so each saved strategy can show whether it is actually working.
 - `/my-picks` already shows stored prediction history with generated timestamps, saved state, and strategy labels.
+- `/my-picks` now uses a broader roughly 30-day fetch window so customers can review and confirm older picks without leaving BrewLotto.
 - `/stats` already shows settled plays, wins, hit rate, daily stats, and strategy summary data for the signed-in account.
 - `/notifications` already exists for customer inbox updates.
 - The current flow still needs a stronger confirmation layer so BrewLotto does not imply a win unless the play was actually logged for the draw date/time that won.
