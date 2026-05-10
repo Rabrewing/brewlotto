@@ -1,6 +1,6 @@
 # BrewLotto V1 - Results History, Win Ratios, and Play Confirmation Plan
 
-**Last Updated:** 2026-05-10 ET
+**Last Updated:** 2026-05-10 ET (results page now groups draws by date with explicit time chips)
 
 ## Purpose
 Define the customer and admin workflow for:
@@ -11,6 +11,7 @@ Define the customer and admin workflow for:
 
 ## Current Truth
 - `/results` already shows recent official draws, match counts, and the closest stored prediction for the selected game/state.
+- `/results` now groups the draw history by draw date with a visible date divider and time chip so the customer can see when each day’s draws happened at a glance.
 - `/my-picks` already shows stored prediction history with generated timestamps, saved state, and strategy labels.
 - `/stats` already shows settled plays, wins, hit rate, daily stats, and strategy summary data for the signed-in account.
 - `/notifications` already exists for customer inbox updates.
@@ -36,6 +37,7 @@ Define the customer and admin workflow for:
   - show recent draw history with date and time
   - show closest prediction separately from confirmed play
   - make the difference between `close match` and `real same-day win` explicit
+  - group each day’s draws with a visible divider and time label so the history reads as dated context, not a flat feed
 - `/my-picks`
   - show the timestamp and draw context for each generated pick
   - allow a customer to mark a pick as actually played

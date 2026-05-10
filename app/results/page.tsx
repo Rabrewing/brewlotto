@@ -65,6 +65,18 @@ function formatDrawTime(value: string | null) {
   });
 }
 
+function formatDrawDate(value: string | null) {
+  if (!value) return 'Date unavailable';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString([], {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
 export default function ResultsPage() {
   const { preferredState } = usePreferredState();
   const [selectedGame, setSelectedGame] = useState<GameId>('pick3');
@@ -136,6 +148,22 @@ export default function ResultsPage() {
     daily: 'Daily',
     nightly: 'Nightly',
   };
+  const groupedDraws = filteredDraws.reduce<Array<{ drawDate: string | null; draws: Array<{ draw: DrawEntry; index: number }> }>>((groups, draw, index) => {
+    const key = draw.drawDate || 'unknown-date';
+    const existing = groups.find((group) => (group.drawDate || 'unknown-date') === key);
+
+    if (existing) {
+      existing.draws.push({ draw, index });
+      return groups;
+    }
+
+    groups.push({
+      drawDate: draw.drawDate,
+      draws: [{ draw, index }],
+    });
+
+    return groups;
+  }, []);
 
   return (
     <main className="min-h-screen bg-[#050505] text-white">
@@ -187,50 +215,71 @@ export default function ResultsPage() {
                 : `No official draw is available yet for ${gameConfig.displayLabel}.`}
           </div>
         ) : (
-          <div className="space-y-5">
-            {filteredDraws.map((draw, index) => {
-              const matchCountEntry = results?.matchCounts?.[index] || null;
-              return (
-                <section
-                  key={`${draw.drawDate}-${draw.windowLabel || index}`}
-                  className="rounded-[28px] border border-[#ffbd39]/22 bg-[linear-gradient(145deg,rgba(32,19,13,0.82),rgba(13,10,10,0.96))] px-5 py-4 shadow-[0_0_22px_rgba(255,184,28,0.08)]"
-                >
-                  <div className="text-[16px] font-semibold text-[#f7d6ab]">
-                    {gameConfig.displayLabel}
-                    <span className="ml-1 text-white/45">• {gameConfig.statsStateCode}</span>
+          <div className="space-y-7">
+            {groupedDraws.map((group) => (
+              <section key={group.drawDate || 'unknown-date'} className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[#ffbd39]/35 to-transparent" />
+                  <div className="rounded-full border border-[#ffbd39]/20 bg-[#24160f] px-4 py-1.5 text-[12px] font-semibold uppercase tracking-[0.14em] text-[#f7d6ab]">
+                    {formatDrawDate(group.drawDate)}
                   </div>
+                  <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[#ffbd39]/35 to-transparent" />
+                </div>
 
-                  {draw.windowLabel ? (
-                    <div className="mt-1 text-[13px] font-medium uppercase tracking-[0.06em] text-[#ffbd39]/70">
-                      {draw.windowLabel} Draw
-                    </div>
-                  ) : null}
+                <div className="space-y-5">
+                  {group.draws.map(({ draw, index }) => {
+                    const matchCountEntry = results?.matchCounts?.[index] || null;
+                    return (
+                      <section
+                        key={`${draw.drawDate}-${draw.windowLabel || index}`}
+                        className="rounded-[28px] border border-[#ffbd39]/22 bg-[linear-gradient(145deg,rgba(32,19,13,0.82),rgba(13,10,10,0.96))] px-5 py-4 shadow-[0_0_22px_rgba(255,184,28,0.08)]"
+                      >
+                        <div className="flex flex-wrap items-start justify-between gap-3">
+                          <div className="text-[16px] font-semibold text-[#f7d6ab]">
+                            {gameConfig.displayLabel}
+                            <span className="ml-1 text-white/45">• {gameConfig.statsStateCode}</span>
+                          </div>
+                          <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[12px] uppercase tracking-[0.12em] text-white/55">
+                            {formatDrawTime(draw.drawnAt)}
+                          </div>
+                        </div>
 
-                  <div className="mt-4 flex flex-wrap items-start gap-2">
-                    {draw.primaryNumbers.map((value, i) => (
-                      <LotteryBall key={`draw-${index}-${value}-${i}`} number={value} variant="hot" size="tiny" />
-                    ))}
-                    {showBonus && draw.bonusNumber !== null ? (
-                      <LotteryBall
-                        number={draw.bonusNumber}
-                        variant="bonus-hot"
-                        size="tiny"
-                        label={draw.bonusLabel}
-                      />
-                    ) : null}
-                  </div>
+                        {draw.windowLabel ? (
+                          <div className="mt-1 text-[13px] font-medium uppercase tracking-[0.06em] text-[#ffbd39]/70">
+                            {draw.windowLabel} Draw
+                          </div>
+                        ) : null}
 
-                  <div className="mt-4 text-[13px] text-white/50">Drawn: {formatDrawTime(draw.drawnAt)}</div>
+                        <div className="mt-4 flex flex-wrap items-start gap-2">
+                          {draw.primaryNumbers.map((value, i) => (
+                            <LotteryBall key={`draw-${index}-${value}-${i}`} number={value} variant="hot" size="tiny" />
+                          ))}
+                          {showBonus && draw.bonusNumber !== null ? (
+                            <LotteryBall
+                              number={draw.bonusNumber}
+                              variant="bonus-hot"
+                              size="tiny"
+                              label={draw.bonusLabel}
+                            />
+                          ) : null}
+                        </div>
 
-                  {matchCountEntry ? (
-                    <div className="mt-2 text-[13px] text-[#ffd27e]">
-                      Closest pick matched {matchCountEntry.matchCount} number{matchCountEntry.matchCount === 1 ? '' : 's'}
-                      {showBonus && matchCountEntry.bonusMatch ? ' + bonus' : ''}
-                    </div>
-                  ) : null}
-                </section>
-              );
-            })}
+                        <div className="mt-4 text-[13px] text-white/50">
+                          Drawn: {formatDrawTime(draw.drawnAt)} • {formatDrawDate(draw.drawDate)}
+                        </div>
+
+                        {matchCountEntry ? (
+                          <div className="mt-2 text-[13px] text-[#ffd27e]">
+                            Closest pick matched {matchCountEntry.matchCount} number{matchCountEntry.matchCount === 1 ? '' : 's'}
+                            {showBonus && matchCountEntry.bonusMatch ? ' + bonus' : ''}
+                          </div>
+                        ) : null}
+                      </section>
+                    );
+                  })}
+                </div>
+              </section>
+            ))}
 
             <section>
               <div className="mb-3 text-[18px] font-medium text-[#f7d6ab]">

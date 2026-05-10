@@ -607,7 +607,7 @@ The system is considered complete when:
 2. **Dropdown UX** — Add hover previews and keyboard navigation per dropdown spec
 3. **"Run Strategy" Animation** — Wire up the animation from `strategy-locker-run-stratergy-animation.png`
 4. **Customer Notifications / Winnings Alerts** — Normalize the settled-play flow against `play_logs`, insert support updates and settled-play events into `user_notifications`, and send customer emails with a BrewLotto return link when support tickets or winnings are resolved.
-5. **Results History / Win Ratios** — Add a confirmed-play workflow, expand result history to 3–6 months, and surface win ratios by strategy/game/state in `/stats` and BrewCommand.
+5. **Results History / Win Ratios** — Add a confirmed-play workflow, expand result history to 3–6 months, surface win ratios by strategy/game/state in `/stats` and BrewCommand, and keep `/results` grouped by draw date/time so each day’s draws read as a dated history instead of a flat list.
 6. **Odds & Play-Style Intelligence** — Capture every launch game’s official play styles, odds, and payout ladders, then teach BrewLotto AI and BrewU/help content to explain straight vs box vs straight/box vs 50/50 vs combo vs add-on choices as educational options per game.
 7. **BrewU Support Intake** — Add a lightweight support tab with category dropdown, comments, screenshot upload, and a 24-hour response disclaimer; route submissions to BrewCommand notifications/email.
 8. **Strategy Validation** — Cross-check `lib/prediction/strategyEngine.js` and the live strategy modules against the BrewLotto V1 strategy spec, and keep the legacy wrapper files clearly marked as transitional only.
