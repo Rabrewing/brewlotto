@@ -1,6 +1,6 @@
 # BrewLotto V1 - Current State & Next Steps
 
-**Last Updated:** 2026-05-10 ET (desktop/tablet shell widened, changelog + responsive checklist added, admin alerting cleanup, branch truth update, blob-backed landing reel, home-state preference wiring, billing live-mode verification, strategy locker save/run flow fix, compact entitlement summary + collapsible ladder, BrewU Systems support scaffold, support screenshots bucket added, canonical play log bridge, support inbox notifications, settlement sweep, customer notifications plan added, docs timestamp rule added, BrewU play-style guidance live, shared play-style and payout matrix centralized, settlement classification upgraded, strategy validation pass queued, landing video replacement queued, AI strategy notifications tracked, momentum meter kept single, ingestion-driven strategy signal sweep wired, results history and win-ratio plan added)
+**Last Updated:** 2026-05-10 ET (desktop/tablet shell widened, changelog + responsive checklist added, admin alerting cleanup, branch truth update, blob-backed landing reel, home-state preference wiring, billing live-mode verification, strategy locker save/run flow fix, compact entitlement summary + collapsible ladder, BrewU Systems support scaffold, support screenshots bucket added, canonical play log bridge, support inbox notifications, settlement sweep, customer notifications plan added, docs timestamp rule added, BrewU play-style guidance live, shared play-style and payout matrix centralized, settlement classification upgraded, strategy validation pass queued, landing video replacement queued, AI strategy notifications tracked, momentum meter kept single, ingestion-driven strategy signal sweep wired, Strategy Signals BrewCommand section added, results history and win-ratio plan added)
 **Phase:** Shared UI/UX framework and product truth pass
 
 ## 2026-05-05 Truth Update
@@ -353,6 +353,7 @@ npm run ingest-all
 4. Run a tier matrix test across dashboard, strategy locker, pricing, billing, and AI commentary surfaces.
 5. Verify the strategy replay / run-strategy affordance and tighten the comparison/animation polish where needed.
 6. Do a desktop/tablet/mobile responsive pass on the landing, login, and shared framework surfaces so the structure stays polished across devices.
+7. Finish the BrewCommand Strategy Signals view so every ingestion-driven alert shows the recipient, reason, and qualifying strategy keys before moving back to results-history work.
 
 ### Medium Priority
 1. Replace the lightweight Learn and Legal shells with fuller CMS-backed and policy-backed content.

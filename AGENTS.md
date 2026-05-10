@@ -513,7 +513,7 @@ The system is considered complete when:
 
 ## V1 Progress Tracker
 
-**Last Updated:** 2026-05-01 ET (15:45 EDT - NC adapter schema fixed, all 8/8 scrapers now insert into canonical official_draws)
+**Last Updated:** 2026-05-10 ET (Strategy Signals BrewCommand section added, results-history work still queued, daily support/notification and play-log paths remain canonical)
 
 ### Phase Status
 
@@ -587,7 +587,7 @@ The system is considered complete when:
 1. **Mockup Alignment** — Visually QA all 15 mockup PNGs against rendered pages and lock designs, starting with Strategy Locker, Learn/BrewU, Billing, and Notifications
 2. **Stripe Live Mode** — Flip the current test-mode billing path to live keys, then verify the production checkout/webhook path end-to-end
 3. **Landing Video Swap** — Replace the current landing-page reel with the watermark-free Blob asset once it lands locally, then deploy/update through the Vercel CLI path.
-4. **Customer Strategy Alerts** — When Brew detects meaningful strategy signals, write an event-driven `user_notifications` record and send email only for off-app or high-priority events, keeping the momentum meter as a single gauge and exposing hot/cold as separate cards.
+4. **Customer Strategy Alerts** — When Brew detects meaningful strategy signals, write an event-driven `user_notifications` record and send email only for off-app or high-priority events, keeping the momentum meter as a single gauge and exposing hot/cold as separate cards. BrewCommand should surface the recent signals, recipients, and reasons in a dedicated Strategy Signals section so alerting can be audited.
 
 **ONBOARDING STATUS:**
 | Component | Status |

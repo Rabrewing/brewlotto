@@ -141,6 +141,39 @@ interface AiUsageTierMarginRow {
   verdict: 'profitable' | 'watch' | 'unknown';
 }
 
+interface StrategySignalSummary {
+  totalSignals: number;
+  highPriority: number;
+  unread: number;
+  surgeSignals: number;
+  recentEmails: number;
+}
+
+interface StrategySignalRow {
+  id: string;
+  userId: string;
+  contactEmail: string;
+  title: string;
+  body: string;
+  ctaLabel: string;
+  ctaUrl: string;
+  priority: 'low' | 'medium' | 'high';
+  isRead: boolean;
+  createdAt: string;
+  state: string;
+  gameKey: string;
+  gameLabel: string;
+  drawDate: string;
+  drawWindowLabel: string;
+  signalType: string;
+  signalReason: string;
+  momentumPercent: number | null;
+  hotNumbers: number[];
+  coldNumbers: number[];
+  signalKey: string;
+  eligibleStrategyKeys: string[];
+}
+
 interface AlertRecipientState {
   recipientEmail: string;
   choices: string[];
@@ -238,6 +271,14 @@ const EMPTY_AI_SUMMARY: AiUsageSummary = {
   totalRevenueUsd: 0,
   totalGrossMarginUsd: 0,
   totalMarginPct: null,
+};
+
+const EMPTY_STRATEGY_SIGNAL_SUMMARY: StrategySignalSummary = {
+  totalSignals: 0,
+  highPriority: 0,
+  unread: 0,
+  surgeSignals: 0,
+  recentEmails: 0,
 };
 
 const DEFAULT_ALERT_RECIPIENT: AlertRecipientState = {
@@ -423,6 +464,8 @@ export default function AdminPage() {
   const [aiUsageByModel, setAiUsageByModel] = useState<AiUsageModelRow[]>([]);
   const [aiUsageByTier, setAiUsageByTier] = useState<AiUsageTierMarginRow[]>([]);
   const [aiUsageRows, setAiUsageRows] = useState<AiUsageRow[]>([]);
+  const [strategySignalSummary, setStrategySignalSummary] = useState<StrategySignalSummary>(EMPTY_STRATEGY_SIGNAL_SUMMARY);
+  const [strategySignals, setStrategySignals] = useState<StrategySignalRow[]>([]);
   const [alertRecipient, setAlertRecipient] = useState<AlertRecipientState>(DEFAULT_ALERT_RECIPIENT);
   const [savingAlertRecipient, setSavingAlertRecipient] = useState(false);
   const [alertDeliveries, setAlertDeliveries] = useState<AlertDeliveryRow[]>([]);
@@ -484,6 +527,7 @@ export default function AdminPage() {
           fetch(`/api/admin/alerts?${alertParams.toString()}`, { cache: 'no-store' }),
           fetch('/api/admin/ingestion-health', { cache: 'no-store' }),
           fetch('/api/admin/ai-usage', { cache: 'no-store' }),
+          fetch('/api/admin/strategy-signals', { cache: 'no-store' }),
           fetch('/api/admin/alert-recipient', { cache: 'no-store' }),
           fetch('/api/admin/alert-deliveries', { cache: 'no-store' }),
           fetch('/api/admin/support-requests', { cache: 'no-store' }),
@@ -508,8 +552,8 @@ export default function AdminPage() {
       return;
     }
 
-    const [summaryResponse, alertsResponse, ingestionResponse, aiUsageResponse, alertRecipientResponse, alertDeliveriesResponse, supportRequestsResponse] = responses;
-    const [summaryPayload, alertsPayload, ingestionPayload, aiUsagePayload, alertRecipientPayload, alertDeliveriesPayload, supportRequestsPayload] = payloads;
+    const [summaryResponse, alertsResponse, ingestionResponse, aiUsageResponse, strategySignalsResponse, alertRecipientResponse, alertDeliveriesResponse, supportRequestsResponse] = responses;
+    const [summaryPayload, alertsPayload, ingestionPayload, aiUsagePayload, strategySignalsPayload, alertRecipientPayload, alertDeliveriesPayload, supportRequestsPayload] = payloads;
 
     if (!summaryResponse.ok) {
       throw new Error(summaryPayload?.error?.message || 'Failed to load alert summary');
@@ -525,6 +569,10 @@ export default function AdminPage() {
 
     if (!aiUsageResponse.ok) {
       throw new Error(aiUsagePayload?.error?.message || 'Failed to load AI usage');
+    }
+
+    if (!strategySignalsResponse.ok) {
+      throw new Error(strategySignalsPayload?.error?.message || 'Failed to load strategy signals');
     }
 
     if (!alertRecipientResponse.ok) {
@@ -548,6 +596,8 @@ export default function AdminPage() {
     setAiUsageByModel(aiUsagePayload.data?.byModel || []);
     setAiUsageByTier(aiUsagePayload.data?.byTier || []);
     setAiUsageRows(aiUsagePayload.data?.recent || []);
+    setStrategySignalSummary(strategySignalsPayload.data?.summary || EMPTY_STRATEGY_SIGNAL_SUMMARY);
+    setStrategySignals(strategySignalsPayload.data?.recent || []);
     setAlertRecipient({
       recipientEmail: alertRecipientPayload.data?.recipientEmail || DEFAULT_ALERT_RECIPIENT.recipientEmail,
       choices: alertRecipientPayload.data?.choices || DEFAULT_ALERT_RECIPIENT.choices,
@@ -1126,6 +1176,124 @@ export default function AdminPage() {
                       <tr>
                         <td colSpan={6} className="px-4 py-8 text-center text-sm text-white/55">
                           No AI usage events have been recorded yet.
+                        </td>
+                      </tr>
+                    ) : null}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-8 rounded-[30px] border border-[#ffd978]/18 bg-[linear-gradient(180deg,rgba(34,24,10,0.94),rgba(14,12,16,0.96))] p-5">
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <div className="text-[11px] font-medium uppercase tracking-[0.22em] text-[#ffd873]">Strategy Signals</div>
+                <h2 className="mt-2 text-xl font-semibold text-white">Ingestion-driven alert review</h2>
+                <p className="mt-1 text-sm text-white/55">
+                  BrewCommand shows who was alerted, why they were alerted, and which saved strategies qualified for the signal.
+                </p>
+              </div>
+              <div className="text-right text-[11px] uppercase tracking-[0.16em] text-white/35">
+                <div>Recent signals</div>
+                <div className="mt-1 text-white/60 normal-case tracking-normal">{strategySignalSummary.totalSignals}</div>
+              </div>
+            </div>
+
+            <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+              <SummaryCard label="Total Signals" value={strategySignalSummary.totalSignals} accent="text-white" />
+              <SummaryCard label="High Priority" value={strategySignalSummary.highPriority} accent="text-[#ff9f92]" />
+              <SummaryCard label="Unread" value={strategySignalSummary.unread} accent="text-[#ffd873]" />
+              <SummaryCard label="Momentum Surges" value={strategySignalSummary.surgeSignals} accent="text-[#93efb8]" />
+              <SummaryCard label="Emailed" value={strategySignalSummary.recentEmails} accent="text-[#9edcff]" />
+            </div>
+
+            <div className="mt-6 overflow-hidden rounded-[24px] border border-white/10 bg-black/20">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-white/10 text-left text-sm">
+                  <thead className="bg-white/5 text-[11px] uppercase tracking-[0.16em] text-white/45">
+                    <tr>
+                      <th className="px-4 py-3">Time</th>
+                      <th className="px-4 py-3">Recipient / Signal</th>
+                      <th className="px-4 py-3">Context</th>
+                      <th className="px-4 py-3">Momentum</th>
+                      <th className="px-4 py-3">Strategy Keys</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5 text-white/75">
+                    {strategySignals.map((signal) => {
+                      const numbersLabel = [...signal.hotNumbers, ...signal.coldNumbers]
+                        .filter((value, index, array) => array.indexOf(value) === index)
+                        .join(', ');
+
+                      return (
+                        <tr key={signal.id} className="align-top">
+                          <td className="px-4 py-4 text-white/65">{formatDate(signal.createdAt)}</td>
+                          <td className="px-4 py-4">
+                            <div className="font-semibold text-white">{signal.contactEmail || 'Unknown recipient'}</div>
+                            <div className="mt-1 text-xs uppercase tracking-[0.12em] text-white/40">{signal.signalType || 'strategy_signal'}</div>
+                            <div className="mt-2 text-sm text-white/65">{signal.title}</div>
+                            <div className="mt-2 inline-flex rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] border-white/10 bg-white/5 text-white/70">
+                              {signal.priority}
+                            </div>
+                            {!signal.isRead ? (
+                              <div className="mt-2 text-xs uppercase tracking-[0.14em] text-[#ffd873]">Unread</div>
+                            ) : null}
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="font-semibold text-white">{signal.gameLabel || signal.gameKey || 'Unknown game'}</div>
+                            <div className="mt-1 text-xs uppercase tracking-[0.12em] text-white/40">
+                              {signal.state || 'Unknown state'} • {signal.drawWindowLabel || 'Draw window unknown'}
+                            </div>
+                            <div className="mt-2 text-sm text-white/65">{signal.signalReason}</div>
+                            <div className="mt-2 text-xs text-white/40">{signal.drawDate || 'Unknown draw date'}</div>
+                            {numbersLabel ? (
+                              <div className="mt-2 text-xs uppercase tracking-[0.12em] text-white/40">Hot/Cold: {numbersLabel}</div>
+                            ) : null}
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="text-lg font-semibold text-white">
+                              {signal.momentumPercent == null ? 'N/A' : `${signal.momentumPercent.toFixed(1)}%`}
+                            </div>
+                            <div className="mt-1 text-xs text-white/40">
+                              {signal.momentumPercent == null
+                                ? 'No momentum snapshot'
+                                : signal.momentumPercent >= 35
+                                  ? 'Momentum surge'
+                                  : signal.momentumPercent >= 20
+                                    ? 'Momentum shift'
+                                    : 'Below alert threshold'}
+                            </div>
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="flex flex-wrap gap-2">
+                              {signal.eligibleStrategyKeys.length > 0 ? signal.eligibleStrategyKeys.map((key) => (
+                                <span
+                                  key={`${signal.id}:${key}`}
+                                  className="rounded-full border border-[#72caff]/20 bg-[#111f28] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#9edcff]"
+                                >
+                                  {key}
+                                </span>
+                              )) : (
+                                <span className="text-white/45">No saved strategy keys</span>
+                              )}
+                            </div>
+                            {signal.ctaLabel ? (
+                              <div className="mt-3 text-xs uppercase tracking-[0.12em] text-white/35">
+                                CTA: {signal.ctaLabel}
+                              </div>
+                            ) : null}
+                            {signal.ctaUrl ? (
+                              <div className="mt-1 break-all text-xs text-white/40">{signal.ctaUrl}</div>
+                            ) : null}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {!loading && strategySignals.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="px-4 py-8 text-center text-sm text-white/55">
+                          No strategy signals have been recorded yet.
                         </td>
                       </tr>
                     ) : null}
