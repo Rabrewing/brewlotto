@@ -39,6 +39,29 @@ const TUTORIAL_VIDEO_SRC =
   process.env.NEXT_PUBLIC_TUTORIAL_VIDEO_URL ||
   'https://qrmbod86z2yiiftp.public.blob.vercel-storage.com/brewlotto-tutorial.mp4';
 
+const COVERAGE_OVERVIEW = [
+  {
+    label: 'Play-style guides',
+    value: BREWU_PLAY_STYLE_GUIDES.length,
+    note: 'NC, CA, and multi-state play options',
+  },
+  {
+    label: 'Payout ladders',
+    value: BREWU_PAYOUT_GUIDES.length,
+    note: 'Prize-shape guidance by game family',
+  },
+  {
+    label: 'Game families',
+    value: 5,
+    note: 'Pick 3, Pick 4, Cash 5, Powerball, Mega Millions',
+  },
+  {
+    label: 'Systems links',
+    value: 4,
+    note: 'BrewU, Support, Terms & Privacy, Logout',
+  },
+];
+
 export default function LearnPage() {
   return (
     <main className="min-h-screen bg-[#050505] text-white">
@@ -47,6 +70,25 @@ export default function LearnPage() {
         <NavigationTabs />
 
         <div className="mb-5 mt-2 text-[40px] font-medium tracking-[-0.03em] text-[#f8cf98]">BrewU</div>
+
+        <section className="rounded-[30px] border border-[#ffc742]/24 bg-[radial-gradient(circle_at_top_left,rgba(255,199,66,0.16),rgba(0,0,0,0)_34%),linear-gradient(145deg,rgba(30,20,13,0.9),rgba(8,8,8,0.98))] px-5 py-5 shadow-[0_0_28px_rgba(255,184,28,0.08)]">
+          <div className="text-[15px] uppercase tracking-[0.16em] text-white/38">Intelligence Center</div>
+          <div className="mt-3 text-[26px] font-semibold text-[#f7ddb3]">Master the strategies behind every pick</div>
+          <div className="mt-2 max-w-3xl text-[15px] leading-7 text-white/62">
+            BrewU stays tied to the live app, not a fake LMS. The pages below explain real play
+            styles, payout shapes, and where each concept shows up inside BrewLotto.
+          </div>
+
+          <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            {COVERAGE_OVERVIEW.map((item) => (
+              <div key={item.label} className="rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
+                <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">{item.label}</div>
+                <div className="mt-3 text-[28px] font-semibold text-[#ddf7e2]">{item.value}</div>
+                <div className="mt-2 text-[13px] leading-6 text-white/52">{item.note}</div>
+              </div>
+            ))}
+          </div>
+        </section>
 
         <section id="tutorial" className="mt-1">
           <TutorialVideoPanel
@@ -75,10 +117,14 @@ export default function LearnPage() {
           </TutorialVideoPanel>
         </section>
 
-        <section className="rounded-[30px] border border-[#ffc742]/24 bg-[radial-gradient(circle_at_top_left,rgba(255,199,66,0.18),rgba(0,0,0,0)_34%),linear-gradient(145deg,rgba(30,20,13,0.88),rgba(8,8,8,0.98))] px-5 py-5 shadow-[0_0_28px_rgba(255,184,28,0.08)]">
+        <section className="mt-5 rounded-[30px] border border-[#ffc742]/24 bg-[radial-gradient(circle_at_top_left,rgba(255,199,66,0.18),rgba(0,0,0,0)_34%),linear-gradient(145deg,rgba(30,20,13,0.88),rgba(8,8,8,0.98))] px-5 py-5 shadow-[0_0_28px_rgba(255,184,28,0.08)]">
           <div className="text-[15px] uppercase tracking-[0.16em] text-white/38">BrewUniversity Lite</div>
           <div className="mt-3 text-[26px] font-semibold text-[#f7ddb3]">Short explainers, not a fake LMS</div>
-          <div className="mt-2 max-w-3xl text-[15px] leading-7 text-white/62">V1 keeps learning lightweight and connected to real product surfaces. This route explains core Brew concepts and links back into the dashboard, stats, and strategy views where those concepts appear.</div>
+          <div className="mt-2 max-w-3xl text-[15px] leading-7 text-white/62">
+            V1 keeps learning lightweight and connected to real product surfaces. This route
+            explains core Brew concepts and links back into the dashboard, stats, and strategy
+            views where those concepts appear.
+          </div>
         </section>
 
         <section className="mt-5 grid gap-4 lg:grid-cols-2">

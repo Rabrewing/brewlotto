@@ -33,6 +33,7 @@
 - The next strategy-intelligence pass should capture each launch game’s official play styles and odds so the AI layer can explain straight, box, straight/box, 50/50, combo, pair, Fireball, Power Play, Double Play, and similar choices in a customer-friendly way.
 - The BrewU/help surface now turns that same play-style matrix into plain-English strategy guidance so customers can learn when a straight play, box play, or game-specific add-on is the better educational option. That guidance now comes from shared BrewU matrix modules so future AI copy, help surfaces, and settlement labels can stay aligned.
 - Settlement classification now uses the shared payout matrix, so exact-order, box-style, and standard match-number games are no longer all treated as the same generic result label.
+- BrewU/help copy, support categories, and tutorial transcript content remain static by design for V1; a DB/CMS-backed content pass is tracked separately in `brewdocs/v1/content-externalization-plan.md` if launch pressure later justifies content management.
 
 ### ⚠️ Still Partial Or Needs Verification
 - `scripts/ingestionScheduler.js` has been archived; Cloud Scheduler + Cloud Run are the active production ingestion path.
@@ -51,6 +52,7 @@
 - Tier gating still needs a deliberate test matrix across dashboard, strategy locker, pricing, billing, and AI surfaces.
 - Route wiring is now cleaner, but the next visual pass should still check whether the shared dashboard surfaces breathe as well on desktop/tablet as they do on mobile mockups.
 - Strategy validation still needs a spec cross-check pass that verifies each live engine module and its tests against the BrewLotto V1 strategy spec.
+- BrewU content externalization is intentionally deferred until launch pressure justifies a content-management layer; the current static content is truthful and tied to real product surfaces.
 - BrewCommand alerting is now operational with a single selected recipient plus history/filtering, but full internal RBAC and user provisioning are still deferred.
 - BrewCommand receives BrewU support submissions so reported issues can be tracked with notifications, ticket status, and email escalation back to the customer when resolved.
 - Shared tier access now normalizes legacy `brew` labels and numeric strategy tiers into the current `free / starter / pro / master` ladder, and the dashboard generate action plus strategy smoke tests now pass against historical-style feature data.

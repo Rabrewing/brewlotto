@@ -42,6 +42,7 @@ official source → ingestion → Supabase → freshness view → API → UI
 | **Responsive shell widening** | `components/brewlotto/dashboard/DashboardContainer.tsx`, `brewdocs/v1/shared-ui-ux-framework.md`, `brewdocs/v1/responsive-layout-checklist.md` — 2026-05-10 | Widened the shared shell on tablet/desktop while keeping the current mobile stack so larger screens breathe horizontally without changing phone behavior. |
 | **Strategy validation checklist** | `brewdocs/v1/strategy-validation-checklist.md` — 2026-05-10 | Tracks the live strategy-engine scope (`poisson`, `momentum`, `markov`, `ensemble`) and keeps the legacy wrapper files clearly labeled as transitional only. |
 | **Strategy Locker compact ladder** | `app/strategy-locker/page.tsx`, `brewdocs/v1/current_state.md`, `brewdocs/v1/CHANGELOG.md` — 2026-05-10 | Collapsed the entitlement surface into a compact summary by default with a user-triggered full ladder reveal so the strategy cards stay visually primary on desktop and mobile. |
+| **BrewU content externalization plan** | `brewdocs/v1/content-externalization-plan.md` — 2026-05-10 | Tracks the decision to keep BrewU/help copy, support categories, and tutorial transcript static for V1 while reserving DB/CMS-backed content as a later follow-on if launch needs justify it. |
 | **Superadmin added** | `.env`, `.env.local` — 2026-05-02 | `BREWCOMMAND_ADMIN_EMAILS` now includes `command@brewlotto.app` and `michael.brewington@gmail.com`; code keeps fallback allowlist so BrewCommand access works if one env entry is missing. |
 | **SectionCard centralized** | `components/brewlotto/dashboard/SectionCard.tsx` (new) — 2026-05-02 | Removed 6 local duplicates across strategy-locker, profile, settings, stats, notifications, billing. Single shared component with consistent dark/gold styling. |
 | **Play log bridge** | `app/api/play/log/route.ts` — 2026-05-07 | Legacy browser write path now inserts into canonical `play_logs` with auth validation and normalized draw-time / number payloads. This is the settlement source of truth for future winnings alerts. |
@@ -604,6 +605,7 @@ The system is considered complete when:
 5. **Odds & Play-Style Intelligence** — Capture every launch game’s official play styles, odds, and payout ladders, then teach BrewLotto AI and BrewU/help content to explain straight vs box vs straight/box vs 50/50 vs combo vs add-on choices as educational options per game.
 6. **BrewU Support Intake** — Add a lightweight support tab with category dropdown, comments, screenshot upload, and a 24-hour response disclaimer; route submissions to BrewCommand notifications/email.
 7. **Strategy Validation** — Cross-check `lib/prediction/strategyEngine.js` and the live strategy modules against the BrewLotto V1 strategy spec, and keep the legacy wrapper files clearly marked as transitional only.
+8. **BrewU Content Externalization** — If V1 content editing needs increase, move BrewU/help copy, support categories, and tutorial transcript content into DB/CMS-backed tables using the new plan doc as the handoff.
 
 **LOW PRIORITY / FOLLOW-ON:**
 1. **Stats Charts** — Add Chart.js visualizations for trends

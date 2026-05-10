@@ -9,6 +9,7 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 ### 2026-05-10
 - Widened the shared dashboard shell for desktop and tablet while preserving the current mobile layout.
 - Reworked Strategy Locker so the entitlement snapshot opens as a compact summary with a collapsible full ladder, keeping the strategy cards visually primary.
+- Tuned BrewU so the page opens with an intelligence-center style coverage overview before the tutorial replay and lesson cards, and tracked content externalization as a later V1 follow-on.
 - Added a BrewU play-style matrix and payout ladder matrix so help content, AI guidance, and settlement classification share one source of truth.
 - Upgraded settlement classification to distinguish exact-order, box-style, and standard match-number outcomes more cleanly.
 - Centralized support intake, support tickets, BrewCommand notifications, and customer resolution emails.
