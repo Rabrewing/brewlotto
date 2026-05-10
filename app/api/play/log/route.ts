@@ -63,7 +63,7 @@ function normalizeDrawTime(drawType: unknown) {
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => ({}));
-    const { user_id, game, draw_type, strategy, numbers, add_on, amount_spent, outcome, prize } = body;
+    const { user_id, game, draw_type, strategy, numbers, add_on, amount_spent, outcome, prize, draw_date, prediction_id } = body;
 
     if (!game) {
       return NextResponse.json(
@@ -95,9 +95,10 @@ export async function POST(req: Request) {
     const supabase = getAdminClient();
     const normalizedGame = normalizeGame(String(game));
     const playedNumbers = normalizeNumbers(numbers);
-    const drawDate = new Date().toISOString().slice(0, 10);
+    const parsedDrawDate = typeof draw_date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(draw_date) ? draw_date : null;
+    const drawDate = parsedDrawDate || new Date().toISOString().slice(0, 10);
     const playSource =
-      String(strategy || '').trim() ? 'saved_prediction' : 'quick_pick';
+      String(strategy || '').trim() ? (String(prediction_id || '').trim() ? 'confirmed_prediction' : 'saved_prediction') : 'quick_pick';
 
     const { data, error } = await supabase
       .from('play_logs')
@@ -110,6 +111,7 @@ export async function POST(req: Request) {
           draw_time: normalizeDrawTime(draw_type),
           played_numbers: playedNumbers,
           played_bonus_number: null,
+          prediction_id: String(prediction_id || '').trim() || null,
           play_source: playSource,
           amount_spent: typeof amount_spent === 'number' ? amount_spent : Number(amount_spent) || null,
           was_played: true,
@@ -121,6 +123,7 @@ export async function POST(req: Request) {
           metadata: {
             strategy: strategy || null,
             add_on: add_on || null,
+            source: String(prediction_id || '').trim() ? 'my_picks_confirmation' : 'quick_pick',
             legacy_payload: true,
           },
         },

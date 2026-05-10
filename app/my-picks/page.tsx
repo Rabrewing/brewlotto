@@ -137,11 +137,17 @@ function SummaryMetric({ label, value }: { label: string; value: string }) {
 
 function PickCard({
   prediction,
+  isConfirmed,
+  isConfirming,
   onToggleSaved,
+  onConfirmPlayed,
   onDelete,
 }: {
   prediction: PredictionRecord;
+  isConfirmed: boolean;
+  isConfirming: boolean;
   onToggleSaved: (prediction: PredictionRecord) => Promise<void>;
+  onConfirmPlayed: (prediction: PredictionRecord) => Promise<void>;
   onDelete: (prediction: PredictionRecord) => Promise<void>;
 }) {
   const numbers = Array.isArray(prediction.predicted_numbers) ? prediction.predicted_numbers : [];
@@ -187,7 +193,19 @@ function PickCard({
       <div className="mt-5 flex flex-wrap items-center justify-between gap-4 border-t border-white/8 pt-4">
         <PickStatusPill status={status} createdAt={prediction.created_at} />
 
-        <div className="flex items-center gap-3 text-[14px] text-[#f2d29f]">
+        <div className="flex flex-wrap items-center gap-2 text-[13px] text-[#f2d29f] sm:gap-3 sm:text-[14px]">
+          <button
+            type="button"
+            className={`rounded-full border px-3 py-2 font-medium transition-colors sm:px-4 ${
+              isConfirmed
+                ? 'border-[#85d36c]/25 bg-[#102117] text-[#85d36c]'
+                : 'border-[#ffc742]/22 bg-[#ffc742]/10 text-[#ffd27e] hover:bg-[#ffc742]/16 hover:text-white'
+            }`}
+            onClick={() => onConfirmPlayed(prediction)}
+            disabled={isConfirmed || isConfirming}
+          >
+            {isConfirmed ? 'Played' : isConfirming ? 'Confirming...' : 'I Played This'}
+          </button>
           <button
             type="button"
             className="transition-colors hover:text-white"
@@ -223,6 +241,9 @@ export default function MyPicksPage() {
   const [predictions, setPredictions] = useState<PredictionRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [confirmedPredictionIds, setConfirmedPredictionIds] = useState<string[]>([]);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [confirmingPredictionId, setConfirmingPredictionId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -314,6 +335,48 @@ export default function MyPicksPage() {
     setPredictions((current) => current.filter((item) => item.id !== prediction.id));
   }
 
+  async function handleConfirmPlayed(prediction: PredictionRecord) {
+    if (confirmedPredictionIds.includes(prediction.id)) {
+      return;
+    }
+
+    setActionMessage(null);
+    setConfirmingPredictionId(prediction.id);
+
+    try {
+      const drawDate = prediction.created_at ? new Date(prediction.created_at).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+
+      const response = await fetch('/api/play/log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          game: prediction.game || 'pick3',
+          draw_date: drawDate,
+          strategy: prediction.source_strategy_key || 'my_picks_confirm',
+          numbers: prediction.predicted_numbers || [],
+          amount_spent: null,
+          outcome: null,
+          prize: null,
+          prediction_id: prediction.id,
+          draw_type: null,
+          add_on: null,
+        }),
+      });
+
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload?.error?.message || 'Failed to confirm play');
+      }
+
+      setConfirmedPredictionIds((current) => [...current, prediction.id]);
+      setActionMessage('Play confirmed. Brew will use this as the canonical play history entry for the selected draw date.');
+    } catch (confirmError) {
+      setActionMessage(confirmError instanceof Error ? confirmError.message : 'Failed to confirm play');
+    } finally {
+      setConfirmingPredictionId(null);
+    }
+  }
+
   return (
     <main className="min-h-screen bg-[#050505] text-white">
       <DashboardContainer>
@@ -358,6 +421,12 @@ export default function MyPicksPage() {
           <SummaryMetric label="Primary Game" value={predictions.length > 0 ? primaryGame : '--'} />
         </div>
 
+        {actionMessage ? (
+          <div className="mb-5 rounded-[22px] border border-[#53d48a]/20 bg-[#102117] px-4 py-3 text-[14px] leading-6 text-[#c8f4d8]">
+            {actionMessage}
+          </div>
+        ) : null}
+
         {loading ? (
           <div className="rounded-[28px] border border-white/10 bg-white/[0.03] px-5 py-8 text-center text-white/55">
             Loading saved Brew picks...
@@ -385,7 +454,10 @@ export default function MyPicksPage() {
               <PickCard
                 key={prediction.id}
                 prediction={prediction}
+                isConfirmed={confirmedPredictionIds.includes(prediction.id)}
+                isConfirming={confirmingPredictionId === prediction.id}
                 onToggleSaved={handleToggleSaved}
+                onConfirmPlayed={handleConfirmPlayed}
                 onDelete={handleDelete}
               />
             ))}

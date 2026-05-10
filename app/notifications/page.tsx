@@ -153,6 +153,7 @@ export default function NotificationsPage() {
 
     return notifications.filter((entry) => !entry.is_read);
   }, [notifications, selectedTab]);
+  const compactNotificationTypes = new Set(['pick_reminder', 'draw_result']);
 
   async function savePreferences() {
     if (!user) {
@@ -338,25 +339,34 @@ export default function NotificationsPage() {
                 <div className="rounded-[20px] border border-white/8 bg-black/20 px-4 py-4 text-[14px] leading-6 text-white/58">No in-app notifications are stored for this account yet. As draw, streak, subscription, and system events land, they will appear here.</div>
               ) : (
                 <div className="space-y-3">
-                  {visibleNotifications.map((entry) => (
-                    <article key={entry.id} className={`rounded-[22px] border px-4 py-4 ${entry.is_read ? 'border-white/8 bg-black/20' : 'border-[#ffc742]/20 bg-[#ffc742]/8'}`}>
+                  {visibleNotifications.map((entry) => {
+                    const isCompact = compactNotificationTypes.has(entry.type);
+                    return (
+                    <article key={entry.id} className={`rounded-[22px] border px-3 py-3 sm:px-4 sm:py-4 ${entry.is_read ? 'border-white/8 bg-black/20' : 'border-[#ffc742]/20 bg-[#ffc742]/8'}`}>
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <div>
                           <div className="flex flex-wrap items-center gap-2">
-                            <div className="text-[16px] font-medium text-[#f7ddb3]">{entry.title}</div>
-                            <span className="rounded-full border border-white/8 bg-white/[0.03] px-2.5 py-1 text-[11px] uppercase tracking-[0.14em] text-white/38">{entry.type}</span>
-                            <span className="rounded-full border border-white/8 bg-white/[0.03] px-2.5 py-1 text-[11px] uppercase tracking-[0.14em] text-white/38">{entry.priority}</span>
+                            <div className="text-[15px] font-medium text-[#f7ddb3] sm:text-[16px]">{entry.title}</div>
+                            {isCompact ? (
+                              <span className="rounded-full border border-[#ffc742]/18 bg-[#ffc742]/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-[#ffd27e]">
+                                quick confirm
+                              </span>
+                            ) : (
+                              <span className="rounded-full border border-white/8 bg-white/[0.03] px-2.5 py-1 text-[11px] uppercase tracking-[0.14em] text-white/38">{entry.type}</span>
+                            )}
+                            <span className="rounded-full border border-white/8 bg-white/[0.03] px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-white/38 sm:text-[11px]">{entry.priority}</span>
                           </div>
-                          <div className="mt-2 text-[14px] leading-7 text-white/62">{entry.body || 'No detail text stored for this notification.'}</div>
+                          <div className={`mt-2 text-[13px] leading-6 text-white/62 sm:text-[14px] sm:leading-7 ${isCompact ? 'max-w-2xl' : ''}`}>{entry.body || 'No detail text stored for this notification.'}</div>
                           <div className="mt-2 text-[12px] uppercase tracking-[0.14em] text-white/35">{formatTimestamp(entry.created_at)}</div>
                         </div>
-                        <div className="flex flex-wrap gap-2">
-                          {entry.cta_url ? <Link href={entry.cta_url} className="rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-[13px] font-medium text-white/72 transition-colors hover:text-white">{entry.cta_label || 'Open'}</Link> : null}
-                          {!entry.is_read ? <button type="button" onClick={() => markAsRead(entry.id)} className="rounded-full border border-[#ffc742]/28 bg-[#ffc742]/10 px-4 py-2 text-[13px] font-medium text-[#ffd27e] transition-colors hover:bg-[#ffc742]/16 hover:text-white">Mark Read</button> : null}
+                        <div className="flex flex-wrap gap-2 sm:flex-col sm:items-end">
+                          {entry.cta_url ? <Link href={entry.cta_url} className="w-full rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-center text-[12px] font-medium text-white/72 transition-colors hover:text-white sm:w-auto sm:text-[13px]">{entry.cta_label || 'Open'}</Link> : null}
+                          {!entry.is_read ? <button type="button" onClick={() => markAsRead(entry.id)} className="w-full rounded-full border border-[#ffc742]/28 bg-[#ffc742]/10 px-4 py-2 text-[12px] font-medium text-[#ffd27e] transition-colors hover:bg-[#ffc742]/16 hover:text-white sm:w-auto sm:text-[13px]">Mark Read</button> : null}
                         </div>
                       </div>
                     </article>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </SectionCard>

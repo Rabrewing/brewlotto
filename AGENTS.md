@@ -589,6 +589,7 @@ The system is considered complete when:
 3. **Landing Video Swap** — Replace the current landing-page reel with the watermark-free Blob asset once it lands locally, then deploy/update through the Vercel CLI path.
 4. **Customer Strategy Alerts** — When Brew detects meaningful strategy signals, write an event-driven `user_notifications` record and send email only for off-app or high-priority events, keeping the momentum meter as a single gauge and exposing hot/cold as separate cards. BrewCommand should surface the recent signals, recipients, and reasons in a dedicated Strategy Signals section so alerting can be audited.
 5. **Play Confirmation Nudges** — When a settled play has a near-hit or meaningful match, write a customer nudge that says “if you played this, confirm it” so the result history can stay honest before the confirmed-play workflow is fully interactive.
+6. **Strategy Locker Win Ratios** — Surface a compact hit / win ratio beside each saved strategy so users can see which saved strategy is actually working once confirmed plays and result matches are compared.
 
 **ONBOARDING STATUS:**
 | Component | Status |
@@ -608,7 +609,7 @@ The system is considered complete when:
 2. **Dropdown UX** — Add hover previews and keyboard navigation per dropdown spec
 3. **"Run Strategy" Animation** — Wire up the animation from `strategy-locker-run-stratergy-animation.png`
 4. **Customer Notifications / Winnings Alerts** — Normalize the settled-play flow against `play_logs`, insert support updates and settled-play events into `user_notifications`, and send customer emails with a BrewLotto return link when support tickets or winnings are resolved.
-5. **Results History / Win Ratios** — Add a confirmed-play workflow, expand result history to 3–6 months, surface win ratios by strategy/game/state in `/stats` and BrewCommand, and keep `/results` grouped by draw date/time so each day’s draws read as a dated history instead of a flat list.
+5. **Results History / Win Ratios** — Add a confirmed-play workflow, expand result history to 3–6 months, surface win ratios by strategy/game/state in `/stats` and BrewCommand, keep `/results` grouped by draw date/time so each day’s draws read as a dated history instead of a flat list, and feed the same confirmed-play signal into the Strategy Locker ratio chips.
 6. **Odds & Play-Style Intelligence** — Capture every launch game’s official play styles, odds, and payout ladders, then teach BrewLotto AI and BrewU/help content to explain straight vs box vs straight/box vs 50/50 vs combo vs add-on choices as educational options per game.
 7. **BrewU Support Intake** — Add a lightweight support tab with category dropdown, comments, screenshot upload, and a 24-hour response disclaimer; route submissions to BrewCommand notifications/email.
 8. **Strategy Validation** — Cross-check `lib/prediction/strategyEngine.js` and the live strategy modules against the BrewLotto V1 strategy spec, and keep the legacy wrapper files clearly marked as transitional only.
