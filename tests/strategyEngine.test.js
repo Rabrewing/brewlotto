@@ -90,6 +90,13 @@ const FEATURE_FIXTURES = {
 };
 
 describe('StrategyEngine', () => {
+  test('registers only the live V1 core strategy modules', () => {
+    const engine = new StrategyEngine();
+
+    expect(Object.keys(engine.strategies).sort()).toEqual(['markov', 'momentum', 'poisson']);
+    expect(Object.keys(engine.strategyWeights).sort()).toEqual(['markov', 'momentum', 'poisson']);
+  });
+
   test('executes the core strategies from historical-style feature data', () => {
     const engine = new StrategyEngine();
     const scores = engine.executeStrategies(FEATURE_FIXTURES.pick3);
@@ -103,6 +110,87 @@ describe('StrategyEngine', () => {
       expect(typeof strategyScores).toBe('object');
       expect(Object.keys(strategyScores)).toContain('1');
     }
+  });
+
+  test('poisson strategy normalizes frequency data and falls back to uniform range scores', () => {
+    const strategy = new PoissonStrategy();
+    const frequencyScores = strategy.execute({
+      frequency: { 1: 2, 2: 4 },
+      numberRange: { min: 1, max: 2 },
+    });
+
+    expect(frequencyScores['2']).toBe(1);
+    expect(frequencyScores['1']).toBe(0.5);
+
+    const fallbackScores = strategy.execute({
+      numberRange: { min: 1, max: 3 },
+    });
+
+    expect(fallbackScores['1']).toBeCloseTo(1 / 3, 5);
+    expect(fallbackScores['2']).toBeCloseTo(1 / 3, 5);
+    expect(fallbackScores['3']).toBeCloseTo(1 / 3, 5);
+  });
+
+  test('momentum strategy prefers momentum data and falls back to recent frequency', () => {
+    const strategy = new MomentumStrategy();
+    const momentumScores = strategy.execute({
+      momentum: { 1: 1, 2: 4 },
+      recentFrequency: { 1: 9, 2: 1 },
+      numberRange: { min: 1, max: 2 },
+    });
+
+    expect(momentumScores['2']).toBe(1);
+    expect(momentumScores['1']).toBe(0.25);
+
+    const fallbackScores = strategy.execute({
+      recentFrequency: { 1: 3, 2: 9 },
+      numberRange: { min: 1, max: 2 },
+    });
+
+    expect(fallbackScores['2']).toBe(1);
+    expect(fallbackScores['1']).toBe(1 / 3);
+  });
+
+  test('markov strategy uses transition matrices and falls back to a uniform range when needed', () => {
+    const strategy = new MarkovStrategy();
+    const transitionScores = strategy.execute({
+      transitionMatrix: {
+        1: { 1: 0.2, 2: 0.8 },
+        2: { 1: 0.5, 2: 0.5 },
+      },
+      numberRange: { min: 1, max: 2 },
+    });
+
+    expect(transitionScores['2']).toBeGreaterThan(transitionScores['1']);
+    expect(transitionScores['2']).toBe(1);
+
+    const fallbackScores = strategy.execute({
+      numberRange: { min: 1, max: 3 },
+    });
+
+    expect(fallbackScores['1']).toBeCloseTo(1 / 3, 5);
+    expect(fallbackScores['2']).toBeCloseTo(1 / 3, 5);
+    expect(fallbackScores['3']).toBeCloseTo(1 / 3, 5);
+  });
+
+  test('ensemble strategy combines scores with weights', () => {
+    const ensemble = new EnsembleStrategy();
+    const combined = ensemble.execute(
+      {
+        poisson: { 1: 1, 2: 0 },
+        momentum: { 1: 0, 2: 1 },
+        markov: { 1: 0, 2: 1 },
+      },
+      {
+        poisson: 1,
+        momentum: 3,
+        markov: 1,
+      }
+    );
+
+    expect(combined['2']).toBeGreaterThan(combined['1']);
+    expect(combined['2']).toBeCloseTo(0.8, 5);
+    expect(combined['1']).toBeCloseTo(0.2, 5);
   });
 
   test('generates valid candidate picks for each supported game range', () => {
