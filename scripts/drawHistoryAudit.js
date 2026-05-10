@@ -1,5 +1,16 @@
 // /scripts/drawHistoryAudit.js
-import { supabase } from "../lib/supabase/browserClient";
+import { createClient } from "@supabase/supabase-js";
+
+function getSupabase() {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!url || !/^https?:\/\//i.test(url) || !key) {
+        return null;
+    }
+
+    return createClient(url, key);
+}
 
 const games = [
     { game: 'Pick 3', table: 'pick3_draws' },
@@ -19,6 +30,16 @@ const getDateRange = (start, end) => {
 };
 
 export async function runAudit() {
+    const supabase = getSupabase();
+    if (!supabase) {
+        return games.map((entry) => ({
+            game: entry.game,
+            error: 'Supabase environment variables are not configured for audit.',
+            missingDates: [],
+            count: -1,
+        }));
+    }
+
     const results = [];
 
     for (const { game, table } of games) {

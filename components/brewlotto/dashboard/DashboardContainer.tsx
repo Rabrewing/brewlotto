@@ -1,6 +1,6 @@
 export function DashboardContainer({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative mx-auto max-w-[490px] px-4 pb-3 pt-2 sm:max-w-[490px] sm:px-4 sm:pb-4 sm:pt-3 lg:max-w-[490px] lg:px-4 xl:max-w-[490px] xl:px-4">
+    <div className="relative mx-auto max-w-[490px] px-4 pb-3 pt-2 sm:max-w-[760px] sm:px-4 sm:pb-4 sm:pt-3 md:max-w-[900px] lg:max-w-[1080px] lg:px-5 xl:max-w-[1240px] xl:px-6 2xl:max-w-[1360px]">
       {/* Outer golden aura */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,199,66,0.3),transparent_58%)] blur-2xl" />
@@ -16,7 +16,7 @@ export function DashboardContainer({ children }: { children: React.ReactNode }) 
         <div className="pointer-events-none absolute inset-x-6 top-[2px] h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#ffe08a] to-transparent shadow-[0_0_14px_rgba(255,224,138,0.8)]" />
         <div className="pointer-events-none absolute inset-x-10 bottom-[2px] h-[3px] rounded-full bg-gradient-to-r from-transparent via-[#ffc742] to-transparent shadow-[0_0_16px_rgba(255,199,66,0.75)]" />
         
-        <div className="relative px-4 py-3 sm:px-5 sm:py-4 lg:px-5 lg:py-4 xl:px-6 xl:py-5">
+        <div className="relative px-4 py-3 sm:px-5 sm:py-4 lg:px-6 lg:py-5 xl:px-7 xl:py-6">
           {children}
         </div>
       </div>

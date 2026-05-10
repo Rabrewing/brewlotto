@@ -3,7 +3,7 @@
 **Version:** 1.0  
 **Date:** 2026-05-01  
 **Status:** Canonical Source of Truth  
-**Last Updated:** 2026-05-01 ET (NC adapter schema fixed, all 8/8 ingestion scrapers working)
+**Last Updated:** 2026-05-10 ET (NC adapter schema fixed, all 8/8 ingestion scrapers working, responsive shell widened for desktop/tablet)
 **Purpose:** Define the shared UI/UX framework for all V1 destinations to ensure seamless transitions and consistent experience.
 
 ---
@@ -27,6 +27,15 @@ app/[route]/page.tsx
             ├── DetailRow (key-value display)
             └── EmptyState (no-data state)
 ```
+
+### 1.1.1 Responsive Density Rules
+
+- Mobile should keep the current vertical, stacked-card rhythm.
+- Tablet should widen the content band and allow 2-column groupings when the content supports it.
+- Desktop should use a wider shared shell so the dashboard, BrewU, support, strategy locker, and billing pages breathe horizontally.
+- Do not widen by increasing font size alone; increase available content width and then re-balance the layout inside the shell.
+- The shared `DashboardContainer` should remain the single place where the breakpoint density is controlled.
+- The widened desktop/tablet shell should be documented in the responsive checklist and kept in sync with any future shell-width changes.
 
 ### 1.2 Shared Component Library
 

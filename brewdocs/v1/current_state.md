@@ -1,6 +1,6 @@
 # BrewLotto V1 - Current State & Next Steps
 
-**Last Updated:** 2026-05-07 ET (admin alerting cleanup, branch truth update, blob-backed landing reel, home-state preference wiring, billing live-mode verification, strategy locker save/run flow fix, BrewU Systems support scaffold, support screenshots bucket added, canonical play log bridge, support inbox notifications, settlement sweep, customer notifications plan added, docs timestamp rule added, BrewU play-style guidance live, shared play-style and payout matrix centralized, settlement classification upgraded)
+**Last Updated:** 2026-05-10 ET (desktop/tablet shell widened, changelog + responsive checklist added, admin alerting cleanup, branch truth update, blob-backed landing reel, home-state preference wiring, billing live-mode verification, strategy locker save/run flow fix, BrewU Systems support scaffold, support screenshots bucket added, canonical play log bridge, support inbox notifications, settlement sweep, customer notifications plan added, docs timestamp rule added, BrewU play-style guidance live, shared play-style and payout matrix centralized, settlement classification upgraded)
 **Phase:** Shared UI/UX framework and product truth pass
 
 ## 2026-05-05 Truth Update
@@ -59,10 +59,10 @@
 - AI usage logging now feeds an internal BrewCommand spend dashboard so token usage and estimated model cost can be audited before margin-sensitive launch decisions.
 
 ### 🎯 Current Truth Priority
-1. Run a visual QA pass on the dropdown/menu destinations against the current mockups and rendered pages.
-2. Run a tier matrix test across dashboard, strategy locker, pricing, billing, and AI commentary surfaces.
-3. Verify Stripe live-mode checkout/webhook flow against the current billing ladder.
-4. Do a desktop/tablet/mobile responsive pass on the landing, login, and shared framework surfaces so the structure stays polished across devices.
+1. Do a desktop/tablet/mobile responsive pass on the landing, login, and shared framework surfaces so the structure stays polished across devices. The new checklist lives in `brewdocs/v1/responsive-layout-checklist.md`.
+2. Run a visual QA pass on the dropdown/menu destinations against the current mockups and rendered pages.
+3. Run a tier matrix test across dashboard, strategy locker, pricing, billing, and AI commentary surfaces.
+4. Verify Stripe live-mode checkout/webhook flow against the current billing ladder.
 5. Finish the CA Powerball/Mega live scraper work that remains stale/expected.
 6. Keep the BrewCommand AI usage ledger visible while live-mode billing is validated.
 7. Keep the onboarding tutorial and future Opus Clip clips aligned with the landing/login flow.

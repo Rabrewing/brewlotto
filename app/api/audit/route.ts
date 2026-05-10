@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase/browserClient';
-import { runAudit } from '@/scripts/drawHistoryAudit';
+import { createClient } from '@supabase/supabase-js';
 
 const games = [
     { game: 'Pick 3', table: 'pick3_draws' },
@@ -19,8 +18,24 @@ const getDateRange = (start: string, end: string): string[] => {
     return range;
 };
 
+function getAuditClient() {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!url || !/^https?:\/\//i.test(url) || !key) {
+        return null;
+    }
+
+    return createClient(url, key);
+}
+
 export async function GET() {
     const results: { game: string; missing: string[] }[] = [];
+    const supabase = getAuditClient();
+
+    if (!supabase) {
+        return NextResponse.json({ missingDates: results, scriptAudit: [] }, { status: 200 });
+    }
 
     for (const { game, table } of games) {
         const { data, error } = await supabase
@@ -48,8 +63,7 @@ export async function GET() {
     }
 
     try {
-        // Assuming runAudit is meant to be called once for a general audit,
-        // not per game in this context.
+        const { runAudit } = await import('@/scripts/drawHistoryAudit');
         const auditResults = await runAudit();
         // You might want to merge or process auditResults with the missing dates results
         // For now, I'll return both, or you can choose to return only one.

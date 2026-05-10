@@ -1,6 +1,6 @@
 # AGENTS.md (BrewLotto V1)
 
-## Current Status (2026-05-07 ET)
+## Current Status (2026-05-10 ET)
 
 ### System Health — All NC + CA Launch Games Green
 
@@ -38,6 +38,7 @@ official source → ingestion → Supabase → freshness view → API → UI
 | **Number formatting** | `LotteryBall.tsx` + 5 inline files + API route — 2026-05-01 | Removed `padStart(2, '0')` globally. Numbers display as `6` not `06`. |
 | **Timezone display** | `FreshnessBanner.tsx`, `LiveTrustBadge.tsx`, `PredictionCard.tsx` — 2026-05-02 | Removed seconds from timestamps. Added ET/PT timezone labels. Format: "May 2, 2026, 1:00 PM ET". |
 | **Dropdown navigation** | `AvatarDropdown.tsx` — 2026-05-02 | Fixed onClick — now calls `router.push(href) + setIsOpen(false)` instead of just closing. Removed hardcoded "John Doe"/"john@example.com"/"JD" avatar — all loaded from auth. |
+| **Responsive shell widening** | `components/brewlotto/dashboard/DashboardContainer.tsx`, `brewdocs/v1/shared-ui-ux-framework.md`, `brewdocs/v1/responsive-layout-checklist.md` — 2026-05-10 | Widened the shared shell on tablet/desktop while keeping the current mobile stack so larger screens breathe horizontally without changing phone behavior. |
 | **Superadmin added** | `.env`, `.env.local` — 2026-05-02 | `BREWCOMMAND_ADMIN_EMAILS` now includes `command@brewlotto.app` and `michael.brewington@gmail.com`; code keeps fallback allowlist so BrewCommand access works if one env entry is missing. |
 | **SectionCard centralized** | `components/brewlotto/dashboard/SectionCard.tsx` (new) — 2026-05-02 | Removed 6 local duplicates across strategy-locker, profile, settings, stats, notifications, billing. Single shared component with consistent dark/gold styling. |
 | **Play log bridge** | `app/api/play/log/route.ts` — 2026-05-07 | Legacy browser write path now inserts into canonical `play_logs` with auth validation and normalized draw-time / number payloads. This is the settlement source of truth for future winnings alerts. |
@@ -535,7 +536,7 @@ The system is considered complete when:
 | 9E | Notifications/Settings/Billing/Learn/Legal | ✅ Complete | All V1 destination routes live |
 | 10 | Cloud Infrastructure | ✅ Complete | Cloud Run + 7 Scheduler jobs deployed, Sentry configured |
 | 11 | Vercel Production Deploy | ✅ Complete | Build fixed, lint disabled, Sentry DSN added, preview mode active |
-| 12 | Shared UI/UX Framework | 🔄 In Progress | `shared-ui-ux-framework.md` created, implementation pending |
+| 12 | Shared UI/UX Framework | 🔄 In Progress | `shared-ui-ux-framework.md` + `responsive-layout-checklist.md` track the canonical shell and responsive density rules |
 | 13 | AI Usage Ledger | 🔄 In Progress | `ai_usage_events` ledger + BrewCommand spend dashboard are being added |
 
 ### Data Collection Status

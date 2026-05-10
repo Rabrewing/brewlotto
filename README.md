@@ -121,7 +121,7 @@ BrewLotto is designed with modularity and AI-first strategy in mind — here’s
 - `/brewdocs/v1/BREWLOTTO_V1_ADMIN_AND_BREWCOMMAND_SCOPE.md` — Admin scope  
 - `/brewdocs/v1/BREWLOTTO_V1_COMPLIANCE_AND_TRUST_SPEC.md` — Compliance and trust  
 - `/docs/dev-manual.md`: How we build, deploy, review, and document  
-- `/docs/CHANGELOG.md`: Full release log + feature changes  
+- `/brewdocs/v1/CHANGELOG.md`: Full release log + feature changes  
 - `/docs/data-pipeline-manual.md`: How to ingest, audit, and validate draw data  
 - `/docs/TODO.md`: Dev checklist grouped by system area  
 - `/docs/init.sh`: Shell script to scaffold new strategies + log entries  
