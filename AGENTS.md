@@ -46,6 +46,7 @@ official source → ingestion → Supabase → freshness view → API → UI
 | **Settings hero polish** | `app/settings/page.tsx`, `brewdocs/v1/current_state.md`, `brewdocs/v1/CHANGELOG.md` — 2026-05-10 | Reworked Settings into a centered account-style hero with clearer Gameplay / Notifications / Account groupings so the route better mirrors the settings mockup without using fake profile data. |
 | **Billing / notifications polish** | `app/billing/page.tsx`, `app/notifications/page.tsx`, `brewdocs/v1/current_state.md`, `brewdocs/v1/CHANGELOG.md` — 2026-05-10 | Reworked Billing into a centered account-style hero with a clearer benefits / billing / quick-links flow, and added New / All tabs to Notifications so the feed mirrors the mockup rhythm more closely. |
 | **AI strategy notifications** | `scripts/ingestionJob.js`, `lib/notifications/strategySignals.js`, `brewdocs/v1/customer-notifications-plan.md`, `brewdocs/v1/current_state.md`, `brewdocs/v1/CHANGELOG.md` — 2026-05-10 | Brew AI strategy-detection alerts now run as an ingestion-driven, event-based sweep that writes `user_notifications` and emails a BrewLotto return link only when the user is eligible and the signal is strong enough. The main momentum meter stays a single gauge; hot/cold remain separate cards. |
+| **Results history / win ratios** | `brewdocs/v1/results-history-win-ratios-plan.md`, `brewdocs/v1/current_state.md`, `brewdocs/v1/CHANGELOG.md` — 2026-05-10 | Track confirmed wins only when the play was actually logged for the winning draw date/time, expand result history across NC/CA, and expose strategy-specific win ratios in `/stats` and BrewCommand so retroactive close matches never masquerade as same-day wins. |
 | **Superadmin added** | `.env`, `.env.local` — 2026-05-02 | `BREWCOMMAND_ADMIN_EMAILS` now includes `command@brewlotto.app` and `michael.brewington@gmail.com`; code keeps fallback allowlist so BrewCommand access works if one env entry is missing. |
 | **SectionCard centralized** | `components/brewlotto/dashboard/SectionCard.tsx` (new) — 2026-05-02 | Removed 6 local duplicates across strategy-locker, profile, settings, stats, notifications, billing. Single shared component with consistent dark/gold styling. |
 | **Play log bridge** | `app/api/play/log/route.ts` — 2026-05-07 | Legacy browser write path now inserts into canonical `play_logs` with auth validation and normalized draw-time / number payloads. This is the settlement source of truth for future winnings alerts. |
@@ -565,7 +566,7 @@ The system is considered complete when:
 | Destination | Status | Data Source | Mockup | Key Gaps |
 |-------------|--------|-------------|--------|----------|
 | `/my-picks` | ✅ Live | API: `/api/predictions` | `my-picks.png` | Replay action, match history, SectionCard migration |
-| `/results` | ✅ Live | API: `/api/results` | `today-results.png` | Match history (last 5 draws), "Request New Prediction" CTA |
+| `/results` | ✅ Live | API: `/api/results` | `today-results.png` | Match history (last 5 draws), "Request New Prediction" CTA, confirmed-play/date gating still needs a dedicated user action |
 | `/stats` | ✅ Live | Direct Supabase | `stats-and-performance.png` | Charts (Chart.js installed), date filter, API migration |
 | `/strategy-locker` | ✅ Live | Direct Supabase | `stratergy-locker.png` + card states + run animation | "Run Strategy" action, comparison view, animation not wired |
 | `/profile` | ✅ Live | Auth + `user_profiles` | `profile.png` | Avatar upload, theme apply |
@@ -606,10 +607,11 @@ The system is considered complete when:
 2. **Dropdown UX** — Add hover previews and keyboard navigation per dropdown spec
 3. **"Run Strategy" Animation** — Wire up the animation from `strategy-locker-run-stratergy-animation.png`
 4. **Customer Notifications / Winnings Alerts** — Normalize the settled-play flow against `play_logs`, insert support updates and settled-play events into `user_notifications`, and send customer emails with a BrewLotto return link when support tickets or winnings are resolved.
-5. **Odds & Play-Style Intelligence** — Capture every launch game’s official play styles, odds, and payout ladders, then teach BrewLotto AI and BrewU/help content to explain straight vs box vs straight/box vs 50/50 vs combo vs add-on choices as educational options per game.
-6. **BrewU Support Intake** — Add a lightweight support tab with category dropdown, comments, screenshot upload, and a 24-hour response disclaimer; route submissions to BrewCommand notifications/email.
-7. **Strategy Validation** — Cross-check `lib/prediction/strategyEngine.js` and the live strategy modules against the BrewLotto V1 strategy spec, and keep the legacy wrapper files clearly marked as transitional only.
-8. **BrewU Content Externalization** — If V1 content editing needs increase, move BrewU/help copy, support categories, and tutorial transcript content into DB/CMS-backed tables using the new plan doc as the handoff.
+5. **Results History / Win Ratios** — Add a confirmed-play workflow, expand result history to 3–6 months, and surface win ratios by strategy/game/state in `/stats` and BrewCommand.
+6. **Odds & Play-Style Intelligence** — Capture every launch game’s official play styles, odds, and payout ladders, then teach BrewLotto AI and BrewU/help content to explain straight vs box vs straight/box vs 50/50 vs combo vs add-on choices as educational options per game.
+7. **BrewU Support Intake** — Add a lightweight support tab with category dropdown, comments, screenshot upload, and a 24-hour response disclaimer; route submissions to BrewCommand notifications/email.
+8. **Strategy Validation** — Cross-check `lib/prediction/strategyEngine.js` and the live strategy modules against the BrewLotto V1 strategy spec, and keep the legacy wrapper files clearly marked as transitional only.
+9. **BrewU Content Externalization** — If V1 content editing needs increase, move BrewU/help copy, support categories, and tutorial transcript content into DB/CMS-backed tables using the new plan doc as the handoff.
 
 **LOW PRIORITY / FOLLOW-ON:**
 1. **Stats Charts** — Add Chart.js visualizations for trends

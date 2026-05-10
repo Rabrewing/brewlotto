@@ -1,6 +1,6 @@
 # BrewLotto V1 - Current State & Next Steps
 
-**Last Updated:** 2026-05-10 ET (desktop/tablet shell widened, changelog + responsive checklist added, admin alerting cleanup, branch truth update, blob-backed landing reel, home-state preference wiring, billing live-mode verification, strategy locker save/run flow fix, compact entitlement summary + collapsible ladder, BrewU Systems support scaffold, support screenshots bucket added, canonical play log bridge, support inbox notifications, settlement sweep, customer notifications plan added, docs timestamp rule added, BrewU play-style guidance live, shared play-style and payout matrix centralized, settlement classification upgraded, strategy validation pass queued, landing video replacement queued, AI strategy notifications tracked, momentum meter kept single, ingestion-driven strategy signal sweep wired)
+**Last Updated:** 2026-05-10 ET (desktop/tablet shell widened, changelog + responsive checklist added, admin alerting cleanup, branch truth update, blob-backed landing reel, home-state preference wiring, billing live-mode verification, strategy locker save/run flow fix, compact entitlement summary + collapsible ladder, BrewU Systems support scaffold, support screenshots bucket added, canonical play log bridge, support inbox notifications, settlement sweep, customer notifications plan added, docs timestamp rule added, BrewU play-style guidance live, shared play-style and payout matrix centralized, settlement classification upgraded, strategy validation pass queued, landing video replacement queued, AI strategy notifications tracked, momentum meter kept single, ingestion-driven strategy signal sweep wired, results history and win-ratio plan added)
 **Phase:** Shared UI/UX framework and product truth pass
 
 ## 2026-05-05 Truth Update
@@ -35,6 +35,7 @@
 - Settlement classification now uses the shared payout matrix, so exact-order, box-style, and standard match-number games are no longer all treated as the same generic result label.
 - BrewU/help copy, support categories, and tutorial transcript content remain static by design for V1; a DB/CMS-backed content pass is tracked separately in `brewdocs/v1/content-externalization-plan.md` if launch pressure later justifies content management.
 - Brew AI strategy-detection alerts are intentionally modeled as an ingestion-driven, event-based sweep that can write to `user_notifications` and send an email with a BrewLotto return link when the user is eligible and the signal is strong enough; the main momentum meter remains a single gauge, with hot/cold still presented as separate cards.
+- Confirmed wins still need a tighter play-date confirmation layer before the app can safely say a user truly won on that draw; the new results-history plan tracks that as a launch-critical flow item so a May 10 prediction cannot masquerade as a May 9 win.
 
 ### ⚠️ Still Partial Or Needs Verification
 - `scripts/ingestionScheduler.js` has been archived; Cloud Scheduler + Cloud Run are the active production ingestion path.
@@ -43,7 +44,7 @@
 - The dashboard "Generate Numbers" action is wired to `POST /api/predictions`, and a historical-style strategy smoke test now covers the current strategy engine across Pick 3, Pick 4, Cash 5, Powerball, and Mega Millions ranges.
 - The live strategy engine is intentionally narrow in V1: `lib/prediction/strategyEngine.js` currently registers the core deterministic trio (`poisson`, `momentum`, `markov`) plus the ensemble combiner, while the older `lib/strategies/*.js` wrappers and `hooks/usePredictionEngine.js` are legacy compatibility layers that should not be mistaken for the current spec truth.
 - `My Picks` still uses a scroll-to-top placeholder for `Replay`; a true replay action is not wired yet.
-- `Today's Results` still uses a dashboard shortcut for `Replay`; it is not a true replay interaction yet.
+- `Today's Results` still uses a dashboard shortcut for `Replay`; it is not a true replay interaction yet, and the page still needs a clearer split between a `closest match` and a `confirmed same-day win`.
 - `Logout` signs out immediately; the confirm-modal UX called for in the screen map is still pending.
 - Learn and Legal are lightweight V1 shells, not full CMS/legal surfaces yet.
 - Settings stores values, but full theme application across the UI is still future work.
@@ -60,6 +61,7 @@
 - BrewCommand receives BrewU support submissions so reported issues can be tracked with notifications, ticket status, and email escalation back to the customer when resolved.
 - Shared tier access now normalizes legacy `brew` labels and numeric strategy tiers into the current `free / starter / pro / master` ladder, and the dashboard generate action plus strategy smoke tests now pass against historical-style feature data.
 - State analytics is intentionally deferred until the state preference flow settles, but the data model is ready for it once we instrument events.
+- The results/history workflow still needs a confirmed-play layer so a prediction created after a draw does not get described as a win just because it matched an earlier result.
 - Pricing direction is now locked for the next billing pass: 3-day capped trial, then Starter at $4.99, Pro at $9.99, and Master at $19.99, with AI starting in Starter and expanding upward; annual billing should target a 30% savings message.
 - Stripe setup should mirror that ladder with six price records: Starter monthly/yearly, Pro monthly/yearly, and Master monthly/yearly, with live-mode confirmation still pending.
 - Trial nudges are now contextual only and appear on dashboard, billing, and profile instead of periodic nags.
@@ -78,9 +80,10 @@
 7. Keep the onboarding tutorial and future Opus Clip clips aligned with the landing/login flow.
 8. Tighten the BrewU support intake flow and verify screenshot upload / notification delivery.
 9. Normalize the customer notification pipeline so support updates, settlement events, and Brew AI strategy detections can write to `user_notifications` and email the correct BrewLotto return link.
-10. Capture every launch game’s play-style odds and payout ladders, then teach the AI layer plus BrewU/help content to offer educational straight/box/50-50/combo suggestions per game.
-11. Replace the landing-page video with the watermark-free Blob asset once it lands, and use the Vercel CLI deployment path for the swap.
-12. Keep the referral growth loop deferred until billing, notifications, and strategy gating are stable.
+10. Add a confirmed-play workflow plus longer results history so same-day wins are counted correctly and retroactive close matches never masquerade as a real win.
+11. Capture every launch game’s play-style odds and payout ladders, then teach the AI layer plus BrewU/help content to offer educational straight/box/50-50/combo suggestions per game.
+12. Replace the landing-page video with the watermark-free Blob asset once it lands, and use the Vercel CLI deployment path for the swap.
+13. Keep the referral growth loop deferred until billing, notifications, and strategy gating are stable.
 
 ### Tutorial Prompt Status
 - Opus Clip prompt pack is ready to generate for the disclaimer, walkthrough, and dashboard intro clips.
