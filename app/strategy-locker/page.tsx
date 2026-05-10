@@ -9,6 +9,7 @@ import {
   SectionCard,
 } from '@/components/brewlotto/dashboard';
 import { supabase } from '@/lib/supabase/browserClient';
+import { buildStrategyPerformanceSummary, type StrategyPerformanceSummary } from '@/lib/stats/strategyPerformance';
 
 type TierCode = 'free' | 'starter' | 'pro' | 'master';
 
@@ -46,9 +47,20 @@ interface StrategyActivityRecord {
 }
 
 interface PredictionRecord {
+  id: string;
   source_strategy_key?: string | null;
   confidence_score?: number | null;
   created_at: string;
+}
+
+interface PlayLogRecord {
+  id: string;
+  prediction_id?: string | null;
+  outcome_result_code?: string | null;
+  outcome_match_count?: number | null;
+  is_settled?: boolean | null;
+  created_at: string;
+  metadata?: unknown;
 }
 
 interface RunPreviewRecord {
@@ -123,6 +135,7 @@ export default function StrategyLockerPage() {
   const [savedStrategies, setSavedStrategies] = useState<SavedStrategyRecord[]>([]);
   const [strategyActivity, setStrategyActivity] = useState<StrategyActivityRecord[]>([]);
   const [predictions, setPredictions] = useState<PredictionRecord[]>([]);
+  const [playLogs, setPlayLogs] = useState<PlayLogRecord[]>([]);
   const [entitlements, setEntitlements] = useState<UserEntitlementRecord | null>(null);
   const [subscriptionTiers, setSubscriptionTiers] = useState<SubscriptionTierRecord[]>([]);
   const [savingStrategyId, setSavingStrategyId] = useState<string | null>(null);
@@ -153,7 +166,7 @@ export default function StrategyLockerPage() {
           return;
         }
 
-        const [strategiesResult, savedResult, activityResult, predictionsResult, entitlementsResult, tiersResult] = await Promise.all([
+        const [strategiesResult, savedResult, activityResult, predictionsResult, playLogsResult, entitlementsResult, tiersResult] = await Promise.all([
           supabase
             .from('strategy_registry')
             .select('id, strategy_key, public_name, description, category, min_tier, sort_order, metadata')
@@ -171,10 +184,16 @@ export default function StrategyLockerPage() {
             .limit(60),
           supabase
             .from('predictions')
-            .select('source_strategy_key, confidence_score, created_at')
+            .select('id, source_strategy_key, confidence_score, created_at')
             .eq('user_id', authUser.id)
             .order('created_at', { ascending: false })
-            .limit(60),
+            .limit(120),
+          supabase
+            .from('play_logs')
+            .select('id, prediction_id, outcome_result_code, outcome_match_count, is_settled, created_at, metadata')
+            .eq('user_id', authUser.id)
+            .order('created_at', { ascending: false })
+            .limit(120),
           supabase
             .from('user_entitlements')
             .select('tier_code, advanced_strategy_access, premium_explanations_access, premium_comparison_access, voice_commentary_access')
@@ -199,6 +218,9 @@ export default function StrategyLockerPage() {
         if (predictionsResult.error) {
           throw predictionsResult.error;
         }
+        if (playLogsResult.error) {
+          throw playLogsResult.error;
+        }
         if (entitlementsResult.error) {
           throw entitlementsResult.error;
         }
@@ -212,6 +234,7 @@ export default function StrategyLockerPage() {
           setSavedStrategies((savedResult.data || []) as SavedStrategyRecord[]);
           setStrategyActivity((activityResult.data || []) as StrategyActivityRecord[]);
           setPredictions((predictionsResult.data || []) as PredictionRecord[]);
+          setPlayLogs((playLogsResult.data || []) as PlayLogRecord[]);
           setEntitlements((entitlementsResult.data as UserEntitlementRecord | null) || null);
           setSubscriptionTiers((tiersResult.data || []) as SubscriptionTierRecord[]);
         }
@@ -294,6 +317,14 @@ export default function StrategyLockerPage() {
 
     return grouped;
   }, [predictions]);
+
+  const strategyPerformance = useMemo<StrategyPerformanceSummary[]>(() => {
+    return buildStrategyPerformanceSummary(predictions, playLogs);
+  }, [playLogs, predictions]);
+
+  const strategyPerformanceMap = useMemo(() => {
+    return new Map(strategyPerformance.map((entry) => [entry.strategy, entry]));
+  }, [strategyPerformance]);
 
   const unlockedCount = useMemo(() => {
     return strategies.filter((entry) => TIER_ORDER[currentTier] >= TIER_ORDER[entry.min_tier]).length;
@@ -560,6 +591,7 @@ export default function StrategyLockerPage() {
                   const saved = savedMap.get(strategy.id);
                   const activity = activityMap.get(strategy.id) || [];
                   const predictionData = predictionSummary.get(strategy.strategy_key);
+                  const performanceData = strategyPerformanceMap.get(strategy.strategy_key);
                   const lastUsedAt = activity[0]?.occurred_at || predictionData?.lastUsedAt || null;
                   const averageConfidence =
                     predictionData && predictionData.confidenceCount > 0
@@ -593,7 +625,18 @@ export default function StrategyLockerPage() {
 
                       <div className="mt-4 flex flex-wrap gap-2 text-[12px] uppercase tracking-[0.14em] text-white/40">
                         <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">Saved {saved ? 'Yes' : 'No'}</span>
-                        <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">Uses {predictionData?.uses || 0}</span>
+                        <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
+                          Uses {performanceData?.predictions || predictionData?.uses || 0}
+                        </span>
+                        <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
+                          Confirms {performanceData?.confirmedPlays || 0}
+                        </span>
+                        <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
+                          Hit rate {performanceData?.hitRate !== null && performanceData?.hitRate !== undefined ? `${performanceData.hitRate}%` : 'N/A'}
+                        </span>
+                        <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
+                          Win rate {performanceData?.winRate !== null && performanceData?.winRate !== undefined ? `${performanceData.winRate}%` : 'N/A'}
+                        </span>
                         <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
                           Avg confidence {averageConfidence !== null ? `${averageConfidence}%` : 'N/A'}
                         </span>

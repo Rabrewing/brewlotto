@@ -1,6 +1,6 @@
 # BrewLotto V1 - Current State & Next Steps
 
-**Last Updated:** 2026-05-10 ET (desktop/tablet shell widened, changelog + responsive checklist added, admin alerting cleanup, branch truth update, blob-backed landing reel, home-state preference wiring, billing live-mode verification, strategy locker save/run flow fix, compact entitlement summary + collapsible ladder, BrewU Systems support scaffold, support screenshots bucket added, canonical play log bridge, support inbox notifications, settlement sweep, customer notifications plan added, docs timestamp rule added, BrewU play-style guidance live, shared play-style and payout matrix centralized, settlement classification upgraded, strategy validation pass queued, landing video replacement queued, AI strategy notifications tracked, momentum meter kept single, ingestion-driven strategy signal sweep wired, Strategy Signals BrewCommand section added, play confirmation nudges added, My Picks confirm-play action added, results page date/time dividers added, strategy locker ratio chips queued, results history and win-ratio plan added, My Picks 30-day history queued)
+**Last Updated:** 2026-05-10 ET (desktop/tablet shell widened, changelog + responsive checklist added, admin alerting cleanup, branch truth update, blob-backed landing reel, home-state preference wiring, billing live-mode verification, strategy locker save/run flow fix, compact entitlement summary + collapsible ladder, BrewU Systems support scaffold, support screenshots bucket added, canonical play log bridge, support inbox notifications, settlement sweep, customer notifications plan added, docs timestamp rule added, BrewU play-style guidance live, shared play-style and payout matrix centralized, settlement classification upgraded, strategy validation pass queued, landing video replacement queued, AI strategy notifications tracked, momentum meter kept single, ingestion-driven strategy signal sweep wired, Strategy Signals BrewCommand section added, play confirmation nudges added, My Picks confirm-play action added, results page date/time dividers added, strategy locker ratio chips live, results history and win-ratio plan added, My Picks 30-day history added)
 **Phase:** Shared UI/UX framework and product truth pass
 
 ## 2026-05-05 Truth Update
@@ -20,6 +20,7 @@
 - Strategy Locker, Billing, Notifications, Settings, Profile, Results, My Picks, Learn, Legal, and Admin routes all exist in the App Router.
 - Strategy Locker saves now route through a server-side save endpoint and the underlying `user_saved_strategies` table supports multiple saved strategies per user, one row per strategy.
 - Strategy Locker currently acts as a saved-strategy library and entitlement surface, and it now exposes a real run-preview action from each card while the entitlement ladder is compact by default; the dashboard `Generate Numbers` action remains the main app generate path.
+- Strategy Locker now shows compact confirmed-play / hit-rate / win-rate chips beside each strategy card, and the same confirmed-play source now flows into the stats/performance summary so the ratio is based on actual logged plays rather than loose prediction closeness.
 - Dashboard/results freshness gating is real and blocks stale/failed output.
 - Login is temporarily locked to BrewCommand superadmin allowlist accounts only; remove that gate before public V1 launch.
 - BrewCommand does not yet have a full internal RBAC / user-provisioning system; it still relies on the superadmin allowlist and should stay that way until V1 launch pressure justifies more complexity.
@@ -30,7 +31,7 @@
 - BrewCommand now has a settlement sweep endpoint and admin trigger that can settle unsettled `play_logs` against official draws, covering both NC and CA through the same state/game mapping the dashboard uses.
 - Customer-facing notifications are still only partially wired: the notification center exists, support updates now land in inbox + email, and winnings/settlement alerts now read from `play_logs` but still need a real cash-value prize-table source before they become fully precise.
 - Near-hit settlement prompts now create a `confirm your play` notification so the app can ask the user to verify a real play without marking a later close match as a confirmed win.
-- The same confirmed-play bridge is expected to feed compact hit / win ratio chips in Strategy Locker once the UI confirms the real-play flow.
+- The same confirmed-play bridge now feeds compact hit / win ratio chips in Strategy Locker and the stats/performance summary so the user can see which strategies are actually working.
 - The live strategy engine is intentionally narrow in V1: `lib/prediction/strategyEngine.js` currently registers the core deterministic trio (`poisson`, `momentum`, `markov`) plus the ensemble combiner, while the older `lib/strategies/*.js` wrappers and `hooks/usePredictionEngine.js` are legacy compatibility layers that should not be mistaken for the current spec truth.
 - The next strategy-intelligence pass should capture each launch game’s official play styles and odds so the AI layer can explain straight, box, straight/box, 50/50, combo, pair, Fireball, Power Play, Double Play, and similar choices in a customer-friendly way.
 - The BrewU/help surface now turns that same play-style matrix into plain-English strategy guidance so customers can learn when a straight play, box play, or game-specific add-on is the better educational option. That guidance now comes from shared BrewU matrix modules so future AI copy, help surfaces, and settlement labels can stay aligned.
@@ -84,11 +85,9 @@
 8. Tighten the BrewU support intake flow and verify screenshot upload / notification delivery.
 9. Normalize the customer notification pipeline so support updates, settlement events, and Brew AI strategy detections can write to `user_notifications` and email the correct BrewLotto return link.
 10. Add a confirmed-play workflow plus longer results history so same-day wins are counted correctly and retroactive close matches never masquerade as a real win; near-hit play confirmation nudges are the interim bridge.
-11. Expand My Picks to keep roughly 30 days of personal pick history in view so users can confirm played entries without leaving BrewLotto.
-12. Surface compact hit / win ratio chips in Strategy Locker once the confirmed-play signal is stable enough to drive per-strategy trust signals.
-13. Capture every launch game’s play-style odds and payout ladders, then teach the AI layer plus BrewU/help content to offer educational straight/box/50-50/combo suggestions per game.
-14. Replace the landing-page video with the watermark-free Blob asset once it lands, and use the Vercel CLI deployment path for the swap.
-15. Keep the referral growth loop deferred until billing, notifications, and strategy gating are stable.
+11. Capture every launch game’s play-style odds and payout ladders, then teach the AI layer plus BrewU/help content to offer educational straight/box/50-50/combo suggestions per game.
+12. Replace the landing-page video with the watermark-free Blob asset once it lands, and use the Vercel CLI deployment path for the swap.
+13. Keep the referral growth loop deferred until billing, notifications, and strategy gating are stable.
 
 ### Tutorial Prompt Status
 - Opus Clip prompt pack is ready to generate for the disclaimer, walkthrough, and dashboard intro clips.

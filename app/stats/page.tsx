@@ -9,6 +9,7 @@ import {
   SectionCard,
 } from '@/components/brewlotto/dashboard';
 import { supabase } from '@/lib/supabase/browserClient';
+import { buildStrategyPerformanceSummary, type StrategyPerformanceSummary } from '@/lib/stats/strategyPerformance';
 
 interface AuthUser {
   id: string;
@@ -69,13 +70,6 @@ type GameSummary = {
   plays: number;
   wins: number;
   bestMatch: number;
-};
-
-type StrategySummary = {
-  strategy: string;
-  uses: number;
-  savedCount: number;
-  averageConfidence: number | null;
 };
 
 function formatGameLabel(game: string) {
@@ -180,7 +174,7 @@ export default function StatsPage() {
             .select('id, game, state, created_at, source_strategy_key, confidence_score, is_saved')
             .eq('user_id', authUser.id)
             .order('created_at', { ascending: false })
-            .limit(60),
+            .limit(120),
         ]);
 
         if (playLogsResult.error) {
@@ -279,38 +273,9 @@ export default function StatsPage() {
     return [...summary.values()].sort((a, b) => b.plays - a.plays || a.label.localeCompare(b.label));
   }, [pickResults]);
 
-  const strategySummary = useMemo<StrategySummary[]>(() => {
-    const summary = new Map<string, { uses: number; savedCount: number; confidenceTotal: number; confidenceCount: number }>();
-
-    for (const entry of predictions) {
-      const strategy = entry.source_strategy_key || 'brew strategy';
-      const existing = summary.get(strategy) || {
-        uses: 0,
-        savedCount: 0,
-        confidenceTotal: 0,
-        confidenceCount: 0,
-      };
-
-      existing.uses += 1;
-      existing.savedCount += entry.is_saved ? 1 : 0;
-
-      if (entry.confidence_score != null && Number.isFinite(Number(entry.confidence_score))) {
-        existing.confidenceTotal += Number(entry.confidence_score);
-        existing.confidenceCount += 1;
-      }
-
-      summary.set(strategy, existing);
-    }
-
-    return [...summary.entries()]
-      .map(([strategy, entry]) => ({
-        strategy,
-        uses: entry.uses,
-        savedCount: entry.savedCount,
-        averageConfidence: entry.confidenceCount > 0 ? Math.round(entry.confidenceTotal / entry.confidenceCount) : null,
-      }))
-      .sort((a, b) => b.uses - a.uses || a.strategy.localeCompare(b.strategy));
-  }, [predictions]);
+  const strategySummary = useMemo<StrategyPerformanceSummary[]>(() => {
+    return buildStrategyPerformanceSummary(predictions, playLogs);
+  }, [playLogs, predictions]);
 
   const recentTrend = useMemo(() => {
     return [...dailyStats].reverse();
@@ -446,7 +411,7 @@ export default function StatsPage() {
 
             <SectionCard
               title="Strategy Performance Summary"
-              description="This section only counts predictions owned by your account. Dashboard-generated anonymous picks will not appear until they are attached to your user record."
+              description="This section counts stored predictions plus confirmed play logs so the ratio reflects real account history instead of loose close matches."
             >
               {strategySummary.length === 0 ? (
                 <div className="rounded-[20px] border border-white/8 bg-black/20 px-4 py-4 text-[14px] leading-6 text-white/58">
@@ -461,10 +426,20 @@ export default function StatsPage() {
                     >
                       <div>
                         <div className="text-[17px] font-medium text-[#f7ddb3]">{entry.strategy}</div>
-                        <div className="mt-1 text-[13px] text-white/52">{entry.uses} stored predictions</div>
+                        <div className="mt-1 text-[13px] text-white/52">
+                          {entry.predictions} stored predictions • {entry.confirmedPlays} confirmed plays
+                        </div>
                       </div>
                       <div className="flex flex-wrap gap-2 text-[13px] uppercase tracking-[0.14em] text-white/42">
-                        <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">Saved {entry.savedCount}</span>
+                        <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
+                          Wins {entry.wins}
+                        </span>
+                        <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
+                          Hit rate {entry.hitRate !== null ? `${entry.hitRate}%` : 'N/A'}
+                        </span>
+                        <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
+                          Win rate {entry.winRate !== null ? `${entry.winRate}%` : 'N/A'}
+                        </span>
                         <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
                           Avg confidence {entry.averageConfidence !== null ? `${entry.averageConfidence}%` : 'N/A'}
                         </span>
