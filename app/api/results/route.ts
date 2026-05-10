@@ -60,6 +60,10 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const game = (searchParams.get('game') || 'powerball') as DashboardGameId;
     const state = (searchParams.get('state') || 'NC') as DashboardStateCode;
+    const requestedHistoryDays = Number(searchParams.get('history_days') || '180');
+    const historyDays = Number.isFinite(requestedHistoryDays)
+      ? Math.min(Math.max(Math.trunc(requestedHistoryDays), 30), 365)
+      : 180;
     const gameConfig = resolveDashboardGameConfig(game, state);
     const resultConfig = RESULT_GAME_CONFIG[game];
 
@@ -96,6 +100,9 @@ export async function GET(request: NextRequest) {
       .map((row) => row.expected_next_draw_at)
       .filter(Boolean)
       .sort()[0] || null;
+    const historyCutoff = new Date();
+    historyCutoff.setDate(historyCutoff.getDate() - historyDays);
+    const historyCutoffDate = historyCutoff.toISOString().slice(0, 10);
 
     if (freshnessBlocked) {
       return NextResponse.json({
@@ -138,8 +145,10 @@ export async function GET(request: NextRequest) {
             .from('official_draws')
             .select('draw_date, draw_datetime_local, draw_window_label, primary_numbers, bonus_numbers')
             .eq('game_id', gameId)
+            .gte('draw_date', historyCutoffDate)
             .order('draw_date', { ascending: false })
-            .limit(5)
+            .order('draw_datetime_local', { ascending: false })
+            .limit(400)
         : { data: [], error: null },
       supabase
         .from('predictions')
@@ -153,8 +162,10 @@ export async function GET(request: NextRequest) {
             .from('official_draws')
             .select('primary_numbers, bonus_numbers')
             .eq('game_id', gameId)
+            .gte('draw_date', historyCutoffDate)
             .order('draw_date', { ascending: false })
-            .limit(24)
+            .order('draw_datetime_local', { ascending: false })
+            .limit(400)
         : { data: [], error: null },
     ]);
 
@@ -335,7 +346,7 @@ export async function GET(request: NextRequest) {
           expectedNextDrawAt,
         },
       },
-      meta: { fallback: false },
+      meta: { fallback: false, historyDays },
     }, NO_CACHE);
   } catch (error: unknown) {
     console.error('Results GET error:', error);

@@ -16,6 +16,7 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Added a My Picks confirm-play action and made notification cards more compact on mobile while keeping desktop spacing roomy.
 - Expanded `My Picks` to pull a broader roughly 30-day history window so users can confirm older plays without leaving BrewLotto.
 - Added confirmed-play hit / win ratio chips to Strategy Locker and the Stats & Performance strategy summary so real play history drives the ratio instead of loose prediction closeness.
+- Added 3-month / 6-month history controls to `/results` so the customer can review a wider dated draw history without leaving BrewLotto.
 - Tightened Settings with a centered account-style hero and clearer Gameplay / Notifications / Account section rhythm to better match the mockup flow.
 - Polished Billing with a centered account-style hero, clearer benefits / billing / quick-link flow, and polished Notifications with New / All tabs so both routes better match their mockups.
 - Documented the decision to keep the momentum meter as a single gauge, while tracking Brew AI strategy-detection alerts as event-driven, deduplicated notifications that can email a BrewLotto return link when the user is away.

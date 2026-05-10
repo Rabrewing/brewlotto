@@ -55,6 +55,8 @@ interface ResultsPayload {
   };
 }
 
+type HistoryRange = 90 | 180;
+
 function formatDrawTime(value: string | null) {
   if (!value) return 'Time unavailable';
   const date = new Date(value);
@@ -81,6 +83,7 @@ export default function ResultsPage() {
   const { preferredState } = usePreferredState();
   const [selectedGame, setSelectedGame] = useState<GameId>('pick3');
   const [selectedWindow, setSelectedWindow] = useState<string | null>(null);
+  const [historyDays, setHistoryDays] = useState<HistoryRange>(180);
   const [results, setResults] = useState<ResultsPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -93,7 +96,9 @@ export default function ResultsPage() {
       setError(null);
 
       try {
-        const response = await fetch(`/api/results?game=${selectedGame}&state=${preferredState}`, { cache: 'no-store' });
+        const response = await fetch(`/api/results?game=${selectedGame}&state=${preferredState}&history_days=${historyDays}`, {
+          cache: 'no-store',
+        });
         const payload = await response.json();
 
         if (!response.ok) {
@@ -125,7 +130,7 @@ export default function ResultsPage() {
       cancelled = true;
       clearInterval(interval);
     };
-  }, [selectedGame, preferredState]);
+  }, [historyDays, selectedGame, preferredState]);
 
   useEffect(() => {
     setSelectedWindow(null);
@@ -140,6 +145,12 @@ export default function ResultsPage() {
   const activeWindow = selectedWindow || windowLabels[0] || null;
   const filteredDraws = activeWindow ? draws.filter(d => d.windowLabel === activeWindow) : draws;
   const latestDraw = draws[0] || null;
+  const closestPredictionAfterDraw = Boolean(
+    results?.closestPrediction?.createdAt &&
+      latestDraw?.drawDate &&
+      new Date(results.closestPrediction.createdAt).getTime() >
+        new Date(`${latestDraw.drawDate}T23:59:59`).getTime(),
+  );
 
   const windowDisplayName: Record<string, string> = {
     midday: 'Midday',
@@ -176,6 +187,34 @@ export default function ResultsPage() {
         </div>
 
         <GameTabs selectedGame={selectedGame} onSelect={setSelectedGame} stateCode={preferredState} />
+
+        <div className="mb-5 flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setHistoryDays(90)}
+            className={`rounded-full border px-4 py-2 text-[13px] font-medium uppercase tracking-[0.08em] transition-all ${
+              historyDays === 90
+                ? 'border-[#ffbd39]/30 bg-[#ffbd39]/12 text-[#ffd27e]'
+                : 'border-white/10 bg-white/[0.04] text-white/55 hover:text-white'
+            }`}
+          >
+            3 Months
+          </button>
+          <button
+            type="button"
+            onClick={() => setHistoryDays(180)}
+            className={`rounded-full border px-4 py-2 text-[13px] font-medium uppercase tracking-[0.08em] transition-all ${
+              historyDays === 180
+                ? 'border-[#ffbd39]/30 bg-[#ffbd39]/12 text-[#ffd27e]'
+                : 'border-white/10 bg-white/[0.04] text-white/55 hover:text-white'
+            }`}
+          >
+            6 Months
+          </button>
+          <div className="flex items-center px-2 text-[12px] uppercase tracking-[0.14em] text-white/35">
+            Showing {historyDays} days of draw history
+          </div>
+        </div>
 
         {windowLabels.length > 1 ? (
           <div className="-mt-2 mb-5 flex gap-1.5">
@@ -291,6 +330,9 @@ export default function ResultsPage() {
               {results.closestPrediction ? (
                 <div className="rounded-[28px] border border-[#72caff]/20 bg-[linear-gradient(145deg,rgba(19,22,31,0.76),rgba(10,10,12,0.96))] px-5 py-4 shadow-[0_0_22px_rgba(114,202,255,0.06)]">
                   <div className="text-[16px] font-semibold text-[#d8e6f8]">Closest Pick</div>
+                  <div className="mt-1 text-[13px] text-white/52">
+                    Generated on {formatDrawDate(results.closestPrediction.createdAt)} • confirm in My Picks if you actually played this draw
+                  </div>
                   <div className="mt-5 flex flex-wrap items-start gap-2">
                     {results.closestPrediction.primaryNumbers.map((value, i) => (
                       <LotteryBall key={`pick-${value}-${i}`} number={value} variant="cold" size="tiny" />
@@ -314,6 +356,11 @@ export default function ResultsPage() {
                       <Link href="/my-picks" className="transition-colors hover:text-white">View Picks</Link>
                     </div>
                   </div>
+                  {closestPredictionAfterDraw ? (
+                    <div className="mt-3 rounded-[18px] border border-[#ffbd39]/18 bg-[#24160f] px-4 py-3 text-[13px] leading-6 text-[#f3d7a7]">
+                      Brew generated this pick after the current draw window, so it is a pattern match only until you confirm a real play in My Picks.
+                    </div>
+                  ) : null}
                 </div>
               ) : (
                 <div className="rounded-[28px] border border-white/10 bg-white/[0.03] px-5 py-6 text-white/55">
