@@ -15,7 +15,7 @@
 - BrewCommand now has a notification bell for the admin surface, critical/email-worthy alerts are fanned out to one selected superadmin inbox by email, and the admin console shows recent alert delivery history alongside the shared alert center.
 - Sentry remains an external observability tool; BrewCommand should track product/business truth directly and only mirror Sentry status if we later decide we need a lightweight dashboard summary.
 - `SectionCard` is centralized in `components/brewlotto/dashboard/SectionCard.tsx` and the duplicated copies are gone.
-- Dropdown menu destinations are wired to live routes for gameplay, account, and system surfaces.
+- Dropdown menu destinations are wired to live routes for gameplay, account, and system surfaces, and the older shared `Header` account button now points to `/profile` instead of a dead `/account` route.
 - `scrapeCA_Live.js` and `scrapeNC_Live.js` exist and are wired into `scripts/ingestionJob.js`.
 - Strategy Locker, Billing, Notifications, Settings, Profile, Results, My Picks, Learn, Legal, and Admin routes all exist in the App Router.
 - Strategy Locker saves now route through a server-side save endpoint and the underlying `user_saved_strategies` table supports multiple saved strategies per user, one row per strategy.
@@ -49,6 +49,7 @@
 - Menu/tab and mockup QA still needs another visual pass against the current rendered routes.
 - The watermark-free landing-page video still needs a replacement pass once the new Blob asset lands locally; keep the Vercel CLI deploy/update step tracked with that media swap.
 - Tier gating still needs a deliberate test matrix across dashboard, strategy locker, pricing, billing, and AI surfaces.
+- Route wiring is now cleaner, but the next visual pass should still check whether the shared dashboard surfaces breathe as well on desktop/tablet as they do on mobile mockups.
 - Strategy validation still needs a spec cross-check pass that verifies each live engine module and its tests against the BrewLotto V1 strategy spec.
 - BrewCommand alerting is now operational with a single selected recipient plus history/filtering, but full internal RBAC and user provisioning are still deferred.
 - BrewCommand receives BrewU support submissions so reported issues can be tracked with notifications, ticket status, and email escalation back to the customer when resolved.

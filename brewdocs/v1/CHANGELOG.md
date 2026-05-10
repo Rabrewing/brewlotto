@@ -14,6 +14,7 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Added a strategy-validation checklist and tightened the live engine spec alignment notes.
 - Added a landing-video replacement note so the watermark-free Blob asset can be swapped in through the Vercel CLI update path.
 - Tightened the live strategy engine test suite so each deterministic module and the ensemble combiner are validated explicitly.
+- Repointed the legacy shared header `Account` button from dead `/account` to the live `/profile` route.
 
 ### 2026-05-07
 - Added BrewU support intake, support screenshot storage, canonical play-log bridge, settlement sweep, and customer notifications planning.

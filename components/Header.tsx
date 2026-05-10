@@ -11,7 +11,7 @@ export default function Header(){
           <nav className="hidden md:block"><CustomerNavDropdown/></nav>
         </div>
         <div className="flex items-center gap-3"><PwaInstall/>
-          <Link href="/account" className="rounded-full border border-white/10 bg-[#1a1a1c] px-3 py-1.5 text-sm hover:bg-[#232326]">Account</Link>
+          <Link href="/profile" className="rounded-full border border-white/10 bg-[#1a1a1c] px-3 py-1.5 text-sm hover:bg-[#232326]">Account</Link>
         </div>
       </div>
     </header>
