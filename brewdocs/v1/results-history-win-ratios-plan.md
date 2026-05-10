@@ -1,6 +1,6 @@
 # BrewLotto V1 - Results History, Win Ratios, and Play Confirmation Plan
 
-**Last Updated:** 2026-05-10 ET (results page now groups draws by date with explicit time chips)
+**Last Updated:** 2026-05-10 ET (results page now groups draws by date with explicit time chips, near-hit play confirmation nudge added)
 
 ## Purpose
 Define the customer and admin workflow for:
@@ -12,6 +12,7 @@ Define the customer and admin workflow for:
 ## Current Truth
 - `/results` already shows recent official draws, match counts, and the closest stored prediction for the selected game/state.
 - `/results` now groups the draw history by draw date with a visible date divider and time chip so the customer can see when each day’s draws happened at a glance.
+- Near-hit settlement events now create a customer nudge that says “if you played this, confirm it,” which gives the app a bridge toward a true confirmed-play flow without confusing close matches for confirmed wins.
 - `/my-picks` already shows stored prediction history with generated timestamps, saved state, and strategy labels.
 - `/stats` already shows settled plays, wins, hit rate, daily stats, and strategy summary data for the signed-in account.
 - `/notifications` already exists for customer inbox updates.
@@ -66,3 +67,4 @@ Define the customer and admin workflow for:
 3. Add strategy-specific win ratios to `/stats` and BrewCommand.
 4. Keep settlement notifications tied to canonical `play_logs` and official draw settlement.
 5. If the user wants deeper analytics later, add a dedicated play-intent table or richer settlement audit layer.
+6. Keep the play-confirmation nudge limited to near-hit outcomes until the UI exposes a true confirm-play action.

@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { requireBrewCommandRequest } from '@/lib/auth/brewcommand';
 import { classifySettlementOutcome } from '@/lib/brewwu/payoutMatrix';
-import { sendPlaySettlementEmail } from '@/lib/notifications/playSettlements';
+import { sendPlayConfirmationNudge, sendPlaySettlementEmail } from '@/lib/notifications/playSettlements';
 
 type PlayLogRow = {
   id: string;
@@ -389,7 +389,7 @@ export async function POST(request: NextRequest) {
         body: notificationBody,
         cta_label: 'View Result',
         cta_url: `${process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') || 'https://brewlotto.app'}/notifications`,
-        priority: isWin ? 'high' : 'normal',
+        priority: classification.isWin ? 'high' : 'normal',
           metadata: {
             source: 'settlement-sweep',
             play_log_id: log.id,
@@ -408,6 +408,32 @@ export async function POST(request: NextRequest) {
 
       if (!notificationError) {
         notificationsCreated += 1;
+      }
+
+      if (!classification.isWin && matchCount > 0) {
+        const promptResult = await sendPlayConfirmationNudge(supabase, {
+          userId: log.user_id,
+          contactEmail: null,
+          state: log.state,
+          gameLabel: game.display_name,
+          drawDate: officialDraw.draw_date,
+          drawWindowLabel: officialDraw.draw_window_label,
+          playedNumbers,
+          officialNumbers,
+          matchCount,
+          positionalMatchCount,
+          bonusMatch: classification.bonusMatch,
+          isWin: classification.isWin,
+          payoutTier: classification.payoutTier,
+          resultCode: classification.resultCode,
+          payoutAmount,
+          payoutLabel: classification.payoutLabel,
+          payoutSummary: classification.payoutSummary,
+        });
+
+        if (!promptResult.skipped) {
+          notificationsCreated += 1;
+        }
       }
 
       if (classification.isWin) {

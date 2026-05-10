@@ -588,6 +588,7 @@ The system is considered complete when:
 2. **Stripe Live Mode** — Flip the current test-mode billing path to live keys, then verify the production checkout/webhook path end-to-end
 3. **Landing Video Swap** — Replace the current landing-page reel with the watermark-free Blob asset once it lands locally, then deploy/update through the Vercel CLI path.
 4. **Customer Strategy Alerts** — When Brew detects meaningful strategy signals, write an event-driven `user_notifications` record and send email only for off-app or high-priority events, keeping the momentum meter as a single gauge and exposing hot/cold as separate cards. BrewCommand should surface the recent signals, recipients, and reasons in a dedicated Strategy Signals section so alerting can be audited.
+5. **Play Confirmation Nudges** — When a settled play has a near-hit or meaningful match, write a customer nudge that says “if you played this, confirm it” so the result history can stay honest before the confirmed-play workflow is fully interactive.
 
 **ONBOARDING STATUS:**
 | Component | Status |

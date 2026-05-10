@@ -118,6 +118,55 @@ function buildSettlementEmailHtml(input: SettlementNotificationInput) {
   </html>`;
 }
 
+function buildPlayConfirmationEmailHtml(input: SettlementNotificationInput) {
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL?.trim() || 'https://brewlotto.app').replace(/\/$/, '');
+  const ctaUrl = `${appUrl}/my-picks`;
+  const drawWindow = input.drawWindowLabel ? input.drawWindowLabel.replace(/_/g, ' ') : 'official draw';
+  const matchSummary = input.matchCount > 0
+    ? `Your pick matched ${input.matchCount} number${input.matchCount === 1 ? '' : 's'} on this draw.`
+    : 'Your pick nearly landed, and Brew wants to keep your history accurate.';
+
+  return `<!DOCTYPE html>
+  <html>
+    <body style="margin:0;padding:0;background:#050505;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#fff;">
+      <div style="max-width:640px;margin:0 auto;padding:32px 20px;">
+        <div style="border:1px solid rgba(255,199,66,0.24);border-radius:24px;background:linear-gradient(145deg,rgba(30,20,13,0.96),rgba(8,8,10,0.99));padding:28px 24px;box-shadow:0 0 32px rgba(255,184,28,0.08);">
+          <div style="font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:#f0c46b;margin-bottom:8px;">BrewLotto Play Confirmation</div>
+          <h1 style="margin:0 0 12px;font-size:24px;line-height:32px;color:#f7ddb3;">If you played this draw, confirm it</h1>
+          <div style="margin:0 0 18px;font-size:14px;line-height:22px;color:rgba(255,255,255,0.72);">
+            ${escapeHtml(matchSummary)} BrewLotto is asking for a quick confirmation so your play history stays aligned with what you actually entered.
+          </div>
+          <div style="border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:14px;background:rgba(0,0,0,0.26);margin-bottom:14px;">
+            <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,0.35);">Game</div>
+            <div style="margin-top:6px;font-size:15px;color:#fff;">${escapeHtml(`${input.state} ${input.gameLabel}`)}</div>
+          </div>
+          <div style="border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:14px;background:rgba(0,0,0,0.26);margin-bottom:14px;">
+            <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,0.35);">Draw context</div>
+            <div style="margin-top:6px;font-size:15px;color:#fff;">${escapeHtml(input.drawDate)} · ${escapeHtml(drawWindow)}</div>
+          </div>
+          <div style="border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:14px;background:rgba(0,0,0,0.26);margin-bottom:14px;">
+            <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,0.35);">Your pick</div>
+            <div style="margin-top:6px;font-size:15px;color:#fff;">${escapeHtml(input.playedNumbers.join(' ') || 'No numbers recorded')}</div>
+          </div>
+          <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:20px;">
+            <tr>
+              <td style="border-radius:999px;background:#ffc742;padding:12px 20px;">
+                <a href="${ctaUrl}" style="color:#050505;font-size:13px;font-weight:700;text-decoration:none;display:inline-block;">Open My Picks</a>
+              </td>
+            </tr>
+          </table>
+          <div style="margin-top:18px;font-size:12px;line-height:20px;color:rgba(255,255,255,0.45);">
+            Confirming the play helps BrewLotto keep your strategy history accurate and makes future win tracking more reliable.
+          </div>
+          <div style="margin-top:10px;font-size:11px;line-height:18px;color:rgba(255,255,255,0.30);">
+            BrewLotto AI - Smart Picks. Sharper Odds.
+          </div>
+        </div>
+      </div>
+    </body>
+  </html>`;
+}
+
 async function sendResendEmail(params: {
   apiKey: string;
   fromEmail: string;
@@ -207,6 +256,98 @@ export async function sendPlaySettlementEmail(
     fromEmail: config.fromEmail,
     fromName: config.fromName,
     to: input.contactEmail,
+    subject,
+    html,
+    text,
+  });
+
+  return { skipped: false };
+}
+
+export async function sendPlayConfirmationNudge(
+  supabase: SupabaseClient,
+  input: SettlementNotificationInput,
+) {
+  const prefsResult = await supabase
+    .from('notification_preferences')
+    .select('email_enabled, draw_results_enabled, pick_reminders_enabled')
+    .eq('user_id', input.userId)
+    .maybeSingle();
+
+  if (prefsResult.error) {
+    throw new Error(prefsResult.error.message);
+  }
+
+  const prefs = prefsResult.data;
+  const shouldEmail = Boolean(
+    input.contactEmail &&
+    prefs &&
+    prefs.email_enabled &&
+    (prefs.pick_reminders_enabled || prefs.draw_results_enabled),
+  );
+
+  const notificationTitle = input.matchCount >= 2
+    ? 'Your pick came close'
+    : 'Confirm your play';
+  const notificationBody = input.matchCount > 0
+    ? `Your ${input.gameLabel} numbers matched ${input.matchCount} number${input.matchCount === 1 ? '' : 's'} on ${input.drawDate}. If you played this draw, confirm it in BrewLotto so your history stays accurate.`
+    : `If you played this ${input.gameLabel} draw, confirm it in BrewLotto so your history stays accurate.`;
+
+  if (input.userId) {
+    const { error: insertError } = await supabase.from('user_notifications').insert({
+      user_id: input.userId,
+      type: 'pick_reminder',
+      title: notificationTitle,
+      body: notificationBody,
+      cta_label: 'Open My Picks',
+      cta_url: `${(process.env.NEXT_PUBLIC_APP_URL?.trim() || 'https://brewlotto.app').replace(/\/$/, '')}/my-picks`,
+      priority: input.matchCount >= 2 ? 'high' : 'normal',
+      metadata: {
+        source: 'play_confirmation_prompt',
+        game_label: input.gameLabel,
+        state: input.state,
+        draw_date: input.drawDate,
+        draw_window_label: input.drawWindowLabel,
+        match_count: input.matchCount,
+        positional_match_count: input.positionalMatchCount,
+        bonus_match: input.bonusMatch,
+      },
+    });
+
+    if (insertError) {
+      throw new Error(insertError.message);
+    }
+  }
+
+  if (!shouldEmail) {
+    return { skipped: true, reason: 'email-disabled-or-unavailable' };
+  }
+
+  const config = getResendConfig();
+  if (!config) {
+    return { skipped: true, reason: 'email-not-configured' };
+  }
+
+  const subject = `[BrewLotto] Confirm your ${input.gameLabel} play`;
+  const html = buildPlayConfirmationEmailHtml(input);
+  const text = [
+    'BrewLotto Play Confirmation',
+    '',
+    `Game: ${input.state} ${input.gameLabel}`,
+    `Draw date: ${input.drawDate}`,
+    `Draw window: ${input.drawWindowLabel || 'official draw'}`,
+    `Your pick: ${input.playedNumbers.join(' ')}`,
+    `Match count: ${input.matchCount}`,
+    `Bonus match: ${input.bonusMatch ? 'yes' : 'no'}`,
+    '',
+    'Open BrewLotto My Picks to confirm the play and keep your history accurate.',
+  ].join('\n');
+
+  await sendResendEmail({
+    apiKey: config.apiKey,
+    fromEmail: config.fromEmail,
+    fromName: config.fromName,
+    to: input.contactEmail!,
     subject,
     html,
     text,
