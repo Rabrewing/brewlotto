@@ -34,8 +34,9 @@ Design goals:
 - `Settings`
 - `Subscription & Billing`
 
-### System
-- `Help / Learn`
+### Systems
+- `BrewU`
+- `Support`
 - `Terms & Privacy`
 - `Logout`
 
@@ -51,7 +52,8 @@ Design goals:
 | Notifications | `/notifications` | route | Preference toggles plus notification history |
 | Settings | `/settings` | route | App-level preferences, state default, controls |
 | Subscription & Billing | `/billing` | route | Plan, upgrade, invoices, entitlement messaging |
-| Help / Learn | `/learn` | route | BrewUniversity Lite / explainers / help |
+| BrewU | `/learn` | route | BrewUniversity Lite / explainers / help |
+| Support | `/support` | route | Issue intake and BrewCommand ticket routing |
 | Terms & Privacy | `/legal` | route | Legal index page linking policy docs |
 | Logout | `/logout` | action route + confirm modal | Confirm in UI, then use existing logout route |
 

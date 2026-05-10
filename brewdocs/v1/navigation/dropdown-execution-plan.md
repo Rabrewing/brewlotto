@@ -64,8 +64,9 @@ Build order:
 1. `/notifications`
 2. `/settings`
 3. `/billing`
-4. `/learn`
-5. `/legal`
+4. `/support`
+5. `/learn`
+6. `/legal`
 
 Reason:
 - lower urgency for game-loop value
@@ -78,6 +79,7 @@ Reason:
 - Keep each new route thin and real rather than broad and partially fake
 - Reuse the dashboard shell language but do not clone the dashboard blindly
 - Maintain V1 route clarity over speculative future extensibility
+- Treat `/support` as a first-class help/system route rather than a hidden modal or an embedded support widget
 
 ## 4. Suggested Commit Grouping
 

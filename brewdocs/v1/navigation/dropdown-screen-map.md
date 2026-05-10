@@ -125,7 +125,23 @@
   - onboarding/help articles
   - support links
 
-## 10. Terms & Privacy
+## 10. Support
+
+- Route: `/support`
+- Status: Live, partial delivery
+- Purpose: customer issue intake for bugs, confusion, and screenshot-backed help requests
+- Core sections:
+  - section/category dropdown
+  - subject
+  - comments
+  - screenshot upload
+  - 24-hour response disclaimer
+- V1 dependency:
+  - support requests table
+  - BrewCommand alerting / ticket queue
+  - customer update emails
+
+## 11. Terms & Privacy
 
 - Route: `/legal`
 - Status: Shell
@@ -135,7 +151,7 @@
   - privacy policy
   - responsible-use/trust references if added
 
-## 11. Logout
+## 12. Logout
 
 - UI model: menu action with confirm dialog
 - Status: Live
@@ -146,7 +162,7 @@
 - Notes:
   - current implementation signs out immediately; the confirm modal is still pending.
 
-## 12. Build-Safety Rules
+## 13. Build-Safety Rules
 
 - Do not add a destination until route intent and data dependencies are defined here
 - Do not mix account, gameplay, and legal concerns into a single catch-all page
