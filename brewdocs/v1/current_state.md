@@ -48,6 +48,7 @@
 - Settings stores values, but full theme application across the UI is still future work.
 - Notifications stores preferences and reads history, but real delivery wiring still needs a full verification pass.
 - Menu/tab and mockup QA still needs another visual pass against the current rendered routes, with Strategy Locker and Learn/BrewU still the highest-priority polish pages.
+- Settings now uses a centered account-style hero with clearer Gameplay / Notifications / Account groupings, which brings it closer to the mockup rhythm without inventing fake profile data.
 - The watermark-free landing-page video still needs a replacement pass once the new Blob asset lands locally; keep the Vercel CLI deploy/update step tracked with that media swap.
 - Tier gating still needs a deliberate test matrix across dashboard, strategy locker, pricing, billing, and AI surfaces.
 - Route wiring is now cleaner, but the next visual pass should still check whether the shared dashboard surfaces breathe as well on desktop/tablet as they do on mobile mockups.

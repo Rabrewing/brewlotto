@@ -1,11 +1,13 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { DashboardContainer, Header, NavigationTabs, SectionCard } from '@/components/brewlotto/dashboard';
 import { supabase } from '@/lib/supabase/browserClient';
 
 interface AuthUser {
   id: string;
+  email?: string | null;
 }
 
 interface UserSettingsRecord {
@@ -79,7 +81,7 @@ export default function SettingsPage() {
         }
 
         if (!cancelled) {
-          setUser({ id: authUser.id });
+          setUser({ id: authUser.id, email: authUser.email });
           setSettings({ ...DEFAULT_SETTINGS, ...(data || {}) });
         }
       } catch (loadError) {
@@ -139,6 +141,16 @@ export default function SettingsPage() {
     { key: 'show_results_first', label: 'Results First', description: 'Favor results-oriented route ordering in future account UX.' },
   ];
 
+  const displayName =
+    user?.email?.split('@')[0]?.replace(/[._-]+/g, ' ').trim() || 'Brew User';
+  const initials =
+    displayName
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() || '')
+      .join('') || 'BU';
+
   return (
     <main className="min-h-screen bg-[#050505] text-white">
       <DashboardContainer>
@@ -154,12 +166,36 @@ export default function SettingsPage() {
         ) : (
           <div className="space-y-5">
             <section className="rounded-[30px] border border-[#ffc742]/24 bg-[radial-gradient(circle_at_top_left,rgba(255,199,66,0.18),rgba(0,0,0,0)_34%),linear-gradient(145deg,rgba(30,20,13,0.88),rgba(8,8,8,0.98))] px-5 py-5 shadow-[0_0_28px_rgba(255,184,28,0.08)]">
-              <div className="text-[15px] uppercase tracking-[0.16em] text-white/38">App behavior</div>
-              <div className="mt-3 text-[26px] font-semibold text-[#f7ddb3]">Environment-wide preferences</div>
-              <div className="mt-2 max-w-2xl text-[15px] leading-7 text-white/62">This page uses `user_settings` for app-level controls that are broader than profile identity, and keeps future controls inside the same stable record.</div>
+              <div className="flex flex-col items-center text-center">
+                <div className="flex h-32 w-32 items-center justify-center rounded-full border border-[#ffc742]/30 bg-[radial-gradient(circle_at_top_left,rgba(255,199,66,0.35),rgba(0,0,0,0)_58%),linear-gradient(145deg,rgba(36,24,16,0.95),rgba(10,10,10,0.98))] text-[34px] font-semibold text-[#f7ddb3] shadow-[0_0_30px_rgba(255,184,28,0.15)]">
+                  {initials}
+                </div>
+                <div className="mt-4 text-[32px] font-semibold text-[#f7ddb3]">{displayName}</div>
+                <div className="mt-3 inline-flex rounded-full border border-[#ffc742]/24 bg-[#ffc742]/10 px-4 py-1.5 text-[12px] uppercase tracking-[0.16em] text-[#ffd27e]">
+                  Brew settings
+                </div>
+                <div className="mt-4 max-w-2xl text-[15px] leading-7 text-white/62">
+                  This page uses `user_settings` for app-level controls that are broader than profile
+                  identity, and keeps future controls inside the same stable record.
+                </div>
+                <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+                  <Link
+                    href="/profile"
+                    className="rounded-full bg-gradient-to-r from-[#ffc742] to-[#ffbe27] px-6 py-3 text-[15px] font-semibold text-black shadow-[0_0_18px_rgba(255,199,66,0.18)] transition-transform hover:scale-[1.02]"
+                  >
+                    Edit Profile
+                  </Link>
+                  <Link
+                    href="/billing"
+                    className="rounded-full border border-white/10 bg-white/[0.03] px-6 py-3 text-[15px] font-medium text-[#f2d29f] transition-colors hover:text-white"
+                  >
+                    Manage Subscription
+                  </Link>
+                </div>
+              </div>
             </section>
 
-            <SectionCard title="Defaults" description="Saved defaults influence future route and gameplay preferences for your account.">
+            <SectionCard title="Gameplay" description="Saved defaults influence future route and gameplay preferences for your account.">
               <div className="grid gap-4 md:grid-cols-2">
                 <label>
                   <div className="mb-2 text-[12px] uppercase tracking-[0.16em] text-white/35">Default state</div>
@@ -181,7 +217,7 @@ export default function SettingsPage() {
               </div>
             </SectionCard>
 
-            <SectionCard title="Experience Preferences" description="These toggles use fields already defined on the `user_settings` table.">
+            <SectionCard title="Notifications" description="These toggles use fields already defined on the `user_settings` table.">
               <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                 {toggleFields.map((field) => (
                   <label key={field.key} className="rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
@@ -195,7 +231,7 @@ export default function SettingsPage() {
               </div>
             </SectionCard>
 
-            <SectionCard title="Theme & Accent" description="These values are stored now even though the full theme switcher rollout remains future work.">
+            <SectionCard title="Account" description="These values are stored now even though the full theme switcher rollout remains future work.">
               <div className="grid gap-4 md:grid-cols-2">
                 <label>
                   <div className="mb-2 text-[12px] uppercase tracking-[0.16em] text-white/35">Theme</div>
