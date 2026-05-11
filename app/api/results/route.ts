@@ -143,7 +143,7 @@ export async function GET(request: NextRequest) {
       gameId
         ? supabase
             .from('official_draws')
-            .select('draw_date, draw_datetime_local, draw_window_label, primary_numbers, bonus_numbers')
+            .select('draw_date, draw_datetime_local, draw_window_label, primary_numbers, bonus_numbers, fireball_value')
             .eq('game_id', gameId)
             .gte('draw_date', historyCutoffDate)
             .order('draw_date', { ascending: false })
@@ -241,6 +241,12 @@ export async function GET(request: NextRequest) {
         ? draw.bonus_numbers.filter((value): value is number => typeof value === 'number')
         : [];
       const drawBonus = drawBonusNumbers[0] ?? null;
+      const drawFireballRaw = (draw as { fireball_value?: unknown }).fireball_value;
+      const drawFireball = typeof drawFireballRaw === 'number'
+        ? drawFireballRaw
+        : typeof drawFireballRaw === 'string' && drawFireballRaw.trim() !== '' && Number.isFinite(Number(drawFireballRaw))
+          ? Number(drawFireballRaw)
+          : null;
 
       const scoredPredictions = predictions.map((prediction) => {
         const predictedNumbers = Array.isArray(prediction.predicted_numbers)
@@ -272,6 +278,7 @@ export async function GET(request: NextRequest) {
         windowLabel: draw.draw_window_label,
         primaryNumbers: drawNumbers,
         bonusNumber: drawBonus,
+        fireballValue: drawFireball,
         bestPrediction: best,
       };
     });
@@ -315,6 +322,7 @@ export async function GET(request: NextRequest) {
       windowLabel: entry.windowLabel,
       primaryNumbers: entry.primaryNumbers,
       bonusNumber: entry.bonusNumber,
+      fireballValue: entry.fireballValue,
       bonusLabel: gameConfig.bonusLabel,
     }));
 

@@ -1,6 +1,6 @@
 # BrewLotto V1 - Results History, Win Ratios, and Play Confirmation Plan
 
-**Last Updated:** 2026-05-11 ET (results page now groups draws by date with explicit time chips, near-hit play confirmation nudge added, My Picks now shows saved picks only with a broader 30-day history window, Strategy Locker ratio chips and Stats summary are live, results page has a 3/6 month history toggle)
+**Last Updated:** 2026-05-11 ET (results page now groups draws by date with explicit time chips, near-hit play confirmation nudge added, My Picks now shows saved picks only with a broader 30-day history window, Strategy Locker ratio chips and Stats summary are live, results page has a 3/6 month history toggle, Fireball is surfaced in Results / My Picks / Strategy Locker / Stats / Admin and remains tracked in play logs and settlement labels)
 
 ## Purpose
 Define the customer and admin workflow for:

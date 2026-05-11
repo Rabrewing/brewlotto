@@ -36,6 +36,17 @@ interface PredictionRecord {
   prediction_strategy_scores?: StrategyScore[] | null;
 }
 
+interface PlayLogRecord {
+  id: string;
+  prediction_id: string | null;
+  is_settled: boolean | null;
+  outcome_result_code?: string | null;
+  outcome_match_count?: number | null;
+  draw_date?: string | null;
+  created_at: string;
+  metadata?: unknown;
+}
+
 const GAME_OPTIONS: Array<{ value: FilterGame; label: string }> = [
   { value: 'ALL', label: 'All Games' },
   { value: 'powerball', label: 'Powerball' },
@@ -126,6 +137,33 @@ function getPickStatus(prediction: PredictionRecord): PickStatus {
   return prediction.is_saved ? 'saved' : 'pending';
 }
 
+function getFireballContext(playLog?: PlayLogRecord | null) {
+  if (!playLog) {
+    return null;
+  }
+
+  const metadata = playLog.metadata;
+  if (metadata && typeof metadata === 'object') {
+    const value = metadata as Record<string, unknown>;
+    const active = value.fireball_active ?? value.fireball ?? null;
+    if (active === true || active === 'true') {
+      return 'Fireball active';
+    }
+    if (typeof value.fireball_value === 'number') {
+      return `Fireball ${value.fireball_value}`;
+    }
+    if (typeof value.fireball_value === 'string' && value.fireball_value.trim() !== '' && Number.isFinite(Number(value.fireball_value))) {
+      return `Fireball ${value.fireball_value}`;
+    }
+  }
+
+  if (typeof playLog.outcome_result_code === 'string' && playLog.outcome_result_code.toLowerCase().includes('fireball')) {
+    return 'Fireball tracked';
+  }
+
+  return null;
+}
+
 function PickStatusPill({ status, createdAt }: { status: PickStatus; createdAt: string | null }) {
   if (status === 'saved') {
     return (
@@ -155,6 +193,7 @@ function SummaryMetric({ label, value }: { label: string; value: string }) {
 
 function PickCard({
   prediction,
+  playLog,
   isConfirmed,
   isConfirming,
   onToggleSaved,
@@ -162,6 +201,7 @@ function PickCard({
   onDelete,
 }: {
   prediction: PredictionRecord;
+  playLog?: PlayLogRecord | null;
   isConfirmed: boolean;
   isConfirming: boolean;
   onToggleSaved: (prediction: PredictionRecord) => Promise<void>;
@@ -171,6 +211,7 @@ function PickCard({
   const numbers = Array.isArray(prediction.predicted_numbers) ? prediction.predicted_numbers : [];
   const hasBonus = prediction.bonus_number !== null && prediction.bonus_number !== undefined;
   const status = getPickStatus(prediction);
+  const fireballContext = getFireballContext(playLog);
 
   return (
     <article className="rounded-[28px] border border-[#ffbd39]/22 bg-[linear-gradient(145deg,rgba(32,19,13,0.82),rgba(13,10,10,0.96))] px-5 py-4 shadow-[0_0_22px_rgba(255,184,28,0.08)]">
@@ -191,6 +232,12 @@ function PickCard({
           {status}
         </div>
       </div>
+
+      {fireballContext ? (
+        <div className="mt-3 inline-flex rounded-full border border-[#72caff]/18 bg-[#111f28] px-3 py-1 text-[11px] uppercase tracking-[0.12em] text-[#9edcff]">
+          {fireballContext}
+        </div>
+      ) : null}
 
       <div className="mt-5 flex flex-wrap items-start gap-3">
         {numbers.map((value, index) => (
@@ -257,6 +304,7 @@ export default function MyPicksPage() {
   const [selectedState, setSelectedState] = useState<FilterState>('ALL');
   const [selectedGame, setSelectedGame] = useState<FilterGame>('ALL');
   const [predictions, setPredictions] = useState<PredictionRecord[]>([]);
+  const [playLogs, setPlayLogs] = useState<PlayLogRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [confirmedPredictionIds, setConfirmedPredictionIds] = useState<string[]>([]);
@@ -271,6 +319,8 @@ export default function MyPicksPage() {
       setError(null);
 
       try {
+        const { data: authData } = await supabase.auth.getUser();
+        const userId = authData.user?.id || '';
         const params = new URLSearchParams({ limit: '100' });
         const createdAfter = new Date();
         createdAfter.setDate(createdAfter.getDate() - 30);
@@ -285,22 +335,37 @@ export default function MyPicksPage() {
           params.set('game', selectedGame);
         }
 
-        const response = await fetch(`/api/predictions?${params.toString()}`, {
-          cache: 'no-store',
-        });
-        const payload = await response.json();
+        const [predictionsResponse, playLogsResponse] = await Promise.all([
+          fetch(`/api/predictions?${params.toString()}`, {
+            cache: 'no-store',
+          }),
+          supabase
+            .from('play_logs')
+            .select('id, prediction_id, is_settled, outcome_result_code, outcome_match_count, draw_date, created_at, metadata')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false })
+            .limit(120),
+        ]);
 
-        if (!response.ok) {
+        const payload = await predictionsResponse.json();
+
+        if (!predictionsResponse.ok) {
           throw new Error(payload?.error?.message || 'Failed to load picks');
+        }
+
+        if (playLogsResponse.error) {
+          throw playLogsResponse.error;
         }
 
         const data = Array.isArray(payload.data) ? payload.data : [];
         if (!cancelled) {
           setPredictions(data);
+          setPlayLogs((playLogsResponse.data || []) as PlayLogRecord[]);
         }
       } catch (loadError) {
         if (!cancelled) {
           setPredictions([]);
+          setPlayLogs([]);
           setError(loadError instanceof Error ? loadError.message : 'Failed to load picks');
         }
       } finally {
@@ -347,6 +412,18 @@ export default function MyPicksPage() {
   }, [predictions]);
 
   const savedDays = useMemo(() => groupedPredictions.length, [groupedPredictions]);
+
+  const playLogMap = useMemo(() => {
+    const map = new Map<string, PlayLogRecord>();
+
+    for (const entry of playLogs) {
+      if (entry.prediction_id) {
+        map.set(entry.prediction_id, entry);
+      }
+    }
+
+    return map;
+  }, [playLogs]);
 
   async function handleToggleSaved(prediction: PredictionRecord) {
     const response = await fetch(`/api/predictions/${prediction.id}`, {
@@ -508,6 +585,7 @@ export default function MyPicksPage() {
                     <PickCard
                       key={prediction.id}
                       prediction={prediction}
+                      playLog={playLogMap.get(prediction.id) || null}
                       isConfirmed={confirmedPredictionIds.includes(prediction.id)}
                       isConfirming={confirmingPredictionId === prediction.id}
                       onToggleSaved={handleToggleSaved}

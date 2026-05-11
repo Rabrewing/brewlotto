@@ -440,6 +440,15 @@ export default function StatsPage() {
                         <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
                           Win rate {entry.winRate !== null ? `${entry.winRate}%` : 'N/A'}
                         </span>
+                        <span className="rounded-full border border-[#72caff]/18 bg-[#111f28] px-3 py-1 text-[#9edcff]">
+                          Fireball plays {entry.fireballConfirmedPlays}
+                        </span>
+                        <span className="rounded-full border border-[#72caff]/18 bg-[#111f28] px-3 py-1 text-[#9edcff]">
+                          Fireball hits {entry.fireballHits}
+                        </span>
+                        <span className="rounded-full border border-[#72caff]/18 bg-[#111f28] px-3 py-1 text-[#9edcff]">
+                          Fireball win rate {entry.fireballWinRate !== null ? `${entry.fireballWinRate}%` : 'N/A'}
+                        </span>
                         <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
                           Avg confidence {entry.averageConfidence !== null ? `${entry.averageConfidence}%` : 'N/A'}
                         </span>

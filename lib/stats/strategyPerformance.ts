@@ -24,6 +24,11 @@ export type StrategyPerformanceSummary = {
   wins: number;
   hitRate: number | null;
   winRate: number | null;
+  fireballConfirmedPlays: number;
+  fireballHits: number;
+  fireballWins: number;
+  fireballHitRate: number | null;
+  fireballWinRate: number | null;
   lastActivityAt: string | null;
 };
 
@@ -46,6 +51,33 @@ function extractMetadataStrategy(metadata: unknown) {
   return typeof raw === 'string' && raw.trim() ? raw.trim() : null;
 }
 
+function extractFireballFlag(metadata: unknown, resultCode?: string | null) {
+  if (!metadata || typeof metadata !== 'object') {
+    return Boolean(resultCode && String(resultCode).includes('fireball'));
+  }
+
+  const value = metadata as Record<string, unknown>;
+  const active = value.fireball_active ?? value.fireball ?? null;
+
+  if (active === true) {
+    return true;
+  }
+
+  if (typeof active === 'string' && active.toLowerCase() === 'true') {
+    return true;
+  }
+
+  if (typeof value.fireball_value === 'number') {
+    return true;
+  }
+
+  if (typeof value.fireball_value === 'string' && value.fireball_value.trim() !== '' && Number.isFinite(Number(value.fireball_value))) {
+    return true;
+  }
+
+  return Boolean(resultCode && String(resultCode).toLowerCase().includes('fireball'));
+}
+
 export function buildStrategyPerformanceSummary(
   predictions: PredictionLike[],
   playLogs: PlayLogLike[],
@@ -60,6 +92,9 @@ export function buildStrategyPerformanceSummary(
       confirmedPlays: number;
       wins: number;
       hitCount: number;
+      fireballConfirmedPlays: number;
+      fireballHits: number;
+      fireballWins: number;
       lastActivityAt: string | null;
     }
   >();
@@ -78,6 +113,9 @@ export function buildStrategyPerformanceSummary(
       confirmedPlays: 0,
       wins: 0,
       hitCount: 0,
+      fireballConfirmedPlays: 0,
+      fireballHits: 0,
+      fireballWins: 0,
       lastActivityAt: null,
     };
 
@@ -113,6 +151,9 @@ export function buildStrategyPerformanceSummary(
       confirmedPlays: 0,
       wins: 0,
       hitCount: 0,
+      fireballConfirmedPlays: 0,
+      fireballHits: 0,
+      fireballWins: 0,
       lastActivityAt: null,
     };
 
@@ -120,6 +161,17 @@ export function buildStrategyPerformanceSummary(
 
     if ((playLog.outcome_match_count || 0) > 0) {
       existing.hitCount += 1;
+    }
+
+    const fireballActive = extractFireballFlag(playLog.metadata, playLog.outcome_result_code);
+    if (fireballActive) {
+      existing.fireballConfirmedPlays += 1;
+      if ((playLog.outcome_match_count || 0) > 0) {
+        existing.fireballHits += 1;
+      }
+      if (isWinResultCode(playLog.outcome_result_code)) {
+        existing.fireballWins += 1;
+      }
     }
 
     if (isWinResultCode(playLog.outcome_result_code)) {
@@ -140,6 +192,8 @@ export function buildStrategyPerformanceSummary(
         entry.confidenceCount > 0 ? Math.round(entry.confidenceTotal / entry.confidenceCount) : null;
       const hitRate = entry.confirmedPlays > 0 ? Math.round((entry.hitCount / entry.confirmedPlays) * 100) : null;
       const winRate = entry.confirmedPlays > 0 ? Math.round((entry.wins / entry.confirmedPlays) * 100) : null;
+      const fireballHitRate = entry.fireballConfirmedPlays > 0 ? Math.round((entry.fireballHits / entry.fireballConfirmedPlays) * 100) : null;
+      const fireballWinRate = entry.fireballConfirmedPlays > 0 ? Math.round((entry.fireballWins / entry.fireballConfirmedPlays) * 100) : null;
 
       return {
         strategy,
@@ -150,6 +204,11 @@ export function buildStrategyPerformanceSummary(
         wins: entry.wins,
         hitRate,
         winRate,
+        fireballConfirmedPlays: entry.fireballConfirmedPlays,
+        fireballHits: entry.fireballHits,
+        fireballWins: entry.fireballWins,
+        fireballHitRate,
+        fireballWinRate,
         lastActivityAt: entry.lastActivityAt,
       };
     })

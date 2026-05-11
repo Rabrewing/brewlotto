@@ -637,6 +637,15 @@ export default function StrategyLockerPage() {
                         <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
                           Win rate {performanceData?.winRate !== null && performanceData?.winRate !== undefined ? `${performanceData.winRate}%` : 'N/A'}
                         </span>
+                        <span className="rounded-full border border-[#72caff]/18 bg-[#111f28] px-3 py-1 text-[#9edcff]">
+                          Fireball plays {performanceData?.fireballConfirmedPlays || 0}
+                        </span>
+                        <span className="rounded-full border border-[#72caff]/18 bg-[#111f28] px-3 py-1 text-[#9edcff]">
+                          Fireball hit rate {performanceData?.fireballHitRate !== null && performanceData?.fireballHitRate !== undefined ? `${performanceData.fireballHitRate}%` : 'N/A'}
+                        </span>
+                        <span className="rounded-full border border-[#72caff]/18 bg-[#111f28] px-3 py-1 text-[#9edcff]">
+                          Fireball win rate {performanceData?.fireballWinRate !== null && performanceData?.fireballWinRate !== undefined ? `${performanceData.fireballWinRate}%` : 'N/A'}
+                        </span>
                         <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
                           Avg confidence {averageConfidence !== null ? `${averageConfidence}%` : 'N/A'}
                         </span>

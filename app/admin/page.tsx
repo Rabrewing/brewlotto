@@ -149,6 +149,34 @@ interface StrategySignalSummary {
   recentEmails: number;
 }
 
+interface FireballSummary {
+  totalFireballPlays: number;
+  settledFireballPlays: number;
+  fireballWins: number;
+  fireballWinRate: number | null;
+  recentCount: number;
+}
+
+interface FireballSummaryRow {
+  game: string;
+  state: string;
+  plays: number;
+  settled: number;
+  wins: number;
+  lastSeenAt: string;
+}
+
+interface FireballRecentRow {
+  id: string;
+  state: string;
+  game: string;
+  drawDate: string;
+  createdAt: string;
+  resultCode: string | null;
+  matchCount: number | null;
+  payoutAmount: number | null;
+}
+
 interface StrategySignalRow {
   id: string;
   userId: string;
@@ -466,6 +494,15 @@ export default function AdminPage() {
   const [aiUsageRows, setAiUsageRows] = useState<AiUsageRow[]>([]);
   const [strategySignalSummary, setStrategySignalSummary] = useState<StrategySignalSummary>(EMPTY_STRATEGY_SIGNAL_SUMMARY);
   const [strategySignals, setStrategySignals] = useState<StrategySignalRow[]>([]);
+  const [fireballSummary, setFireballSummary] = useState<FireballSummary>({
+    totalFireballPlays: 0,
+    settledFireballPlays: 0,
+    fireballWins: 0,
+    fireballWinRate: null,
+    recentCount: 0,
+  });
+  const [fireballByGame, setFireballByGame] = useState<FireballSummaryRow[]>([]);
+  const [fireballRecent, setFireballRecent] = useState<FireballRecentRow[]>([]);
   const [alertRecipient, setAlertRecipient] = useState<AlertRecipientState>(DEFAULT_ALERT_RECIPIENT);
   const [savingAlertRecipient, setSavingAlertRecipient] = useState(false);
   const [alertDeliveries, setAlertDeliveries] = useState<AlertDeliveryRow[]>([]);
@@ -528,6 +565,7 @@ export default function AdminPage() {
           fetch('/api/admin/ingestion-health', { cache: 'no-store' }),
           fetch('/api/admin/ai-usage', { cache: 'no-store' }),
           fetch('/api/admin/strategy-signals', { cache: 'no-store' }),
+          fetch('/api/admin/fireball-summary', { cache: 'no-store' }),
           fetch('/api/admin/alert-recipient', { cache: 'no-store' }),
           fetch('/api/admin/alert-deliveries', { cache: 'no-store' }),
           fetch('/api/admin/support-requests', { cache: 'no-store' }),
@@ -552,8 +590,8 @@ export default function AdminPage() {
       return;
     }
 
-    const [summaryResponse, alertsResponse, ingestionResponse, aiUsageResponse, strategySignalsResponse, alertRecipientResponse, alertDeliveriesResponse, supportRequestsResponse] = responses;
-    const [summaryPayload, alertsPayload, ingestionPayload, aiUsagePayload, strategySignalsPayload, alertRecipientPayload, alertDeliveriesPayload, supportRequestsPayload] = payloads;
+    const [summaryResponse, alertsResponse, ingestionResponse, aiUsageResponse, strategySignalsResponse, fireballResponse, alertRecipientResponse, alertDeliveriesResponse, supportRequestsResponse] = responses;
+    const [summaryPayload, alertsPayload, ingestionPayload, aiUsagePayload, strategySignalsPayload, fireballPayload, alertRecipientPayload, alertDeliveriesPayload, supportRequestsPayload] = payloads;
 
     if (!summaryResponse.ok) {
       throw new Error(summaryPayload?.error?.message || 'Failed to load alert summary');
@@ -573,6 +611,10 @@ export default function AdminPage() {
 
     if (!strategySignalsResponse.ok) {
       throw new Error(strategySignalsPayload?.error?.message || 'Failed to load strategy signals');
+    }
+
+    if (!fireballResponse.ok) {
+      throw new Error(fireballPayload?.error?.message || 'Failed to load Fireball summary');
     }
 
     if (!alertRecipientResponse.ok) {
@@ -598,6 +640,15 @@ export default function AdminPage() {
     setAiUsageRows(aiUsagePayload.data?.recent || []);
     setStrategySignalSummary(strategySignalsPayload.data?.summary || EMPTY_STRATEGY_SIGNAL_SUMMARY);
     setStrategySignals(strategySignalsPayload.data?.recent || []);
+    setFireballSummary(fireballPayload.data?.summary || {
+      totalFireballPlays: 0,
+      settledFireballPlays: 0,
+      fireballWins: 0,
+      fireballWinRate: null,
+      recentCount: 0,
+    });
+    setFireballByGame(fireballPayload.data?.byGame || []);
+    setFireballRecent(fireballPayload.data?.recent || []);
     setAlertRecipient({
       recipientEmail: alertRecipientPayload.data?.recipientEmail || DEFAULT_ALERT_RECIPIENT.recipientEmail,
       choices: alertRecipientPayload.data?.choices || DEFAULT_ALERT_RECIPIENT.choices,
@@ -1301,6 +1352,89 @@ export default function AdminPage() {
                 </table>
               </div>
             </div>
+          </div>
+
+          <div className="mt-8">
+            <div className="mb-4 flex items-end justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-semibold text-white">Fireball Tracker</h2>
+                <p className="mt-1 text-sm text-white/55">NC Pick 3 / Pick 4 Fireball-aware play logs and settlement outcomes for BrewCommand review.</p>
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <SummaryCard label="Fireball Plays" value={fireballSummary.totalFireballPlays} accent="text-white" />
+              <SummaryCard label="Settled Fireball" value={fireballSummary.settledFireballPlays} accent="text-[#72caff]" />
+              <SummaryCard label="Fireball Wins" value={fireballSummary.fireballWins} accent="text-[#93efb8]" />
+              <SummaryCard label="Fireball Win Rate" value={fireballSummary.fireballWinRate !== null ? `${fireballSummary.fireballWinRate}%` : 'N/A'} accent="text-[#ffd873]" />
+            </div>
+
+            {fireballByGame.length > 0 ? (
+              <div className="mt-5 overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(24,22,26,0.96),rgba(14,12,16,0.96))]">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-white/10 text-left text-sm">
+                    <thead className="bg-white/5 text-[11px] uppercase tracking-[0.16em] text-white/45">
+                      <tr>
+                        <th className="px-4 py-3">State / Game</th>
+                        <th className="px-4 py-3">Plays</th>
+                        <th className="px-4 py-3">Settled</th>
+                        <th className="px-4 py-3">Wins</th>
+                        <th className="px-4 py-3">Last Seen</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5 text-white/75">
+                      {fireballByGame.map((row) => (
+                        <tr key={`${row.state}:${row.game}`} className="align-top">
+                          <td className="px-4 py-4">
+                            <div className="font-semibold text-white">{row.state} {row.game}</div>
+                          </td>
+                          <td className="px-4 py-4">{row.plays}</td>
+                          <td className="px-4 py-4">{row.settled}</td>
+                          <td className="px-4 py-4">{row.wins}</td>
+                          <td className="px-4 py-4 text-white/65">{formatDate(row.lastSeenAt)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-[28px] border border-white/10 bg-white/[0.03] px-5 py-8 text-center text-white/55">
+                No Fireball-aware play logs have been recorded yet.
+              </div>
+            )}
+
+            {fireballRecent.length > 0 ? (
+              <div className="mt-5 overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(24,22,26,0.96),rgba(14,12,16,0.96))]">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-white/10 text-left text-sm">
+                    <thead className="bg-white/5 text-[11px] uppercase tracking-[0.16em] text-white/45">
+                      <tr>
+                        <th className="px-4 py-3">Time</th>
+                        <th className="px-4 py-3">Game</th>
+                        <th className="px-4 py-3">Result</th>
+                        <th className="px-4 py-3">Match</th>
+                        <th className="px-4 py-3">Payout</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5 text-white/75">
+                      {fireballRecent.map((row) => (
+                        <tr key={row.id} className="align-top">
+                          <td className="px-4 py-4 text-white/65">{formatDate(row.createdAt)}</td>
+                          <td className="px-4 py-4">
+                            <div className="font-semibold text-white">{row.state} {row.game}</div>
+                            <div className="mt-1 text-xs uppercase tracking-[0.12em] text-white/40">{row.drawDate}</div>
+                          </td>
+                          <td className="px-4 py-4 text-white/80">{row.resultCode || 'N/A'}</td>
+                          <td className="px-4 py-4">{row.matchCount ?? 0}</td>
+                          <td className="px-4 py-4">{row.payoutAmount != null ? `$${Number(row.payoutAmount).toFixed(2)}` : 'N/A'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : null}
           </div>
 
           <div className="mt-8" id="alert-feed">

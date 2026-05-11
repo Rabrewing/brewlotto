@@ -20,6 +20,7 @@ interface DrawEntry {
   windowLabel: string | null;
   primaryNumbers: number[];
   bonusNumber: number | null;
+  fireballValue?: number | null;
   bonusLabel: string;
 }
 
@@ -293,15 +294,26 @@ export default function ResultsPage() {
                           {draw.primaryNumbers.map((value, i) => (
                             <LotteryBall key={`draw-${index}-${value}-${i}`} number={value} variant="hot" size="tiny" />
                           ))}
-                          {showBonus && draw.bonusNumber !== null ? (
-                            <LotteryBall
-                              number={draw.bonusNumber}
-                              variant="bonus-hot"
-                              size="tiny"
-                              label={draw.bonusLabel}
-                            />
-                          ) : null}
-                        </div>
+                            {showBonus && draw.bonusNumber !== null ? (
+                              <LotteryBall
+                                number={draw.bonusNumber}
+                                variant="bonus-hot"
+                                size="tiny"
+                                label={draw.bonusLabel}
+                              />
+                            ) : null}
+                            {gameConfig.statsStateCode === 'NC' && (selectedGame === 'pick3' || selectedGame === 'pick4') ? (
+                              draw.fireballValue !== null && draw.fireballValue !== undefined ? (
+                                <div className="rounded-full border border-[#72caff]/18 bg-[#111f28] px-3 py-1 text-[12px] uppercase tracking-[0.12em] text-[#9edcff]">
+                                  Fireball: {draw.fireballValue}
+                                </div>
+                              ) : (
+                                <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[12px] uppercase tracking-[0.12em] text-white/45">
+                                  Fireball not drawn
+                                </div>
+                              )
+                            ) : null}
+                          </div>
 
                         <div className="mt-4 text-[13px] text-white/50">
                           Drawn: {formatDrawTime(draw.drawnAt)} • {formatDrawDate(draw.drawDate)}
