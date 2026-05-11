@@ -8,6 +8,7 @@ import {
   NavigationTabs,
   LotteryBall,
 } from '@/components/brewlotto/dashboard';
+import { supabase } from '@/lib/supabase/browserClient';
 
 type FilterState = 'ALL' | 'NC' | 'MULTI';
 type FilterGame = 'ALL' | 'pick3' | 'pick4' | 'cash5' | 'powerball' | 'mega_millions';
