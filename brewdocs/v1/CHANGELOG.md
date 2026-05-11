@@ -53,6 +53,9 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Fixed Strategy Locker performance chip bug: `strategyPerformanceMap` keyed by display label but looked up with raw key, always producing undefined.
 - Added Data Freshness section to BrewU explaining healthy/delayed/stale states.
 - Documented all changes in `brewdocs/v1/strategy-engine-cleanup-2026-05-11.md`.
+- Replaced flat strategy brand names with tiered ladder naming: HeatCheck → HeatCheck II → III → IV, HeatWave → II → III, PulseSync → II. Each family progresses across tier unlocks instead of showing unrelated brand names.
+- Assigned Lucide icons per strategy family (Flame for HeatCheck, TrendingUp for HeatWave, Brain for PulseSync, Sparkles for SequenceX) with branded colors (amber, blue, purple, teal).
+- Updated AGENTS.md tiered naming entry, CHANGELOG.md, and strategy-engine-cleanup case study.
 ### 2026-05-07
 - Added BrewU support intake, support screenshot storage, canonical play-log bridge, settlement sweep, and customer notifications planning.
 - Added timestamp discipline to AGENTS and Brewdocs so future AI sessions can read state without guessing.

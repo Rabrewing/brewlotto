@@ -75,6 +75,7 @@ official source → ingestion → Supabase → freshness view → API → UI
 | **BrewU Data Freshness** | `app/learn/page.tsx` — 2026-05-11 | Added Data Freshness section explaining healthy/delayed/stale states and LiveTrustBadge behavior. Sets expectations that official results can occasionally be delayed. |
 | **Multi-state prediction fix** | `lib/prediction/predictionGenerator.js` — 2026-05-11 | Fixed `.single()` crash on MULTI state (2 rows returned for NC+CA). Changed to `.select()` + explicit NC pick. Added `state`/`game` fields to `predictionData` so storage no longer defaults to 'NC'/'pick3'. Added `draw_window_label` filter for daily games. |
 | **Strategy name normalization** | `utils/strategyLabel.js` + 8 UI files — 2026-05-11 | Centralized brand-name mapper. All surfaces (Strategy Locker, Stats, My Picks, Dashboard, Results, Voice, Commentary) now display "HeatCheck™", "HeatWave™", "PulseSync™", "PulsePrime™", "SequenceX™" instead of raw internal keys like "poisson", "hot_cold", "frequency_analysis". |
+| **Strategy tiered naming** | `lib/explainers/strategyExplainers.js`, `utils/strategyLabel.js`, `lib/voice/BREW_PHRASES.js` — 2026-05-11 | Replaced flat branded names with tiered ladder: HeatCheck → HeatCheck II → III → IV, HeatWave → II → III, PulseSync → II. Each family progresses across tier unlocks instead of showing unrelated brand names. Lucide icons assigned per family. AGENTS.md updated, CHANGELOG.md updated.
 | **BLOB_READ_WRITE_TOKEN** | Vercel Blob — 2026-05-04 | Blob store created, linked to project. Landing video + tutorial video uploaded to Blob. `NEXT_PUBLIC_LANDING_VIDEO_*_URL` and `NEXT_PUBLIC_TUTORIAL_VIDEO_URL` env vars set. |
 
 ### Auth & Email
@@ -523,7 +524,7 @@ The system is considered complete when:
 
 ## V1 Progress Tracker
 
-**Last Updated:** 2026-05-11 ET (All scrapers patched: Powerball/MM now write to NC+CA game_ids, NC Live fetches 24 months past-draws for ~1000 draw target, CA Multi-State switched to lotteryextreme.com, Feb month label bug fixed, multi-state MONTHS_BACK increased from 6 to 24. CA Live backfill added via lotteryextreme.com draw-ID iteration. Phase 4 deferred retry added to ingestionJob.js. Cloud Run timeout and scheduler deadlines increased. Multi-state prediction crash fixed, prediction state/game labels fixed, draw window filter added. Strategy names normalized across all surfaces. Momentum gauge re-centered with delta-distribution formula. BrewU Data Freshness section added. Case study documented in brewdocs/v1/strategy-engine-cleanup-2026-05-11.md.)
+**Last Updated:** 2026-05-11 ET (All scrapers patched: Powerball/MM now write to NC+CA game_ids, NC Live fetches 24 months past-draws for ~1000 draw target, CA Multi-State switched to lotteryextreme.com, Feb month label bug fixed, multi-state MONTHS_BACK increased from 6 to 24. CA Live backfill added via lotteryextreme.com draw-ID iteration. Phase 4 deferred retry added to ingestionJob.js. Cloud Run timeout and scheduler deadlines increased. Multi-state prediction crash fixed, prediction state/game labels fixed, draw window filter added. Strategy names normalized across all surfaces with tiered ladder naming and Lucide icons. Momentum gauge re-centered with delta-distribution formula. BrewU Data Freshness section added. Case study documented in brewdocs/v1/strategy-engine-cleanup-2026-05-11.md.)
 
 ### Phase Status
 

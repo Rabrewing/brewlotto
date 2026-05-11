@@ -20,7 +20,7 @@ export default function PricingTierCard({
         if (locked) {
             const previewLines = {
                 brew: "This is Brew Tier. Brew commentary and strategic Pulse are activated here.",
-                master: "Master Tier engages full prediction firepower. SequenceX™, entropy, the works.",
+                master: "Master Tier engages full prediction firepower. SequenceX, entropy, the works.",
             };
             if (previewLines[tierId]) prompt(previewLines[tierId]);
         }

@@ -56,6 +56,19 @@ Handles unknown keys with a title-case cleaner as fallback.
 | `strategy_explanations` / `prediction_comparisons` / `confidence_bands` | Mapped to appropriate general brand |
 | unknown/unrecognized | Title-cased cleanup (e.g. `"my_custom_key"` → `"My Custom Key"`) |
 
+### Tiered Naming Ladder
+
+Each family now displays as a progression across unlock tiers instead of flat unrelated names:
+
+| Family | Free | Starter | Pro | Master |
+|--------|------|---------|-----|--------|
+| **HeatCheck** | HeatCheck | HeatCheck II | HeatCheck III | HeatCheck IV |
+| **HeatWave** | HeatWave | HeatWave II | HeatWave III | — |
+| **PulseSync** | PulseSync | — | — | PulseSync II |
+| **SequenceX** | — | — | — | SequenceX |
+
+Lucide icons: Flame (amber #f59e0b), TrendingUp (blue #3b82f6), Brain (purple #a855f7), Sparkles (teal #14b8a6).
+
 ---
 
 ## 3. Files Changed
