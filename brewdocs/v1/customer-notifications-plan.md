@@ -1,6 +1,6 @@
 # BrewLotto V1 - Customer Notifications & Winnings Alerts Plan
 
-**Last Updated:** 2026-05-10 ET (AI strategy notifications tracked, momentum meter kept single, ingestion-driven sweep wired, BrewCommand Strategy Signals section added, play confirmation nudges added)
+**Last Updated:** 2026-05-11 ET (AI strategy notifications tracked, momentum meter kept single, ingestion-driven sweep wired, BrewCommand Strategy Signals section added, play confirmation nudges added, Fireball play-log tracking added)
 
 ## Purpose
 Track the customer-facing notification flow so BrewLotto can notify users about:
@@ -15,7 +15,7 @@ Track the customer-facing notification flow so BrewLotto can notify users about:
 - BrewCommand admin alerts are already separate and should remain admin-only.
 - BrewCommand now has a settlement sweep endpoint that can settle unsettled `play_logs` against official draws for both NC and CA using the same state/game mapping the dashboard uses.
 - The legacy `app/api/play/log/route.ts` now writes into the canonical `play_logs` table with auth validation, normalized draw times, and normalized numbers. That source is ready for settlement automation.
-- Winnings alerts are now wired through the settlement sweep, and the payout-tier classifier now uses the shared BrewU payout matrix so the customer event flow can distinguish exact-order, box-style, and match-number outcomes more clearly.
+- Winnings alerts are now wired through the settlement sweep, and the payout-tier classifier now uses the shared BrewU payout matrix so the customer event flow can distinguish exact-order, box-style, Fireball, and match-number outcomes more clearly.
 - Brew AI strategy-detection alerts now behave like the rest of the customer notification system: they are emitted from the ingestion-driven sweep, deduplicated, and only emailed when the user is eligible and the signal is strong enough.
 - BrewCommand now surfaces a dedicated Strategy Signals section so the team can audit who got alerted, why they were alerted, and which saved strategy keys qualified for the alert.
 - BrewCommand settlement nudges now create a `confirm your play` customer notification for near-hit outcomes so the app can ask the user to verify a real play without pretending a later close match was already confirmed.

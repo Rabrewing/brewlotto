@@ -189,6 +189,35 @@ function extractStrategyHint(metadata: unknown) {
   return value.strategy ?? value.add_on ?? value.play_style ?? null;
 }
 
+function extractFireballActive(metadata: unknown) {
+  if (!metadata || typeof metadata !== 'object') {
+    return false;
+  }
+
+  const value = metadata as Record<string, unknown>;
+  const addOn = value.add_on;
+  const playStyle = value.play_style;
+  const fireballFlag = value.fireball_active ?? value.fireball ?? null;
+
+  if (fireballFlag === true) {
+    return true;
+  }
+
+  if (typeof fireballFlag === 'string' && fireballFlag.toLowerCase() === 'true') {
+    return true;
+  }
+
+  if (typeof addOn === 'string' && addOn.toLowerCase().includes('fireball')) {
+    return true;
+  }
+
+  if (typeof playStyle === 'string' && playStyle.toLowerCase().includes('fireball')) {
+    return true;
+  }
+
+  return false;
+}
+
 async function getOfficialDraw(
   supabase: ReturnType<typeof getSupabase>,
   game: LotteryGameRow,
@@ -335,11 +364,13 @@ export async function POST(request: NextRequest) {
       const playedBonusNumber = log.played_bonus_number;
       const matchCount = countIntersection(playedNumbers, officialNumbers);
       const positionalMatchCount = countExactPositions(playedNumbers, officialNumbers);
+      const fireballActive = extractFireballActive(log.metadata);
       const classification = classifySettlementOutcome({
         gameId: canonicalGameId(game.game_key),
         playedNumbers,
         officialNumbers,
         strategyHint: extractStrategyHint(log.metadata),
+        fireballActive,
         bonusMatch:
           playedBonusNumber != null && officialBonusNumbers.length > 0
             ? officialBonusNumbers.includes(playedBonusNumber)
@@ -390,21 +421,22 @@ export async function POST(request: NextRequest) {
         cta_label: 'View Result',
         cta_url: `${process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') || 'https://brewlotto.app'}/notifications`,
         priority: classification.isWin ? 'high' : 'normal',
-          metadata: {
-            source: 'settlement-sweep',
-            play_log_id: log.id,
-            game_key: normalizedGameKey,
-            state: log.state,
-            draw_id: officialDraw.id,
-            is_win: classification.isWin,
-            match_count: matchCount,
-            positional_match_count: positionalMatchCount,
-            bonus_match: classification.bonusMatch,
-            payout_tier: classification.payoutTier,
-            payout_label: classification.payoutLabel,
-            result_code: classification.resultCode,
-          },
-        });
+        metadata: {
+          source: 'settlement-sweep',
+          play_log_id: log.id,
+          game_key: normalizedGameKey,
+          state: log.state,
+          draw_id: officialDraw.id,
+          is_win: classification.isWin,
+          match_count: matchCount,
+          positional_match_count: positionalMatchCount,
+          bonus_match: classification.bonusMatch,
+          fireball_active: fireballActive,
+          payout_tier: classification.payoutTier,
+          payout_label: classification.payoutLabel,
+          result_code: classification.resultCode,
+        },
+      });
 
       if (!notificationError) {
         notificationsCreated += 1;
@@ -429,6 +461,7 @@ export async function POST(request: NextRequest) {
           payoutAmount,
           payoutLabel: classification.payoutLabel,
           payoutSummary: classification.payoutSummary,
+          fireballActive,
         });
 
         if (!promptResult.skipped) {
@@ -462,6 +495,7 @@ export async function POST(request: NextRequest) {
             payoutAmount,
             payoutLabel: classification.payoutLabel,
             payoutSummary: classification.payoutSummary,
+            fireballActive,
           });
 
           if (!emailResult.skipped) {

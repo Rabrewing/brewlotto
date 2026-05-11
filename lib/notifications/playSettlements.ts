@@ -18,6 +18,7 @@ type SettlementNotificationInput = {
   payoutAmount: number | null;
   payoutLabel: string;
   payoutSummary: string;
+  fireballActive?: boolean;
 };
 
 function getResendConfig() {
@@ -63,6 +64,7 @@ function buildSettlementEmailHtml(input: SettlementNotificationInput) {
   const playedNumbers = input.playedNumbers.join(' ');
   const officialNumbers = input.officialNumbers.join(' ');
   const bonusText = input.bonusMatch ? 'Bonus match: yes' : 'Bonus match: no';
+  const fireballText = input.fireballActive ? 'Fireball: active' : 'Fireball: off';
   const prizeText = input.payoutAmount != null ? `$${input.payoutAmount.toFixed(2)}` : 'Pending';
 
   return `<!DOCTYPE html>
@@ -87,6 +89,7 @@ function buildSettlementEmailHtml(input: SettlementNotificationInput) {
             <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,0.35);">Official result</div>
             <div style="margin-top:6px;font-size:15px;color:#fff;">${escapeHtml(officialNumbers || 'No official numbers recorded')}</div>
             <div style="margin-top:6px;font-size:13px;line-height:20px;color:rgba(255,255,255,0.62);">${escapeHtml(bonusText)} · ${escapeHtml(prizeText)}</div>
+            <div style="margin-top:6px;font-size:13px;line-height:20px;color:rgba(255,255,255,0.62);">${escapeHtml(fireballText)}</div>
           </div>
           <div style="border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:14px;background:rgba(0,0,0,0.26);">
             <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,0.35);">Settlement details</div>
@@ -95,6 +98,7 @@ function buildSettlementEmailHtml(input: SettlementNotificationInput) {
               Draw window: ${escapeHtml(summary.drawWindow)}<br />
               Match count: ${input.matchCount}<br />
               Positional match count: ${input.positionalMatchCount}<br />
+              Fireball: ${input.fireballActive ? 'active' : 'off'}<br />
               Result code: ${escapeHtml(input.resultCode)}<br />
               Payout tier: ${escapeHtml(input.payoutLabel || input.payoutTier || 'Not awarded')}
             </div>
@@ -125,6 +129,7 @@ function buildPlayConfirmationEmailHtml(input: SettlementNotificationInput) {
   const matchSummary = input.matchCount > 0
     ? `Your pick matched ${input.matchCount} number${input.matchCount === 1 ? '' : 's'} on this draw.`
     : 'Your pick nearly landed, and Brew wants to keep your history accurate.';
+  const fireballNote = input.fireballActive ? ' Fireball was active on this play.' : '';
 
   return `<!DOCTYPE html>
   <html>
@@ -134,7 +139,7 @@ function buildPlayConfirmationEmailHtml(input: SettlementNotificationInput) {
           <div style="font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:#f0c46b;margin-bottom:8px;">BrewLotto Play Confirmation</div>
           <h1 style="margin:0 0 12px;font-size:24px;line-height:32px;color:#f7ddb3;">If you played this draw, confirm it</h1>
           <div style="margin:0 0 18px;font-size:14px;line-height:22px;color:rgba(255,255,255,0.72);">
-            ${escapeHtml(matchSummary)} BrewLotto is asking for a quick confirmation so your play history stays aligned with what you actually entered.
+            ${escapeHtml(matchSummary)}${escapeHtml(fireballNote)} BrewLotto is asking for a quick confirmation so your play history stays aligned with what you actually entered.
           </div>
           <div style="border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:14px;background:rgba(0,0,0,0.26);margin-bottom:14px;">
             <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,0.35);">Game</div>
@@ -143,6 +148,7 @@ function buildPlayConfirmationEmailHtml(input: SettlementNotificationInput) {
           <div style="border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:14px;background:rgba(0,0,0,0.26);margin-bottom:14px;">
             <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,0.35);">Draw context</div>
             <div style="margin-top:6px;font-size:15px;color:#fff;">${escapeHtml(input.drawDate)} · ${escapeHtml(drawWindow)}</div>
+            <div style="margin-top:6px;font-size:13px;line-height:20px;color:rgba(255,255,255,0.62);">${input.fireballActive ? 'Fireball was active on this play.' : 'Fireball was not active on this play.'}</div>
           </div>
           <div style="border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:14px;background:rgba(0,0,0,0.26);margin-bottom:14px;">
             <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,0.35);">Your pick</div>
@@ -245,6 +251,7 @@ export async function sendPlaySettlementEmail(
     `Match count: ${input.matchCount}`,
     `Positional match count: ${input.positionalMatchCount}`,
     `Bonus match: ${input.bonusMatch ? 'yes' : 'no'}`,
+    `Fireball: ${input.fireballActive ? 'active' : 'off'}`,
     `Result code: ${input.resultCode}`,
     `Payout tier: ${input.payoutLabel || input.payoutTier || 'not awarded'}`,
     '',
@@ -289,9 +296,10 @@ export async function sendPlayConfirmationNudge(
   const notificationTitle = input.matchCount >= 2
     ? 'Your pick came close'
     : 'Confirm your play';
+  const fireballSentence = input.fireballActive ? ' Fireball was active on this play.' : '';
   const notificationBody = input.matchCount > 0
-    ? `Your ${input.gameLabel} numbers matched ${input.matchCount} number${input.matchCount === 1 ? '' : 's'} on ${input.drawDate}. If you played this draw, confirm it in BrewLotto so your history stays accurate.`
-    : `If you played this ${input.gameLabel} draw, confirm it in BrewLotto so your history stays accurate.`;
+    ? `Your ${input.gameLabel} numbers matched ${input.matchCount} number${input.matchCount === 1 ? '' : 's'} on ${input.drawDate}.${fireballSentence} If you played this draw, confirm it in BrewLotto so your history stays accurate.`
+    : `If you played this ${input.gameLabel} draw, confirm it in BrewLotto so your history stays accurate.${fireballSentence}`;
 
   if (input.userId) {
     const { error: insertError } = await supabase.from('user_notifications').insert({
@@ -311,6 +319,7 @@ export async function sendPlayConfirmationNudge(
         match_count: input.matchCount,
         positional_match_count: input.positionalMatchCount,
         bonus_match: input.bonusMatch,
+        fireball_active: Boolean(input.fireballActive),
       },
     });
 
@@ -339,6 +348,7 @@ export async function sendPlayConfirmationNudge(
     `Your pick: ${input.playedNumbers.join(' ')}`,
     `Match count: ${input.matchCount}`,
     `Bonus match: ${input.bonusMatch ? 'yes' : 'no'}`,
+    `Fireball: ${input.fireballActive ? 'active' : 'off'}`,
     '',
     'Open BrewLotto My Picks to confirm the play and keep your history accurate.',
   ].join('\n');

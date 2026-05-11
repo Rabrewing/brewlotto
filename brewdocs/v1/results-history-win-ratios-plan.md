@@ -18,6 +18,7 @@ Define the customer and admin workflow for:
 - `/my-picks` now uses a broader roughly 30-day fetch window so customers can review and confirm older saved picks without leaving BrewLotto.
 - `/stats` already shows settled plays, wins, hit rate, daily stats, and strategy summary data for the signed-in account.
 - `/notifications` already exists for customer inbox updates.
+- NC Pick 3 / Pick 4 Fireball is now tracked in the play-log and settlement path so the confirmed-play flow can preserve the add-on context instead of flattening it into a generic straight or box result.
 - The current flow still needs a stronger confirmation layer so BrewLotto does not imply a win unless the play was actually logged for the draw date/time that won.
 
 ## What Must Be True Before a Win Counts

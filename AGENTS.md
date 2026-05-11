@@ -54,7 +54,7 @@ official source → ingestion → Supabase → freshness view → API → UI
 | **Play log bridge** | `app/api/play/log/route.ts` — 2026-05-07 | Legacy browser write path now inserts into canonical `play_logs` with auth validation and normalized draw-time / number payloads. This is the settlement source of truth for future winnings alerts. |
 | **Support inbox notifications** | `app/api/admin/support-requests/[id]/route.ts`, `lib/notifications/supportRequests.ts` — 2026-05-07 | Resolved support tickets now send the branded customer email and also create an in-app `user_notifications` record so BrewLotto support updates reach both inboxes. |
 | **Settlement sweep** | `app/api/admin/settlements/run/route.ts`, `lib/notifications/playSettlements.ts` — 2026-05-07 | BrewCommand can sweep unsettled `play_logs`, settle NC and CA games against official draws, write `user_notifications`, and send winning emails back to the customer inbox. |
-| **Odds / play-style matrix** | `lib/brewwu/playStyleMatrix.ts` + docs — 2026-05-07 | Capture every launch game’s official play styles, odds, and payout ladders so BrewLotto AI, BrewU/help, and settlement classification can explain straight, box, straight/box, 50/50, combo, pair, Fireball, Power Play, Double Play, and related game-specific options in a customer-friendly way. NC Pick 3 / Pick 4 Fireball still needs explicit model handling so the modifier is not lost in plain straight/box settlement math. |
+| **Odds / play-style matrix** | `lib/brewwu/playStyleMatrix.ts` + docs — 2026-05-07 | Capture every launch game’s official play styles, odds, and payout ladders so BrewLotto AI, BrewU/help, and settlement classification can explain straight, box, straight/box, 50/50, combo, pair, Fireball, Power Play, Double Play, and related game-specific options in a customer-friendly way. NC Pick 3 / Pick 4 Fireball is now tracked explicitly in play-log metadata and settlement labels so the modifier is not lost in plain straight/box settlement math. |
 | **Onboarding flow** | `app/onboarding/page.tsx`, `middleware.ts`, `app/auth/callback/route.ts` (new) — 2026-05-02 | Disclaimer acknowledgment → tutorial video → dashboard. Middleware enforces onboarding completion. Auth callback exchanges magic link codes. |
 | **Dropdown auth data** | `AvatarDropdown.tsx` — 2026-05-02 | Removed hardcoded "JD"/"John Doe"/"john@example.com". Name, email, initials loaded from `supabase.auth.getUser()` on mount. |
 | **Scheduler URL fix** | Cloud Scheduler (7 jobs) — 2026-05-05 | All 7 jobs were hitting dead URL `...jix2pwxsaa-uc.a.run.app`. Fixed to `...119469099721.us-central1.run.app`. Added IAM binding so scheduler can invoke Cloud Run. Data had been stale for 3 days — now fresh. |
@@ -515,7 +515,7 @@ The system is considered complete when:
 
 ## V1 Progress Tracker
 
-**Last Updated:** 2026-05-11 ET (Strategy Signals BrewCommand section added, results-history work still queued, daily support/notification and play-log paths remain canonical, saved-only My Picks flow tracked, midday/evening ingestion verified, momentum gauge re-centered)
+**Last Updated:** 2026-05-11 ET (Strategy Signals BrewCommand section added, results-history work still queued, daily support/notification and play-log paths remain canonical, saved-only My Picks flow tracked, midday/evening ingestion verified, momentum gauge re-centered, NC Fireball play-log tracking added)
 
 ### Phase Status
 
@@ -613,7 +613,7 @@ The system is considered complete when:
 2. **Dropdown UX** — Add hover previews and keyboard navigation per dropdown spec
 3. **"Run Strategy" Animation** — Wire up the animation from `strategy-locker-run-stratergy-animation.png`
 4. **Customer Notifications / Winnings Alerts** — Normalize the settled-play flow against `play_logs`, insert support updates and settled-play events into `user_notifications`, and send customer emails with a BrewLotto return link when support tickets or winnings are resolved.
-5. **Odds & Play-Style Intelligence** — Capture every launch game’s official play styles, odds, and payout ladders, then teach BrewLotto AI and BrewU/help content to explain straight vs box vs straight/box vs 50/50 vs combo vs add-on choices as educational options per game. NC Fireball on Pick 3 / Pick 4 should be modeled explicitly in that pass.
+5. **Odds & Play-Style Intelligence** — Capture every launch game’s official play styles, odds, and payout ladders, then teach BrewLotto AI and BrewU/help content to explain straight vs box vs straight/box vs 50/50 vs combo vs add-on choices as educational options per game. NC Fireball on Pick 3 / Pick 4 is now tracked explicitly in the play-log and settlement path.
 6. **BrewU Support Intake** — Add a lightweight support tab with category dropdown, comments, screenshot upload, and a 24-hour response disclaimer; route submissions to BrewCommand notifications/email.
 7. **Strategy Validation** — Cross-check `lib/prediction/strategyEngine.js` and the live strategy modules against the BrewLotto V1 strategy spec, and keep the legacy wrapper files clearly marked as transitional only.
 8. **BrewU Content Externalization** — If V1 content editing needs increase, move BrewU/help copy, support categories, and tutorial transcript content into DB/CMS-backed tables using the new plan doc as the handoff.

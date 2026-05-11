@@ -25,6 +25,7 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Added a BrewU play-style matrix and payout ladder matrix so help content, AI guidance, and settlement classification share one source of truth.
 
 ### 2026-05-11
+- Wired NC Pick 3 / Pick 4 Fireball into the play-log and settlement label path so the modifier is tracked explicitly instead of being flattened into plain straight/box settlement math.
 - Added explicit NC Pick 3 / Pick 4 Fireball tracking to the play-style and payout workstream so the modifier is not lost in plain straight/box settlement math.
 - Switched `My Picks` to saved-pick-only history with date dividers so confirmed-play nudges land on explicit user-saved entries instead of every generated locker run, and stopped new predictions from auto-saving by default.
 - Upgraded settlement classification to distinguish exact-order, box-style, and standard match-number outcomes more cleanly.

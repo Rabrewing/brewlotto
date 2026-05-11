@@ -60,10 +60,14 @@ function normalizeDrawTime(drawType: unknown) {
   return null;
 }
 
+function isFireballAddOn(value: unknown) {
+  return typeof value === 'string' && value.toLowerCase().includes('fireball');
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => ({}));
-    const { user_id, game, draw_type, strategy, numbers, add_on, amount_spent, outcome, prize, draw_date, prediction_id } = body;
+    const { user_id, game, draw_type, strategy, numbers, add_on, fireball, fireball_value, amount_spent, outcome, prize, draw_date, prediction_id } = body;
 
     if (!game) {
       return NextResponse.json(
@@ -99,6 +103,13 @@ export async function POST(req: Request) {
     const drawDate = parsedDrawDate || new Date().toISOString().slice(0, 10);
     const playSource =
       String(strategy || '').trim() ? (String(prediction_id || '').trim() ? 'confirmed_prediction' : 'saved_prediction') : 'quick_pick';
+    const parsedFireballValue =
+      typeof fireball_value === 'number'
+        ? fireball_value
+        : typeof fireball_value === 'string' && fireball_value.trim() !== '' && Number.isFinite(Number(fireball_value))
+          ? Number(fireball_value)
+          : null;
+    const fireballActive = isFireballAddOn(add_on) || Boolean(fireball) || parsedFireballValue != null;
 
     const { data, error } = await supabase
       .from('play_logs')
@@ -123,6 +134,8 @@ export async function POST(req: Request) {
           metadata: {
             strategy: strategy || null,
             add_on: add_on || null,
+            fireball_active: fireballActive,
+            fireball_value: parsedFireballValue,
             source: String(prediction_id || '').trim() ? 'my_picks_confirmation' : 'quick_pick',
             legacy_payload: true,
           },

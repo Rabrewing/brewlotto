@@ -75,29 +75,36 @@ function buildPickStyleClassification(
   officialNumbers: number[],
   strategyHint: SettlementStyleHint,
   bonusMatch: boolean,
+  fireballActive: boolean,
 ): SettlementClassification {
   const positionalExact = exactPositions(playedNumbers, officialNumbers);
   const boxMatch = sameMultiset(playedNumbers, officialNumbers);
+  const fireballPrefix = fireballActive ? 'fireball_' : '';
+  const fireballLabel = fireballActive ? 'Fireball ' : '';
+  const fireballSummary = fireballActive ? ' Fireball was active on this play.' : '';
 
   if (positionalExact && bonusMatch) {
     return {
-      resultCode: `${gameId}_straight_bonus`,
-      payoutTier: 'straight_bonus',
-      payoutLabel: 'Straight + bonus',
-      payoutSummary: 'Exact-order hit with the game bonus path active.',
+      resultCode: `${gameId}_${fireballPrefix}straight_bonus`,
+      payoutTier: fireballActive ? 'fireball_straight_bonus' : 'straight_bonus',
+      payoutLabel: `${fireballLabel}Straight + bonus`,
+      payoutSummary: `Exact-order hit with the game bonus path active.${fireballSummary}`,
       isWin: true,
       bonusMatch,
     };
   }
 
   if (positionalExact) {
+    const isCoverageStyle = strategyHint === 'box' || strategyHint === 'straight_box' || strategyHint === 'combo' || strategyHint === 'pair';
     return {
-      resultCode: `${gameId}_${strategyHint === 'box' || strategyHint === 'straight_box' || strategyHint === 'combo' || strategyHint === 'pair' ? 'box' : 'straight'}_hit`,
-      payoutTier: strategyHint === 'box' || strategyHint === 'straight_box' || strategyHint === 'combo' || strategyHint === 'pair' ? 'box_hit' : 'straight_hit',
-      payoutLabel: strategyHint === 'box' || strategyHint === 'straight_box' || strategyHint === 'combo' || strategyHint === 'pair' ? 'Box / split hit' : 'Straight hit',
-      payoutSummary: strategyHint === 'box' || strategyHint === 'straight_box' || strategyHint === 'combo' || strategyHint === 'pair'
-        ? 'The numbers matched in the expected coverage style.'
-        : 'The numbers matched in exact order.',
+      resultCode: `${gameId}_${fireballPrefix}${isCoverageStyle ? 'box' : 'straight'}_hit`,
+      payoutTier: fireballActive
+        ? `fireball_${isCoverageStyle ? 'box_hit' : 'straight_hit'}`
+        : isCoverageStyle
+          ? 'box_hit'
+          : 'straight_hit',
+      payoutLabel: `${fireballLabel}${isCoverageStyle ? 'Box / split hit' : 'Straight hit'}`,
+      payoutSummary: `${isCoverageStyle ? 'The numbers matched in the expected coverage style.' : 'The numbers matched in exact order.'}${fireballSummary}`,
       isWin: true,
       bonusMatch,
     };
@@ -105,22 +112,22 @@ function buildPickStyleClassification(
 
   if (boxMatch) {
     return {
-      resultCode: `${gameId}_box_hit`,
-      payoutTier: 'box_hit',
-      payoutLabel: 'Box hit',
-      payoutSummary: 'The numbers matched as an any-order box play.',
+      resultCode: `${gameId}_${fireballPrefix}box_hit`,
+      payoutTier: fireballActive ? 'fireball_box_hit' : 'box_hit',
+      payoutLabel: `${fireballLabel}Box hit`,
+      payoutSummary: `The numbers matched as an any-order box play.${fireballSummary}`,
       isWin: true,
       bonusMatch,
     };
   }
 
   return {
-    resultCode: bonusMatch ? `${gameId}_bonus_only` : `${gameId}_no_match`,
-    payoutTier: bonusMatch ? 'bonus_match' : null,
-    payoutLabel: bonusMatch ? 'Bonus match' : 'No win',
+    resultCode: bonusMatch ? `${gameId}_${fireballPrefix}bonus_only` : `${gameId}_${fireballPrefix}no_match`,
+    payoutTier: bonusMatch ? (fireballActive ? 'fireball_bonus_match' : 'bonus_match') : null,
+    payoutLabel: bonusMatch ? `${fireballLabel}Bonus match` : fireballActive ? 'Fireball no win' : 'No win',
     payoutSummary: bonusMatch
-      ? 'The bonus path hit, but the base number set did not fully land.'
-      : 'The pick settled without a winning match.',
+      ? `The bonus path hit, but the base number set did not fully land.${fireballSummary}`
+      : `The pick settled without a winning match.${fireballSummary}`,
     isWin: bonusMatch,
     bonusMatch,
   };
@@ -345,11 +352,13 @@ export function classifySettlementOutcome(params: {
   playedNumbers: number[];
   officialNumbers: number[];
   strategyHint?: unknown;
+  fireballActive?: boolean;
   bonusMatch?: boolean;
   playedBonusNumber?: number | null;
   officialBonusNumbers?: number[];
 }): SettlementClassification {
   const strategyHint = normalizeStrategyHint(params.strategyHint);
+  const fireballActive = Boolean(params.fireballActive);
   const bonusMatch = Boolean(params.bonusMatch);
 
   if (params.gameId === 'pick3' || params.gameId === 'pick4') {
@@ -359,6 +368,7 @@ export function classifySettlementOutcome(params: {
       params.officialNumbers,
       strategyHint,
       bonusMatch,
+      fireballActive,
     );
   }
 
