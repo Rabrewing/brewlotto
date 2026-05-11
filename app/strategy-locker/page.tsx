@@ -72,6 +72,8 @@ interface RunPreviewRecord {
   bonusNumbers: number[];
   publicName: string;
   strategyKey: string;
+  predictionId: string | null;
+  predictionSaved: boolean;
   createdAt: string;
 }
 
@@ -142,6 +144,7 @@ export default function StrategyLockerPage() {
   const [savingStrategyId, setSavingStrategyId] = useState<string | null>(null);
   const [runningStrategyId, setRunningStrategyId] = useState<string | null>(null);
   const [runPreviews, setRunPreviews] = useState<Record<string, RunPreviewRecord>>({});
+  const [savingPredictionId, setSavingPredictionId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -399,12 +402,8 @@ export default function StrategyLockerPage() {
     try {
       const response = await fetch('/api/strategy-locker/run', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          strategyId: strategy.id,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ strategyId: strategy.id }),
       });
 
       const payload = await response.json().catch(() => null);
@@ -424,6 +423,8 @@ export default function StrategyLockerPage() {
           bonusNumbers: Array.isArray(payload.data.bonusNumbers) ? payload.data.bonusNumbers : [],
           publicName: payload.data.publicName,
           strategyKey: payload.data.strategyKey,
+          predictionId: payload.data.prediction?.id || null,
+          predictionSaved: false,
           createdAt: new Date().toISOString(),
         },
       }));
@@ -432,6 +433,32 @@ export default function StrategyLockerPage() {
       setError(runError instanceof Error ? runError.message : 'Failed to run strategy');
     } finally {
       setRunningStrategyId(null);
+    }
+  }
+
+  async function handleSavePrediction(strategyId: string) {
+    const preview = runPreviews[strategyId];
+    if (!preview?.predictionId || preview.predictionSaved) return;
+
+    setSavingPredictionId(strategyId);
+    try {
+      const response = await fetch(`/api/predictions/${preview.predictionId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_saved: true }),
+      });
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || !payload?.success) throw new Error('Failed to save pick');
+
+      setRunPreviews((current) => ({
+        ...current,
+        [strategyId]: { ...current[strategyId], predictionSaved: true },
+      }));
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save pick');
+    } finally {
+      setSavingPredictionId(null);
     }
   }
 
@@ -726,6 +753,18 @@ export default function StrategyLockerPage() {
                           <div className="mt-2 text-[12px] uppercase tracking-[0.14em] text-white/40">
                             Stored at {new Date(runPreviews[strategy.id].createdAt).toLocaleString()}
                           </div>
+                          {!runPreviews[strategy.id].predictionSaved ? (
+                            <button
+                              type="button"
+                              onClick={() => handleSavePrediction(strategy.id)}
+                              disabled={savingPredictionId === strategy.id}
+                              className="mt-3 animate-pulse rounded-full bg-[#3b82f6] px-5 py-2 text-[13px] font-semibold text-white transition-all hover:bg-[#60a5fa] disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              {savingPredictionId === strategy.id ? 'Saving...' : 'Save to My Picks'}
+                            </button>
+                          ) : (
+                            <div className="mt-3 text-[13px] font-medium text-[#93efb8]">✓ Saved to My Picks</div>
+                          )}
                         </div>
                       ) : null}
                     </article>
