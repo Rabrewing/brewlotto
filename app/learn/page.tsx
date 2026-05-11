@@ -3,6 +3,7 @@ import { TutorialVideoPanel } from '@/components/brewlotto/TutorialVideoPanel';
 import { DashboardContainer, Header, NavigationTabs } from '@/components/brewlotto/dashboard';
 import { BREWU_PLAY_STYLE_GUIDES } from '@/lib/brewwu/playStyleMatrix';
 import { BREWU_PAYOUT_GUIDES } from '@/lib/brewwu/payoutMatrix';
+import { BREWU_PRIZE_TABLES } from '@/lib/brewwu/prizeTableMatrix';
 
 const LESSONS = [
   {
@@ -260,6 +261,43 @@ export default function LearnPage() {
             <div className="rounded-[20px] border border-white/8 bg-black/20 px-4 py-4 text-[15px] text-white/78">
               Keep the guidance educational. No strategy beats randomness or guarantees a win.
             </div>
+          </div>
+        </section>
+
+        <section className="mt-5 rounded-[30px] border border-[#72caff]/18 bg-[radial-gradient(circle_at_top_left,rgba(114,202,255,0.14),rgba(0,0,0,0)_34%),linear-gradient(145deg,rgba(13,20,28,0.9),rgba(8,8,8,0.98))] px-5 py-5 shadow-[0_0_28px_rgba(114,202,255,0.06)]">
+          <div className="text-[15px] uppercase tracking-[0.16em] text-white/38">Prize tables</div>
+          <div className="mt-3 text-[26px] font-semibold text-[#d7ecff]">Show the official payout shape</div>
+          <div className="mt-2 max-w-3xl text-[15px] leading-7 text-white/62">
+            BrewLotto should tell the truth about prizes. Fixed ladders can be shown directly, while
+            CA pari-mutuel games should be labeled as draw-specific certified values so users do not
+            confuse an example payout with a guaranteed amount.
+          </div>
+          <div className="mt-5 grid gap-4 xl:grid-cols-2">
+            {BREWU_PRIZE_TABLES.map((guide) => (
+              <article
+                key={guide.title}
+                className="rounded-[24px] border border-white/8 bg-black/20 px-5 py-5 shadow-[0_0_18px_rgba(114,202,255,0.04)]"
+              >
+                <div className="text-[12px] uppercase tracking-[0.16em] text-[#9edcff]">{guide.label}</div>
+                <div className="mt-2 text-[21px] font-semibold text-white">{guide.title}</div>
+                <div className="mt-3 text-[15px] leading-7 text-white/66">{guide.summary}</div>
+                <div className="mt-4 space-y-2">
+                  {guide.rows.map((row) => (
+                    <div
+                      key={`${guide.id}-${row.label}`}
+                      className="rounded-[18px] border border-[#72caff]/14 bg-[#101922] px-4 py-3 text-[13px] leading-6 text-[#d7ecff]"
+                    >
+                      <div className="flex flex-wrap items-baseline justify-between gap-3">
+                        <div className="font-semibold text-white">{row.label}</div>
+                        <div className="text-white/78">{row.value}</div>
+                      </div>
+                      {row.note ? <div className="mt-1 text-white/54">{row.note}</div> : null}
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 text-[13px] leading-6 text-white/44">Source: {guide.source}</div>
+              </article>
+            ))}
           </div>
         </section>
 

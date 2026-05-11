@@ -29,6 +29,7 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Added explicit NC Pick 3 / Pick 4 Fireball tracking to the play-style and payout workstream so the modifier is not lost in plain straight/box settlement math.
 - Surfaced NC Pick 3 / Pick 4 Fireball context in Results, My Picks, Strategy Locker, Stats & Performance, and BrewCommand so the modifier is visible in the product surfaces that drive confirmation and ratio tracking.
 - Added a BrewU Fireball explainer so NC-only Fireball is clearly framed as a draw-date-specific settlement modifier instead of a trend signal.
+- Added prize-table snapshots to BrewU so fixed ladders can be shown directly and CA pari-mutuel games can be labeled as draw-specific certified values instead of fake static payouts.
 - Switched `My Picks` to saved-pick-only history with date dividers so confirmed-play nudges land on explicit user-saved entries instead of every generated locker run, and stopped new predictions from auto-saving by default.
 - Upgraded settlement classification to distinguish exact-order, box-style, and standard match-number outcomes more cleanly.
 - Centralized support intake, support tickets, BrewCommand notifications, and customer resolution emails.
