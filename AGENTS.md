@@ -515,7 +515,7 @@ The system is considered complete when:
 
 ## V1 Progress Tracker
 
-**Last Updated:** 2026-05-11 ET (Strategy Signals BrewCommand section added, results-history work still queued, daily support/notification and play-log paths remain canonical, saved-only My Picks flow tracked, midday/evening ingestion verified, momentum gauge re-centered, NC Fireball play-log tracking added and surfaced in results / My Picks / Strategy Locker / Stats / Admin, Fireball clarity added to BrewU/help, prize-table snapshots added to BrewU/help)
+**Last Updated:** 2026-05-11 ET (Strategy Signals BrewCommand section added, results-history work still queued, daily support/notification and play-log paths remain canonical, saved-only My Picks flow tracked, midday/evening ingestion verified, momentum gauge re-centered, NC Fireball play-log tracking added and surfaced in results / My Picks / Strategy Locker / Stats / Admin, Fireball clarity added to BrewU/help, prize-table snapshots added to BrewU/help, visual polish sweep on BrewU/Strategy Locker in progress)
 
 ### Phase Status
 

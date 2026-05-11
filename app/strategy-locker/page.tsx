@@ -623,32 +623,55 @@ export default function StrategyLockerPage() {
                         </div>
                       </div>
 
-                      <div className="mt-4 flex flex-wrap gap-2 text-[12px] uppercase tracking-[0.14em] text-white/40">
-                        <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">Saved {saved ? 'Yes' : 'No'}</span>
-                        <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
-                          Uses {performanceData?.predictions || predictionData?.uses || 0}
-                        </span>
-                        <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
-                          Confirms {performanceData?.confirmedPlays || 0}
-                        </span>
-                        <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
-                          Hit rate {performanceData?.hitRate !== null && performanceData?.hitRate !== undefined ? `${performanceData.hitRate}%` : 'N/A'}
-                        </span>
-                        <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
-                          Win rate {performanceData?.winRate !== null && performanceData?.winRate !== undefined ? `${performanceData.winRate}%` : 'N/A'}
-                        </span>
-                        <span className="rounded-full border border-[#72caff]/18 bg-[#111f28] px-3 py-1 text-[#9edcff]">
-                          Fireball plays {performanceData?.fireballConfirmedPlays || 0}
-                        </span>
-                        <span className="rounded-full border border-[#72caff]/18 bg-[#111f28] px-3 py-1 text-[#9edcff]">
-                          Fireball hit rate {performanceData?.fireballHitRate !== null && performanceData?.fireballHitRate !== undefined ? `${performanceData.fireballHitRate}%` : 'N/A'}
-                        </span>
-                        <span className="rounded-full border border-[#72caff]/18 bg-[#111f28] px-3 py-1 text-[#9edcff]">
-                          Fireball win rate {performanceData?.fireballWinRate !== null && performanceData?.fireballWinRate !== undefined ? `${performanceData.fireballWinRate}%` : 'N/A'}
-                        </span>
-                        <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
-                          Avg confidence {averageConfidence !== null ? `${averageConfidence}%` : 'N/A'}
-                        </span>
+                      <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                        <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-4 py-3">
+                          <div className="text-[11px] uppercase tracking-[0.14em] text-white/35">Saved</div>
+                          <div className="mt-2 text-[16px] font-medium text-[#f7ddb3]">{saved ? 'Yes' : 'No'}</div>
+                        </div>
+                        <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-4 py-3">
+                          <div className="text-[11px] uppercase tracking-[0.14em] text-white/35">Uses</div>
+                          <div className="mt-2 text-[16px] font-medium text-[#f7ddb3]">
+                            {performanceData?.predictions || predictionData?.uses || 0}
+                          </div>
+                        </div>
+                        <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-4 py-3">
+                          <div className="text-[11px] uppercase tracking-[0.14em] text-white/35">Confirms</div>
+                          <div className="mt-2 text-[16px] font-medium text-[#f7ddb3]">{performanceData?.confirmedPlays || 0}</div>
+                        </div>
+                        <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-4 py-3">
+                          <div className="text-[11px] uppercase tracking-[0.14em] text-white/35">Hit rate</div>
+                          <div className="mt-2 text-[16px] font-medium text-[#f7ddb3]">
+                            {performanceData?.hitRate !== null && performanceData?.hitRate !== undefined ? `${performanceData.hitRate}%` : 'N/A'}
+                          </div>
+                        </div>
+                        <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-4 py-3">
+                          <div className="text-[11px] uppercase tracking-[0.14em] text-white/35">Win rate</div>
+                          <div className="mt-2 text-[16px] font-medium text-[#f7ddb3]">
+                            {performanceData?.winRate !== null && performanceData?.winRate !== undefined ? `${performanceData.winRate}%` : 'N/A'}
+                          </div>
+                        </div>
+                        <div className="rounded-[18px] border border-[#72caff]/18 bg-[#111f28] px-4 py-3">
+                          <div className="text-[11px] uppercase tracking-[0.14em] text-[#9edcff]">Fireball plays</div>
+                          <div className="mt-2 text-[16px] font-medium text-[#d7ecff]">{performanceData?.fireballConfirmedPlays || 0}</div>
+                        </div>
+                        <div className="rounded-[18px] border border-[#72caff]/18 bg-[#111f28] px-4 py-3">
+                          <div className="text-[11px] uppercase tracking-[0.14em] text-[#9edcff]">Fireball hit rate</div>
+                          <div className="mt-2 text-[16px] font-medium text-[#d7ecff]">
+                            {performanceData?.fireballHitRate !== null && performanceData?.fireballHitRate !== undefined ? `${performanceData.fireballHitRate}%` : 'N/A'}
+                          </div>
+                        </div>
+                        <div className="rounded-[18px] border border-[#72caff]/18 bg-[#111f28] px-4 py-3">
+                          <div className="text-[11px] uppercase tracking-[0.14em] text-[#9edcff]">Fireball win rate</div>
+                          <div className="mt-2 text-[16px] font-medium text-[#d7ecff]">
+                            {performanceData?.fireballWinRate !== null && performanceData?.fireballWinRate !== undefined ? `${performanceData.fireballWinRate}%` : 'N/A'}
+                          </div>
+                        </div>
+                        <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-4 py-3">
+                          <div className="text-[11px] uppercase tracking-[0.14em] text-white/35">Avg confidence</div>
+                          <div className="mt-2 text-[16px] font-medium text-[#f7ddb3]">
+                            {averageConfidence !== null ? `${averageConfidence}%` : 'N/A'}
+                          </div>
+                        </div>
                       </div>
 
                       <div className="mt-5 border-t border-white/8 pt-4 text-[14px] text-white/62">

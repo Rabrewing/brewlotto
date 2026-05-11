@@ -197,9 +197,9 @@ export default function LearnPage() {
           <div className="text-[15px] uppercase tracking-[0.16em] text-white/38">Fireball clarity</div>
           <div className="mt-3 text-[26px] font-semibold text-[#d7ecff]">Only NC Pick 3 / Pick 4 uses Fireball</div>
           <div className="mt-2 max-w-3xl text-[15px] leading-7 text-white/62">
-            BrewLotto treats Fireball like a play modifier, not a trend signal. That keeps the
-            results page, My Picks confirmation flow, Strategy Locker ratios, and BrewCommand
-            reporting aligned with the actual draw date and the actual ticket rules.
+            Fireball is a play modifier, not a trend signal. BrewLotto keeps it tied to the actual
+            draw date so Results, My Picks, Strategy Locker, Stats, and BrewCommand stay aligned
+            with the ticket rules.
           </div>
           <div className="mt-5 grid gap-3 md:grid-cols-3">
             {FIREBALL_GUIDE.map((item) => (
@@ -268,9 +268,8 @@ export default function LearnPage() {
           <div className="text-[15px] uppercase tracking-[0.16em] text-white/38">Prize tables</div>
           <div className="mt-3 text-[26px] font-semibold text-[#d7ecff]">Show the official payout shape</div>
           <div className="mt-2 max-w-3xl text-[15px] leading-7 text-white/62">
-            BrewLotto should tell the truth about prizes. Fixed ladders can be shown directly, while
-            CA pari-mutuel games should be labeled as draw-specific certified values so users do not
-            confuse an example payout with a guaranteed amount.
+            Fixed ladders can be shown directly. CA pari-mutuel games should stay labeled as
+            draw-specific certified values so no one confuses an example payout with a guarantee.
           </div>
           <div className="mt-5 grid gap-4 xl:grid-cols-2">
             {BREWU_PRIZE_TABLES.map((guide) => (
