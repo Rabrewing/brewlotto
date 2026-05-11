@@ -62,11 +62,19 @@ official source → ingestion → Supabase → freshness view → API → UI
 | **Billing success feedback** | `app/billing/page.tsx` — 2026-05-05 | Added green upgrade success banner detected from `?checkout=success` query param on Stripe redirect return. |
 | **AI provider keys** | Vercel env — 2026-05-04 | `AI_PROVIDER`, `OPENAI_MODEL`, `DEEPSEEK_API_KEY`, `DEEPSEEK_MODEL`, `OPENAI_API_KEY` set across all 3 environments. |
 | **Admin emails** | `BREWCOMMAND_ADMIN_EMAILS` (Vercel) — 2026-05-05 | Updated to `command@brewlotto.app,michael.brewington@gmail.com` across Production/Preview/Development. |
-| **CA Multi-State scraper** | `scripts/scrapeCA_MultiState.js` (new) — 2026-05-05 | New live scraper for CA Powerball and Mega Millions from calottery.com. Mirrors the scrapeCA_Live.js draw-cards pattern with bonus ball splitting. Registered in ingestionJob.js RUN_ORDER. Previous CA multi-state entries were stale — now scraped live. |
+| **CA Multi-State scraper** | `scripts/scrapeCA_MultiState.js` — 2026-05-11 | Switched from calottery.com (0 draws) to lotteryextreme.com for CA Powerball. CA Mega Millions dropped from this scraper (lotteryextreme MM returns 404; now covered by scrapeMega.js which writes to CA game_id). |
 | **CA Results/Stats game_key fix** | `lib/dashboard/game-config.ts` — 2026-05-05 | statsGameKey now maps correctly per state: CA pick3→daily3, pick4→daily4, cash5→fantasy5. Previously CA daily games looked up with wrong game_key ('pick3' instead of 'daily3'), returning 500 errors. |
 | **Results API cache prevention** | `app/api/results/route.ts`, `app/results/page.tsx` — 2026-05-05 | Added `force-dynamic` + `Cache-Control: no-store`. Fixed `.single()`→`.maybeSingle()` to handle empty draws gracefully. Fixed `getWorstStatus` ranking so 'unknown' (rank 2) doesn't mask stale data. Added 2min auto-poll on Results page. |
 | **Dashboard Stats API cache prevention** | `app/api/dashboard/stats/route.ts` — 2026-05-05 | Added `force-dynamic` + `Cache-Control: no-store` headers. Added 2min auto-poll on dashboard. |
 | **DST timezone fix** | All 5 scrapers — 2026-05-05 | Changed hardcoded timezone offsets from EST/PST (-05:00/-08:00) to EDT/PDT (-04:00/-07:00) for DST. Previous offset caused all draw times to display 1 hour off during daylight saving. Also fixed LiveTrustBadge date-only string handling (no longer treats date-only 'YYYY-MM-DD' as UTC midnight, avoiding off-by-one-day display). |
+| **Powerball multi-state** | `scripts/scrapePowerball.js` — 2026-05-11 | Now writes to BOTH NC and CA game_ids (same draw numbers for both states). Feb month label bug fixed (`Feb:1`→`Feb:2`). MONTHS_BACK increased from 6 to 24 (~2 years data). Target draw output: ~200+ draws per run. |
+| **Mega Millions multi-state** | `scripts/scrapeMega.js` — 2026-05-11 | Now writes to BOTH NC and CA game_ids (same draw numbers for both states). MONTHS_BACK increased from 6 to 24. |
+| **NC Live past-draws** | `scripts/scrapeNC_Live.js` — 2026-05-11 | Added month-by-month past-draws scraping from nclottery.com past-draws pages. MONTHS_BACK=24 for ~1000 draws per game (Pick3, Pick4, Cash5). Keeps latest-draw scrape for low latency on fresh entries. |
+| **Deferred retry** | `scripts/ingestionJob.js` — 2026-05-11 | Added Phase 4 deferred retry: 10-minute wait after 3 fast retry rounds, then re-checks and retries still-delayed games. Catches late-posted draws that arrive after the initial scraping window. |
+| **CA Live backfill** | `scripts/scrapeCA_Live.js` — 2026-05-11 | Added lotteryextreme.com historical backfill for Daily 3/4/Fantasy 5. Scrapes up to 2000 draws via draw-ID iteration when existing count < 500. After threshold, only scrapes calottery.com latest page. |
+| **BrewU Data Freshness** | `app/learn/page.tsx` — 2026-05-11 | Added Data Freshness section explaining healthy/delayed/stale states and LiveTrustBadge behavior. Sets expectations that official results can occasionally be delayed. |
+| **Multi-state prediction fix** | `lib/prediction/predictionGenerator.js` — 2026-05-11 | Fixed `.single()` crash on MULTI state (2 rows returned for NC+CA). Changed to `.select()` + explicit NC pick. Added `state`/`game` fields to `predictionData` so storage no longer defaults to 'NC'/'pick3'. Added `draw_window_label` filter for daily games. |
+| **Strategy name normalization** | `utils/strategyLabel.js` + 8 UI files — 2026-05-11 | Centralized brand-name mapper. All surfaces (Strategy Locker, Stats, My Picks, Dashboard, Results, Voice, Commentary) now display "HeatCheck™", "HeatWave™", "PulseSync™", "PulsePrime™", "SequenceX™" instead of raw internal keys like "poisson", "hot_cold", "frequency_analysis". |
 | **BLOB_READ_WRITE_TOKEN** | Vercel Blob — 2026-05-04 | Blob store created, linked to project. Landing video + tutorial video uploaded to Blob. `NEXT_PUBLIC_LANDING_VIDEO_*_URL` and `NEXT_PUBLIC_TUTORIAL_VIDEO_URL` env vars set. |
 
 ### Auth & Email
@@ -515,7 +523,7 @@ The system is considered complete when:
 
 ## V1 Progress Tracker
 
-**Last Updated:** 2026-05-11 ET (Strategy Signals BrewCommand section added, results-history work still queued, daily support/notification and play-log paths remain canonical, saved-only My Picks flow tracked, midday/evening ingestion verified, momentum gauge re-centered, NC Fireball play-log tracking added and surfaced in results / My Picks / Strategy Locker / Stats / Admin, Fireball clarity added to BrewU/help, prize-table snapshots added to BrewU/help, visual polish sweep on BrewU/Strategy Locker in progress)
+**Last Updated:** 2026-05-11 ET (All scrapers patched: Powerball/MM now write to NC+CA game_ids, NC Live fetches 24 months past-draws for ~1000 draw target, CA Multi-State switched to lotteryextreme.com, Feb month label bug fixed, multi-state MONTHS_BACK increased from 6 to 24. CA Live backfill added via lotteryextreme.com draw-ID iteration. Phase 4 deferred retry added to ingestionJob.js. Cloud Run timeout and scheduler deadlines increased. Multi-state prediction crash fixed, prediction state/game labels fixed, draw window filter added. Strategy names normalized across all surfaces. Momentum gauge re-centered with delta-distribution formula. BrewU Data Freshness section added. Case study documented in brewdocs/v1/strategy-engine-cleanup-2026-05-11.md.)
 
 ### Phase Status
 
@@ -861,7 +869,7 @@ The system is considered complete when:
 node scripts/scrapeCA_Data.js daily3 2000
 node scripts/scrapeCA_Data.js daily4 2000
 
-# CA multi-state live scraper (Powerball + Mega Millions)
+# CA multi-state live scraper (Powerball — lotteryextreme.com)
 node scripts/scrapeCA_MultiState.js
 
 # Scrape multi-state games

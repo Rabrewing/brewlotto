@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { NextRequest, NextResponse } from 'next/server';
+import { getStrategyLabel } from '@/utils/strategyLabel';
 
 import { createSupabaseServerClient } from '@/lib/supabase/serverClient';
 import StrategyEngine from '@/lib/prediction/strategyEngine';
@@ -358,7 +358,7 @@ export async function POST(request: NextRequest) {
       : [];
     const scoreEntries = Object.entries(strategyScores).map(([key, value]) => ({
       strategy_key: key,
-      public_label: key,
+      public_label: getStrategyLabel(key),
       weight: 1,
       score: summarizeScoreMap(value as Record<string, number> | null | undefined),
       notes: [`Engine run via ${engineKey}`],
@@ -375,7 +375,7 @@ export async function POST(request: NextRequest) {
       bonus_numbers: bonusNumbers,
       composite_score: engineKey === 'ensemble' ? 78 : 72,
       confidence_band: 'medium',
-      strategy_public_label: strategyRow.strategy_key,
+      strategy_public_label: getStrategyLabel(strategyRow.strategy_key),
       strategy_internal_bundle: {
         registry_strategy_key: strategyRow.strategy_key,
         engine_key: engineKey,
@@ -392,7 +392,7 @@ export async function POST(request: NextRequest) {
       explanations: [
         {
           explanation_type: 'summary',
-          summary_text: `${strategyRow.public_name} ran against your ${homeState} default game and produced ${primaryNumbers.join(', ')}.`,
+          summary_text: `${getStrategyLabel(strategyRow.strategy_key)} ran against your ${homeState} default game and produced ${primaryNumbers.join(', ')}.`,
           detail_text: strategyRow.description || null,
         },
       ],

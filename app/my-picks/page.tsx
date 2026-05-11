@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
+import { getStrategyLabel } from '@/utils/strategyLabel';
 import {
   DashboardContainer,
   Header,
@@ -128,7 +129,7 @@ function getPredictionSummary(prediction: PredictionRecord) {
   }
 
   if (prediction.source_strategy_key) {
-    return `Generated using ${prediction.source_strategy_key} strategy signals.`;
+    return `Generated using ${getStrategyLabel(prediction.source_strategy_key)} strategy signals.`;
   }
 
   return 'Stored Brew pick ready for replay or save actions.';
@@ -223,7 +224,7 @@ function PickCard({
             <span className="ml-1 text-white/45">• {prediction.state || 'N/A'}</span>
           </div>
           <div className="mt-1 text-[12px] uppercase tracking-[0.14em] text-white/35">
-            {prediction.source_strategy_key || 'brew strategy'}
+            {getStrategyLabel(prediction.source_strategy_key)}
             {prediction.confidence_score !== null && prediction.confidence_score !== undefined
               ? ` • ${Math.round(Number(prediction.confidence_score))}% confidence`
               : ''}

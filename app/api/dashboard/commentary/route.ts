@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { resolveDashboardGameConfig, type DashboardGameId, type DashboardStateCode } from '@/lib/dashboard/game-config';
+import { getStrategyLabel } from '@/utils/strategyLabel';
 
 const getSupabase = () => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -123,7 +124,7 @@ export async function GET(request: NextRequest) {
             latestPrediction.predicted_numbers,
             latestPrediction.bonus_number,
           ),
-          strategyLabel: latestPrediction.source_strategy_key,
+          strategyLabel: getStrategyLabel(latestPrediction.source_strategy_key),
           confidenceScore: latestPrediction.confidence_score,
           generatedAt: latestPrediction.created_at,
           sourceGame: latestPrediction.game,
@@ -148,7 +149,7 @@ export async function GET(request: NextRequest) {
           explanation?.summary_text ||
           explanation?.detail_text ||
           buildFallback(game).summary,
-        strategyLabel: latestWithExplanation.source_strategy_key,
+        strategyLabel: getStrategyLabel(latestWithExplanation.source_strategy_key),
         confidenceScore: latestWithExplanation.confidence_score,
         generatedAt: latestWithExplanation.created_at,
         sourceGame: latestWithExplanation.game,

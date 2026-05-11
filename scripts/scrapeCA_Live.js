@@ -1,6 +1,4 @@
-// /scripts/scrapeCA_Live.js
-// BrewLotto AI — Live CA Lottery Scraper
-// Fetches latest draws from calottery.com Daily 3, Daily 4, Fantasy 5 pages
+#!/usr/bin/env node
 
 import 'dotenv/config';
 import axios from 'axios';
@@ -12,6 +10,14 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY
 );
 
+const SUFFICIENT_COUNT = 500;
+
+const LXE_CONFIGS = {
+  daily3: { baseUrl: 'https://www.lotteryextreme.com/california/daily3-detailed_results', latestDraw: 20924, primaryCount: 3, drawsPerDay: 2 },
+  daily4: { baseUrl: 'https://www.lotteryextreme.com/california/daily4-detailed_results', latestDraw: 6510, primaryCount: 4, drawsPerDay: 1 },
+  fantasy5: { baseUrl: 'https://www.lotteryextreme.com/california/fantasy5-detailed_results', latestDraw: 3500, primaryCount: 5, drawsPerDay: 1 },
+};
+
 const GAME_CONFIGS = [
   {
     name: 'daily3',
@@ -21,6 +27,7 @@ const GAME_CONFIGS = [
     primaryCount: 3,
     dateTzLabel: 'PT',
     timeMap: { midday: '13:00', evening: '20:00' },
+    lxKey: 'daily3',
   },
   {
     name: 'daily4',
@@ -30,6 +37,7 @@ const GAME_CONFIGS = [
     primaryCount: 4,
     dateTzLabel: 'PT',
     timeMap: { daily: '20:00' },
+    lxKey: 'daily4',
   },
   {
     name: 'fantasy5',
@@ -39,15 +47,15 @@ const GAME_CONFIGS = [
     primaryCount: 5,
     dateTzLabel: 'PT',
     timeMap: { nightly: '20:00' },
+    lxKey: 'fantasy5',
   },
 ];
 
 function parseCADate(text) {
   if (!text) return null;
-  // "FRI/MAY 1, 2026 - EVENING" or "FRI/MAY 1, 2026"
   const m = text.match(/([A-Z]+)\/([A-Za-z]+)\s+(\d+),?\s*(\d{4})/i);
   if (!m) return null;
-  const months = { JAN:1,FEB:1,MAR:3,APR:4,MAY:5,JUN:6,JUL:7,AUG:8,SEP:9,OCT:10,NOV:11,DEC:12 };
+  const months = { JAN:1,FEB:2,MAR:3,APR:4,MAY:5,JUN:6,JUL:7,AUG:8,SEP:9,OCT:10,NOV:11,DEC:12 };
   const month = months[m[2].toUpperCase().substring(0,3)];
   const day = String(parseInt(m[3])).padStart(2,'0');
   const year = m[4] || new Date().getFullYear();
@@ -63,13 +71,98 @@ function extractWindow(text) {
   return 'daily';
 }
 
+async function countExistingDraws(gameId) {
+  const { count, error } = await supabase
+    .from('official_draws')
+    .select('*', { count: 'exact', head: true })
+    .eq('game_id', gameId);
+  return error ? 0 : (count || 0);
+}
+
+async function scrapeLotteryExtremeDraw(lxConfig, drawId) {
+  const drawsPerDay = lxConfig.drawsPerDay || 1;
+  const refDate = new Date('2026-03-16');
+  const daysBack = Math.floor((lxConfig.latestDraw - drawId) / drawsPerDay);
+  const estimatedDate = new Date(refDate.getTime() - daysBack * 24 * 60 * 60 * 1000);
+  const dateStr = estimatedDate.toISOString().split('T')[0];
+  const url = `${lxConfig.baseUrl}(${dateStr}_${drawId})`;
+
+  try {
+    const resp = await axios.get(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+      timeout: 10000,
+    });
+    if (resp.status === 404 || resp.status === 410) return null;
+    const $ = load(resp.data);
+    const title = $('title').text();
+    const dateMatch = title.match(/(\w+) (\d+), (\d{4})/);
+    if (!dateMatch) return null;
+    const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const month = (monthNames.indexOf(dateMatch[1]) + 1).toString().padStart(2, '0');
+    const day = dateMatch[2].padStart(2, '0');
+    const year = dateMatch[3];
+    const drawDate = `${year}-${month}-${day}`;
+    const numbers = [];
+    $('ul.displayball li').each((i, el) => {
+      if (i < lxConfig.primaryCount) {
+        const num = $(el).text().trim();
+        if (/^\d+$/.test(num)) numbers.push(parseInt(num));
+      }
+    });
+    if (numbers.length !== lxConfig.primaryCount) return null;
+    return { draw_date: drawDate, numbers };
+  } catch {
+    return null;
+  }
+}
+
+async function backfillFromLotteryExtreme(config, maxDraws = 2000) {
+  const lxConfig = LXE_CONFIGS[config.lxKey];
+  if (!lxConfig) return [];
+
+  console.log(`  📚 Backfilling from lotteryextreme.com (${maxDraws} draws max)...`);
+
+  const draws = [];
+  let consecutiveFails = 0;
+  const startDraw = lxConfig.latestDraw;
+  const endDraw = Math.max(1, startDraw - maxDraws + 1);
+
+  for (let drawId = startDraw; drawId >= endDraw; drawId--) {
+    const result = await scrapeLotteryExtremeDraw(lxConfig, drawId);
+    if (result) {
+      draws.push(result);
+      consecutiveFails = 0;
+    } else {
+      consecutiveFails++;
+    }
+    if (consecutiveFails > 100) break;
+    if (draws.length % 200 === 0 && draws.length > 0) {
+      console.log(`     ${draws.length} draws found so far...`);
+    }
+    await new Promise(r => setTimeout(r, 30));
+  }
+
+  console.log(`     ✅ Found ${draws.length} historical draws from lotteryextreme.com`);
+  return draws;
+}
+
+function getWindowForDraw(config, index) {
+  if (config.name === 'daily3') {
+    return index % 2 === 0 ? 'midday' : 'evening';
+  }
+  if (config.name === 'fantasy5') return 'nightly';
+  return 'daily';
+}
+
 async function scrape() {
-  console.log('🚀 Starting CA Live Lottery Scraper...\n');
+  console.log('🚀 Starting CA Live Lottery Scraper (with historical backfill)...\n');
   let totalInserted = 0;
 
   for (const config of GAME_CONFIGS) {
-    console.log(`🔍 Scraping ${config.name} from ${config.url}`);
+    const existingCount = await countExistingDraws(config.gameId);
+    console.log(`📊 ${config.name}: ${existingCount} existing draws (threshold: ${SUFFICIENT_COUNT})`);
 
+    console.log(`🔍 Scraping latest from ${config.url}`);
     try {
       const resp = await axios.get(config.url, {
         headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
@@ -83,54 +176,72 @@ async function scrape() {
       let currentWindow = null;
       let currentNumbers = [];
 
-      const collectNumber = (val) => {
-        currentNumbers.push(val);
-        if (currentDate && currentNumbers.length === config.primaryCount) {
-          const key = `${currentDate}-${currentWindow}`;
-          if (!seenKeys.has(key)) {
-            draws.push({ date: currentDate, window: currentWindow, numbers: [...currentNumbers] });
-            seenKeys.add(key);
-          }
-          // Reset for next section (mobile/desktop duplicate)
-          currentNumbers = [];
-        }
-      };
-
       $('[class*="draw-cards"]').each((_, el) => {
         const cls = $(el).attr('class') || '';
-
         if (cls.includes('draw-cards--draw-date')) {
           const text = $(el).text().trim();
           currentDate = parseCADate(text);
-          currentWindow = config.name === 'daily3'
-            ? extractWindow(text)
-            : config.name === 'fantasy5' ? 'nightly' : 'daily';
-          currentNumbers = currentNumbers.filter(n => !n); // reset from any stale data
+          currentWindow = config.name === 'daily3' ? extractWindow(text) : (config.name === 'fantasy5' ? 'nightly' : 'daily');
         }
-
         if (cls.includes('draw-cards--winning-numbers-inner-wrapper')) {
-          const val = parseInt($(el).text().trim());
-          if (!isNaN(val)) collectNumber(val);
+          currentNumbers.push(parseInt($(el).text().trim()));
+          if (currentDate && currentNumbers.length === config.primaryCount) {
+            const key = `${currentDate}-${currentWindow}`;
+            if (!seenKeys.has(key)) {
+              draws.push({ date: currentDate, window: currentWindow, numbers: [...currentNumbers] });
+              seenKeys.add(key);
+            }
+            currentNumbers = [];
+          }
         }
       });
 
-      if (draws.length === 0) {
-        console.log(`  ⚠️ No draws found for ${config.name}`);
+      let allHistory = [];
+      if (existingCount < SUFFICIENT_COUNT) {
+        const lxDraws = await backfillFromLotteryExtreme(config);
+        const dateGroups = new Map();
+        for (const d of lxDraws) {
+          if (!dateGroups.has(d.draw_date)) dateGroups.set(d.draw_date, []);
+          dateGroups.get(d.draw_date).push(d.numbers);
+        }
+        for (const [date, entries] of dateGroups) {
+          for (let i = 0; i < entries.length; i++) {
+            allHistory.push({
+              date,
+              window: getWindowForDraw(config, i),
+              numbers: entries[i],
+            });
+          }
+        }
+        console.log(`     📚 ${allHistory.length} deduped historical draws ready`);
+      }
+
+      const allRecords = [
+        ...draws.map(d => ({ date: d.date, window: d.window, numbers: d.numbers })),
+        ...allHistory,
+      ];
+
+      const seen = new Set();
+      const unique = allRecords.filter(r => {
+        const key = `${r.date}-${r.window}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+
+      console.log(`  📅 Total unique draws: ${unique.length}`);
+
+      if (unique.length === 0) {
+        console.log(`  ⏭️ No draws for ${config.name}`);
         continue;
       }
 
-      console.log(`  📅 Found ${draws.length} draws`);
-      for (const d of draws) {
-        console.log(`     ${d.date} ${d.window}: [${d.numbers.join(', ')}]`);
-      }
-
-      // Insert into DB
-      const records = draws.map(d => ({
+      const dbRecords = unique.map(d => ({
         id: crypto.randomUUID(),
         game_id: config.gameId,
         draw_date: d.date,
         draw_window_label: d.window,
-        draw_datetime_local: `${d.date}T${config.timeMap[d.window] || config.timeMap.daily}:00-07:00`,
+        draw_datetime_local: `${d.date}T${config.timeMap[d.window] || config.timeMap.daily || '20:00'}:00-07:00`,
         primary_numbers: d.numbers,
         bonus_numbers: [],
         source_id: config.sourceId,
@@ -140,8 +251,7 @@ async function scrape() {
         source_payload: {},
       }));
 
-      // Dedup
-      const dates = records.map(r => r.draw_date);
+      const dates = dbRecords.map(r => r.draw_date);
       const { data: existing } = await supabase
         .from('official_draws')
         .select('draw_date, draw_window_label')
@@ -149,10 +259,10 @@ async function scrape() {
         .in('draw_date', dates);
 
       const existingKeys = new Set((existing || []).map(d => `${d.draw_date}-${d.draw_window_label}`));
-      const newRecords = records.filter(r => !existingKeys.has(`${r.draw_date}-${r.draw_window_label}`));
+      const newRecords = dbRecords.filter(r => !existingKeys.has(`${r.draw_date}-${r.draw_window_label}`));
 
       if (newRecords.length === 0) {
-        console.log(`  ⏭️ All ${records.length} draws already exist`);
+        console.log(`  ⏭️ All up to date for ${config.name}`);
         continue;
       }
 

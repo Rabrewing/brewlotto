@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
+import { getStrategyLabel } from '@/utils/strategyLabel';
 import {
   DashboardContainer,
   Header,
@@ -425,7 +426,7 @@ export default function StatsPage() {
                       className="flex flex-col gap-3 rounded-[22px] border border-white/8 bg-black/20 px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
                     >
                       <div>
-                        <div className="text-[17px] font-medium text-[#f7ddb3]">{entry.strategy}</div>
+                        <div className="text-[17px] font-medium text-[#f7ddb3]">{getStrategyLabel(entry.strategy)}</div>
                         <div className="mt-1 text-[13px] text-white/52">
                           {entry.predictions} stored predictions • {entry.confirmedPlays} confirmed plays
                         </div>

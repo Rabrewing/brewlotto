@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { resolveDashboardGameConfig, type DashboardGameId, type DashboardStateCode } from '@/lib/dashboard/game-config';
+import { getStrategyLabel } from '@/utils/strategyLabel';
 
 export const dynamic = 'force-dynamic';
 
@@ -336,7 +337,7 @@ export async function GET(request: NextRequest) {
               game: bestOverall.prediction.game,
               state: bestOverall.prediction.state,
               createdAt: bestOverall.prediction.created_at,
-              strategyLabel: bestOverall.prediction.source_strategy_key,
+              strategyLabel: getStrategyLabel(bestOverall.prediction.source_strategy_key),
               confidenceScore: bestOverall.prediction.confidence_score,
               primaryNumbers: bestOverall.predictedNumbers,
               bonusNumber: bestOverall.prediction.bonus_number,

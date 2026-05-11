@@ -270,14 +270,35 @@ async function runIngestionJob() {
   await refreshFreshness();
   delayedGames = await getDelayedGames();
 
+  // ── ROUND 4: Deferred retry (10 min wait for late-posted draws) ──
+  if (delayedGames.length > 0) {
+    const deferredDelayMs = 600000;
+    console.log(`\n⏰ ${delayedGames.length} game(s) still delayed. Waiting ${deferredDelayMs/60000}min for deferred retry (late-posted draws)...`);
+    console.log(`   Delayed: ${delayedGames.map(d => `${d.state_code} ${d.game_name}`).join(', ')}`);
+    await wait(deferredDelayMs);
+
+    await refreshFreshness();
+    const stillDelayed = await getDelayedGames();
+    const round4Keys = getDelayedKeys(stillDelayed);
+
+    if (round4Keys.length > 0) {
+      await ingestRound(results, round4Keys, `PHASE 4: Deferred Retry (${round4Keys.length} still delayed)`);
+      await refreshFreshness();
+      delayedGames = await getDelayedGames();
+    } else {
+      console.log('   ✅ Games recovered during wait');
+      delayedGames = [];
+    }
+  }
+
   // ── Final status ──
   console.log('\n📍 FINAL FRESHNESS STATUS');
   if (delayedGames.length > 0) {
-    console.log(`   ⚠️ ${delayedGames.length} game(s) still delayed after retries:`);
+    console.log(`   ⚠️ ${delayedGames.length} game(s) still delayed after full retry cycle:`);
     delayedGames.forEach(d => console.log(`      ${d.state_code} ${d.game_name} — ${d.freshness_status}`));
     console.log('   ℹ️ Trust Badge will remain amber. Will retry on next scheduled run.');
   } else {
-    console.log('   ✅ All games healthy after retry rounds');
+    console.log('   ✅ All games healthy after full retry cycle');
   }
 
   await printSummary(results);

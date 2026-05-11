@@ -23,6 +23,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BREW_PHRASES } from "../../lib/voice/BREW_PHRASES";
 import { STRATEGY_EXPLAINERS } from "../../lib/explainers/strategyExplainers";
+import { getStrategyLabel } from "../../utils/strategyLabel";
 
 export default function BrewCommentaryEngine({
     status = "idle",          // "idle" | "loading" | "success" | "error"
@@ -35,7 +36,7 @@ export default function BrewCommentaryEngine({
     const [phrase, setPhrase] = useState("");
 
     useEffect(() => {
-        const strategyLabel = STRATEGY_EXPLAINERS?.[strategy]?.label || strategy;
+        const strategyLabel = getStrategyLabel(strategy);
 
         const fallback =
             BREW_PHRASES?.[mode]?.[status]?.[strategy] ||

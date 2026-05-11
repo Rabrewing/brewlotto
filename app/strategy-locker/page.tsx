@@ -10,6 +10,7 @@ import {
 } from '@/components/brewlotto/dashboard';
 import { supabase } from '@/lib/supabase/browserClient';
 import { buildStrategyPerformanceSummary, type StrategyPerformanceSummary } from '@/lib/stats/strategyPerformance';
+import { getStrategyLabel } from '@/utils/strategyLabel';
 
 type TierCode = 'free' | 'starter' | 'pro' | 'master';
 
@@ -591,7 +592,7 @@ export default function StrategyLockerPage() {
                   const saved = savedMap.get(strategy.id);
                   const activity = activityMap.get(strategy.id) || [];
                   const predictionData = predictionSummary.get(strategy.strategy_key);
-                  const performanceData = strategyPerformanceMap.get(strategy.strategy_key);
+                  const performanceData = strategyPerformanceMap.get(getStrategyLabel(strategy.strategy_key));
                   const lastUsedAt = activity[0]?.occurred_at || predictionData?.lastUsedAt || null;
                   const averageConfidence =
                     predictionData && predictionData.confidenceCount > 0
@@ -611,7 +612,7 @@ export default function StrategyLockerPage() {
                         <div>
                           <div className="flex flex-wrap items-center gap-2">
                             <div className={`text-[19px] font-medium ${hasAccess ? 'text-[#f7ddb3]' : 'text-white/72'}`}>
-                              {strategy.public_name}
+                              {getStrategyLabel(strategy.strategy_key)}
                             </div>
                             <span className="rounded-full border border-white/8 bg-white/[0.03] px-2.5 py-1 text-[11px] uppercase tracking-[0.14em] text-white/38">
                               {formatCategoryLabel(strategy.category)}
@@ -716,7 +717,7 @@ export default function StrategyLockerPage() {
                         <div className="mt-4 rounded-[22px] border border-[#72caff]/16 bg-[#72caff]/8 px-4 py-4">
                           <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">Run preview</div>
                           <div className="mt-3 text-[14px] text-white/72">
-                            {runPreviews[strategy.id].publicName} ran on {runPreviews[strategy.id].homeState} {runPreviews[strategy.id].gameKey.toUpperCase()} using {runPreviews[strategy.id].engineKey}.
+                            {getStrategyLabel(runPreviews[strategy.id].engineKey)} ran on {runPreviews[strategy.id].homeState} {runPreviews[strategy.id].gameKey.toUpperCase()}.
                           </div>
                           <div className="mt-3 text-[20px] font-medium text-[#f7ddb3]">
                             {runPreviews[strategy.id].primaryNumbers.join(' ')}

@@ -1,3 +1,5 @@
+import { getStrategyLabel } from '@/utils/strategyLabel';
+
 type PredictionLike = {
   id: string;
   source_strategy_key?: string | null;
@@ -102,7 +104,7 @@ export function buildStrategyPerformanceSummary(
   const strategyByPredictionId = new Map<string, string>();
 
   for (const prediction of predictions) {
-    const strategy = prediction.source_strategy_key || 'brew strategy';
+    const strategy = getStrategyLabel(prediction.source_strategy_key);
     strategyByPredictionId.set(prediction.id, strategy);
 
     const existing = summary.get(strategy) || {

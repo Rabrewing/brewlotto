@@ -249,6 +249,45 @@ export default function LearnPage() {
           </div>
         </section>
 
+        <section className="mt-5 rounded-[30px] border border-[#ffb84d]/18 bg-[radial-gradient(circle_at_top_left,rgba(255,184,77,0.14),rgba(0,0,0,0)_34%),linear-gradient(145deg,rgba(28,20,12,0.92),rgba(8,8,8,0.98))] px-5 py-5 shadow-[0_0_28px_rgba(255,184,77,0.08)]">
+          <div className="text-[15px] uppercase tracking-[0.16em] text-white/38">Data Freshness</div>
+          <div className="mt-3 text-[26px] font-semibold text-[#f7ddb3]">Official results can be delayed — BrewLotto adapts</div>
+          <div className="mt-2 max-w-3xl text-[15px] leading-7 text-white/62">
+            Draw data is ingested shortly after each official lottery posting. On rare occasions, the
+            official source may post results later than expected. BrewLotto&apos;s ingestion pipeline
+            retries automatically and continues checking until fresh data arrives.
+          </div>
+          <div className="mt-5 grid gap-3 md:grid-cols-3">
+            <div className="rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
+              <div className="text-[12px] font-semibold uppercase tracking-[0.16em] text-[#93efb8]">Healthy</div>
+              <div className="mt-2 text-[14px] leading-7 text-white/68">
+                Green dot. Draw data is current and within the expected posting window. All stats,
+                predictions, and results reflect the latest official draw.
+              </div>
+            </div>
+            <div className="rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
+              <div className="text-[12px] font-semibold uppercase tracking-[0.16em] text-[#f5cf84]">Delayed</div>
+              <div className="mt-2 text-[14px] leading-7 text-white/68">
+                Amber dot. The next draw has not been posted yet but is within the expected grace
+                period. Existing data is still displayed while Brew waits for the next result.
+              </div>
+            </div>
+            <div className="rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
+              <div className="text-[12px] font-semibold uppercase tracking-[0.16em] text-[#ffb5a8]">Stale</div>
+              <div className="mt-2 text-[14px] leading-7 text-white/68">
+                Red dot. Draw data has not been updated beyond the expected window. Live stats and
+                predictions are paused until the official source publishes the next result.
+              </div>
+            </div>
+          </div>
+          <div className="mt-5 rounded-[22px] border border-[#ffb84d]/14 bg-[#1a140c] px-5 py-4 text-[14px] leading-7 text-[#f6e2bc]">
+            <span className="font-semibold text-white">LiveTrustBadge: </span>
+            Every results page and dashboard shows a compact badge with the current freshness
+            status, the latest draw date, and a short disclaimer. If data is stale, the app will
+            state it clearly and resume normal operation as soon as the next draw is ingested.
+          </div>
+        </section>
+
         <section className="mt-5 rounded-[28px] border border-[#72caff]/18 bg-[linear-gradient(145deg,rgba(19,22,31,0.76),rgba(10,10,12,0.96))] px-6 py-6 shadow-[0_0_20px_rgba(114,202,255,0.05)]">
           <div className="text-[20px] font-medium text-[#d8e6f8]">How Brew AI helps without overpromising</div>
           <div className="mt-3 grid gap-3 md:grid-cols-3">

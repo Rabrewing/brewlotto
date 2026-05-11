@@ -40,7 +40,19 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Repointed the legacy shared header `Account` button from dead `/account` to the live `/profile` route.
 - Added a follow-up note to re-check midday/evening ingestion timing and the dashboard momentum gauge after the scheduler/auth changes.
 - Verified the midday/evening Cloud Scheduler jobs are healthy and re-centered the dashboard momentum gauge so it reports a visible trend-strength value instead of flattening to zero.
-
+- Fixed the momentum gauge formula: the `totalHits / (drawCount * primaryCount)` rate was always 1.0, producing flat 50%. Switched to delta-distribution balance so momentum varies with actual number trends (0–100 centered at 50).
+- Rewrote `scrapePowerball.js` to write to both NC and CA game_ids, fixed `Feb:1→Feb:2` bug, and added data-sufficiency gating (skips 24-month iteration if >500 draws exist).
+- Rewrote `scrapeMega.js` to write to both NC and CA game_ids with the same sufficiency gate.
+- Rewrote `scrapeNC_Live.js` to add 24-month past-draws iteration (~1000+ draws per game), fireball handling for Pick3/4 only, and a three-tier late-post fallback (main page → staleness check → current-month past-draws).
+- Rewrote `scrapeCA_MultiState.js` to use lotteryextreme.com for CA Powerball (switched from broken calottery.com selector).
+- Rewrote `scrapeCA_Live.js` to add lotteryextreme.com historical backfill (up to 2000 draws via draw-ID iteration) when data < 500 threshold.
+- Added Phase 4 deferred retry to `ingestionJob.js`: 10-minute wait after 3 fast retry rounds catches late-posted draws.
+- Increased Cloud Run request timeout to 30 minutes and all 7 scheduler attempt deadlines to 15 minutes.
+- Fixed `lib/prediction/predictionGenerator.js`: stopped `.single()` crash on MULTI state predictions, added `state`/`game` fields to prediction data, and added `draw_window_label` filter for daily games.
+- Centralized strategy name mapping in `utils/strategyLabel.js`: all surfaces (Strategy Locker, Stats, My Picks, Dashboard, Results, Voice, Commentary) now display branded labels like "HeatCheck™", "HeatWave™", "PulseSync™" instead of raw internal keys.
+- Fixed Strategy Locker performance chip bug: `strategyPerformanceMap` keyed by display label but looked up with raw key, always producing undefined.
+- Added Data Freshness section to BrewU explaining healthy/delayed/stale states.
+- Documented all changes in `brewdocs/v1/strategy-engine-cleanup-2026-05-11.md`.
 ### 2026-05-07
 - Added BrewU support intake, support screenshot storage, canonical play-log bridge, settlement sweep, and customer notifications planning.
 - Added timestamp discipline to AGENTS and Brewdocs so future AI sessions can read state without guessing.

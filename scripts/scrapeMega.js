@@ -1,6 +1,4 @@
-// /scripts/scrapeMega.js
-// BrewLotto AI — Mega Millions Scraper
-// Scrapes from official Mega Millions website with NCEL fallback
+#!/usr/bin/env node
 
 import 'dotenv/config';
 import axios from 'axios';
@@ -12,189 +10,162 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY
 );
 
-const MONTHS_BACK = 6; // Look back 6 months for more data
+const MONTHS_BACK = 24;
+const SUFFICIENT_COUNT = 500;
+
+function parseNCELDate(text) {
+  if (!text) return null;
+  const m = text.match(/(\d{4}),\s*([A-Za-z]+)\s+(\d+)/);
+  if (!m) return null;
+  const months = { Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12 };
+  const month = months[m[2].substring(0,3)];
+  const day = String(parseInt(m[3])).padStart(2,'0');
+  if (!month) return null;
+  return `${m[1]}-${String(month).padStart(2,'0')}-${day}`;
+}
+
+async function getGames() {
+  const { data } = await supabase
+    .from('lottery_games')
+    .select('id, state_code')
+    .eq('game_key', 'mega_millions')
+    .in('state_code', ['NC', 'CA'])
+    .eq('is_active', true);
+  return data || [];
+}
+
+async function getSources() {
+  const { data } = await supabase
+    .from('draw_sources')
+    .select('id, state_code')
+    .eq('source_key', 'mega_millions_official');
+  return data || [];
+}
+
+async function scrapeMonth(year, month) {
+  const url = `https://nclottery.com/mega-millions-past-draws?month=${month}&year=${year}`;
+  const resp = await axios.get(url, {
+    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+    timeout: 15000,
+  });
+  const $ = load(resp.data);
+  const draws = [];
+
+  $('table tbody tr').each((_, row) => {
+    const tds = $(row).find('td');
+    if (tds.length < 3) return;
+    const dateText = $(tds[0]).text().trim();
+    if (!dateText || dateText.includes('download')) return;
+    const drawDate = parseNCELDate(dateText);
+    if (!drawDate) return;
+
+    const numbersBlock = $(tds[1]).text().trim();
+    const allNums = numbersBlock.split(/\s+/).filter(x => /^\d+$/.test(x)).map(Number);
+    if (allNums.length < 6) return;
+
+    draws.push({
+      draw_date: drawDate,
+      numbers: allNums.slice(0, 5),
+      bonus_number: allNums[5],
+    });
+  });
+
+  return draws;
+}
 
 (async () => {
-    const allDraws = [];
-    const today = new Date();
+  const games = await getGames();
+  const sources = await getSources();
 
-    console.log('🚀 Starting Mega Millions scraper...');
+  if (games.length === 0) {
+    console.error('❌ No active Mega Millions game entries for NC or CA');
+    process.exit(1);
+  }
 
-    for (let i = 0; i < MONTHS_BACK; i++) {
-        const dt = new Date(today.getFullYear(), today.getMonth() - i, 1);
-        const year = dt.getFullYear();
-        const month = dt.getMonth() + 1;
-        
-        console.log(`  📅 Processing ${year}-${month.toString().padStart(2, '0')}...`);
-        
-        // Try NCEL first (more reliable)
-        try {
-            const ncelUrl = `https://nclottery.com/mega-millions-past-draws?month=${month}&year=${year}`;
-            const ncelResp = await axios.get(ncelUrl, {
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-                },
-                timeout: 10000
-            });
-            const ncel$ = load(ncelResp.data);
-            
-            // NCEL uses ASP.NET table structure
-            // Row structure: Cell 0 = Date, Cell 1 = Numbers (with newlines), Cell 2 = "View"
-            ncel$('table tbody tr').each((_, el) => {
-                const tds = ncel$(el).find('td');
-                
-                if (tds.length >= 3) {
-                    const dateText = ncel$(tds[0]).text().trim();
-                    const numbersBlock = ncel$(tds[1]).text().trim();
-                    
-                    // Extract numbers from block (numbers are separated by newlines/spaces)
-                    const numbers = numbersBlock
-                        .split(/\s+/)
-                        .filter(x => /^\d+$/.test(x))
-                        .map(Number)
-                        .slice(0, 5); // Take first 5 as main numbers
-                    
-                    // Last number in the block is usually the Mega Ball
-                    const allNums = numbersBlock
-                        .split(/\s+/)
-                        .filter(x => /^\d+$/.test(x))
-                        .map(Number);
-                    const megaBall = allNums.length > 5 ? allNums[allNums.length - 1] : null;
-                    
-                    if (dateText && numbers.length === 5 && megaBall) {
-                        allDraws.push({
-                            draw_date: formatDate(dateText),
-                            numbers: numbers,
-                            bonus_number: megaBall,
-                            source: 'mega_millions_official'
-                        });
-                    }
-                }
-            });
-            
-            console.log(`  ✅ NCEL successful: ${allDraws.length} draws total`);
-        } catch (ncelErr) {
-            console.log(`  ⚠️ NCEL failed: ${ncelErr.message}`);
-        }
+  let totalDbCount = 0;
+  for (const game of games) {
+    const { count } = await supabase
+      .from('official_draws')
+      .select('*', { count: 'exact', head: true })
+      .eq('game_id', game.id);
+    totalDbCount += count || 0;
+  }
+
+  const needsBackfill = totalDbCount < SUFFICIENT_COUNT;
+  console.log(`🚀 Starting Mega Millions scraper (NCEL, multi-state)...`);
+  console.log(`📊 Total draws in DB: ${totalDbCount} (threshold: ${SUFFICIENT_COUNT}, backfill: ${needsBackfill ? 'YES' : 'NO'})\n`);
+
+  const today = new Date();
+  const monthCount = needsBackfill ? MONTHS_BACK : 2;
+  const allDraws = [];
+
+  for (let i = 0; i < monthCount; i++) {
+    const dt = new Date(today.getFullYear(), today.getMonth() - i, 1);
+    try {
+      const draws = await scrapeMonth(dt.getFullYear(), dt.getMonth() + 1);
+      allDraws.push(...draws);
+      console.log(`  ${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}: ${draws.length} draws (total: ${allDraws.length})`);
+    } catch (err) {
+      console.log(`  ⚠️ ${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')} failed: ${err.message}`);
+    }
+  }
+
+  const seen = new Set();
+  const uniqueDraws = allDraws.filter(d => {
+    if (seen.has(d.draw_date)) return false;
+    seen.add(d.draw_date);
+    return true;
+  });
+
+  console.log(`\n📊 Total unique draws found: ${uniqueDraws.length}`);
+
+  if (uniqueDraws.length === 0) {
+    console.log('❌ No draws found!');
+    process.exit(1);
+  }
+
+  for (const game of games) {
+    const source = sources.find(s => s.state_code === game.state_code);
+    if (!source) {
+      console.log(`  ⚠️ No source for ${game.state_code} — skipping`);
+      continue;
     }
 
-    // Remove duplicates
-    const uniqueDraws = allDraws.filter(
-        (v, i, a) => a.findIndex(t => t.draw_date === v.draw_date) === i
-    );
+    const { data: existing } = await supabase
+      .from('official_draws')
+      .select('draw_date')
+      .eq('game_id', game.id)
+      .in('draw_date', uniqueDraws.map(d => d.draw_date));
 
-    console.log(`\n📊 Total unique draws found: ${uniqueDraws.length}`);
+    const existingDates = new Set(existing?.map(d => d.draw_date) || []);
 
-    // Insert into Supabase
-    if (uniqueDraws.length > 0) {
-        try {
-            // Get or create game_id for NC Mega Millions
-            const { data: ncGame } = await supabase
-                .from('lottery_games')
-                .select('id')
-                .eq('state_code', 'NC')
-                .eq('game_key', 'mega_millions')
-                .single();
+    const dbRecords = uniqueDraws
+      .filter(d => !existingDates.has(d.draw_date))
+      .map(draw => ({
+        id: crypto.randomUUID(),
+        game_id: game.id,
+        draw_date: draw.draw_date,
+        draw_window_label: 'nightly',
+        draw_datetime_local: `${draw.draw_date}T23:00:00-04:00`,
+        primary_numbers: draw.numbers,
+        bonus_numbers: [draw.bonus_number],
+        source_id: source.id,
+        source_draw_id: `${draw.draw_date}-megamillions-${game.state_code}`,
+        result_status: 'official',
+        is_latest_snapshot: false,
+      }));
 
-            let ncGameId = ncGame?.id;
-            if (!ncGameId) {
-                ncGameId = crypto.randomUUID();
-                await supabase.from('lottery_games').insert({
-                    id: ncGameId,
-                    state_code: 'NC',
-                    game_key: 'mega_millions',
-                    display_name: 'Mega Millions',
-                    game_family: 'mega_millions',
-                    primary_count: 5,
-                    primary_min: 1,
-                    primary_max: 70,
-                    has_bonus: true,
-                    bonus_count: 1,
-                    bonus_min: 1,
-                    bonus_max: 25,
-                    bonus_label: 'Mega Ball',
-                    draw_style: 'weekly',
-                    supports_multiplier: true,
-                    supports_fireball: false,
-                    schedule_config: { windows: [{ label: 'nightly', time: '23:00', days: ['Tue', 'Fri'] }] }
-                });
-            }
-
-            // Get or create source_id
-            const { data: ncSource } = await supabase
-                .from('draw_sources')
-                .select('id')
-                .eq('state_code', 'NC')
-                .eq('source_key', 'mega_millions_official')
-                .single();
-
-            let ncSourceId = ncSource?.id;
-            if (!ncSourceId) {
-                ncSourceId = crypto.randomUUID();
-                await supabase.from('draw_sources').insert({
-                    id: ncSourceId,
-                    state_code: 'NC',
-                    source_key: 'mega_millions_official',
-                    source_type: 'api',
-                    base_url: 'https://www.megamillions.com/',
-                    parser_key: 'html',
-                    priority: 1,
-                    is_official: true,
-                    is_active: true
-                });
-            }
-
-            // Prepare records for insertion
-            const dbRecords = uniqueDraws.map(draw => ({
-                id: crypto.randomUUID(),
-                game_id: ncGameId,
-                draw_date: draw.draw_date,
-                draw_window_label: 'nightly',
-                draw_datetime_local: `${draw.draw_date}T23:00:00-04:00`,
-                primary_numbers: draw.numbers,
-                bonus_numbers: [draw.bonus_number],
-                multiplier_value: draw.multiplier ? parseInt(draw.multiplier) : null,
-                source_id: ncSourceId,
-                source_draw_id: `${draw.draw_date}-mega-millions`,
-                result_status: 'official',
-                is_latest_snapshot: false
-            }));
-
-            // Check for existing records
-            const dates = dbRecords.map(r => r.draw_date);
-            const { data: existingDraws } = await supabase
-                .from('official_draws')
-                .select('draw_date')
-                .eq('game_id', ncGameId)
-                .in('draw_date', dates);
-
-            const existingDates = existingDraws?.map(d => d.draw_date) || [];
-            const newRecords = dbRecords.filter(r => !existingDates.includes(r.draw_date));
-
-            console.log(`\n📈 New records to insert: ${newRecords.length}`);
-            console.log(`⏭️  Skipped (already exist): ${existingDates.length}`);
-
-            if (newRecords.length > 0) {
-                const { error, data } = await supabase
-                    .from('official_draws')
-                    .insert(newRecords);
-
-                if (error) {
-                    console.error(`❌ Insert error: ${error.message}`);
-                } else {
-                    console.log(`✅ Successfully inserted ${newRecords.length} Mega Millions draws!`);
-                }
-            } else {
-                console.log('✅ All draws already exist in database.');
-            }
-        } catch (err) {
-            console.error(`❌ Database error: ${err.message}`);
-        }
+    if (dbRecords.length > 0) {
+      const { error } = await supabase.from('official_draws').insert(dbRecords);
+      if (error) {
+        console.error(`  ❌ Insert error for ${game.state_code}: ${error.message}`);
+      } else {
+        console.log(`  ✅ Inserted ${dbRecords.length} new ${game.state_code} draws`);
+      }
+    } else {
+      console.log(`  ✅ ${game.state_code} — all up to date`);
     }
+  }
+
+  console.log('\n✅ Mega Millions scraper done!\n');
 })();
-
-function formatDate(dateStr) {
-    // Handle different date formats
-    const date = new Date(dateStr);
-    return date.toISOString().split('T')[0];
-}
