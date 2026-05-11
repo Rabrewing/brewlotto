@@ -270,14 +270,14 @@ export const BREWU_PAYOUT_GUIDES: BrewwuPayoutGuide[] = [
     title: 'Pick 3 / Daily 3',
     label: 'Straight and box ladder',
     summary:
-      'Teach the user the difference between exact-order and any-order coverage, then layer NC-only add-ons as optional educational paths.',
+      'Teach the user the difference between exact-order and any-order coverage, then layer NC-only add-ons like Fireball as optional educational paths tied to the actual draw date.',
     tiers: [
       { name: 'Straight', odds: '1 in 1,000', note: 'Exact order prize path.' },
       { name: 'Box (2 like numbers)', odds: '1 in 333', note: 'Any order with repeated digits.' },
       { name: 'Box (3 different numbers)', odds: '1 in 167', note: 'Any order with three unique digits.' },
     ],
     aiHint:
-      'Brew AI should explain whether exact-order precision or any-order box coverage better fits the player’s risk comfort.',
+      'Brew AI should explain whether exact-order precision or any-order box coverage better fits the player’s risk comfort, and clarify that Fireball only changes NC Pick 3 settlement when the user actually confirmed that draw date.',
     source: 'NC Pick 3 and CA Daily 3 official game pages.',
   },
   {
@@ -285,7 +285,7 @@ export const BREWU_PAYOUT_GUIDES: BrewwuPayoutGuide[] = [
     title: 'Pick 4 / Daily 4',
     label: 'Four-digit coverage ladder',
     summary:
-      'Teach the user the smaller, middle, and broader box structures, plus NC-only Fireball / 50-50 style choices where applicable.',
+      'Teach the user the smaller, middle, and broader box structures, plus NC-only Fireball / 50-50 style choices where applicable. Fireball should always be read as a draw-date-specific modifier, not as a separate strategy signal.',
     tiers: [
       { name: 'Exact order', odds: '1 in 10,000', note: 'Precision play.' },
       { name: '4-way box', odds: '1 in 2,500', note: 'Three like digits and one unique digit.' },
@@ -294,7 +294,7 @@ export const BREWU_PAYOUT_GUIDES: BrewwuPayoutGuide[] = [
       { name: '24-way box', odds: '1 in 416.7', note: 'Four unique digits.' },
     ],
     aiHint:
-      'Brew AI should explain how the box size changes the coverage path without promising a better result.',
+      'Brew AI should explain how the box size changes the coverage path without promising a better result, and make it clear that Fireball only matters when the user played the correct NC Pick 4 draw with Fireball active.',
     source: 'NC Pick 4 and CA Daily 4 official game pages.',
   },
   {

@@ -62,6 +62,24 @@ const COVERAGE_OVERVIEW = [
   },
 ];
 
+const FIREBALL_GUIDE = [
+  {
+    label: 'Where it matters',
+    summary:
+      'Fireball is an NC-only modifier for Pick 3 and Pick 4. BrewLotto tracks it in Results, My Picks, Strategy Locker, Stats, and BrewCommand so the play history stays accurate.',
+  },
+  {
+    label: 'What it changes',
+    summary:
+      'Fireball changes settlement classification and confirmed-play ratios for the draw it was actually played on. It does not change hot/cold or momentum, which stay draw-trend only.',
+  },
+  {
+    label: 'What it does not change',
+    summary:
+      'Fireball is not a separate strategy meter and it does not guarantee a better result. If the user did not confirm that play on the winning draw date, it should not count as a win.',
+  },
+];
+
 export default function LearnPage() {
   return (
     <main className="min-h-screen bg-[#050505] text-white">
@@ -170,6 +188,24 @@ export default function LearnPage() {
                   {guide.aiHint}
                 </div>
               </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-5 rounded-[30px] border border-[#72caff]/18 bg-[radial-gradient(circle_at_top_left,rgba(114,202,255,0.14),rgba(0,0,0,0)_34%),linear-gradient(145deg,rgba(13,20,28,0.9),rgba(8,8,8,0.98))] px-5 py-5 shadow-[0_0_28px_rgba(114,202,255,0.06)]">
+          <div className="text-[15px] uppercase tracking-[0.16em] text-white/38">Fireball clarity</div>
+          <div className="mt-3 text-[26px] font-semibold text-[#d7ecff]">Only NC Pick 3 / Pick 4 uses Fireball</div>
+          <div className="mt-2 max-w-3xl text-[15px] leading-7 text-white/62">
+            BrewLotto treats Fireball like a play modifier, not a trend signal. That keeps the
+            results page, My Picks confirmation flow, Strategy Locker ratios, and BrewCommand
+            reporting aligned with the actual draw date and the actual ticket rules.
+          </div>
+          <div className="mt-5 grid gap-3 md:grid-cols-3">
+            {FIREBALL_GUIDE.map((item) => (
+              <div key={item.label} className="rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
+                <div className="text-[12px] uppercase tracking-[0.16em] text-[#9edcff]">{item.label}</div>
+                <div className="mt-3 text-[14px] leading-7 text-white/68">{item.summary}</div>
+              </div>
             ))}
           </div>
         </section>

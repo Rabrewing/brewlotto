@@ -22,7 +22,7 @@ export const BREWU_PLAY_STYLE_GUIDES: BrewwuGameGuide[] = [
     label: 'Order matters',
     odds: 'Straight odds: 1 in 1,000',
     summary:
-      'Pick 3 is the cleanest place to teach exact-order play, broader box coverage, and split-style wagers. NC adds Fireball, 50/50, Combo, and Pair. CA Daily 3 centers on Straight, Box, and Straight/Box.',
+      'Pick 3 is the cleanest place to teach exact-order play, broader box coverage, and split-style wagers. NC adds Fireball, 50/50, Combo, and Pair. Fireball is an NC-only modifier that affects settlement for the draw it was actually played on, not a separate trend signal. CA Daily 3 centers on Straight, Box, and Straight/Box.',
     playStyles: [
       { name: 'Straight', odds: '1 in 1,000', note: 'Exact order. Highest payout shape, narrowest coverage.' },
       { name: 'Box (2 like numbers)', odds: '1 in 333', note: 'Any order with repeated digits.' },
@@ -31,7 +31,7 @@ export const BREWU_PLAY_STYLE_GUIDES: BrewwuGameGuide[] = [
       { name: 'NC extras', note: '50/50, Combo, Pair, and Fireball are NC-specific educational options.' },
     ],
     aiHint:
-      'Brew AI should explain when a tighter exact-order play is more focused and when a broader box or split wager is better for the user’s comfort level.',
+      'Brew AI should explain when a tighter exact-order play is more focused and when a broader box or split wager is better for the user’s comfort level, while also clarifying that Fireball only matters on NC Pick 3 and only for the draw date it was actually played.',
     source:
       'North Carolina Education Lottery Pick 3 payout pages and California Lottery Daily 3 odds pages.',
   },
@@ -41,7 +41,7 @@ export const BREWU_PLAY_STYLE_GUIDES: BrewwuGameGuide[] = [
     label: 'More combinations',
     odds: 'Exact order odds: 1 in 10,000',
     summary:
-      'Pick 4 / Daily 4 expands the same education pattern to more digits, more ways to box, and more ways to split coverage. NC includes Fireball and 50/50 style play; CA Daily 4 centers on Straight, Box, and Straight/Box.',
+      'Pick 4 / Daily 4 expands the same education pattern to more digits, more ways to box, and more ways to split coverage. NC includes Fireball and 50/50 style play; Fireball is a settlement modifier for the draw it was actually played on, not a dashboard trend metric. CA Daily 4 centers on Straight, Box, and Straight/Box.',
     playStyles: [
       { name: 'Exact order', odds: '1 in 10,000', note: 'The strongest precision play, but the narrowest path.' },
       { name: '4-Way', odds: '1 in 2,500', note: 'Any order with three like digits and one unique digit.' },
@@ -51,7 +51,7 @@ export const BREWU_PLAY_STYLE_GUIDES: BrewwuGameGuide[] = [
       { name: 'NC extras', note: '50/50 and Fireball add teaching depth for NC-only players.' },
     ],
     aiHint:
-      'Brew AI should help users choose between precision and coverage by explaining how each box style changes the path to a hit.',
+      'Brew AI should help users choose between precision and coverage by explaining how each box style changes the path to a hit, while clearly stating that Fireball only applies to NC Pick 4 plays on the exact draw date the user confirmed.',
     source:
       'North Carolina Education Lottery Pick 4 prizes and odds page plus California Lottery Daily 4 play-style guidance.',
   },
