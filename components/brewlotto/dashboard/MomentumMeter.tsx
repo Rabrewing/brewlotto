@@ -52,7 +52,7 @@ export function MomentumMeter({ percent }: MomentumMeterProps) {
             {clampedPercent}%
           </span>
           <span className="mt-2 text-center text-[12px] text-white/72 sm:text-[13px]">
-            Win Probability
+            Trend Strength
           </span>
         </div>
       </div>

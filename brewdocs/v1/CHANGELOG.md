@@ -34,6 +34,7 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Tightened the live strategy engine test suite so each deterministic module and the ensemble combiner are validated explicitly.
 - Repointed the legacy shared header `Account` button from dead `/account` to the live `/profile` route.
 - Added a follow-up note to re-check midday/evening ingestion timing and the dashboard momentum gauge after the scheduler/auth changes.
+- Verified the midday/evening Cloud Scheduler jobs are healthy and re-centered the dashboard momentum gauge so it reports a visible trend-strength value instead of flattening to zero.
 
 ### 2026-05-07
 - Added BrewU support intake, support screenshot storage, canonical play-log bridge, settlement sweep, and customer notifications planning.

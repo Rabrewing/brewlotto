@@ -95,6 +95,9 @@ function computeMultiWindowStats(
   const numberPool: number[] = [];
   for (let n = minN; n <= maxN; n++) numberPool.push(n);
 
+  const recentWindowSize = Math.max(1, Math.min(recentWindow.length, draws.length));
+  const baseWindowSize = Math.max(1, baseWindow.length);
+
   let maxBaseFreq = 0;
   let maxRecentFreq = 0;
   for (const n of numberPool) {
@@ -107,7 +110,7 @@ function computeMultiWindowStats(
   for (const n of numberPool) {
     const bf = baseFreq.get(n) || 0;
     const rf = recentFreq.get(n) || 0;
-    const expectedInRecent = bf * 30 / 120;
+    const expectedInRecent = bf * recentWindowSize / baseWindowSize;
     const delta = rf - expectedInRecent;
     deltas.set(n, delta);
     maxDelta = Math.max(maxDelta, delta);
@@ -142,11 +145,20 @@ function computeMultiWindowStats(
   hotScores.sort((a, b) => b.score - a.score);
   coldScores.sort((a, b) => b.score - a.score);
 
-  const recentAppearanceRate = totalRecentHits / (30 * primaryCount);
-  const baseAppearanceRate = totalBaseHits / (120 * primaryCount);
-  let momentum = 0;
-  if (baseAppearanceRate > 0) {
-    momentum = Math.round(((recentAppearanceRate / baseAppearanceRate) - 1) * 100);
+  let positiveDeltaSum = 0;
+  let negativeDeltaSum = 0;
+  for (const delta of deltas.values()) {
+    if (delta > 0) {
+      positiveDeltaSum += delta;
+    } else if (delta < 0) {
+      negativeDeltaSum += Math.abs(delta);
+    }
+  }
+  const totalDeltaMagnitude = positiveDeltaSum + negativeDeltaSum;
+  let momentum = 50;
+  if (totalDeltaMagnitude > 0) {
+    const balance = (positiveDeltaSum - negativeDeltaSum) / totalDeltaMagnitude;
+    momentum = Math.round(50 + balance * 50);
     momentum = Math.max(0, Math.min(100, momentum));
   }
 
@@ -182,7 +194,7 @@ function computeMultiWindowStats(
     for (const n of bonusPool) {
       const bf = bonusBaseFreq.get(n) || 0;
       const rf = bonusRecentFreq.get(n) || 0;
-      const expectedInRecent = bf * 30 / 120;
+      const expectedInRecent = bf * recentWindowSize / baseWindowSize;
       const delta = rf - expectedInRecent;
       bonusDeltas.set(n, delta);
       maxBonusDelta = Math.max(maxBonusDelta, delta);

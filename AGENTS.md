@@ -515,7 +515,7 @@ The system is considered complete when:
 
 ## V1 Progress Tracker
 
-**Last Updated:** 2026-05-11 ET (Strategy Signals BrewCommand section added, results-history work still queued, daily support/notification and play-log paths remain canonical, saved-only My Picks flow tracked, midday/evening ingestion and momentum regressions queued)
+**Last Updated:** 2026-05-11 ET (Strategy Signals BrewCommand section added, results-history work still queued, daily support/notification and play-log paths remain canonical, saved-only My Picks flow tracked, midday/evening ingestion verified, momentum gauge re-centered)
 
 ### Phase Status
 
@@ -592,8 +592,8 @@ The system is considered complete when:
 4. **Customer Strategy Alerts** — When Brew detects meaningful strategy signals, write an event-driven `user_notifications` record and send email only for off-app or high-priority events, keeping the momentum meter as a single gauge and exposing hot/cold as separate cards. BrewCommand should surface the recent signals, recipients, and reasons in a dedicated Strategy Signals section so alerting can be audited.
 5. **Play Confirmation Nudges** — When a settled play has a near-hit or meaningful match, write a customer nudge that says “if you played this, confirm it” so the result history can stay honest before the confirmed-play workflow is fully interactive.
 6. **Results History / Win Ratios** — Continue tightening the confirmed-play workflow, keep `/results` grouped by draw date/time with the 3/6 month history toggle, surface win ratios by strategy/game/state in `/stats` and BrewCommand, and continue feeding the same confirmed-play signal into the Strategy Locker ratio chips and stats summaries.
-7. **Ingestion Midday / Evening Check** — Re-verify the Cloud Scheduler → Cloud Run ingestion path for midday and evening runs after the schedule change so NC/CA draw windows do not regress.
-8. **Momentum Meter Regression** — Investigate why the dashboard momentum gauge is now flat or missing across games, then decide whether the metric needs a data-shape fix or a new normalization rule.
+7. **Ingestion Midday / Evening Check** — Verified: Cloud Scheduler → Cloud Run ingestion path is healthy for midday and evening runs after the schedule change so NC/CA draw windows are not regressing.
+8. **Momentum Meter Regression** — Verified: the dashboard momentum gauge now shows a centered trend-strength value instead of flattening to zero, and keep an eye on whether any game-specific data shape still suppresses it.
 
 **ONBOARDING STATUS:**
 | Component | Status |
