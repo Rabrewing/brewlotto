@@ -1,6 +1,6 @@
 # AGENTS.md (BrewLotto V1)
 
-## Current Status (2026-05-10 ET)
+## Current Status (2026-05-11 ET)
 
 ### System Health — All NC + CA Launch Games Green
 
@@ -48,13 +48,13 @@ official source → ingestion → Supabase → freshness view → API → UI
 | **Billing / notifications polish** | `app/billing/page.tsx`, `app/notifications/page.tsx`, `brewdocs/v1/current_state.md`, `brewdocs/v1/CHANGELOG.md` — 2026-05-10 | Reworked Billing into a centered account-style hero with a clearer benefits / billing / quick-links flow, and added New / All tabs to Notifications so the feed mirrors the mockup rhythm more closely. |
 | **AI strategy notifications** | `scripts/ingestionJob.js`, `lib/notifications/strategySignals.js`, `brewdocs/v1/customer-notifications-plan.md`, `brewdocs/v1/current_state.md`, `brewdocs/v1/CHANGELOG.md` — 2026-05-10 | Brew AI strategy-detection alerts now run as an ingestion-driven, event-based sweep that writes `user_notifications` and emails a BrewLotto return link only when the user is eligible and the signal is strong enough. The main momentum meter stays a single gauge; hot/cold remain separate cards. |
 | **Results history / win ratios** | `brewdocs/v1/results-history-win-ratios-plan.md`, `brewdocs/v1/current_state.md`, `brewdocs/v1/CHANGELOG.md` — 2026-05-10 | Track confirmed wins only when the play was actually logged for the winning draw date/time, keep `/results` on a 3/6 month history toggle, and expose strategy-specific win ratios in `/stats` and BrewCommand so retroactive close matches never masquerade as same-day wins. |
-| **My Picks 30-day history** | `app/my-picks/page.tsx`, `app/api/predictions/route.ts`, `brewdocs/v1/current_state.md`, `brewdocs/v1/CHANGELOG.md` — 2026-05-10 | Keep the personal pick history window broad enough to show roughly the last 30 days of picks so the user can confirm plays without leaving BrewLotto, while still preserving the same-day win confirmation rule. |
+| **My Picks saved-only 30-day history** | `app/my-picks/page.tsx`, `app/api/predictions/route.ts`, `lib/prediction/predictionGenerator.js`, `lib/prediction/predictionStorage.js`, `brewdocs/v1/current_state.md`, `brewdocs/v1/CHANGELOG.md` — 2026-05-11 | Keep `My Picks` scoped to explicit user-saved picks from Strategy Locker, grouped by date, over roughly the last 30 days so confirmation nudges land on real saved entries instead of auto-saved previews. |
 | **Superadmin added** | `.env`, `.env.local` — 2026-05-02 | `BREWCOMMAND_ADMIN_EMAILS` now includes `command@brewlotto.app` and `michael.brewington@gmail.com`; code keeps fallback allowlist so BrewCommand access works if one env entry is missing. |
 | **SectionCard centralized** | `components/brewlotto/dashboard/SectionCard.tsx` (new) — 2026-05-02 | Removed 6 local duplicates across strategy-locker, profile, settings, stats, notifications, billing. Single shared component with consistent dark/gold styling. |
 | **Play log bridge** | `app/api/play/log/route.ts` — 2026-05-07 | Legacy browser write path now inserts into canonical `play_logs` with auth validation and normalized draw-time / number payloads. This is the settlement source of truth for future winnings alerts. |
 | **Support inbox notifications** | `app/api/admin/support-requests/[id]/route.ts`, `lib/notifications/supportRequests.ts` — 2026-05-07 | Resolved support tickets now send the branded customer email and also create an in-app `user_notifications` record so BrewLotto support updates reach both inboxes. |
 | **Settlement sweep** | `app/api/admin/settlements/run/route.ts`, `lib/notifications/playSettlements.ts` — 2026-05-07 | BrewCommand can sweep unsettled `play_logs`, settle NC and CA games against official draws, write `user_notifications`, and send winning emails back to the customer inbox. |
-| **Odds / play-style matrix** | `lib/brewwu/playStyleMatrix.ts` + docs — 2026-05-07 | Capture every launch game’s official play styles, odds, and payout ladders so BrewLotto AI, BrewU/help, and settlement classification can explain straight, box, straight/box, 50/50, combo, pair, Fireball, Power Play, Double Play, and related game-specific options in a customer-friendly way. |
+| **Odds / play-style matrix** | `lib/brewwu/playStyleMatrix.ts` + docs — 2026-05-07 | Capture every launch game’s official play styles, odds, and payout ladders so BrewLotto AI, BrewU/help, and settlement classification can explain straight, box, straight/box, 50/50, combo, pair, Fireball, Power Play, Double Play, and related game-specific options in a customer-friendly way. NC Pick 3 / Pick 4 Fireball still needs explicit model handling so the modifier is not lost in plain straight/box settlement math. |
 | **Onboarding flow** | `app/onboarding/page.tsx`, `middleware.ts`, `app/auth/callback/route.ts` (new) — 2026-05-02 | Disclaimer acknowledgment → tutorial video → dashboard. Middleware enforces onboarding completion. Auth callback exchanges magic link codes. |
 | **Dropdown auth data** | `AvatarDropdown.tsx` — 2026-05-02 | Removed hardcoded "JD"/"John Doe"/"john@example.com". Name, email, initials loaded from `supabase.auth.getUser()` on mount. |
 | **Scheduler URL fix** | Cloud Scheduler (7 jobs) — 2026-05-05 | All 7 jobs were hitting dead URL `...jix2pwxsaa-uc.a.run.app`. Fixed to `...119469099721.us-central1.run.app`. Added IAM binding so scheduler can invoke Cloud Run. Data had been stale for 3 days — now fresh. |
@@ -515,7 +515,7 @@ The system is considered complete when:
 
 ## V1 Progress Tracker
 
-**Last Updated:** 2026-05-10 ET (Strategy Signals BrewCommand section added, results-history work still queued, daily support/notification and play-log paths remain canonical)
+**Last Updated:** 2026-05-11 ET (Strategy Signals BrewCommand section added, results-history work still queued, daily support/notification and play-log paths remain canonical, saved-only My Picks flow tracked, midday/evening ingestion and momentum regressions queued)
 
 ### Phase Status
 
@@ -592,6 +592,8 @@ The system is considered complete when:
 4. **Customer Strategy Alerts** — When Brew detects meaningful strategy signals, write an event-driven `user_notifications` record and send email only for off-app or high-priority events, keeping the momentum meter as a single gauge and exposing hot/cold as separate cards. BrewCommand should surface the recent signals, recipients, and reasons in a dedicated Strategy Signals section so alerting can be audited.
 5. **Play Confirmation Nudges** — When a settled play has a near-hit or meaningful match, write a customer nudge that says “if you played this, confirm it” so the result history can stay honest before the confirmed-play workflow is fully interactive.
 6. **Results History / Win Ratios** — Continue tightening the confirmed-play workflow, keep `/results` grouped by draw date/time with the 3/6 month history toggle, surface win ratios by strategy/game/state in `/stats` and BrewCommand, and continue feeding the same confirmed-play signal into the Strategy Locker ratio chips and stats summaries.
+7. **Ingestion Midday / Evening Check** — Re-verify the Cloud Scheduler → Cloud Run ingestion path for midday and evening runs after the schedule change so NC/CA draw windows do not regress.
+8. **Momentum Meter Regression** — Investigate why the dashboard momentum gauge is now flat or missing across games, then decide whether the metric needs a data-shape fix or a new normalization rule.
 
 **ONBOARDING STATUS:**
 | Component | Status |
@@ -611,7 +613,7 @@ The system is considered complete when:
 2. **Dropdown UX** — Add hover previews and keyboard navigation per dropdown spec
 3. **"Run Strategy" Animation** — Wire up the animation from `strategy-locker-run-stratergy-animation.png`
 4. **Customer Notifications / Winnings Alerts** — Normalize the settled-play flow against `play_logs`, insert support updates and settled-play events into `user_notifications`, and send customer emails with a BrewLotto return link when support tickets or winnings are resolved.
-5. **Odds & Play-Style Intelligence** — Capture every launch game’s official play styles, odds, and payout ladders, then teach BrewLotto AI and BrewU/help content to explain straight vs box vs straight/box vs 50/50 vs combo vs add-on choices as educational options per game.
+5. **Odds & Play-Style Intelligence** — Capture every launch game’s official play styles, odds, and payout ladders, then teach BrewLotto AI and BrewU/help content to explain straight vs box vs straight/box vs 50/50 vs combo vs add-on choices as educational options per game. NC Fireball on Pick 3 / Pick 4 should be modeled explicitly in that pass.
 6. **BrewU Support Intake** — Add a lightweight support tab with category dropdown, comments, screenshot upload, and a 24-hour response disclaimer; route submissions to BrewCommand notifications/email.
 7. **Strategy Validation** — Cross-check `lib/prediction/strategyEngine.js` and the live strategy modules against the BrewLotto V1 strategy spec, and keep the legacy wrapper files clearly marked as transitional only.
 8. **BrewU Content Externalization** — If V1 content editing needs increase, move BrewU/help copy, support categories, and tutorial transcript content into DB/CMS-backed tables using the new plan doc as the handoff.

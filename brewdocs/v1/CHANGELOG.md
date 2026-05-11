@@ -1,6 +1,6 @@
 # BrewLotto V1 Changelog
 
-**Last Updated:** 2026-05-10 ET
+**Last Updated:** 2026-05-11 ET
 
 This changelog records shipped or committed V1 changes in a compact, timestamped format.
 
@@ -23,12 +23,17 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Wired an ingestion-driven strategy signal sweep that uses a branded Brew AI email template, writes `user_notifications` for eligible users, and keeps the momentum meter as the single visible gauge.
 - Added a results-history and win-ratio plan so confirmed wins are tied to the correct play date/time, longer NC/CA histories can surface in the product, and same-day wins do not get confused with retroactive close matches.
 - Added a BrewU play-style matrix and payout ladder matrix so help content, AI guidance, and settlement classification share one source of truth.
+
+### 2026-05-11
+- Added explicit NC Pick 3 / Pick 4 Fireball tracking to the play-style and payout workstream so the modifier is not lost in plain straight/box settlement math.
+- Switched `My Picks` to saved-pick-only history with date dividers so confirmed-play nudges land on explicit user-saved entries instead of every generated locker run, and stopped new predictions from auto-saving by default.
 - Upgraded settlement classification to distinguish exact-order, box-style, and standard match-number outcomes more cleanly.
 - Centralized support intake, support tickets, BrewCommand notifications, and customer resolution emails.
 - Added a strategy-validation checklist and tightened the live engine spec alignment notes.
 - Added a landing-video replacement note so the watermark-free Blob asset can be swapped in through the Vercel CLI update path.
 - Tightened the live strategy engine test suite so each deterministic module and the ensemble combiner are validated explicitly.
 - Repointed the legacy shared header `Account` button from dead `/account` to the live `/profile` route.
+- Added a follow-up note to re-check midday/evening ingestion timing and the dashboard momentum gauge after the scheduler/auth changes.
 
 ### 2026-05-07
 - Added BrewU support intake, support screenshot storage, canonical play-log bridge, settlement sweep, and customer notifications planning.

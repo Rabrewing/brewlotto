@@ -88,6 +88,24 @@ function formatCreatedAt(value: string | null) {
   });
 }
 
+function formatPickGroupDate(value: string | null) {
+  if (!value) {
+    return 'Unknown day';
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return date.toLocaleDateString(undefined, {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
 function getPredictionSummary(prediction: PredictionRecord) {
   const explanation = Array.isArray(prediction.prediction_explanations)
     ? prediction.prediction_explanations.find((item) => item?.summary_text)
@@ -257,6 +275,7 @@ export default function MyPicksPage() {
         const createdAfter = new Date();
         createdAfter.setDate(createdAfter.getDate() - 30);
         params.set('created_after', createdAfter.toISOString());
+        params.set('saved', 'true');
 
         if (selectedState !== 'ALL') {
           params.set('state', selectedState);
@@ -298,15 +317,36 @@ export default function MyPicksPage() {
     };
   }, [selectedGame, selectedState]);
 
-  const savedCount = useMemo(
-    () => predictions.filter((prediction) => prediction.is_saved).length,
-    [predictions],
-  );
+  const savedCount = useMemo(() => predictions.length, [predictions]);
 
   const primaryGame = useMemo(() => {
     const first = predictions[0]?.game;
     return first ? formatGameLabel(first) : 'No game yet';
   }, [predictions]);
+
+  const groupedPredictions = useMemo(() => {
+    return predictions.reduce<Array<{ createdAt: string | null; picks: PredictionRecord[] }>>((groups, prediction) => {
+      const key = prediction.created_at ? new Date(prediction.created_at).toISOString().slice(0, 10) : 'unknown-date';
+      const existing = groups.find((group) => {
+        const groupKey = group.createdAt ? new Date(group.createdAt).toISOString().slice(0, 10) : 'unknown-date';
+        return groupKey === key;
+      });
+
+      if (existing) {
+        existing.picks.push(prediction);
+        return groups;
+      }
+
+      groups.push({
+        createdAt: prediction.created_at,
+        picks: [prediction],
+      });
+
+      return groups;
+    }, []);
+  }, [predictions]);
+
+  const savedDays = useMemo(() => groupedPredictions.length, [groupedPredictions]);
 
   async function handleToggleSaved(prediction: PredictionRecord) {
     const response = await fetch(`/api/predictions/${prediction.id}`, {
@@ -321,7 +361,7 @@ export default function MyPicksPage() {
     }
 
     setPredictions((current) =>
-      current.map((item) => (item.id === prediction.id ? { ...item, is_saved: !prediction.is_saved } : item)),
+      current.filter((item) => item.id !== prediction.id),
     );
   }
 
@@ -419,9 +459,9 @@ export default function MyPicksPage() {
         <div className="mb-6 flex rounded-full border border-[#ffbd39]/25 bg-[linear-gradient(145deg,rgba(35,19,12,0.74),rgba(10,8,8,0.92))] shadow-[0_0_18px_rgba(255,184,28,0.08)]">
           <SummaryMetric label="Saved Picks" value={String(savedCount)} />
           <div className="my-4 w-px bg-white/10" />
-          <SummaryMetric label="30-Day Picks" value={String(predictions.length)} />
+          <SummaryMetric label="Saved Days" value={String(savedDays)} />
           <div className="my-4 w-px bg-white/10" />
-          <SummaryMetric label="Primary Game" value={predictions.length > 0 ? primaryGame : '--'} />
+          <SummaryMetric label="Latest Game" value={predictions.length > 0 ? primaryGame : '--'} />
         </div>
 
         {actionMessage ? (
@@ -442,27 +482,41 @@ export default function MyPicksPage() {
           <div className="rounded-[30px] border border-[#ffbd39]/22 bg-[linear-gradient(145deg,rgba(32,19,13,0.82),rgba(13,10,10,0.96))] px-6 py-8 text-center shadow-[0_0_22px_rgba(255,184,28,0.08)]">
             <div className="text-[36px] font-semibold tracking-[-0.03em] text-[#f6d29f]">No picks yet</div>
             <div className="mx-auto mt-3 max-w-[280px] text-[17px] leading-8 text-white/68">
-              You haven&apos;t generated any picks for this filter set yet. Let Brew create your next smart pick from the dashboard.
+              You haven&apos;t saved any picks for this filter set yet. Save a Strategy Locker result first if you want it to appear here and be eligible for play confirmation.
             </div>
             <Link
-              href="/dashboard"
+              href="/strategy-locker"
               className="mt-6 inline-flex rounded-full bg-gradient-to-r from-[#ffc742] to-[#ffbe27] px-8 py-3 text-[17px] font-semibold text-black shadow-[0_0_18px_rgba(255,199,66,0.22)]"
             >
-              Generate My Smart Pick →
+              Open Strategy Locker →
             </Link>
           </div>
         ) : (
-          <div className="space-y-4">
-            {predictions.map((prediction) => (
-              <PickCard
-                key={prediction.id}
-                prediction={prediction}
-                isConfirmed={confirmedPredictionIds.includes(prediction.id)}
-                isConfirming={confirmingPredictionId === prediction.id}
-                onToggleSaved={handleToggleSaved}
-                onConfirmPlayed={handleConfirmPlayed}
-                onDelete={handleDelete}
-              />
+          <div className="space-y-6">
+            {groupedPredictions.map((group) => (
+              <section key={group.createdAt || 'unknown-date'} className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[#ffbd39]/35 to-transparent" />
+                  <div className="rounded-full border border-[#ffbd39]/20 bg-[#24160f] px-4 py-1.5 text-[12px] font-semibold uppercase tracking-[0.14em] text-[#f7d6ab]">
+                    {formatPickGroupDate(group.createdAt)}
+                  </div>
+                  <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[#ffbd39]/35 to-transparent" />
+                </div>
+
+                <div className="space-y-4">
+                  {group.picks.map((prediction) => (
+                    <PickCard
+                      key={prediction.id}
+                      prediction={prediction}
+                      isConfirmed={confirmedPredictionIds.includes(prediction.id)}
+                      isConfirming={confirmingPredictionId === prediction.id}
+                      onToggleSaved={handleToggleSaved}
+                      onConfirmPlayed={handleConfirmPlayed}
+                      onDelete={handleDelete}
+                    />
+                  ))}
+                </div>
+              </section>
             ))}
           </div>
         )}

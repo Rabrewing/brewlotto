@@ -41,6 +41,8 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
     const createdAfter = searchParams.get('created_after');
+    const savedParam = searchParams.get('saved');
+    const savedOnly = savedParam === 'true';
     
     let query = supabase
       .from('predictions')
@@ -60,6 +62,9 @@ export async function GET(request: NextRequest) {
     }
     if (createdAfter) {
       query = query.gte('created_at', createdAfter);
+    }
+    if (savedOnly) {
+      query = query.eq('is_saved', true);
     }
     
     const { data, error, count } = await query;
