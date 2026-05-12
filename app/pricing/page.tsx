@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useUserTier } from '@/hooks/useUserTier';
+import { supabase } from '@/lib/supabase/browserClient';
 
 type TierCard = {
   key: string;
@@ -12,6 +13,17 @@ type TierCard = {
   features: string[];
   cta: string;
   highlight?: boolean;
+};
+
+type TierAction = 'upgrade' | 'downgrade' | 'current' | 'trial';
+
+type TierKey = 'trial' | 'starter' | 'pro' | 'master';
+
+const TIER_ORDER: Record<TierKey, number> = {
+  trial: 0,
+  starter: 1,
+  pro: 2,
+  master: 3,
 };
 
 function formatTrialEndsAt(trialEndsAt: string | null) {
@@ -33,6 +45,8 @@ function formatTrialEndsAt(trialEndsAt: string | null) {
 
 export default function PricingPage() {
   const { currentTier, isTrial, trialEndsAt } = useUserTier();
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
 
   const trialDateLabel = useMemo(() => formatTrialEndsAt(trialEndsAt), [trialEndsAt]);
 
@@ -88,6 +102,122 @@ export default function PricingPage() {
       cta: 'Choose Master',
     },
   ];
+
+  const currentTierKey = (currentTier || 'free') as TierKey | 'free';
+
+  function getTierAction(tierKey: TierKey): TierAction {
+    if (tierKey === 'trial') {
+      return 'trial';
+    }
+
+    if (currentTierKey === tierKey) {
+      return 'current';
+    }
+
+    if (currentTierKey === 'free' || TIER_ORDER[currentTierKey as TierKey] < TIER_ORDER[tierKey]) {
+      return 'upgrade';
+    }
+
+    return 'downgrade';
+  }
+
+  function getTierCtaLabel(tier: TierCard) {
+    const action = getTierAction(tier.key as TierKey);
+
+    switch (action) {
+      case 'trial':
+        return 'Start Trial';
+      case 'current':
+        return 'Current plan';
+      case 'downgrade':
+        return `Downgrade to ${tier.title}`;
+      case 'upgrade':
+      default:
+        return `Upgrade to ${tier.title}`;
+    }
+  }
+
+  async function handleTierAction(tier: TierCard) {
+    setActionLoading(tier.key);
+    setActionMessage(null);
+
+    const action = getTierAction(tier.key as TierKey);
+
+    try {
+      const { data: authData } = await supabase.auth.getUser();
+      const authUser = authData.user;
+
+      if (!authUser) {
+        window.location.assign('/login');
+        return;
+      }
+
+      if (action === 'trial') {
+        window.location.assign('/login');
+        return;
+      }
+
+      if (action === 'current') {
+        const response = await fetch('/api/billing/portal', { method: 'POST' });
+        const payload = await response.json();
+
+        if (!response.ok) {
+          throw new Error(payload?.error?.message || 'Failed to open billing portal');
+        }
+
+        if (payload?.data?.portalUrl) {
+          window.location.assign(payload.data.portalUrl);
+          return;
+        }
+
+        throw new Error('Billing portal URL was not returned');
+      }
+
+      if (action === 'downgrade') {
+        const response = await fetch('/api/billing/portal', { method: 'POST' });
+        const payload = await response.json();
+
+        if (!response.ok) {
+          throw new Error(payload?.error?.message || 'Failed to open billing portal');
+        }
+
+        if (payload?.data?.portalUrl) {
+          window.location.assign(payload.data.portalUrl);
+          return;
+        }
+
+        throw new Error('Billing portal URL was not returned');
+      }
+
+      const response = await fetch('/api/billing/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          tierKey: tier.key,
+          interval: 'month',
+        }),
+      });
+
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload?.error?.message || 'Failed to start checkout');
+      }
+
+      if (payload?.data?.checkoutUrl) {
+        window.location.assign(payload.data.checkoutUrl);
+        return;
+      }
+
+      throw new Error('Checkout URL was not returned');
+    } catch (error) {
+      setActionMessage(error instanceof Error ? error.message : 'Failed to load plan action');
+    } finally {
+      setActionLoading(null);
+    }
+  }
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#050505] text-white">
@@ -156,7 +286,7 @@ export default function PricingPage() {
                 href="/billing"
                 className="inline-flex items-center justify-center rounded-full border border-white/12 bg-white/[0.03] px-7 py-3 text-[15px] text-white/80 transition-colors hover:text-white"
               >
-                View Account Billing
+                View Billing &amp; Subscription
               </Link>
             </div>
 
@@ -168,45 +298,88 @@ export default function PricingPage() {
 
             <div className="mt-6 rounded-[20px] border border-white/10 bg-white/[0.03] px-5 py-5 text-[15px] leading-7 text-white/68">
               Current session tier: <span className="text-[#f7ddb3]">{currentTier}</span>
+              {currentTier !== 'free' ? (
+                <span className="ml-2 text-white/48">
+                  {currentTier === 'starter' ? 'You can upgrade to Pro or Master, or manage a downgrade in Billing.' : ''}
+                  {currentTier === 'pro' ? 'You can upgrade to Master or downgrade to Starter in Billing.' : ''}
+                  {currentTier === 'master' ? 'You can downgrade in Billing if you want a lower tier.' : ''}
+                </span>
+              ) : null}
             </div>
           </div>
 
           <div className="relative">
             <div className="absolute -inset-6 rounded-[34px] bg-[#ffc742]/8 blur-2xl animate-brew-drift" />
             <div className="relative grid gap-4 xl:grid-cols-4">
-              {tiers.map((tier) => (
-                <article
-                  key={tier.key}
-                  className={`rounded-[28px] border px-5 py-5 shadow-[0_0_24px_rgba(255,184,28,0.08)] transition-transform duration-500 hover:-translate-y-1 ${
-                    tier.highlight
-                      ? 'border-[#ffc742]/28 bg-[linear-gradient(145deg,rgba(32,19,13,0.92),rgba(13,10,10,0.98))]'
-                      : 'border-white/8 bg-white/[0.03]'
-                  }`}
-                >
-                  <div className="text-[12px] uppercase tracking-[0.18em] text-white/35">{tier.price}</div>
-                  <div className="mt-3 text-[24px] font-semibold text-[#f7ddb3]">{tier.title}</div>
-                  <div className="mt-2 text-[14px] leading-6 text-white/62">{tier.subtitle}</div>
+                {tiers.map((tier) => (
+                  (() => {
+                    const tierKey = tier.key as TierKey;
+                    const action = getTierAction(tierKey);
+                    const isCurrent = action === 'current';
+                    const isDowngrade = action === 'downgrade';
+                    const isTrialTier = action === 'trial';
 
-                  <div className="mt-5 space-y-3">
-                    {tier.features.map((feature) => (
-                      <div key={feature} className="rounded-[16px] border border-white/8 bg-black/20 px-4 py-3 text-[14px] leading-6 text-white/72">
-                        {feature}
+                    return (
+                  <article
+                      key={tier.key}
+                      className={`rounded-[28px] border px-5 py-5 shadow-[0_0_24px_rgba(255,184,28,0.08)] transition-transform duration-500 hover:-translate-y-1 ${
+                        tier.highlight
+                          ? 'border-[#ffc742]/28 bg-[linear-gradient(145deg,rgba(32,19,13,0.92),rgba(13,10,10,0.98))]'
+                          : 'border-white/8 bg-white/[0.03]'
+                      } ${
+                        isCurrent ? 'ring-1 ring-[#85d36c]/22' : ''
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <div className="text-[12px] uppercase tracking-[0.18em] text-white/35">{tier.price}</div>
+                          <div className="mt-3 text-[24px] font-semibold text-[#f7ddb3]">{tier.title}</div>
+                        </div>
+                        {isCurrent ? (
+                          <div className="rounded-full border border-[#85d36c]/20 bg-[#102117] px-3 py-1 text-[11px] uppercase tracking-[0.14em] text-[#85d36c]">
+                            Current
+                          </div>
+                        ) : isDowngrade ? (
+                          <div className="rounded-full border border-[#72caff]/18 bg-[#111f28] px-3 py-1 text-[11px] uppercase tracking-[0.14em] text-[#9edcff]">
+                            Downgrade
+                          </div>
+                        ) : isTrialTier ? (
+                          <div className="rounded-full border border-[#ffc742]/20 bg-[#ffc742]/10 px-3 py-1 text-[11px] uppercase tracking-[0.14em] text-[#ffd27e]">
+                            Trial
+                          </div>
+                        ) : null}
                       </div>
-                    ))}
-                  </div>
 
-                  <Link
-                    href="/login"
-                    className={`mt-6 inline-flex w-full items-center justify-center rounded-full px-5 py-3 text-[15px] font-semibold shadow-[0_0_18px_rgba(255,199,66,0.12)] ${
-                      tier.highlight
-                        ? 'bg-gradient-to-r from-[#ffc742] to-[#ffbe27] text-black'
-                        : 'border border-white/10 bg-white/[0.03] text-white/82 transition-colors hover:text-white'
-                    }`}
-                  >
-                    {tier.cta}
-                  </Link>
-                </article>
-              ))}
+                      <div className="mt-2 text-[14px] leading-6 text-white/62">{tier.subtitle}</div>
+
+                      <div className="mt-5 space-y-3">
+                        {tier.features.map((feature) => (
+                          <div key={feature} className="rounded-[16px] border border-white/8 bg-black/20 px-4 py-3 text-[14px] leading-6 text-white/72">
+                            {feature}
+                          </div>
+                        ))}
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleTierAction(tier)}
+                        disabled={isCurrent && actionLoading === tier.key}
+                        className={`mt-6 inline-flex w-full items-center justify-center rounded-full px-5 py-3 text-[15px] font-semibold shadow-[0_0_18px_rgba(255,199,66,0.12)] ${
+                          isCurrent
+                            ? 'border border-white/10 bg-white/[0.03] text-white/82 transition-colors hover:text-white'
+                            : tier.highlight
+                              ? 'bg-gradient-to-r from-[#ffc742] to-[#ffbe27] text-black'
+                              : isDowngrade
+                                ? 'border border-[#72caff]/18 bg-[#111f28] text-[#9edcff] transition-colors hover:text-white'
+                                : 'border border-white/10 bg-white/[0.03] text-white/82 transition-colors hover:text-white'
+                        }`}
+                      >
+                        {actionLoading === tier.key ? 'Opening...' : isCurrent ? 'Manage Current Plan' : getTierCtaLabel(tier)}
+                      </button>
+                    </article>
+                    );
+                  })()
+                ))}
             </div>
           </div>
         </section>
@@ -231,6 +404,12 @@ export default function PricingPage() {
             </div>
           </div>
         </section>
+
+        {actionMessage ? (
+          <section className="mb-5 rounded-[20px] border border-[#72caff]/18 bg-[#111f28] px-5 py-4 text-[14px] leading-7 text-[#d7ecff]">
+            {actionMessage}
+          </section>
+        ) : null}
       </div>
     </main>
   );
