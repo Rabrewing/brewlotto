@@ -7,6 +7,9 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 ## [Unreleased]
 
 ### 2026-05-12
+- Recorded that the AI provider layer is connected for commentary and suggestion routes with env-driven OpenAI / DeepSeek / NIM routing and BrewCommand usage logging.
+
+### 2026-05-12
 - Confirmed the Stripe CLI is authenticated in test mode and ready for webhook verification, with the Brewlotto sandbox account and config file readable in the local environment.
 - Restyled the trial upgrade banner to a thinner blue/glow treatment and made expired trial generate actions route to `/pricing` instead of leaving users stuck at a hard lockout.
 

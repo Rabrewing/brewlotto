@@ -14,6 +14,7 @@
 - The BrewU/onboarding tutorial is now Blob-backed as well, with captions, a transcript toggle, and a BrewU replay path at `/learn#tutorial`.
 - BrewCommand now has an internal onboarding reset action so the disclaimer/tutorial flow can be re-run without manual database edits during launch testing.
 - BrewCommand AI usage monitoring is being added so request count, tokens, latency, and estimated spend can be compared against tier pricing and customer billing.
+- The AI provider layer is connected end-to-end for commentary and suggestion routes via env-driven OpenAI / DeepSeek / NIM routing, and usage logging writes tokens/cost to BrewCommand; deterministic pick generation remains the launch default.
 - BrewCommand now has a notification bell for the admin surface, critical/email-worthy alerts are fanned out to one selected superadmin inbox by email, and the admin console shows recent alert delivery history alongside the shared alert center.
 - Sentry remains an external observability tool; BrewCommand should track product/business truth directly and only mirror Sentry status if we later decide we need a lightweight dashboard summary.
 - `SectionCard` is centralized in `components/brewlotto/dashboard/SectionCard.tsx` and the duplicated copies are gone.
