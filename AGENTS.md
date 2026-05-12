@@ -585,7 +585,7 @@ The system is considered complete when:
 | `/notifications` | 🔄 Partial | `notification_preferences` | `notifications.png` | Actual delivery, pagination |
 | `/settings` | 🔄 Partial | `user_settings` | `settings.png` | Theme application to UI, data export |
 | `/billing` | 🔄 Partial | `user_entitlements` | `subscription-and-billing.png` | Stripe integration (critical), billing history |
-| `/pricing` | 🔄 Partial | `subscription_tiers` + billing routes | `subscription-and-billing.png` | Real upgrade/downgrade state, direct Stripe checkout entry, signed-in plan actions |
+| `/pricing` | 🔄 Partial | `subscription_tiers` + billing routes | `subscription-and-billing.png` | Real upgrade/downgrade state, monthly/yearly cycle toggle, direct Stripe checkout entry, signed-in plan actions |
 | `/learn` | ❌ Shell | Hardcoded array | `brewu.png` | CMS/DB, progress tracking, real content |
 | `/legal` | ❌ Shell | Hardcoded summaries | None yet | Full policies, cookie consent |
 | `/logout` | ✅ Live | Supabase Auth | None yet | Confirm modal on direct URL access |
@@ -598,7 +598,7 @@ The system is considered complete when:
 
 **HIGH PRIORITY — Before V1 Launch:**
 1. **Mockup Alignment** — Visually QA all 15 mockup PNGs against rendered pages and lock designs, starting with Strategy Locker, Learn/BrewU, Billing, and Notifications
-2. **Pricing / Subscription Flow** — Convert `/pricing` into a real state-aware plan selection page that labels tiers as upgrade, current, or downgrade based on the signed-in account, and routes upgrades into Stripe checkout while downgrades/manages go through the billing portal.
+2. **Pricing / Subscription Polish** — Keep refining `/pricing` now that the state-aware plan selection and Stripe routing are live. Focus on visual hierarchy, monthly/yearly clarity, and the handoff between selection and the Billing manage surface.
 3. **Stripe Live Mode** — Flip the current test-mode billing path to live keys, then verify the production checkout/webhook path end-to-end
 4. **Landing Video Swap** — Replace the current landing-page reel with the watermark-free Blob asset once it lands locally, then deploy/update through the Vercel CLI path.
 5. **Customer Strategy Alerts** — When Brew detects meaningful strategy signals, write an event-driven `user_notifications` record and send email only for off-app or high-priority events, keeping the momentum meter as a single gauge and exposing hot/cold as separate cards. BrewCommand should surface the recent signals, recipients, and reasons in a dedicated Strategy Signals section so alerting can be audited.

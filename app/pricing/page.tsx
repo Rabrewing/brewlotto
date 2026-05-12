@@ -5,25 +5,37 @@ import { useMemo, useState } from 'react';
 import { useUserTier } from '@/hooks/useUserTier';
 import { supabase } from '@/lib/supabase/browserClient';
 
+type BillingInterval = 'month' | 'year';
+type TierAction = 'upgrade' | 'downgrade' | 'current' | 'trial';
+type TierKey = 'trial' | 'starter' | 'pro' | 'master';
+
 type TierCard = {
-  key: string;
+  key: TierKey;
   title: string;
   subtitle: string;
-  price: string;
+  monthlyPrice: string;
+  annualPrice: string;
+  annualSavings: string;
   features: string[];
-  cta: string;
   highlight?: boolean;
 };
-
-type TierAction = 'upgrade' | 'downgrade' | 'current' | 'trial';
-
-type TierKey = 'trial' | 'starter' | 'pro' | 'master';
 
 const TIER_ORDER: Record<TierKey, number> = {
   trial: 0,
   starter: 1,
   pro: 2,
   master: 3,
+};
+
+const BILLING_CYCLE_COPY: Record<BillingInterval, { label: string; helper: string }> = {
+  month: {
+    label: 'Monthly',
+    helper: 'Keep it flexible with month-to-month billing.',
+  },
+  year: {
+    label: 'Annual',
+    helper: 'Save 30% with annual billing.',
+  },
 };
 
 function formatTrialEndsAt(trialEndsAt: string | null) {
@@ -45,69 +57,59 @@ function formatTrialEndsAt(trialEndsAt: string | null) {
 
 export default function PricingPage() {
   const { currentTier, isTrial, trialEndsAt } = useUserTier();
+  const [billingInterval, setBillingInterval] = useState<BillingInterval>('month');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
 
   const trialDateLabel = useMemo(() => formatTrialEndsAt(trialEndsAt), [trialEndsAt]);
+  const currentTierKey = (currentTier || 'free') as TierKey | 'free';
+  const selectedCycle = BILLING_CYCLE_COPY[billingInterval];
+  const currentSessionLabel = isTrial ? 'Trial active' : currentTierKey === 'free' ? 'Free session' : currentTierKey;
 
   const tiers: TierCard[] = [
     {
       key: 'trial',
       title: '3-Day Trial',
-      subtitle: 'Best for testing the full vibe without long-term commitment.',
-      price: '$0',
-      features: [
-        'Full product preview across the app',
-        'Capped AI usage to control burn',
-        'Onboarding + dashboard + live route preview',
-      ],
-      cta: 'Start Trial',
+      subtitle: 'Best for testing the full experience before you commit.',
+      monthlyPrice: '$0',
+      annualPrice: '$0',
+      annualSavings: 'Trial stays capped either way.',
+      features: ['Full product preview', 'Capped AI usage', 'Onboarding, dashboard, and replay surfaces'],
       highlight: true,
     },
     {
       key: 'starter',
       title: 'Starter',
       subtitle: 'Entry paid tier for core commentary and saved picks.',
-      price: '$4.99/mo',
-      features: [
-        'Basic AI commentary',
-        'Saved picks and match tracking',
-        'Limited AI quota',
-      ],
-      cta: 'Choose Starter',
+      monthlyPrice: '$4.99/mo',
+      annualPrice: '$41.92/yr',
+      annualSavings: 'Save 30% annually.',
+      features: ['Basic AI commentary', 'Saved picks and match tracking', 'Limited AI quota'],
     },
     {
       key: 'pro',
       title: 'Pro',
       subtitle: 'Best value for active users who want deeper explanations.',
-      price: '$9.99/mo',
-      features: [
-        'Advanced explanations',
-        'Strategy comparisons',
-        'Higher AI quota and premium surfaces',
-      ],
-      cta: 'Choose Pro',
+      monthlyPrice: '$9.99/mo',
+      annualPrice: '$83.92/yr',
+      annualSavings: 'Save 30% annually.',
+      features: ['Advanced explanations', 'Strategy comparisons', 'Higher AI quota and premium surfaces'],
       highlight: true,
     },
     {
       key: 'master',
       title: 'Master',
       subtitle: 'Maximum analysis, voice, and premium access.',
-      price: '$19.99/mo',
-      features: [
-        'Voice commentary',
-        'Largest AI quota',
-        'Full premium strategy access',
-      ],
-      cta: 'Choose Master',
+      monthlyPrice: '$19.99/mo',
+      annualPrice: '$167.92/yr',
+      annualSavings: 'Save 30% annually.',
+      features: ['Voice commentary', 'Largest AI quota', 'Full premium strategy access'],
     },
   ];
 
-  const currentTierKey = (currentTier || 'free') as TierKey | 'free';
-
   function getTierAction(tierKey: TierKey): TierAction {
     if (tierKey === 'trial') {
-      return 'trial';
+      return isTrial ? 'current' : 'trial';
     }
 
     if (currentTierKey === tierKey) {
@@ -121,16 +123,24 @@ export default function PricingPage() {
     return 'downgrade';
   }
 
+  function getTierPrice(tier: TierCard) {
+    if (tier.key === 'trial') {
+      return billingInterval === 'year' ? tier.annualPrice : tier.monthlyPrice;
+    }
+
+    return billingInterval === 'year' ? tier.annualPrice : tier.monthlyPrice;
+  }
+
   function getTierCtaLabel(tier: TierCard) {
-    const action = getTierAction(tier.key as TierKey);
+    const action = getTierAction(tier.key);
 
     switch (action) {
       case 'trial':
         return 'Start Trial';
       case 'current':
-        return 'Current plan';
+        return tier.key === 'trial' ? 'Manage Trial in Billing' : 'Current plan';
       case 'downgrade':
-        return `Downgrade to ${tier.title}`;
+        return `Downgrade in Billing`;
       case 'upgrade':
       default:
         return `Upgrade to ${tier.title}`;
@@ -141,7 +151,7 @@ export default function PricingPage() {
     setActionLoading(tier.key);
     setActionMessage(null);
 
-    const action = getTierAction(tier.key as TierKey);
+    const action = getTierAction(tier.key);
 
     try {
       const { data: authData } = await supabase.auth.getUser();
@@ -157,23 +167,12 @@ export default function PricingPage() {
         return;
       }
 
-      if (action === 'current') {
-        const response = await fetch('/api/billing/portal', { method: 'POST' });
-        const payload = await response.json();
-
-        if (!response.ok) {
-          throw new Error(payload?.error?.message || 'Failed to open billing portal');
-        }
-
-        if (payload?.data?.portalUrl) {
-          window.location.assign(payload.data.portalUrl);
-          return;
-        }
-
-        throw new Error('Billing portal URL was not returned');
+      if (tier.key === 'trial' && action === 'current') {
+        window.location.assign('/billing');
+        return;
       }
 
-      if (action === 'downgrade') {
+      if (action === 'current' || action === 'downgrade') {
         const response = await fetch('/api/billing/portal', { method: 'POST' });
         const payload = await response.json();
 
@@ -196,7 +195,7 @@ export default function PricingPage() {
         },
         body: JSON.stringify({
           tierKey: tier.key,
-          interval: 'month',
+          interval: billingInterval,
         }),
       });
 
@@ -235,42 +234,67 @@ export default function PricingPage() {
               Home
             </Link>
             <Link
-              href="/login"
+              href="/billing"
               className="rounded-full bg-gradient-to-r from-[#ffc742] to-[#ffbe27] px-5 py-2 text-[14px] font-semibold text-black shadow-[0_0_18px_rgba(255,199,66,0.18)]"
             >
-              Sign In
+              Billing &amp; Subscription
             </Link>
           </div>
         </header>
 
-        <section className="grid gap-8 py-6 lg:grid-cols-[0.95fr_1.05fr] lg:py-10">
-          <div className="max-w-xl">
+        <section className="grid gap-8 py-6 lg:grid-cols-[1.02fr_0.98fr] lg:py-10">
+          <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-[#ffc742]/18 bg-[#ffc742]/10 px-3 py-1 text-[12px] uppercase tracking-[0.16em] text-[#ffd988]">
               <span className="h-2 w-2 rounded-full bg-[#ffcb4d] shadow-[0_0_8px_rgba(255,203,77,0.8)] animate-brew-pulse" />
-              3-day capped trial
+              State-aware plan selection
             </div>
             <h1 className="mt-5 text-[44px] font-semibold tracking-[-0.05em] text-[#fff1d3] sm:text-[56px] lg:text-[68px]">
-              Test the app. Cap the burn.
+              Choose a plan. Manage it in Billing.
             </h1>
-            <p className="mt-5 max-w-xl text-[17px] leading-8 text-white/68 sm:text-[18px]">
-              Use a short trial to prove the experience, then convert into paid access if the product feels worth it.
-              That keeps AI exposure controlled and avoids an unlimited free ride.
+            <p className="mt-5 max-w-2xl text-[17px] leading-8 text-white/68 sm:text-[18px]">
+              This page is for selection. Billing is for management. Pick a tier, route into Stripe when you need to upgrade,
+              and keep downgrades or active subscriptions in the Billing surface so the flow stays clean.
             </p>
 
             <div className="mt-7 rounded-[22px] border border-[#ffc742]/16 bg-[linear-gradient(145deg,rgba(30,20,13,0.78),rgba(8,8,8,0.96))] px-5 py-5">
-              <div className="text-[13px] uppercase tracking-[0.18em] text-white/38">Recommended launch setup</div>
-              <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-4 py-4 text-[14px] leading-6 text-white/72">
-                  3-day trial only
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <div className="text-[13px] uppercase tracking-[0.18em] text-white/38">Billing cycle</div>
+                  <div className="mt-2 text-[16px] leading-7 text-white/70">{selectedCycle.helper}</div>
                 </div>
-                <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-4 py-4 text-[14px] leading-6 text-white/72">
-                  AI starts in Starter
+                <div className="inline-flex rounded-full border border-white/10 bg-white/[0.04] p-1">
+                  {(['month', 'year'] as BillingInterval[]).map((interval) => {
+                    const active = billingInterval === interval;
+                    return (
+                      <button
+                        key={interval}
+                        type="button"
+                        onClick={() => setBillingInterval(interval)}
+                        className={`rounded-full px-4 py-2 text-[13px] font-semibold transition-colors ${
+                          active
+                            ? 'bg-[#ffc742] text-black'
+                            : 'text-white/68 hover:text-white'
+                        }`}
+                      >
+                        {BILLING_CYCLE_COPY[interval].label}
+                      </button>
+                    );
+                  })}
                 </div>
-                <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-4 py-4 text-[14px] leading-6 text-white/72">
-                  30% annual savings
+              </div>
+
+              <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-4 py-4">
+                  <div className="text-[11px] uppercase tracking-[0.16em] text-white/35">Trial cap</div>
+                  <div className="mt-2 text-[14px] leading-6 text-white/72">3 days of full preview with limited AI usage.</div>
                 </div>
-                <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-4 py-4 text-[14px] leading-6 text-white/72">
-                  No unlimited tier
+                <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-4 py-4">
+                  <div className="text-[11px] uppercase tracking-[0.16em] text-white/35">Upgrade path</div>
+                  <div className="mt-2 text-[14px] leading-6 text-white/72">Upgrades go through Stripe checkout immediately.</div>
+                </div>
+                <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-4 py-4">
+                  <div className="text-[11px] uppercase tracking-[0.16em] text-white/35">Downgrades</div>
+                  <div className="mt-2 text-[14px] leading-6 text-white/72">Current plans and downgrades route through Billing.</div>
                 </div>
               </div>
             </div>
@@ -286,23 +310,29 @@ export default function PricingPage() {
                 href="/billing"
                 className="inline-flex items-center justify-center rounded-full border border-white/12 bg-white/[0.03] px-7 py-3 text-[15px] text-white/80 transition-colors hover:text-white"
               >
-                View Billing &amp; Subscription
+                Open Billing &amp; Subscription
               </Link>
             </div>
 
             {isTrial && trialDateLabel ? (
               <div className="mt-6 rounded-[20px] border border-[#72caff]/18 bg-[linear-gradient(145deg,rgba(19,22,31,0.76),rgba(10,10,12,0.96))] px-5 py-5 text-[15px] leading-7 text-white/70">
-                Your trial is active and ends on {trialDateLabel}. It unlocks the full product preview for 3 days with capped AI usage so users can see the whole system before choosing a paid tier.
+                Your trial is active and ends on {trialDateLabel}. It unlocks the full product preview for 3 days with capped AI usage.
               </div>
             ) : null}
 
             <div className="mt-6 rounded-[20px] border border-white/10 bg-white/[0.03] px-5 py-5 text-[15px] leading-7 text-white/68">
-              Current session tier: <span className="text-[#f7ddb3]">{currentTier}</span>
-              {currentTier !== 'free' ? (
+              Current session tier: <span className="text-[#f7ddb3]">{currentSessionLabel}</span>
+              {currentTier !== 'free' || isTrial ? (
                 <span className="ml-2 text-white/48">
-                  {currentTier === 'starter' ? 'You can upgrade to Pro or Master, or manage a downgrade in Billing.' : ''}
-                  {currentTier === 'pro' ? 'You can upgrade to Master or downgrade to Starter in Billing.' : ''}
-                  {currentTier === 'master' ? 'You can downgrade in Billing if you want a lower tier.' : ''}
+                  {isTrial
+                    ? 'Manage the active trial or move into a paid tier from Billing.'
+                    : currentTier === 'starter'
+                      ? 'Upgrade to Pro or Master, or manage a downgrade in Billing.'
+                      : currentTier === 'pro'
+                        ? 'Upgrade to Master or downgrade to Starter in Billing.'
+                        : currentTier === 'master'
+                          ? 'Downgrade in Billing if you want a lower tier.'
+                          : ''}
                 </span>
               ) : null}
             </div>
@@ -310,97 +340,154 @@ export default function PricingPage() {
 
           <div className="relative">
             <div className="absolute -inset-6 rounded-[34px] bg-[#ffc742]/8 blur-2xl animate-brew-drift" />
-            <div className="relative grid gap-4 xl:grid-cols-4">
-                {tiers.map((tier) => (
-                  (() => {
-                    const tierKey = tier.key as TierKey;
-                    const action = getTierAction(tierKey);
-                    const isCurrent = action === 'current';
-                    const isDowngrade = action === 'downgrade';
-                    const isTrialTier = action === 'trial';
+            <div className="relative rounded-[28px] border border-white/8 bg-[linear-gradient(160deg,rgba(17,14,12,0.94),rgba(7,7,8,0.98))] p-5 shadow-[0_0_28px_rgba(255,184,28,0.08)]">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <div className="text-[12px] uppercase tracking-[0.18em] text-white/35">Session summary</div>
+                  <div className="mt-2 text-[26px] font-semibold tracking-[-0.04em] text-[#f7ddb3]">
+                    {isTrial ? 'Trial active' : currentTierKey === 'free' ? 'Plan selection ready' : `${currentTierKey} plan`}
+                  </div>
+                </div>
+                <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] uppercase tracking-[0.14em] text-white/58">
+                  {selectedCycle.label}
+                </div>
+              </div>
 
-                    return (
-                  <article
-                      key={tier.key}
-                      className={`rounded-[28px] border px-5 py-5 shadow-[0_0_24px_rgba(255,184,28,0.08)] transition-transform duration-500 hover:-translate-y-1 ${
-                        tier.highlight
-                          ? 'border-[#ffc742]/28 bg-[linear-gradient(145deg,rgba(32,19,13,0.92),rgba(13,10,10,0.98))]'
-                          : 'border-white/8 bg-white/[0.03]'
-                      } ${
-                        isCurrent ? 'ring-1 ring-[#85d36c]/22' : ''
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <div className="text-[12px] uppercase tracking-[0.18em] text-white/35">{tier.price}</div>
-                          <div className="mt-3 text-[24px] font-semibold text-[#f7ddb3]">{tier.title}</div>
-                        </div>
-                        {isCurrent ? (
-                          <div className="rounded-full border border-[#85d36c]/20 bg-[#102117] px-3 py-1 text-[11px] uppercase tracking-[0.14em] text-[#85d36c]">
-                            Current
-                          </div>
-                        ) : isDowngrade ? (
-                          <div className="rounded-full border border-[#72caff]/18 bg-[#111f28] px-3 py-1 text-[11px] uppercase tracking-[0.14em] text-[#9edcff]">
-                            Downgrade
-                          </div>
-                        ) : isTrialTier ? (
-                          <div className="rounded-full border border-[#ffc742]/20 bg-[#ffc742]/10 px-3 py-1 text-[11px] uppercase tracking-[0.14em] text-[#ffd27e]">
-                            Trial
-                          </div>
-                        ) : null}
-                      </div>
-
-                      <div className="mt-2 text-[14px] leading-6 text-white/62">{tier.subtitle}</div>
-
-                      <div className="mt-5 space-y-3">
-                        {tier.features.map((feature) => (
-                          <div key={feature} className="rounded-[16px] border border-white/8 bg-black/20 px-4 py-3 text-[14px] leading-6 text-white/72">
-                            {feature}
-                          </div>
-                        ))}
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => handleTierAction(tier)}
-                        disabled={isCurrent && actionLoading === tier.key}
-                        className={`mt-6 inline-flex w-full items-center justify-center rounded-full px-5 py-3 text-[15px] font-semibold shadow-[0_0_18px_rgba(255,199,66,0.12)] ${
-                          isCurrent
-                            ? 'border border-white/10 bg-white/[0.03] text-white/82 transition-colors hover:text-white'
-                            : tier.highlight
-                              ? 'bg-gradient-to-r from-[#ffc742] to-[#ffbe27] text-black'
-                              : isDowngrade
-                                ? 'border border-[#72caff]/18 bg-[#111f28] text-[#9edcff] transition-colors hover:text-white'
-                                : 'border border-white/10 bg-white/[0.03] text-white/82 transition-colors hover:text-white'
-                        }`}
-                      >
-                        {actionLoading === tier.key ? 'Opening...' : isCurrent ? 'Manage Current Plan' : getTierCtaLabel(tier)}
-                      </button>
-                    </article>
-                    );
-                  })()
-                ))}
+              <div className="mt-5 space-y-3">
+                <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-4 py-4">
+                  <div className="text-[11px] uppercase tracking-[0.16em] text-white/35">What this page does</div>
+                  <div className="mt-2 text-[14px] leading-6 text-white/72">
+                    Choose a tier, then route to Stripe checkout or the billing portal based on what you already own.
+                  </div>
+                </div>
+                <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-4 py-4">
+                  <div className="text-[11px] uppercase tracking-[0.16em] text-white/35">Current cycle</div>
+                  <div className="mt-2 text-[14px] leading-6 text-white/72">
+                    {selectedCycle.helper} {billingInterval === 'year' ? 'The paid tiers display annual totals with the 30% savings already baked in.' : 'Switch to annual to compare the lower total cost.'}
+                  </div>
+                </div>
+                <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-4 py-4">
+                  <div className="text-[11px] uppercase tracking-[0.16em] text-white/35">Where management happens</div>
+                  <div className="mt-2 text-[14px] leading-6 text-white/72">
+                    Active plans, subscription changes, and billing portal actions belong in Billing &amp; Subscription.
+                  </div>
+                </div>
+              </div>
             </div>
+          </div>
+        </section>
+
+        <section className="pb-6">
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <div className="text-[13px] uppercase tracking-[0.18em] text-white/38">Plan ladder</div>
+              <div className="mt-2 text-[18px] leading-7 text-white/68">
+                Pick the tier that matches your usage. Annual billing saves 30% on paid plans.
+              </div>
+            </div>
+            <div className="hidden rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-[12px] uppercase tracking-[0.18em] text-white/45 lg:block">
+              Trial stays capped; paid tiers expand AI access
+            </div>
+          </div>
+
+          <div className="mt-5 grid gap-4 xl:grid-cols-4">
+            {tiers.map((tier) => {
+              const action = getTierAction(tier.key);
+              const isCurrent = action === 'current';
+              const isDowngrade = action === 'downgrade';
+              const isTrialTier = tier.key === 'trial';
+              const price = getTierPrice(tier);
+
+              return (
+                <article
+                  key={tier.key}
+                  className={`rounded-[28px] border px-5 py-5 shadow-[0_0_24px_rgba(255,184,28,0.08)] transition-transform duration-500 hover:-translate-y-1 ${
+                    tier.highlight
+                      ? 'border-[#ffc742]/28 bg-[linear-gradient(145deg,rgba(32,19,13,0.92),rgba(13,10,10,0.98))]'
+                      : 'border-white/8 bg-white/[0.03]'
+                  } ${isCurrent ? 'ring-1 ring-[#85d36c]/22' : ''}`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="text-[12px] uppercase tracking-[0.18em] text-white/35">{price}</div>
+                      <div className="mt-3 text-[24px] font-semibold text-[#f7ddb3]">{tier.title}</div>
+                    </div>
+                    {isCurrent ? (
+                      <div className="rounded-full border border-[#85d36c]/20 bg-[#102117] px-3 py-1 text-[11px] uppercase tracking-[0.14em] text-[#85d36c]">
+                        Current
+                      </div>
+                    ) : isDowngrade ? (
+                      <div className="rounded-full border border-[#72caff]/18 bg-[#111f28] px-3 py-1 text-[11px] uppercase tracking-[0.14em] text-[#9edcff]">
+                        Downgrade
+                      </div>
+                    ) : isTrialTier ? (
+                      <div className="rounded-full border border-[#ffc742]/20 bg-[#ffc742]/10 px-3 py-1 text-[11px] uppercase tracking-[0.14em] text-[#ffd27e]">
+                        Trial
+                      </div>
+                    ) : (
+                      <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] uppercase tracking-[0.14em] text-white/48">
+                        {billingInterval === 'year' ? 'Annual' : 'Monthly'}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-2 text-[14px] leading-6 text-white/62">{tier.subtitle}</div>
+
+                  <ul className="mt-5 space-y-3">
+                    {tier.features.map((feature) => (
+                      <li key={feature} className="flex items-start gap-3 text-[14px] leading-6 text-white/74">
+                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#ffc742] shadow-[0_0_10px_rgba(255,199,66,0.7)]" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="mt-5 rounded-[18px] border border-white/8 bg-black/20 px-4 py-4">
+                    <div className="text-[11px] uppercase tracking-[0.16em] text-white/35">Billing note</div>
+                    <div className="mt-2 text-[13px] leading-6 text-white/68">
+                      {tier.annualSavings}
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleTierAction(tier)}
+                    disabled={actionLoading !== null}
+                    className={`mt-6 inline-flex w-full items-center justify-center rounded-full px-5 py-3 text-[15px] font-semibold shadow-[0_0_18px_rgba(255,199,66,0.12)] ${
+                      isCurrent
+                        ? 'border border-white/10 bg-white/[0.03] text-white/82 transition-colors hover:text-white'
+                        : tier.highlight
+                          ? 'bg-gradient-to-r from-[#ffc742] to-[#ffbe27] text-black'
+                          : isDowngrade
+                            ? 'border border-[#72caff]/18 bg-[#111f28] text-[#9edcff] transition-colors hover:text-white'
+                            : 'border border-white/10 bg-white/[0.03] text-white/82 transition-colors hover:text-white'
+                    }`}
+                  >
+                    {actionLoading === tier.key ? 'Opening...' : getTierCtaLabel(tier)}
+                  </button>
+                </article>
+              );
+            })}
           </div>
         </section>
 
         <section className="grid gap-4 pb-6 lg:grid-cols-3">
           <div className="rounded-[24px] border border-white/8 bg-white/[0.03] px-5 py-5">
-            <div className="text-[14px] uppercase tracking-[0.16em] text-white/35">Trial policy</div>
+            <div className="text-[14px] uppercase tracking-[0.16em] text-white/35">Pricing selects</div>
             <div className="mt-2 text-[16px] leading-7 text-white/68">
-              Keep the trial short and capped. Give users the full product preview without opening a long, expensive free period.
+              This surface helps the customer choose a tier and move directly into Stripe checkout when they need to upgrade.
             </div>
           </div>
           <div className="rounded-[24px] border border-white/8 bg-white/[0.03] px-5 py-5">
-            <div className="text-[14px] uppercase tracking-[0.16em] text-white/35">Upgrade path</div>
+            <div className="text-[14px] uppercase tracking-[0.16em] text-white/35">Billing manages</div>
             <div className="mt-2 text-[16px] leading-7 text-white/68">
-              Convert trial users into Starter, Pro, or Master after onboarding and a few live interactions, not before they see the value.
+              Active plans, invoices, and plan changes stay in Billing so the subscription state has one clear home.
             </div>
           </div>
           <div className="rounded-[24px] border border-white/8 bg-white/[0.03] px-5 py-5">
-            <div className="text-[14px] uppercase tracking-[0.16em] text-white/35">Cost control</div>
+            <div className="text-[14px] uppercase tracking-[0.16em] text-white/35">Annual savings</div>
             <div className="mt-2 text-[16px] leading-7 text-white/68">
-              Unlimited AI access is the wrong launch default. Start AI in Starter, expand it through Pro and Master, then let Stripe and entitlements enforce the rest.
+              The paid tiers show a 30% annual discount so the customer can compare short-term flexibility against lower total cost.
             </div>
           </div>
         </section>

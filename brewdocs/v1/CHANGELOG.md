@@ -31,7 +31,7 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Added a BrewU Fireball explainer so NC-only Fireball is clearly framed as a draw-date-specific settlement modifier instead of a trend signal.
 - Added prize-table snapshots to BrewU so fixed ladders can be shown directly and CA pari-mutuel games can be labeled as draw-specific certified values instead of fake static payouts.
 - Tightened the Strategy Locker metric presentation into a cleaner grid and shortened BrewU Fireball / prize-table copy for a more premium mockup-aligned read.
-- Started converting `/pricing` into a real state-aware plan-selection surface so upgrade, current, and downgrade labels can route properly into checkout or the billing portal.
+- Converted `/pricing` into a real state-aware plan-selection surface with a monthly/yearly billing toggle, clearer current/upgrade/downgrade labels, and direct routing into Stripe checkout or the billing portal depending on account state.
 - Switched `My Picks` to saved-pick-only history with date dividers so confirmed-play nudges land on explicit user-saved entries instead of every generated locker run, and stopped new predictions from auto-saving by default.
 - Upgraded settlement classification to distinguish exact-order, box-style, and standard match-number outcomes more cleanly.
 - Centralized support intake, support tickets, BrewCommand notifications, and customer resolution emails.
