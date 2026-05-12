@@ -100,8 +100,8 @@ official source → ingestion → Supabase → freshness view → API → UI
 
 | Item | Status |
 |------|--------|
-| Trial expiry banner | ✅ Live on dashboard, billing, and profile |
-| Upgrade prompts | ✅ Contextual only at decision points; no periodic nagging |
+| Trial expiry banner | ✅ Live on dashboard, billing, and profile; now blue/thin with a soft glow and trial-ended CTA handoff |
+| Upgrade prompts | ✅ Contextual only at decision points; expired trial generate actions redirect to `/pricing` instead of hard-locking the app |
 
 ### BrewCommand Test Tools
 

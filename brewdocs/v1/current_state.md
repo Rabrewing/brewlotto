@@ -22,6 +22,7 @@
 - Strategy Locker, Billing, Notifications, Settings, Profile, Results, My Picks, Learn, Legal, and Admin routes all exist in the App Router.
 - Strategy Locker saves now route through a server-side save endpoint and the underlying `user_saved_strategies` table supports multiple saved strategies per user, one row per strategy.
 - Strategy Locker currently acts as a saved-strategy library and entitlement surface, and it now exposes a real run-preview action from each card while the entitlement ladder is compact by default; the dashboard `Generate Numbers` action remains the main app generate path.
+- The trial banner is now a thin blue/glowing strip on dashboard, billing, and profile; when the trial has ended, the dashboard `Generate Numbers` action routes to `/pricing` so the user can convert without being fully locked out of the app.
 - Strategy Locker now shows compact confirmed-play / hit-rate / win-rate chips beside each strategy card, and the same confirmed-play source now flows into the stats/performance summary so the ratio is based on actual logged plays rather than loose prediction closeness.
 - Dashboard/results freshness gating is real and blocks stale/failed output.
 - Login is temporarily locked to BrewCommand superadmin allowlist accounts only; remove that gate before public V1 launch.

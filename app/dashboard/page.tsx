@@ -18,6 +18,7 @@ import {
 } from '@/components/brewlotto/dashboard';
 import { resolveDashboardGameConfig } from '@/lib/dashboard/game-config';
 import { usePreferredState } from '@/hooks/usePreferredState';
+import { useUserTier } from '@/hooks/useUserTier';
 
 interface DashboardStats {
   hotNumbers: number[];
@@ -117,6 +118,7 @@ function normalizePredictionResponse(prediction: StoredPredictionResponse): Dash
 
 export default function DashboardPage() {
   const { preferredState } = usePreferredState();
+  const { currentTier, isTrial, trialEndsAt } = useUserTier();
   const [selectedGame, setSelectedGame] = useState<GameId>('pick3');
   const [isGenerating, setIsGenerating] = useState(false);
   const [commentary, setCommentary] = useState<DashboardCommentary>(EMPTY_COMMENTARY);
@@ -135,6 +137,7 @@ export default function DashboardPage() {
   const freshnessBlocksLiveData = freshness.status === 'stale' || freshness.status === 'failed';
   const effectiveStats = freshnessBlocksLiveData ? EMPTY_STATS : stats;
   const effectiveStatsFallback = freshnessBlocksLiveData ? true : statsFallback;
+  const trialExpired = Boolean(trialEndsAt) && (isTrial || currentTier === 'free') && new Date(trialEndsAt).getTime() < Date.now();
   const effectiveCommentary = freshnessBlocksLiveData
     ? {
         ...EMPTY_COMMENTARY,
@@ -382,6 +385,9 @@ export default function DashboardPage() {
           onClick={handleGenerate}
           loading={isGenerating}
           disabled={freshnessBlocksLiveData}
+          expiredTrial={trialExpired}
+          upgradeHref="/pricing"
+          upgradeLabel="Upgrade to Continue"
         />
 
         <UtilityPills freshnessStatus={freshness.status} game={selectedGame} />

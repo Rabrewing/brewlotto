@@ -8,6 +8,7 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 
 ### 2026-05-12
 - Confirmed the Stripe CLI is authenticated in test mode and ready for webhook verification, with the Brewlotto sandbox account and config file readable in the local environment.
+- Restyled the trial upgrade banner to a thinner blue/glow treatment and made expired trial generate actions route to `/pricing` instead of leaving users stuck at a hard lockout.
 
 ### 2026-05-10
 - Widened the shared dashboard shell for desktop and tablet while preserving the current mobile layout.
