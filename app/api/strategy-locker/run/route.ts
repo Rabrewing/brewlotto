@@ -273,8 +273,16 @@ export async function POST(request: NextRequest) {
 
     await ensureProfileRows(admin, user.id, user.email || null);
 
+    const GAME_KEY_MAP: Record<string, string> = {
+      pick3: 'pick3',
+      pick4: 'pick4',
+      cash5: 'cash5',
+      powerball: 'powerball',
+      mega: 'mega_millions',
+    };
+
     const homeState = (requestState || await resolveHomeState(admin, user.id)) as 'NC' | 'CA';
-    const gameKey = requestGameKey || 'pick3';
+    const gameKey = GAME_KEY_MAP[requestGameKey] || requestGameKey || 'pick3';
     const drawWindow = requestDrawWindow || null;
 
     const { data: gameRow, error: gameError } = await admin
