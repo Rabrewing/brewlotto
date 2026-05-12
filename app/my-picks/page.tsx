@@ -34,6 +34,17 @@ interface PredictionRecord {
   predicted_numbers?: number[] | null;
   bonus_number?: number | null;
   is_saved?: boolean | null;
+  draw_date?: string | null;
+  draw_time?: string | null;
+  matchInfo?: {
+    drawDate: string;
+    drawWindow: string;
+    primaryMatch: number;
+    bonusMatch: boolean;
+    totalMatch: number;
+    drawNumbers: number[];
+    drawBonus: number | null;
+  } | null;
   prediction_explanations?: PredictionExplanation[] | null;
   prediction_strategy_scores?: StrategyScore[] | null;
 }
@@ -254,6 +265,19 @@ function PickCard({
           />
         ) : null}
       </div>
+
+      {prediction.matchInfo ? (
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <div className="rounded-full border border-[#72caff]/20 bg-[#72caff]/10 px-3 py-1 text-[12px] font-medium text-[#9fdcff]">
+            {prediction.matchInfo.totalMatch === 0
+              ? 'No match this draw'
+              : `Matched ${prediction.matchInfo.primaryMatch} number${prediction.matchInfo.primaryMatch === 1 ? '' : 's'}${prediction.matchInfo.bonusMatch ? ' + bonus' : ''} ${prediction.matchInfo.totalMatch === 5 ? '— Jackpot!' : ''}`}
+          </div>
+          <div className="text-[12px] text-white/42">
+            vs {prediction.matchInfo.drawDate} {prediction.matchInfo.drawWindow}
+          </div>
+        </div>
+      ) : null}
 
       <div className="mt-4 text-[14px] leading-7 text-white/66">{getPredictionSummary(prediction)}</div>
 

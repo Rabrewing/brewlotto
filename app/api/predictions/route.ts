@@ -12,6 +12,89 @@ const getSupabase = () => createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+function intersectCount(source: number[], target: number[]) {
+  const remaining = [...target];
+  let hits = 0;
+  for (const value of source) {
+    const index = remaining.indexOf(value);
+    if (index >= 0) {
+      hits += 1;
+      remaining.splice(index, 1);
+    }
+  }
+  return hits;
+}
+
+const GAME_KEY_MAP: Record<string, string> = {
+  pick3: 'pick3',
+  pick4: 'pick4',
+  cash5: 'cash5',
+  powerball: 'powerball',
+  mega_millions: 'mega_millions',
+  mega: 'mega_millions',
+};
+
+async function attachMatchInfo(supabase: ReturnType<typeof createClient>, predictions: any[]) {
+  const enriched: any[] = [];
+
+  for (const prediction of predictions) {
+    const game = prediction.game;
+    const state = prediction.state;
+    const drawDate = prediction.draw_date;
+    const drawWindow = prediction.draw_time;
+    const gameKey = GAME_KEY_MAP[game];
+    let matchInfo: Record<string, unknown> | null = null;
+
+    if (gameKey && state && drawDate && drawWindow) {
+      const stateCode = state === 'MULTI' ? 'NC' : state;
+      const { data: gameRow } = await supabase
+        .from('lottery_games')
+        .select('id, has_bonus')
+        .eq('game_key', gameKey)
+        .eq('state_code', stateCode)
+        .maybeSingle();
+
+      if (gameRow) {
+        const { data: draws } = await supabase
+          .from('official_draws')
+          .select('primary_numbers, bonus_numbers')
+          .eq('game_id', gameRow.id)
+          .eq('draw_date', drawDate)
+          .eq('draw_window_label', drawWindow);
+
+        if (draws && draws.length > 0) {
+          const draw = draws[0];
+          const predictedNumbers = Array.isArray(prediction.predicted_numbers)
+            ? prediction.predicted_numbers.filter((v: unknown): v is number => typeof v === 'number')
+            : [];
+          const drawNumbers = Array.isArray(draw.primary_numbers)
+            ? draw.primary_numbers.filter((v: unknown): v is number => typeof v === 'number')
+            : [];
+          const drawBonus = Array.isArray(draw.bonus_numbers) ? draw.bonus_numbers[0] : null;
+          const predictedBonus = prediction.bonus_number ? Number(prediction.bonus_number) : null;
+
+          const primaryMatch = intersectCount(predictedNumbers, drawNumbers);
+          const bonusMatch = drawBonus !== null && predictedBonus !== null && Number(drawBonus) === predictedBonus;
+
+          matchInfo = {
+            drawDate,
+            drawWindow,
+            primaryMatch,
+            bonusMatch,
+            totalMatch: primaryMatch + (bonusMatch ? 1 : 0),
+            drawNumbers,
+            drawBonus,
+          };
+        }
+      }
+    }
+
+    enriched.push({ ...prediction, matchInfo });
+  }
+
+  return enriched;
+}
+
 function getWorstFreshnessStatus(statuses: string[]) {
   const rank = { failed: 0, stale: 1, delayed: 2, healthy: 3, unknown: 4 } as const;
   return [...statuses].sort((a, b) => (rank[a as keyof typeof rank] ?? 5) - (rank[b as keyof typeof rank] ?? 5))[0] || 'unknown';
@@ -75,10 +158,13 @@ export async function GET(request: NextRequest) {
         { status: 500 }
       );
     }
-    
+
+    const predictions = data || [];
+    const enriched = await attachMatchInfo(supabase, predictions);
+
     return NextResponse.json({
       success: true,
-      data: data || [],
+      data: enriched,
       meta: { total: count || 0, limit, offset }
     });
   } catch (error: any) {
