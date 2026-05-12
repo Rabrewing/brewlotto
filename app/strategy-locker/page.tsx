@@ -529,6 +529,7 @@ export default function StrategyLockerPage() {
               </div>
             </section>
 
+            <div className="text-[12px] uppercase tracking-[0.16em] text-white/38">Choose your game to strategize in</div>
             <GameTabs selectedGame={selectedGame} onSelect={setSelectedGame} stateCode={preferredState} />
 
             {hasDrawWindow ? (
