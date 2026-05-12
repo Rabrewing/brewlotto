@@ -606,6 +606,7 @@ The system is considered complete when:
 7. **Results History / Win Ratios** — Continue tightening the confirmed-play workflow, keep `/results` grouped by draw date/time with the 3/6 month history toggle, surface win ratios by strategy/game/state in `/stats` and BrewCommand, and continue feeding the same confirmed-play signal into the Strategy Locker ratio chips and stats summaries.
 8. **Ingestion Midday / Evening Check** — Verified: Cloud Scheduler → Cloud Run ingestion path is healthy for midday and evening runs after the schedule change so NC/CA draw windows are not regressing.
 9. **Momentum Meter Regression** — Verified: the dashboard momentum gauge now shows a centered trend-strength value instead of flattening to zero, and keep an eye on whether any game-specific data shape still suppresses it.
+10. **Downgrade Rollback Check** — Stripe downgrades are already routed through the billing portal and `customer.subscription.updated` updates entitlements; keep this behavior documented and verify it in Stripe test mode before live mode.
 
 **ONBOARDING STATUS:**
 | Component | Status |

@@ -33,6 +33,7 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Tightened the Strategy Locker metric presentation into a cleaner grid and shortened BrewU Fireball / prize-table copy for a more premium mockup-aligned read.
 - Converted `/pricing` into a real state-aware plan-selection surface with a monthly/yearly billing toggle, clearer current/upgrade/downgrade labels, and direct routing into Stripe checkout or the billing portal depending on account state.
 - Normalized the route-map docs so `/pricing` is recorded as the state-aware selection surface and `Billing` remains the authenticated subscription-management destination.
+- Documented that Stripe downgrades are portal-managed and that `customer.subscription.updated` is the rollback source of truth for entitlement changes.
 - Switched `My Picks` to saved-pick-only history with date dividers so confirmed-play nudges land on explicit user-saved entries instead of every generated locker run, and stopped new predictions from auto-saving by default.
 - Upgraded settlement classification to distinguish exact-order, box-style, and standard match-number outcomes more cleanly.
 - Centralized support intake, support tickets, BrewCommand notifications, and customer resolution emails.

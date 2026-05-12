@@ -7,6 +7,7 @@
 
 ### ✅ Already Real
 - Public landing page, login page, pricing page, onboarding flow, and dashboard entry points are live on the `brew2-overhaul` preview branch; production tracks `brewlotto-v1`.
+- Stripe downgrades are currently managed through the billing portal, and the webhook path reflects the new tier via `customer.subscription.updated` so entitlements roll back cleanly when Stripe changes the subscription.
 - Landing reel now uses a Vercel Blob-backed source with muted autoplay plus explicit `Play with sound`, `Replay`, and `Expand` controls.
 - Landing reel now starts in its expanded movie-style state by default and includes captions plus a transcript toggle for accessibility.
 - The BrewU/onboarding tutorial is now Blob-backed as well, with captions, a transcript toggle, and a BrewU replay path at `/learn#tutorial`.
@@ -46,6 +47,7 @@
 ### ⚠️ Still Partial Or Needs Verification
 - `scripts/ingestionScheduler.js` has been archived; Cloud Scheduler + Cloud Run are the active production ingestion path.
 - Billing has checkout, webhook, and customer portal API scaffolding, and the remaining step is live-mode verification plus production transaction confirmation.
+- Billing downgrades are portal-managed rather than custom-coded; the webhook should remain the source of truth for tier rollback and entitlement updates.
 - Strategy Locker is live and tier-aware, the save/favorite flow is server-backed, the run-preview action is exposed, and the entitlement snapshot now collapses by default; the remaining verification is whether each registry label still matches the intended strategy behavior.
 - The dashboard "Generate Numbers" action is wired to `POST /api/predictions`, and a historical-style strategy smoke test now covers the current strategy engine across Pick 3, Pick 4, Cash 5, Powerball, and Mega Millions ranges.
 - The live strategy engine is intentionally narrow in V1: `lib/prediction/strategyEngine.js` currently registers the core deterministic trio (`poisson`, `momentum`, `markov`) plus the ensemble combiner, while the older `lib/strategies/*.js` wrappers and `hooks/usePredictionEngine.js` are legacy compatibility layers that should not be mistaken for the current spec truth.
