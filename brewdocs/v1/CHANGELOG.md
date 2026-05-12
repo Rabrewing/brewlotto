@@ -56,6 +56,11 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Replaced flat strategy brand names with tiered ladder naming: HeatCheck → HeatCheck II → III → IV, HeatWave → II → III, PulseSync → II. Each family progresses across tier unlocks instead of showing unrelated brand names.
 - Assigned Lucide icons per strategy family (Flame for HeatCheck, TrendingUp for HeatWave, Brain for PulseSync, Sparkles for SequenceX) with branded colors (amber, blue, purple, teal).
 - Updated AGENTS.md tiered naming entry, CHANGELOG.md, and strategy-engine-cleanup case study.
+- Added game selector (GameTabs) and draw window toggle (Midday/Evening) to Strategy Locker so users can strategize for any game, not just Pick 3.
+- Updated the run route to accept gameKey, state, and drawWindow from the request body instead of hardcoding Pick 3.
+- Updated My Picks "Open Strategy Locker" link to pass game/state as URL query params so the locker opens on the right game.
+- Added game and state fields to user_strategy_activity logging for per-game strategy tracking.
+- Documented in brewdocs/v1/game-aware-strategy-locker-2026-05-11.md.
 ### 2026-05-07
 - Added BrewU support intake, support screenshot storage, canonical play-log bridge, settlement sweep, and customer notifications planning.
 - Added timestamp discipline to AGENTS and Brewdocs so future AI sessions can read state without guessing.

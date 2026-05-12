@@ -183,6 +183,9 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json().catch(() => ({}));
     const strategyId = String(body?.strategyId || '').trim();
+    const requestGameKey = String(body?.gameKey || '').trim();
+    const requestState = String(body?.state || '').trim();
+    const requestDrawWindow = String(body?.drawWindow || '').trim();
 
     if (!strategyId) {
       return NextResponse.json(
@@ -270,8 +273,9 @@ export async function POST(request: NextRequest) {
 
     await ensureProfileRows(admin, user.id, user.email || null);
 
-    const homeState = await resolveHomeState(admin, user.id);
-    const gameKey = 'pick3';
+    const homeState = (requestState || await resolveHomeState(admin, user.id)) as 'NC' | 'CA';
+    const gameKey = requestGameKey || 'pick3';
+    const drawWindow = requestDrawWindow || null;
 
     const { data: gameRow, error: gameError } = await admin
       .from('lottery_games')
@@ -371,7 +375,7 @@ export async function POST(request: NextRequest) {
       state: homeState,
       game: gameRow.game_key,
       target_draw_date: new Date().toISOString().slice(0, 10),
-      target_draw_window_label: 'run',
+      target_draw_window_label: drawWindow || 'run',
       primary_numbers: primaryNumbers,
       bonus_numbers: bonusNumbers,
       composite_score: engineKey === 'ensemble' ? 78 : 72,
@@ -403,12 +407,15 @@ export async function POST(request: NextRequest) {
     await admin.from('user_strategy_activity').insert({
       user_id: user.id,
       strategy_id: strategyId,
+      game: gameKey,
+      state: homeState,
       context: 'run',
       occurred_at: new Date().toISOString(),
       metadata: {
         action: 'run',
         engineKey,
         gameKey,
+        drawWindow,
       },
     });
 
@@ -421,6 +428,7 @@ export async function POST(request: NextRequest) {
         engineKey,
         gameKey,
         homeState,
+        drawWindow,
         prediction: stored,
         primaryNumbers,
         bonusNumbers,

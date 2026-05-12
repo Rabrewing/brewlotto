@@ -564,7 +564,11 @@ export default function MyPicksPage() {
               You haven&apos;t saved any picks for this filter set yet. Save a Strategy Locker result first if you want it to appear here and be eligible for play confirmation.
             </div>
             <Link
-              href="/strategy-locker"
+              href={
+                selectedGame !== 'ALL' || selectedState !== 'ALL'
+                  ? `/strategy-locker?game=${selectedGame === 'mega_millions' ? 'mega' : selectedGame}&state=${selectedState === 'ALL' ? 'NC' : selectedState === 'MULTI' ? 'NC' : selectedState}`
+                  : '/strategy-locker'
+              }
               className="mt-6 inline-flex rounded-full bg-gradient-to-r from-[#ffc742] to-[#ffbe27] px-8 py-3 text-[17px] font-semibold text-black shadow-[0_0_18px_rgba(255,199,66,0.22)]"
             >
               Open Strategy Locker →

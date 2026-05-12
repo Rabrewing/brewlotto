@@ -7,10 +7,14 @@ import {
   Header,
   NavigationTabs,
   SectionCard,
+  GameTabs,
+  type GameId,
 } from '@/components/brewlotto/dashboard';
 import { supabase } from '@/lib/supabase/browserClient';
 import { buildStrategyPerformanceSummary, type StrategyPerformanceSummary } from '@/lib/stats/strategyPerformance';
 import { getStrategyLabel } from '@/utils/strategyLabel';
+import { usePreferredState } from '@/hooks/usePreferredState';
+import { resolveDashboardGameConfig } from '@/lib/dashboard/game-config';
 
 type TierCode = 'free' | 'starter' | 'pro' | 'master';
 
@@ -72,6 +76,7 @@ interface RunPreviewRecord {
   bonusNumbers: number[];
   publicName: string;
   strategyKey: string;
+  drawWindow: string | null;
   predictionId: string | null;
   predictionSaved: boolean;
   createdAt: string;
@@ -145,6 +150,21 @@ export default function StrategyLockerPage() {
   const [runningStrategyId, setRunningStrategyId] = useState<string | null>(null);
   const [runPreviews, setRunPreviews] = useState<Record<string, RunPreviewRecord>>({});
   const [savingPredictionId, setSavingPredictionId] = useState<string | null>(null);
+  const { preferredState } = usePreferredState();
+  const [selectedGame, setSelectedGame] = useState<GameId>('pick3');
+  const [selectedDrawWindow, setSelectedDrawWindow] = useState<'midday' | 'evening'>('midday');
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const gameParam = params.get('game') as GameId | null;
+    const stateParam = params.get('state');
+    if (gameParam && ['pick3', 'pick4', 'cash5', 'powerball', 'mega'].includes(gameParam)) {
+      setSelectedGame(gameParam);
+    }
+  }, []);
+
+  const gameConfig = resolveDashboardGameConfig(selectedGame, preferredState) || resolveDashboardGameConfig('pick3', 'NC')!;
+  const hasDrawWindow = selectedGame === 'pick3' || selectedGame === 'pick4';
 
   useEffect(() => {
     let cancelled = false;
@@ -403,7 +423,12 @@ export default function StrategyLockerPage() {
       const response = await fetch('/api/strategy-locker/run', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ strategyId: strategy.id }),
+        body: JSON.stringify({
+          strategyId: strategy.id,
+          gameKey: selectedGame,
+          state: preferredState,
+          drawWindow: hasDrawWindow ? selectedDrawWindow : null,
+        }),
       });
 
       const payload = await response.json().catch(() => null);
@@ -423,6 +448,7 @@ export default function StrategyLockerPage() {
           bonusNumbers: Array.isArray(payload.data.bonusNumbers) ? payload.data.bonusNumbers : [],
           publicName: payload.data.publicName,
           strategyKey: payload.data.strategyKey,
+          drawWindow: payload.data.drawWindow || null,
           predictionId: payload.data.prediction?.id || null,
           predictionSaved: false,
           createdAt: new Date().toISOString(),
@@ -502,6 +528,35 @@ export default function StrategyLockerPage() {
                 </div>
               </div>
             </section>
+
+            <GameTabs selectedGame={selectedGame} onSelect={setSelectedGame} stateCode={preferredState} />
+
+            {hasDrawWindow ? (
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedDrawWindow('midday')}
+                  className={`rounded-full px-4 py-1.5 text-[13px] font-medium uppercase tracking-[0.06em] transition-all ${
+                    selectedDrawWindow === 'midday'
+                      ? 'bg-[#ffbd39]/15 text-[#ffbd39] shadow-[0_0_10px_rgba(255,184,28,0.08)]'
+                      : 'bg-white/[0.04] text-white/45 hover:bg-white/[0.08] hover:text-white/70'
+                  }`}
+                >
+                  Midday
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedDrawWindow('evening')}
+                  className={`rounded-full px-4 py-1.5 text-[13px] font-medium uppercase tracking-[0.06em] transition-all ${
+                    selectedDrawWindow === 'evening'
+                      ? 'bg-[#ffbd39]/15 text-[#ffbd39] shadow-[0_0_10px_rgba(255,184,28,0.08)]'
+                      : 'bg-white/[0.04] text-white/45 hover:bg-white/[0.08] hover:text-white/70'
+                  }`}
+                >
+                  Evening
+                </button>
+              </div>
+            ) : null}
 
             <div className="space-y-5">
               <SectionCard
