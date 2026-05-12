@@ -65,6 +65,11 @@ export default function PricingPage() {
   const currentTierKey = (currentTier || 'free') as TierKey | 'free';
   const selectedCycle = BILLING_CYCLE_COPY[billingInterval];
   const currentSessionLabel = isTrial ? 'Trial active' : currentTierKey === 'free' ? 'Free session' : currentTierKey;
+  const currentSessionCopy = isTrial && trialDateLabel
+    ? `Your trial remains active until ${trialDateLabel}.`
+    : currentTierKey === 'free'
+      ? 'Choose a plan to unlock paid features.'
+      : `${currentTierKey.charAt(0).toUpperCase()}${currentTierKey.slice(1)} is active.`;
 
   const tiers: TierCard[] = [
     {
@@ -320,10 +325,12 @@ export default function PricingPage() {
               </div>
             ) : null}
 
-            <div className="mt-6 rounded-[20px] border border-white/10 bg-white/[0.03] px-5 py-5 text-[15px] leading-7 text-white/68">
-              Current session tier: <span className="text-[#f7ddb3]">{currentSessionLabel}</span>
+            <div className="mt-6 rounded-[20px] border border-[#72caff]/16 bg-[linear-gradient(145deg,rgba(18,24,36,0.86),rgba(9,11,14,0.96))] px-5 py-5 text-[15px] leading-7 text-white/72 shadow-[0_0_18px_rgba(114,202,255,0.08)]">
+              <div className="text-[12px] uppercase tracking-[0.18em] text-[#9edcff]">Current session</div>
+              <div className="mt-2 text-[17px] font-medium text-[#d7ecff]">{currentSessionLabel}</div>
+              <div className="mt-2 text-[15px] leading-7 text-white/60">{currentSessionCopy}</div>
               {currentTier !== 'free' || isTrial ? (
-                <span className="ml-2 text-white/48">
+                <div className="mt-3 text-[14px] leading-6 text-white/46">
                   {isTrial
                     ? 'Manage the active trial or move into a paid tier from Billing.'
                     : currentTier === 'starter'
@@ -333,7 +340,7 @@ export default function PricingPage() {
                         : currentTier === 'master'
                           ? 'Downgrade in Billing if you want a lower tier.'
                           : ''}
-                </span>
+                </div>
               ) : null}
             </div>
           </div>
@@ -355,21 +362,21 @@ export default function PricingPage() {
 
               <div className="mt-5 space-y-3">
                 <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-4 py-4">
-                  <div className="text-[11px] uppercase tracking-[0.16em] text-white/35">What this page does</div>
+                  <div className="text-[11px] uppercase tracking-[0.16em] text-white/35">Plan chooser</div>
                   <div className="mt-2 text-[14px] leading-6 text-white/72">
-                    Choose a tier, then route to Stripe checkout or the billing portal based on what you already own.
+                    Select a tier here. Stripe handles new purchases, and Billing handles current-plan changes.
                   </div>
                 </div>
                 <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-4 py-4">
                   <div className="text-[11px] uppercase tracking-[0.16em] text-white/35">Current cycle</div>
                   <div className="mt-2 text-[14px] leading-6 text-white/72">
-                    {selectedCycle.helper} {billingInterval === 'year' ? 'The paid tiers display annual totals with the 30% savings already baked in.' : 'Switch to annual to compare the lower total cost.'}
+                    {selectedCycle.helper} {billingInterval === 'year' ? 'Annual totals already include the savings view.' : 'Monthly keeps the surface flexible.'}
                   </div>
                 </div>
                 <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-4 py-4">
-                  <div className="text-[11px] uppercase tracking-[0.16em] text-white/35">Where management happens</div>
+                  <div className="text-[11px] uppercase tracking-[0.16em] text-white/35">Billing home</div>
                   <div className="mt-2 text-[14px] leading-6 text-white/72">
-                    Active plans, subscription changes, and billing portal actions belong in Billing &amp; Subscription.
+                    Billing &amp; Subscription is the home for invoices, plan changes, and portal access.
                   </div>
                 </div>
               </div>
@@ -386,7 +393,7 @@ export default function PricingPage() {
               </div>
             </div>
             <div className="hidden rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-[12px] uppercase tracking-[0.18em] text-white/45 lg:block">
-              Trial stays capped; paid tiers expand AI access
+              Trial stays capped; paid tiers unlock more AI and strategy depth
             </div>
           </div>
 
@@ -473,21 +480,21 @@ export default function PricingPage() {
 
         <section className="grid gap-4 pb-6 lg:grid-cols-3">
           <div className="rounded-[24px] border border-white/8 bg-white/[0.03] px-5 py-5">
-            <div className="text-[14px] uppercase tracking-[0.16em] text-white/35">Pricing selects</div>
+            <div className="text-[14px] uppercase tracking-[0.16em] text-white/35">Selection flow</div>
             <div className="mt-2 text-[16px] leading-7 text-white/68">
-              This surface helps the customer choose a tier and move directly into Stripe checkout when they need to upgrade.
+              Pick a tier here, then complete the purchase in Stripe or open Billing for current-plan changes.
             </div>
           </div>
           <div className="rounded-[24px] border border-white/8 bg-white/[0.03] px-5 py-5">
-            <div className="text-[14px] uppercase tracking-[0.16em] text-white/35">Billing manages</div>
+            <div className="text-[14px] uppercase tracking-[0.16em] text-white/35">Billing home</div>
             <div className="mt-2 text-[16px] leading-7 text-white/68">
-              Active plans, invoices, and plan changes stay in Billing so the subscription state has one clear home.
+              Billing &amp; Subscription keeps the active account record, portal access, invoices, and downgrade handling.
             </div>
           </div>
           <div className="rounded-[24px] border border-white/8 bg-white/[0.03] px-5 py-5">
-            <div className="text-[14px] uppercase tracking-[0.16em] text-white/35">Annual savings</div>
+            <div className="text-[14px] uppercase tracking-[0.16em] text-white/35">Savings view</div>
             <div className="mt-2 text-[16px] leading-7 text-white/68">
-              The paid tiers show a 30% annual discount so the customer can compare short-term flexibility against lower total cost.
+              Annual billing shows the 30% savings view without hiding the monthly price users compare against.
             </div>
           </div>
         </section>
