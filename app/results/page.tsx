@@ -10,6 +10,7 @@ import {
   type GameId,
   LotteryBall,
   LiveTrustBadge,
+  FreshnessBanner,
 } from '@/components/brewlotto/dashboard';
 import { resolveDashboardGameConfig } from '@/lib/dashboard/game-config';
 import { usePreferredState } from '@/hooks/usePreferredState';
@@ -186,6 +187,14 @@ export default function ResultsPage() {
         <div className="mb-5 mt-2 text-[40px] font-medium tracking-[-0.03em] text-[#f8cf98]">
           Today&apos;s Results
         </div>
+
+        <FreshnessBanner
+          status={results?.freshness?.status || 'unknown'}
+          stalenessMinutes={results?.freshness?.stalenessMinutes || null}
+          expectedNextDrawAt={results?.freshness?.expectedNextDrawAt || null}
+          loading={loading}
+          stateCode={preferredState}
+        />
 
         <GameTabs selectedGame={selectedGame} onSelect={setSelectedGame} stateCode={preferredState} />
 

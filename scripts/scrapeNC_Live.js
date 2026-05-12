@@ -358,6 +358,10 @@ async function scrapeCurrentMonthFallback(config, gameName) {
   }
 }
 
+function dateStr(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
 (async () => {
   console.log('🚀 Starting Live NC Lottery Scraper (with efficient backfill)...\n');
 
@@ -382,11 +386,17 @@ async function scrapeCurrentMonthFallback(config, gameName) {
         past = await scrapePastDraws(config, gameName);
       } else {
         const today = new Date();
-        const todayDate = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-        const latestHasToday = latest.some(r => r.draw_date === todayDate);
-        const latestHasYesterday = latest.some(r => r.draw_date === `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()-1).padStart(2,'0')}`);
-        if (!latestHasToday && !latestHasYesterday) {
-          console.log(`  🔍 Main page stale — checking current month past-draws as fallback...`);
+        const todayStr = dateStr(today);
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = dateStr(yesterday);
+
+        const todayDraws = latest.filter(r => r.draw_date === todayStr).length;
+        const yesterdayDraws = latest.filter(r => r.draw_date === yesterdayStr).length;
+        const expectedPerDay = config.windows.length;
+
+        if (todayDraws < expectedPerDay && !(yesterdayDraws === expectedPerDay)) {
+          console.log(`  🔍 Main page incomplete (got ${todayDraws + yesterdayDraws} for today/yesterday, expected ~${expectedPerDay}) — checking current month past-draws as fallback...`);
           past = await scrapeCurrentMonthFallback(config, gameName);
           console.log(`  📚 Fallback found ${past.length} draws`);
         } else {
