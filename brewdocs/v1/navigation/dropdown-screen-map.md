@@ -112,8 +112,8 @@
   - upgrade/manage CTA
   - billing history / invoice placeholder area
 - Relationship to pricing:
-  - `/pricing` remains external-facing upgrade/marketing
-  - `/billing` becomes the authenticated account destination
+  - `/pricing` is the state-aware selection surface with upgrade/current/downgrade actions
+  - `/billing` is the authenticated account-management destination
 
 ## 9. Help / Learn
 

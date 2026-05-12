@@ -62,7 +62,7 @@ Design goals:
 - `Profile` and `Settings` remain separate.
   `Profile` owns identity/account editing. `Settings` owns app preferences and controls.
 - `Subscription & Billing` does not reuse `/pricing` as the final information architecture.
-  `Pricing` remains a marketing/upgrade entrypoint. `Billing` becomes the authenticated account surface.
+  `Pricing` is the state-aware selection surface for upgrades and downgrades, while `Billing` remains the authenticated account surface for plan management.
 - `Help / Learn` is the normalized V1 destination for BrewUniversity Lite, FAQs, and explainer content.
 - `Terms & Privacy` should be a legal index route rather than separate top-level menu rows for each legal document.
 - `Logout` is not a full destination page in the menu model; it is a destructive action with confirm affordance.
