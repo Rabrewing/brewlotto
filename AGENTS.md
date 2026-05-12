@@ -1,6 +1,6 @@
 # AGENTS.md (BrewLotto V1)
 
-## Current Status (2026-05-11 ET)
+## Current Status (2026-05-12 ET)
 
 ### System Health — All NC + CA Launch Games Green
 
@@ -46,6 +46,7 @@ official source → ingestion → Supabase → freshness view → API → UI
 | **BrewU content externalization plan** | `brewdocs/v1/content-externalization-plan.md` — 2026-05-10 | Tracks the decision to keep BrewU/help copy, support categories, and tutorial transcript static for V1 while reserving DB/CMS-backed content as a later follow-on if launch needs justify it. |
 | **Settings hero polish** | `app/settings/page.tsx`, `brewdocs/v1/current_state.md`, `brewdocs/v1/CHANGELOG.md` — 2026-05-10 | Reworked Settings into a centered account-style hero with clearer Gameplay / Notifications / Account groupings so the route better mirrors the settings mockup without using fake profile data. |
 | **Billing / notifications polish** | `app/billing/page.tsx`, `app/notifications/page.tsx`, `brewdocs/v1/current_state.md`, `brewdocs/v1/CHANGELOG.md` — 2026-05-10 | Reworked Billing into a centered account-style hero with a clearer benefits / billing / quick-links flow, and added New / All tabs to Notifications so the feed mirrors the mockup rhythm more closely. |
+| **Stripe CLI readiness** | local Stripe CLI config — 2026-05-12 | Stripe test-mode CLI is authenticated and ready for webhook verification (`acct_1TTVRiCi8lUllKJd`, test keys configured, config.toml readable). |
 | **AI strategy notifications** | `scripts/ingestionJob.js`, `lib/notifications/strategySignals.js`, `brewdocs/v1/customer-notifications-plan.md`, `brewdocs/v1/current_state.md`, `brewdocs/v1/CHANGELOG.md` — 2026-05-10 | Brew AI strategy-detection alerts now run as an ingestion-driven, event-based sweep that writes `user_notifications` and emails a BrewLotto return link only when the user is eligible and the signal is strong enough. The main momentum meter stays a single gauge; hot/cold remain separate cards. |
 | **Results history / win ratios** | `brewdocs/v1/results-history-win-ratios-plan.md`, `brewdocs/v1/current_state.md`, `brewdocs/v1/CHANGELOG.md` — 2026-05-10 | Track confirmed wins only when the play was actually logged for the winning draw date/time, keep `/results` on a 3/6 month history toggle, and expose strategy-specific win ratios in `/stats` and BrewCommand so retroactive close matches never masquerade as same-day wins. |
 | **My Picks saved-only 30-day history** | `app/my-picks/page.tsx`, `app/api/predictions/route.ts`, `lib/prediction/predictionGenerator.js`, `lib/prediction/predictionStorage.js`, `brewdocs/v1/current_state.md`, `brewdocs/v1/CHANGELOG.md` — 2026-05-11 | Keep `My Picks` scoped to explicit user-saved picks from Strategy Locker, grouped by date, over roughly the last 30 days so confirmation nudges land on real saved entries instead of auto-saved previews. |

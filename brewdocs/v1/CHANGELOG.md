@@ -6,6 +6,9 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 
 ## [Unreleased]
 
+### 2026-05-12
+- Confirmed the Stripe CLI is authenticated in test mode and ready for webhook verification, with the Brewlotto sandbox account and config file readable in the local environment.
+
 ### 2026-05-10
 - Widened the shared dashboard shell for desktop and tablet while preserving the current mobile layout.
 - Reworked Strategy Locker so the entitlement snapshot opens as a compact summary with a collapsible full ladder, keeping the strategy cards visually primary.
