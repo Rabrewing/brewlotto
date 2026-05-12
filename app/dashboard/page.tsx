@@ -5,9 +5,8 @@ import {
   DashboardContainer, 
   Header, 
   NavigationTabs, 
-  SectionKicker, 
-  FreshnessBanner,
-  GameTabs, 
+  SectionKicker,
+  GameTabs,
   GameId,
   StatsGrid,
   PredictionCard,
@@ -325,13 +324,6 @@ export default function DashboardPage() {
         <NavigationTabs />
         <TrialUpgradeBanner className="mt-4" />
         <SectionKicker />
-        <FreshnessBanner
-          status={freshness.status}
-          stalenessMinutes={freshness.stalenessMinutes}
-          expectedNextDrawAt={freshness.expectedNextDrawAt}
-          loading={freshnessLoading}
-          stateCode={preferredState}
-        />
         <GameTabs selectedGame={selectedGame} onSelect={setSelectedGame} stateCode={preferredState} />
         
         <StatsGrid
