@@ -362,12 +362,19 @@ export default function MyPicksPage() {
         const data = Array.isArray(payload.data) ? payload.data : [];
         if (!cancelled) {
           setPredictions(data);
-          setPlayLogs((playLogsResponse.data || []) as PlayLogRecord[]);
+          const nextPlayLogs = (playLogsResponse.data || []) as PlayLogRecord[];
+          setPlayLogs(nextPlayLogs);
+          setConfirmedPredictionIds(
+            nextPlayLogs
+              .filter((entry) => Boolean(entry.prediction_id))
+              .map((entry) => entry.prediction_id as string),
+          );
         }
       } catch (loadError) {
         if (!cancelled) {
           setPredictions([]);
           setPlayLogs([]);
+          setConfirmedPredictionIds([]);
           setError(loadError instanceof Error ? loadError.message : 'Failed to load picks');
         }
       } finally {
