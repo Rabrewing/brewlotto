@@ -11,7 +11,7 @@ export interface AiRuntimeConfig {
 function normalizeProvider(value: string | undefined | null): "auto" | AiProviderName {
     const normalized = (value || "auto").trim().toLowerCase();
 
-    if (normalized === "openai" || normalized === "deepseek") {
+    if (normalized === "openai" || normalized === "deepseek" || normalized === "nim") {
         return normalized;
     }
 
