@@ -10,6 +10,7 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Recorded that the AI provider layer is connected for commentary and suggestion routes with env-driven OpenAI / DeepSeek / NIM routing and BrewCommand usage logging.
 - Allowed the AI provider selector to accept explicit `AI_PROVIDER=nim` instead of only relying on fallback detection.
 - Tightened `/pricing` copy so the selection surface reads cleaner while still routing upgrades to Stripe and current-plan changes to Billing.
+- Made the primary `/pricing` CTA state-aware so trial, free, and paid users land on the right next step instead of a one-size-fits-all login path.
 
 ### 2026-05-12
 - Confirmed the Stripe CLI is authenticated in test mode and ready for webhook verification, with the Brewlotto sandbox account and config file readable in the local environment.

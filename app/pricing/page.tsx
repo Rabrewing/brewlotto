@@ -70,6 +70,10 @@ export default function PricingPage() {
     : currentTierKey === 'free'
       ? 'Choose a plan to unlock paid features.'
       : `${currentTierKey.charAt(0).toUpperCase()}${currentTierKey.slice(1)} is active.`;
+  const primaryPricingAction =
+    isTrial || currentTierKey !== 'free'
+      ? { href: '/billing', label: 'Open Billing & Subscription' }
+      : { href: '/login', label: 'Start 3-Day Trial' };
 
   const tiers: TierCard[] = [
     {
@@ -306,16 +310,16 @@ export default function PricingPage() {
 
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               <Link
-                href="/login"
+                href={primaryPricingAction.href}
                 className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#ffc742] to-[#ffbe27] px-7 py-3 text-[15px] font-semibold text-black shadow-[0_0_18px_rgba(255,199,66,0.2)]"
               >
-                Start 3-Day Trial
+                {primaryPricingAction.label}
               </Link>
               <Link
-                href="/billing"
+                href="/pricing#plans"
                 className="inline-flex items-center justify-center rounded-full border border-white/12 bg-white/[0.03] px-7 py-3 text-[15px] text-white/80 transition-colors hover:text-white"
               >
-                Open Billing &amp; Subscription
+                Review the plan ladder
               </Link>
             </div>
 
@@ -384,7 +388,7 @@ export default function PricingPage() {
           </div>
         </section>
 
-        <section className="pb-6">
+        <section className="pb-6" id="plans">
           <div className="flex items-end justify-between gap-4">
             <div>
               <div className="text-[13px] uppercase tracking-[0.18em] text-white/38">Plan ladder</div>
