@@ -96,6 +96,14 @@ export default function ResultsPage() {
   const { preferredState } = usePreferredState();
   const [selectedGame, setSelectedGame] = useState<GameId>('pick3');
   const [selectedWindow, setSelectedWindow] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const gameParam = params.get('game') as GameId | null;
+    if (gameParam && ['pick3', 'pick4', 'cash5', 'powerball', 'mega'].includes(gameParam)) {
+      setSelectedGame(gameParam);
+    }
+  }, []);
   const [historyDays, setHistoryDays] = useState<HistoryRange>(180);
   const [results, setResults] = useState<ResultsPayload | null>(null);
   const [loading, setLoading] = useState(true);

@@ -10,11 +10,11 @@ interface UtilityPillProps {
 type UtilityGameId = 'powerball' | 'mega' | 'cash5' | 'pick3' | 'pick4';
 
 const GAME_ROUTE_MAP: Record<UtilityGameId, string> = {
-  powerball: '/powerball',
-  mega: '/mega',
-  cash5: '/pick5',
-  pick3: '/pick3',
-  pick4: '/pick4',
+  powerball: '/results?game=powerball',
+  mega: '/results?game=mega',
+  cash5: '/results?game=cash5',
+  pick3: '/results?game=pick3',
+  pick4: '/results?game=pick4',
 };
 
 function UtilityPill({ href, icon, label, caption }: UtilityPillProps) {
