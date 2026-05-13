@@ -64,16 +64,16 @@ const COVERAGE_OVERVIEW = [
 ];
 
 const BREWU_INDEX = [
-  { label: 'Tutorial replay', href: '#tutorial', hint: 'Replay the onboarding walk-through' },
-  { label: 'BrewU overview', href: '#brewu-lite', hint: 'See how BrewU fits the product' },
-  { label: 'Play styles by game', href: '#play-styles', hint: 'Learn straight, box, 50/50, combo, and add-ons' },
-  { label: 'Fireball clarity', href: '#fireball', hint: 'NC Pick 3 / Pick 4 Fireball only' },
-  { label: 'Payout ladders', href: '#payouts', hint: 'Prize shape and certified values' },
-  { label: 'Data freshness', href: '#freshness', hint: 'Healthy vs delayed vs stale' },
-  { label: 'AI guidance', href: '#ai-guidance', hint: 'How Brew AI helps without hype' },
-  { label: 'Prize tables', href: '#prize-tables', hint: 'Game-by-game payout snapshots' },
-  { label: 'Where to use this', href: '#where-to-use', hint: 'Dashboard, Stats, and Strategy Locker links' },
-  { label: 'Systems', href: '#systems', hint: 'BrewU, Support, policies, logout' },
+  { label: 'How do I replay the tutorial?', href: '#tutorial', hint: 'Replay the onboarding walk-through' },
+  { label: 'What is BrewU?', href: '#brewu-lite', hint: 'See how BrewU fits the product' },
+  { label: 'Which play style fits my game?', href: '#play-styles', hint: 'Learn straight, box, 50/50, combo, and add-ons' },
+  { label: 'How does Fireball work?', href: '#fireball', hint: 'NC Pick 3 / Pick 4 Fireball only' },
+  { label: 'What does this game pay?', href: '#payouts', hint: 'Prize shape and certified values' },
+  { label: 'Why are results delayed?', href: '#freshness', hint: 'Healthy vs delayed vs stale' },
+  { label: 'How does Brew AI help?', href: '#ai-guidance', hint: 'How Brew AI helps without hype' },
+  { label: 'Where are the official prizes?', href: '#prize-tables', hint: 'Game-by-game payout snapshots' },
+  { label: 'Where do I use this?', href: '#where-to-use', hint: 'Dashboard, Stats, and Strategy Locker links' },
+  { label: 'Where are support and policies?', href: '#systems', hint: 'BrewU, Support, policies, logout' },
 ];
 
 const BREWU_INDEX_CHIPS = [
@@ -140,10 +140,16 @@ export default function LearnPage() {
 
         <section className="mt-5 rounded-[30px] border border-[#72caff]/18 bg-[linear-gradient(145deg,rgba(18,24,36,0.9),rgba(8,8,8,0.98))] px-5 py-5 shadow-[0_0_28px_rgba(114,202,255,0.06)]">
           <div className="text-[15px] uppercase tracking-[0.16em] text-white/38">Quick index</div>
-          <div className="mt-3 text-[26px] font-semibold text-[#d7ecff]">Jump to the help topic you need</div>
+          <div className="mt-3 text-[26px] font-semibold text-[#d7ecff]">FAQ-style jump menu</div>
           <div className="mt-2 max-w-3xl text-[15px] leading-7 text-white/62">
-            Pick a topic below to jump straight to that section. BrewU stays readable on scroll, but
-            the index lets you get where you want faster on desktop or mobile.
+            Pick a question below to jump straight to that topic. BrewU stays readable on scroll,
+            but the index lets you get where you want faster on desktop or mobile.
+          </div>
+          <div className="mt-4 rounded-[22px] border border-[#72caff]/16 bg-[#101922] px-4 py-4">
+            <div className="text-[12px] uppercase tracking-[0.16em] text-[#9edcff]">Ask BrewU</div>
+            <div className="mt-2 text-[15px] leading-7 text-white/72">
+              Try: Fireball, play styles, prize tables, freshness, or “what should I read first?”
+            </div>
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
             {BREWU_INDEX_CHIPS.map((chip) => (
@@ -156,7 +162,7 @@ export default function LearnPage() {
             ))}
           </div>
           <div className="mt-4 rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
-            <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">Popular topics</div>
+            <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">Most asked</div>
             <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
               {BREWU_POPULAR_TOPICS.map((topic) => (
                 <Link
