@@ -45,6 +45,7 @@ interface PredictionRecord {
     totalMatch: number;
     drawNumbers: number[];
     drawBonus: number | null;
+    drawFireball: number | null;
   } | null;
   prediction_explanations?: PredictionExplanation[] | null;
   prediction_strategy_scores?: StrategyScore[] | null;
@@ -279,6 +280,11 @@ function PickCard({
               ? 'No match this draw'
               : `Matched ${prediction.matchInfo.primaryMatch} number${prediction.matchInfo.primaryMatch === 1 ? '' : 's'}${prediction.matchInfo.bonusMatch ? ' + bonus' : ''} ${prediction.matchInfo.totalMatch === 5 ? '— Jackpot!' : ''}`}
           </div>
+          {prediction.matchInfo.drawFireball !== null ? (
+            <div className="rounded-full border border-[#72caff]/18 bg-[#111f28] px-3 py-1 text-[11px] uppercase tracking-[0.12em] text-[#9edcff]">
+              Fireball: {prediction.matchInfo.drawFireball}
+            </div>
+          ) : null}
           <div className="text-[12px] text-white/42">
             vs {prediction.matchInfo.drawDate} {prediction.matchInfo.drawWindow}
           </div>

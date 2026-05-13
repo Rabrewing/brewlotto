@@ -57,7 +57,7 @@ async function attachMatchInfo(supabase: ReturnType<typeof createClient>, predic
       if (gameRow) {
         const { data: draws } = await supabase
           .from('official_draws')
-          .select('primary_numbers, bonus_numbers')
+          .select('primary_numbers, bonus_numbers, fireball_value')
           .eq('game_id', gameRow.id)
           .eq('draw_date', drawDate)
           .eq('draw_window_label', drawWindow);
@@ -72,6 +72,7 @@ async function attachMatchInfo(supabase: ReturnType<typeof createClient>, predic
             : [];
           const drawBonus = Array.isArray(draw.bonus_numbers) ? draw.bonus_numbers[0] : null;
           const predictedBonus = prediction.bonus_number ? Number(prediction.bonus_number) : null;
+          const drawFireball = typeof draw.fireball_value === 'number' ? draw.fireball_value : null;
 
           const primaryMatch = intersectCount(predictedNumbers, drawNumbers);
           const bonusMatch = drawBonus !== null && predictedBonus !== null && Number(drawBonus) === predictedBonus;
@@ -84,6 +85,7 @@ async function attachMatchInfo(supabase: ReturnType<typeof createClient>, predic
             totalMatch: primaryMatch + (bonusMatch ? 1 : 0),
             drawNumbers,
             drawBonus,
+            drawFireball,
           };
         }
       }
