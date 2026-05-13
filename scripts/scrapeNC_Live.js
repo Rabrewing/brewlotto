@@ -306,27 +306,39 @@ async function scrapeCurrentMonthFallback(config, gameName) {
     });
     const $ = load(resp.data);
     const records = [];
+    let currentDate = null;
 
     $('table tbody tr').each((_, row) => {
       const tds = $(row).find('td');
       if (tds.length < 2) return;
       const dateText = $(tds[0]).text().trim();
-      if (!dateText || dateText.includes('download')) return;
-      const drawDate = parseNcelDate(dateText);
-      if (!drawDate) return;
+      if (dateText && !dateText.includes('download')) {
+        currentDate = parseNcelDate(dateText);
+      }
+      if (!currentDate) return;
+
       const ballCell = $(tds[1]);
       const numbers = [];
       ballCell.find('.ball').each((_, el) => {
         const val = parseInt($(el).text().trim());
         if (!isNaN(val)) numbers.push(val);
       });
+
       if (numbers.length !== config.primaryCount) return;
+
+      const isDoublePlay = !dateText || dateText.includes('download');
       let fireballValue = null;
       if (config.hasFireball) {
         const allTextNums = ballCell.text().trim().split(/\s+/).filter(x => /^\d+$/.test(x)).map(Number);
         if (allTextNums.length > config.primaryCount) fireballValue = allTextNums[allTextNums.length - 1];
       }
-      records.push({ draw_date: drawDate, primary_numbers: numbers, fireball_value: fireballValue });
+
+      records.push({
+        draw_date: currentDate,
+        primary_numbers: numbers,
+        fireball_value: fireballValue || null,
+        double_play: isDoublePlay,
+      });
     });
 
     const dateGroups = new Map();
@@ -337,18 +349,21 @@ async function scrapeCurrentMonthFallback(config, gameName) {
 
     const result = [];
     for (const [date, entries] of dateGroups) {
-      for (let i = 0; i < Math.min(entries.length, config.windows.length); i++) {
-        const entry = entries[i];
-        const windowLabel = config.windows[i] || config.windows[0];
+      let windowIdx = 0;
+      for (const entry of entries) {
+        if (entry.double_play) continue;
+        const windowLabel = config.windows[windowIdx] || config.windows[0];
+        const timeStr = config.timeMap[windowLabel] || '20:00';
         result.push({
           draw_date: date,
           draw_window_label: windowLabel,
-          draw_datetime_local: `${date}T${config.timeMap[windowLabel] || '20:00'}:00-04:00`,
+          draw_datetime_local: `${date}T${timeStr}:00-04:00`,
           primary_numbers: entry.primary_numbers,
           bonus_numbers: [],
           fireball_value: entry.fireball_value || null,
           source_draw_id: `${date}-${windowLabel}-${gameName}-fallback`,
         });
+        windowIdx++;
       }
     }
 
@@ -384,24 +399,13 @@ function dateStr(d) {
       if (existingCount < 500) {
         console.log(`\n📚 Backfilling past draws (${MONTHS_BACK} months, ${existingCount} < 500 threshold)...`);
         past = await scrapePastDraws(config, gameName);
-      } else {
-        const today = new Date();
-        const todayStr = dateStr(today);
-        const yesterday = new Date(today);
-        yesterday.setDate(yesterday.getDate() - 1);
-        const yesterdayStr = dateStr(yesterday);
+      }
 
-        const todayDraws = latest.filter(r => r.draw_date === todayStr).length;
-        const yesterdayDraws = latest.filter(r => r.draw_date === yesterdayStr).length;
-        const expectedPerDay = config.windows.length;
-
-        if (todayDraws < expectedPerDay && !(yesterdayDraws === expectedPerDay)) {
-          console.log(`  🔍 Main page incomplete (got ${todayDraws + yesterdayDraws} for today/yesterday, expected ~${expectedPerDay}) — checking current month past-draws as fallback...`);
-          past = await scrapeCurrentMonthFallback(config, gameName);
-          console.log(`  📚 Fallback found ${past.length} draws`);
-        } else {
-          console.log(`  ✅ Main page up to date`);
-        }
+      console.log(`  🔍 Supplementing with current month past-draws...`);
+      const supplement = await scrapeCurrentMonthFallback(config, gameName);
+      if (supplement.length > 0) {
+        console.log(`  📚 Found ${supplement.length} draws from current month`);
+        past = [...past, ...supplement];
       }
 
       const allRecords = [...latest, ...past];
