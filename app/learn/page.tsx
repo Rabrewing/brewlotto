@@ -19,6 +19,10 @@ const LESSONS = [
     summary: 'Confidence is an internal ranking signal attached to a prediction, based on the strategy blend and current evidence. Higher confidence still does not change the odds of the game.',
   },
   {
+    title: 'Hit vs Win',
+    summary: 'A hit means your saved numbers matched a draw — visible only after you confirm you played. A win means you confirmed the play and the match resulted in a prize. Unconfirmed pattern matches do not count toward your stats.',
+  },
+  {
     title: 'Why Strategy Variety Matters',
     summary: 'Different strategies emphasize different evidence, such as frequency, momentum, or scoring. Strategy Locker exists so premium users can see which approaches are available and when they were used.',
   },
@@ -66,6 +70,7 @@ const COVERAGE_OVERVIEW = [
 const BREWU_INDEX = [
   { label: 'How do I replay the tutorial?', href: '#tutorial', hint: 'Replay the onboarding walk-through' },
   { label: 'What is BrewU?', href: '#brewu-lite', hint: 'See how BrewU fits the product' },
+  { label: 'How does Hit vs Win work?', href: '#lessons', hint: 'Match tracking and confirmation flow' },
   { label: 'Which play style fits my game?', href: '#play-styles', hint: 'Learn straight, box, 50/50, combo, and add-ons' },
   { label: 'How does Fireball work?', href: '#fireball', hint: 'NC Pick 3 / Pick 4 Fireball only' },
   { label: 'What does this game pay?', href: '#payouts', hint: 'Prize shape and certified values' },
@@ -77,18 +82,21 @@ const BREWU_INDEX = [
 ];
 
 const BREWU_INDEX_CHIPS = [
-  'Tutorial',
-  'Play styles',
-  'Fireball',
-  'Freshness',
-  'Payouts',
-  'AI help',
+  { label: 'Tutorial', href: '#tutorial' },
+  { label: 'Play styles', href: '#play-styles' },
+  { label: 'Hit vs Win', href: '#lessons' },
+  { label: 'Fireball', href: '#fireball' },
+  { label: 'Freshness', href: '#freshness' },
+  { label: 'Payouts', href: '#payouts' },
+  { label: 'AI help', href: '#ai-guidance' },
 ];
 
 const BREWU_POPULAR_TOPICS = [
   { label: 'Quick play styles', href: '#play-styles' },
   { label: 'Fireball rules', href: '#fireball' },
+  { label: 'Hit vs Win explained', href: '#lessons' },
   { label: 'Prize tables', href: '#prize-tables' },
+  { label: 'Data Freshness', href: '#freshness' },
   { label: 'Where to use this', href: '#where-to-use' },
 ];
 
@@ -153,12 +161,13 @@ export default function LearnPage() {
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
             {BREWU_INDEX_CHIPS.map((chip) => (
-              <span
-                key={chip}
-                className="rounded-full border border-[#72caff]/16 bg-[#111f28] px-3 py-1.5 text-[12px] uppercase tracking-[0.14em] text-[#bfe7ff]"
+              <Link
+                key={chip.label}
+                href={chip.href}
+                className="rounded-full border border-[#72caff]/16 bg-[#111f28] px-3 py-1.5 text-[12px] uppercase tracking-[0.14em] text-[#bfe7ff] transition-colors hover:border-[#72caff]/30 hover:bg-[#72caff]/12 hover:text-white"
               >
-                {chip}
-              </span>
+                {chip.label}
+              </Link>
             ))}
           </div>
           <div className="mt-4 rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
