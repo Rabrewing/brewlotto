@@ -104,9 +104,9 @@ const FIREBALL_GUIDE = [
       'Fireball changes settlement classification and confirmed-play ratios for the draw it was actually played on. It does not change hot/cold or momentum, which stay draw-trend only.',
   },
   {
-    label: 'What it does not change',
+    label: 'Fireball is for reference only',
     summary:
-      'Fireball is not a separate strategy meter and it does not guarantee a better result. If the user did not confirm that play on the winning draw date, it should not count as a win.',
+      'Fireball is shown as draw context alongside your match count, but it does not change the match score. "Matched 2 numbers" always refers to core drawn numbers only — Fireball is displayed so you know what the Fireball was for that draw, not as an extra match opportunity.',
   },
 ];
 
