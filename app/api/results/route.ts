@@ -153,9 +153,10 @@ export async function GET(request: NextRequest) {
         : { data: [], error: null },
       supabase
         .from('predictions')
-        .select('id, game, state, created_at, predicted_numbers, bonus_number, is_saved, source_strategy_key, confidence_score')
+        .select('id, game, state, created_at, predicted_numbers, bonus_number, is_saved, source_strategy_key, confidence_score, draw_date, draw_time')
         .eq('game', gameConfig.predictionGame)
         .in('state', gameConfig.predictionStates)
+        .eq('is_saved', true)
         .order('created_at', { ascending: false })
         .limit(8),
       gameId
@@ -253,8 +254,11 @@ export async function GET(request: NextRequest) {
         const predictedNumbers = Array.isArray(prediction.predicted_numbers)
           ? prediction.predicted_numbers.filter((value): value is number => typeof value === 'number')
           : [];
-        const primaryMatches = intersectCount(predictedNumbers, drawNumbers);
-        const bonusMatch = drawBonus != null && prediction.bonus_number === drawBonus ? 1 : 0;
+        const drawDateMatch = prediction.draw_date === draw.draw_date;
+        const drawWindowMatch = !draw.draw_window_label || !prediction.draw_time || prediction.draw_time === draw.draw_window_label;
+        const isDrawMatch = drawDateMatch && drawWindowMatch;
+        const primaryMatches = isDrawMatch ? intersectCount(predictedNumbers, drawNumbers) : 0;
+        const bonusMatch = isDrawMatch && drawBonus != null && prediction.bonus_number === drawBonus ? 1 : 0;
         const totalMatches = primaryMatches + bonusMatch;
 
         return {
