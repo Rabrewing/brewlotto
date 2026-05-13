@@ -163,6 +163,10 @@ export default function StrategyLockerPage() {
     }
   }, []);
 
+  useEffect(() => {
+    setRunPreviews({});
+  }, [selectedGame]);
+
   const gameConfig = resolveDashboardGameConfig(selectedGame, preferredState) || resolveDashboardGameConfig('pick3', 'NC')!;
   const hasDrawWindow = selectedGame === 'pick3' || selectedGame === 'pick4';
 
