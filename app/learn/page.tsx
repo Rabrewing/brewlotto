@@ -76,6 +76,22 @@ const BREWU_INDEX = [
   { label: 'Systems', href: '#systems', hint: 'BrewU, Support, policies, logout' },
 ];
 
+const BREWU_INDEX_CHIPS = [
+  'Tutorial',
+  'Play styles',
+  'Fireball',
+  'Freshness',
+  'Payouts',
+  'AI help',
+];
+
+const BREWU_POPULAR_TOPICS = [
+  { label: 'Quick play styles', href: '#play-styles' },
+  { label: 'Fireball rules', href: '#fireball' },
+  { label: 'Prize tables', href: '#prize-tables' },
+  { label: 'Where to use this', href: '#where-to-use' },
+];
+
 const FIREBALL_GUIDE = [
   {
     label: 'Where it matters',
@@ -128,6 +144,30 @@ export default function LearnPage() {
           <div className="mt-2 max-w-3xl text-[15px] leading-7 text-white/62">
             Pick a topic below to jump straight to that section. BrewU stays readable on scroll, but
             the index lets you get where you want faster on desktop or mobile.
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {BREWU_INDEX_CHIPS.map((chip) => (
+              <span
+                key={chip}
+                className="rounded-full border border-[#72caff]/16 bg-[#111f28] px-3 py-1.5 text-[12px] uppercase tracking-[0.14em] text-[#bfe7ff]"
+              >
+                {chip}
+              </span>
+            ))}
+          </div>
+          <div className="mt-4 rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
+            <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">Popular topics</div>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+              {BREWU_POPULAR_TOPICS.map((topic) => (
+                <Link
+                  key={topic.href}
+                  href={topic.href}
+                  className="rounded-[16px] border border-white/8 bg-white/[0.03] px-3 py-3 text-[13px] leading-6 text-white/78 transition-colors hover:border-[#72caff]/24 hover:bg-[#72caff]/8 hover:text-white"
+                >
+                  {topic.label}
+                </Link>
+              ))}
+            </div>
           </div>
           <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {BREWU_INDEX.map((item) => (
