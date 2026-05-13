@@ -102,7 +102,7 @@ export async function POST(req: Request) {
     const parsedDrawDate = typeof draw_date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(draw_date) ? draw_date : null;
     const drawDate = parsedDrawDate || new Date().toISOString().slice(0, 10);
     const playSource =
-      String(strategy || '').trim() ? (String(prediction_id || '').trim() ? 'confirmed_prediction' : 'saved_prediction') : 'quick_pick';
+      String(strategy || '').trim() ? (String(prediction_id || '').trim() ? 'saved_prediction' : 'saved_prediction') : 'quick_pick';
     const parsedFireballValue =
       typeof fireball_value === 'number'
         ? fireball_value
