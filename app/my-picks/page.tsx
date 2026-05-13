@@ -13,6 +13,7 @@ import { supabase } from '@/lib/supabase/browserClient';
 
 type FilterState = 'ALL' | 'NC' | 'MULTI';
 type FilterGame = 'ALL' | 'pick3' | 'pick4' | 'cash5' | 'powerball' | 'mega_millions';
+type FilterWindow = 'ALL' | 'midday' | 'evening';
 type PickStatus = 'saved' | 'pending';
 
 interface PredictionExplanation {
@@ -233,6 +234,11 @@ function PickCard({
           <div className="text-[16px] font-semibold text-[#f7d6ab]">
             {formatGameLabel(prediction.game)}
             <span className="ml-1 text-white/45">• {prediction.state || 'N/A'}</span>
+            {prediction.draw_time ? (
+              <span className="ml-2 rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-white/50">
+                {prediction.draw_time}
+              </span>
+            ) : null}
           </div>
           <div className="mt-1 text-[12px] uppercase tracking-[0.14em] text-white/35">
             {getStrategyLabel(prediction.source_strategy_key)}
@@ -266,7 +272,7 @@ function PickCard({
         ) : null}
       </div>
 
-      {prediction.matchInfo ? (
+      {isConfirmed && prediction.matchInfo ? (
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <div className="rounded-full border border-[#72caff]/20 bg-[#72caff]/10 px-3 py-1 text-[12px] font-medium text-[#9fdcff]">
             {prediction.matchInfo.totalMatch === 0
@@ -329,6 +335,7 @@ function PickCard({
 export default function MyPicksPage() {
   const [selectedState, setSelectedState] = useState<FilterState>('ALL');
   const [selectedGame, setSelectedGame] = useState<FilterGame>('ALL');
+  const [selectedWindow, setSelectedWindow] = useState<FilterWindow>('ALL');
   const [predictions, setPredictions] = useState<PredictionRecord[]>([]);
   const [playLogs, setPlayLogs] = useState<PlayLogRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -422,8 +429,13 @@ export default function MyPicksPage() {
     return first ? formatGameLabel(first) : 'No game yet';
   }, [predictions]);
 
+  const filteredPredictions = useMemo(() => {
+    if (selectedWindow === 'ALL') return predictions;
+    return predictions.filter((p) => p.draw_time === selectedWindow);
+  }, [predictions, selectedWindow]);
+
   const groupedPredictions = useMemo(() => {
-    return predictions.reduce<Array<{ createdAt: string | null; picks: PredictionRecord[] }>>((groups, prediction) => {
+    return filteredPredictions.reduce<Array<{ createdAt: string | null; picks: PredictionRecord[] }>>((groups, prediction) => {
       const key = prediction.created_at ? new Date(prediction.created_at).toISOString().slice(0, 10) : 'unknown-date';
       const existing = groups.find((group) => {
         const groupKey = group.createdAt ? new Date(group.createdAt).toISOString().slice(0, 10) : 'unknown-date';
@@ -564,6 +576,42 @@ export default function MyPicksPage() {
               </option>
             ))}
           </select>
+
+          <div className="flex gap-1.5 self-center">
+            <button
+              type="button"
+              onClick={() => setSelectedWindow('ALL')}
+              className={`rounded-full px-3 py-1.5 text-[12px] font-medium uppercase tracking-[0.06em] transition-all ${
+                selectedWindow === 'ALL'
+                  ? 'bg-[#ffbd39]/15 text-[#ffbd39]'
+                  : 'bg-white/[0.04] text-white/45 hover:bg-white/[0.08] hover:text-white/70'
+              }`}
+            >
+              All
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedWindow('midday')}
+              className={`rounded-full px-3 py-1.5 text-[12px] font-medium uppercase tracking-[0.06em] transition-all ${
+                selectedWindow === 'midday'
+                  ? 'bg-[#ffbd39]/15 text-[#ffbd39]'
+                  : 'bg-white/[0.04] text-white/45 hover:bg-white/[0.08] hover:text-white/70'
+              }`}
+            >
+              Midday
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedWindow('evening')}
+              className={`rounded-full px-3 py-1.5 text-[12px] font-medium uppercase tracking-[0.06em] transition-all ${
+                selectedWindow === 'evening'
+                  ? 'bg-[#ffbd39]/15 text-[#ffbd39]'
+                  : 'bg-white/[0.04] text-white/45 hover:bg-white/[0.08] hover:text-white/70'
+              }`}
+            >
+              Evening
+            </button>
+          </div>
         </div>
 
         <div className="mb-6 flex rounded-full border border-[#ffbd39]/25 bg-[linear-gradient(145deg,rgba(35,19,12,0.74),rgba(10,8,8,0.92))] shadow-[0_0_18px_rgba(255,184,28,0.08)]">
