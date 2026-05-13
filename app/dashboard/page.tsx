@@ -18,6 +18,7 @@ import {
 } from '@/components/brewlotto/dashboard';
 import { resolveDashboardGameConfig } from '@/lib/dashboard/game-config';
 import { usePreferredState } from '@/hooks/usePreferredState';
+import { getStrategyLabel } from '@/utils/strategyLabel';
 import { useUserTier } from '@/hooks/useUserTier';
 
 interface DashboardStats {
@@ -100,7 +101,7 @@ function normalizePredictionResponse(prediction: StoredPredictionResponse): Dash
       explanation?.summary_text ||
       explanation?.detail_text ||
       EMPTY_COMMENTARY.summary,
-    strategyLabel: prediction?.source_strategy_key || null,
+    strategyLabel: getStrategyLabel(prediction?.source_strategy_key),
     confidenceScore:
       prediction?.confidence_score !== null && prediction?.confidence_score !== undefined
         ? Number(prediction.confidence_score)

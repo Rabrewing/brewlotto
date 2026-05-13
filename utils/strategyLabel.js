@@ -7,6 +7,7 @@ const TIERED_MAP = {
   frequency: 'heatcheck',
   poisson_basic: 'heatcheck_ii',
   'poisson+': 'heatcheck_ii',
+  poisson: 'heatcheck',
   advanced_scoring: 'heatcheck_iii',
   confidence_bands: 'heatwave_ii',
   prediction_comparisons: 'heatwave_iii',
@@ -16,6 +17,8 @@ const TIERED_MAP = {
   strategy_explanations: 'pulsesync',
   early_access_strategies: 'pulsesync_ii',
   'markov++': 'sequencex',
+  markov: 'sequencex',
+  ensemble: 'heatcheck_iii',
 };
 
 const FALLBACK_CLEAN = (key) => {
