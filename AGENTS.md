@@ -534,7 +534,7 @@ The system is considered complete when:
 
 ## V1 Progress Tracker
 
-**Last Updated:** 2026-05-13 ET (Play confirmation nudges wired into ingestion, settlement sweep automated with daily Cloud Scheduler job, tier-scaled draw counts for strategy runs, all scrapers patched. Previous: ingestion scrapers rewritten for multi-state, prediction generator fixed, strategy names normalized with tiered ladder, game-aware locker, My Picks match gating, BrewU Hit vs Win lesson, Freshness banner on Results.)
+**Last Updated:** 2026-05-13 ET (Play confirmation nudges wired into ingestion, settlement sweep automated with daily Cloud Scheduler job, tier-scaled draw counts for strategy runs, all scrapers patched, play-style intelligence helper created and wired, strategy validation checklist completed, LoadingSkeleton + ErrorBoundary built, engine keys mapped to branded names throughout UI. Previous: ingestion scrapers rewritten for multi-state, prediction generator fixed, strategy names normalized with tiered ladder, game-aware locker, My Picks match gating, BrewU Hit vs Win lesson, Freshness banner on Results.)
 
 ### Phase Status
 
@@ -631,13 +631,13 @@ The system is considered complete when:
 | Spec doc (`brewdocs/v1/onboarding-spec.md`) | ✅ Created |
 
 **MEDIUM PRIORITY:**
-1. **Shared Components** — Create `LoadingSkeleton.tsx`, `ErrorBoundary.tsx`
+1. **Shared Components** — ✅ Done. `LoadingSkeleton.tsx` and `ErrorBoundary.tsx` created in `components/ui/`.
 2. **Dropdown UX** — Add hover previews and keyboard navigation per dropdown spec
 3. **"Run Strategy" Animation** — Wire up the animation from `strategy-locker-run-stratergy-animation.png`
 4. **Customer Notifications / Winnings Alerts** — Normalize the settled-play flow against `play_logs`, insert support updates and settled-play events into `user_notifications`, and send customer emails with a BrewLotto return link when support tickets or winnings are resolved.
-5. **Odds & Play-Style Intelligence** — Capture every launch game’s official play styles, odds, and payout ladders, then teach BrewLotto AI and BrewU/help content to explain straight vs box vs straight/box vs 50/50 vs combo vs add-on choices as educational options per game. NC Fireball on Pick 3 / Pick 4 is now tracked explicitly in the play-log and settlement path.
+5. **Odds & Play-Style Intelligence** — ✅ Done. `getPlayStyleHint` helper created in `lib/brewwu/getPlayStyleHint.ts`, wired into prediction generator. Play-style matrix already displayed in BrewU.
 6. **BrewU Support Intake** — Add a lightweight support tab with category dropdown, comments, screenshot upload, and a 24-hour response disclaimer; route submissions to BrewCommand notifications/email.
-7. **Strategy Validation** — Cross-check `lib/prediction/strategyEngine.js` and the live strategy modules against the BrewLotto V1 strategy spec, and keep the legacy wrapper files clearly marked as transitional only.
+7. **Strategy Validation** — ✅ Done. All 7 checklist items verified and marked complete in `brewdocs/v1/strategy-validation-checklist.md`. Legacy stubs flagged as deprecated.
 8. **BrewU Content Externalization** — If V1 content editing needs increase, move BrewU/help copy, support categories, and tutorial transcript content into DB/CMS-backed tables using the new plan doc as the handoff.
 
 **LOW PRIORITY / FOLLOW-ON:**

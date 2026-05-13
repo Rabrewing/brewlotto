@@ -91,7 +91,11 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Strategy runs scale draw count by user tier.
 - BrewU Hit vs Win lesson added, index chips made clickable.
 - Results matches scoped to saved + date-gated predictions only.
-- Firewall display from draw data on confirmed picks.
+- Fireball displayed from draw data on confirmed picks.
+- Created `getPlayStyleHint` helper and wired into prediction commentary.
+- Completed strategy validation checklist (all 7 checks verified).
+- Created `LoadingSkeleton` and `ErrorBoundary` shared components.
+- Mapped engine keys (poisson, momentum, markov, ensemble) to branded names in TIERED_MAP.
 - Added BrewU support intake, support screenshot storage, canonical play-log bridge, settlement sweep, and customer notifications planning.
 - Added timestamp discipline to AGENTS and Brewdocs so future AI sessions can read state without guessing.
 
