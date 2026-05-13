@@ -28,6 +28,13 @@ const TIER_ORDER: Record<TierCode, number> = {
   master: 3,
 };
 
+const TIER_DRAW_LIMITS: Record<TierCode, number> = {
+  free: 100,
+  starter: 200,
+  pro: 500,
+  master: 1000,
+};
+
 const ENGINE_BY_REGISTRY_KEY: Partial<Record<RegistryStrategyKey, EngineKey>> = {
   hot_cold: 'poisson',
   momentum: 'momentum',
@@ -61,6 +68,9 @@ function getEngineKey(strategyKey: string): EngineKey {
 }
 
 function countFrequencies(draws: Array<{ primary_numbers?: number[] | null }>, min: number, max: number) {
+  const totalDraws = draws.length;
+  const recentWindow = Math.max(12, Math.min(Math.floor(totalDraws / 5), 100));
+
   const frequency: Record<number, number> = {};
   const recentFrequency: Record<number, number> = {};
   const transitionMatrix: Record<number, Record<number, number>> = {};
@@ -76,7 +86,7 @@ function countFrequencies(draws: Array<{ primary_numbers?: number[] | null }>, m
 
   for (let index = 0; index < draws.length; index += 1) {
     const numbers = Array.isArray(draws[index]?.primary_numbers) ? draws[index]?.primary_numbers || [] : [];
-    const isRecentWindow = index < Math.min(12, draws.length);
+    const isRecentWindow = index < recentWindow;
 
     for (const number of numbers) {
       if (frequency[number] !== undefined) {
@@ -318,12 +328,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const drawLimit = TIER_DRAW_LIMITS[currentTier] || 100;
+
     const { data: drawRows, error: drawError } = await admin
       .from('official_draws')
       .select('primary_numbers')
       .eq('game_id', gameRow.id)
       .order('draw_datetime_local', { ascending: false })
-      .limit(100);
+      .limit(drawLimit);
 
     if (drawError) {
       return NextResponse.json(
