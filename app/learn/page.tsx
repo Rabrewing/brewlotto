@@ -63,6 +63,19 @@ const COVERAGE_OVERVIEW = [
   },
 ];
 
+const BREWU_INDEX = [
+  { label: 'Tutorial replay', href: '#tutorial', hint: 'Replay the onboarding walk-through' },
+  { label: 'BrewU overview', href: '#brewu-lite', hint: 'See how BrewU fits the product' },
+  { label: 'Play styles by game', href: '#play-styles', hint: 'Learn straight, box, 50/50, combo, and add-ons' },
+  { label: 'Fireball clarity', href: '#fireball', hint: 'NC Pick 3 / Pick 4 Fireball only' },
+  { label: 'Payout ladders', href: '#payouts', hint: 'Prize shape and certified values' },
+  { label: 'Data freshness', href: '#freshness', hint: 'Healthy vs delayed vs stale' },
+  { label: 'AI guidance', href: '#ai-guidance', hint: 'How Brew AI helps without hype' },
+  { label: 'Prize tables', href: '#prize-tables', hint: 'Game-by-game payout snapshots' },
+  { label: 'Where to use this', href: '#where-to-use', hint: 'Dashboard, Stats, and Strategy Locker links' },
+  { label: 'Systems', href: '#systems', hint: 'BrewU, Support, policies, logout' },
+];
+
 const FIREBALL_GUIDE = [
   {
     label: 'Where it matters',
@@ -109,6 +122,27 @@ export default function LearnPage() {
           </div>
         </section>
 
+        <section className="mt-5 rounded-[30px] border border-[#72caff]/18 bg-[linear-gradient(145deg,rgba(18,24,36,0.9),rgba(8,8,8,0.98))] px-5 py-5 shadow-[0_0_28px_rgba(114,202,255,0.06)]">
+          <div className="text-[15px] uppercase tracking-[0.16em] text-white/38">Quick index</div>
+          <div className="mt-3 text-[26px] font-semibold text-[#d7ecff]">Jump to the help topic you need</div>
+          <div className="mt-2 max-w-3xl text-[15px] leading-7 text-white/62">
+            Pick a topic below to jump straight to that section. BrewU stays readable on scroll, but
+            the index lets you get where you want faster on desktop or mobile.
+          </div>
+          <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {BREWU_INDEX.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="rounded-[20px] border border-white/8 bg-black/20 px-4 py-4 transition-colors hover:border-[#72caff]/24 hover:bg-[#72caff]/8"
+              >
+                <div className="text-[16px] font-medium text-[#d7ecff]">{item.label}</div>
+                <div className="mt-2 text-[14px] leading-7 text-white/60">{item.hint}</div>
+              </Link>
+            ))}
+          </div>
+        </section>
+
         <section id="tutorial" className="mt-1">
           <TutorialVideoPanel
             eyebrow="BrewU Replay"
@@ -136,7 +170,7 @@ export default function LearnPage() {
           </TutorialVideoPanel>
         </section>
 
-        <section className="mt-5 rounded-[30px] border border-[#ffc742]/24 bg-[radial-gradient(circle_at_top_left,rgba(255,199,66,0.18),rgba(0,0,0,0)_34%),linear-gradient(145deg,rgba(30,20,13,0.88),rgba(8,8,8,0.98))] px-5 py-5 shadow-[0_0_28px_rgba(255,184,28,0.08)]">
+        <section id="brewu-lite" className="mt-5 rounded-[30px] border border-[#ffc742]/24 bg-[radial-gradient(circle_at_top_left,rgba(255,199,66,0.18),rgba(0,0,0,0)_34%),linear-gradient(145deg,rgba(30,20,13,0.88),rgba(8,8,8,0.98))] px-5 py-5 shadow-[0_0_28px_rgba(255,184,28,0.08)]">
           <div className="text-[15px] uppercase tracking-[0.16em] text-white/38">BrewUniversity Lite</div>
           <div className="mt-3 text-[26px] font-semibold text-[#f7ddb3]">Short explainers, not a fake LMS</div>
           <div className="mt-2 max-w-3xl text-[15px] leading-7 text-white/62">
@@ -155,7 +189,7 @@ export default function LearnPage() {
           ))}
         </section>
 
-        <section className="mt-5 rounded-[30px] border border-[#53d48a]/18 bg-[radial-gradient(circle_at_top_left,rgba(83,212,138,0.14),rgba(0,0,0,0)_34%),linear-gradient(145deg,rgba(16,26,18,0.88),rgba(8,8,8,0.98))] px-5 py-5 shadow-[0_0_28px_rgba(83,212,138,0.08)]">
+        <section id="play-styles" className="mt-5 rounded-[30px] border border-[#53d48a]/18 bg-[radial-gradient(circle_at_top_left,rgba(83,212,138,0.14),rgba(0,0,0,0)_34%),linear-gradient(145deg,rgba(16,26,18,0.88),rgba(8,8,8,0.98))] px-5 py-5 shadow-[0_0_28px_rgba(83,212,138,0.08)]">
           <div className="text-[15px] uppercase tracking-[0.16em] text-white/38">Play styles by game</div>
           <div className="mt-3 text-[26px] font-semibold text-[#ddf7e2]">Teach the game before the bet</div>
           <div className="mt-2 max-w-3xl text-[15px] leading-7 text-white/62">
@@ -193,7 +227,7 @@ export default function LearnPage() {
           </div>
         </section>
 
-        <section className="mt-5 rounded-[30px] border border-[#72caff]/18 bg-[radial-gradient(circle_at_top_left,rgba(114,202,255,0.14),rgba(0,0,0,0)_34%),linear-gradient(145deg,rgba(13,20,28,0.9),rgba(8,8,8,0.98))] px-5 py-5 shadow-[0_0_28px_rgba(114,202,255,0.06)]">
+        <section id="fireball" className="mt-5 rounded-[30px] border border-[#72caff]/18 bg-[radial-gradient(circle_at_top_left,rgba(114,202,255,0.14),rgba(0,0,0,0)_34%),linear-gradient(145deg,rgba(13,20,28,0.9),rgba(8,8,8,0.98))] px-5 py-5 shadow-[0_0_28px_rgba(114,202,255,0.06)]">
           <div className="text-[15px] uppercase tracking-[0.16em] text-white/38">Fireball clarity</div>
           <div className="mt-3 text-[26px] font-semibold text-[#d7ecff]">Only NC Pick 3 / Pick 4 uses Fireball</div>
           <div className="mt-2 max-w-3xl text-[15px] leading-7 text-white/62">
@@ -211,7 +245,7 @@ export default function LearnPage() {
           </div>
         </section>
 
-        <section className="mt-5 rounded-[30px] border border-[#f7b84d]/18 bg-[radial-gradient(circle_at_top_left,rgba(247,184,77,0.14),rgba(0,0,0,0)_34%),linear-gradient(145deg,rgba(28,20,12,0.92),rgba(8,8,8,0.98))] px-5 py-5 shadow-[0_0_28px_rgba(247,184,77,0.08)]">
+        <section id="payouts" className="mt-5 rounded-[30px] border border-[#f7b84d]/18 bg-[radial-gradient(circle_at_top_left,rgba(247,184,77,0.14),rgba(0,0,0,0)_34%),linear-gradient(145deg,rgba(28,20,12,0.92),rgba(8,8,8,0.98))] px-5 py-5 shadow-[0_0_28px_rgba(247,184,77,0.08)]">
           <div className="text-[15px] uppercase tracking-[0.16em] text-white/38">Payout ladders by game</div>
           <div className="mt-3 text-[26px] font-semibold text-[#f7ddb3]">Show the prize shape, not hype</div>
           <div className="mt-2 max-w-3xl text-[15px] leading-7 text-white/62">
@@ -249,7 +283,7 @@ export default function LearnPage() {
           </div>
         </section>
 
-        <section className="mt-5 rounded-[30px] border border-[#ffb84d]/18 bg-[radial-gradient(circle_at_top_left,rgba(255,184,77,0.14),rgba(0,0,0,0)_34%),linear-gradient(145deg,rgba(28,20,12,0.92),rgba(8,8,8,0.98))] px-5 py-5 shadow-[0_0_28px_rgba(255,184,77,0.08)]">
+        <section id="freshness" className="mt-5 rounded-[30px] border border-[#ffb84d]/18 bg-[radial-gradient(circle_at_top_left,rgba(255,184,77,0.14),rgba(0,0,0,0)_34%),linear-gradient(145deg,rgba(28,20,12,0.92),rgba(8,8,8,0.98))] px-5 py-5 shadow-[0_0_28px_rgba(255,184,77,0.08)]">
           <div className="text-[15px] uppercase tracking-[0.16em] text-white/38">Data Freshness</div>
           <div className="mt-3 text-[26px] font-semibold text-[#f7ddb3]">Official results can be delayed — BrewLotto adapts</div>
           <div className="mt-2 max-w-3xl text-[15px] leading-7 text-white/62">
@@ -288,7 +322,7 @@ export default function LearnPage() {
           </div>
         </section>
 
-        <section className="mt-5 rounded-[28px] border border-[#72caff]/18 bg-[linear-gradient(145deg,rgba(19,22,31,0.76),rgba(10,10,12,0.96))] px-6 py-6 shadow-[0_0_20px_rgba(114,202,255,0.05)]">
+        <section id="ai-guidance" className="mt-5 rounded-[28px] border border-[#72caff]/18 bg-[linear-gradient(145deg,rgba(19,22,31,0.76),rgba(10,10,12,0.96))] px-6 py-6 shadow-[0_0_20px_rgba(114,202,255,0.05)]">
           <div className="text-[20px] font-medium text-[#d8e6f8]">How Brew AI helps without overpromising</div>
           <div className="mt-3 grid gap-3 md:grid-cols-3">
             <div className="rounded-[20px] border border-white/8 bg-black/20 px-4 py-4 text-[15px] text-white/78">
@@ -303,7 +337,7 @@ export default function LearnPage() {
           </div>
         </section>
 
-        <section className="mt-5 rounded-[30px] border border-[#72caff]/18 bg-[radial-gradient(circle_at_top_left,rgba(114,202,255,0.14),rgba(0,0,0,0)_34%),linear-gradient(145deg,rgba(13,20,28,0.9),rgba(8,8,8,0.98))] px-5 py-5 shadow-[0_0_28px_rgba(114,202,255,0.06)]">
+        <section id="prize-tables" className="mt-5 rounded-[30px] border border-[#72caff]/18 bg-[radial-gradient(circle_at_top_left,rgba(114,202,255,0.14),rgba(0,0,0,0)_34%),linear-gradient(145deg,rgba(13,20,28,0.9),rgba(8,8,8,0.98))] px-5 py-5 shadow-[0_0_28px_rgba(114,202,255,0.06)]">
           <div className="text-[15px] uppercase tracking-[0.16em] text-white/38">Prize tables</div>
           <div className="mt-3 text-[26px] font-semibold text-[#d7ecff]">Show the official payout shape</div>
           <div className="mt-2 max-w-3xl text-[15px] leading-7 text-white/62">
@@ -339,7 +373,7 @@ export default function LearnPage() {
           </div>
         </section>
 
-        <section className="mt-5 rounded-[28px] border border-[#72caff]/18 bg-[linear-gradient(145deg,rgba(19,22,31,0.76),rgba(10,10,12,0.96))] px-6 py-6 shadow-[0_0_20px_rgba(114,202,255,0.05)]">
+        <section id="where-to-use" className="mt-5 rounded-[28px] border border-[#72caff]/18 bg-[linear-gradient(145deg,rgba(19,22,31,0.76),rgba(10,10,12,0.96))] px-6 py-6 shadow-[0_0_20px_rgba(114,202,255,0.05)]">
           <div className="text-[20px] font-medium text-[#d8e6f8]">Where to use this knowledge</div>
           <div className="mt-3 grid gap-3 md:grid-cols-3">
             <Link href="/dashboard" className="rounded-[20px] border border-white/8 bg-black/20 px-4 py-4 text-[15px] text-white/78 transition-colors hover:text-white">Dashboard: live commentary, hot/cold, and momentum context</Link>
@@ -348,7 +382,7 @@ export default function LearnPage() {
           </div>
         </section>
 
-        <section className="mt-5 rounded-[28px] border border-white/10 bg-white/[0.03] px-6 py-6">
+        <section id="systems" className="mt-5 rounded-[28px] border border-white/10 bg-white/[0.03] px-6 py-6">
           <div className="text-[18px] font-medium text-[#f7ddb3]">Systems</div>
           <div className="mt-3 text-[15px] leading-7 text-white/62">
             BrewU keeps product learning and system access in one place. Use this area to replay the tutorial, reach support, review policies, or sign out.
