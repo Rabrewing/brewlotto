@@ -9,6 +9,7 @@ import { execSync } from 'child_process';
 import { createClient } from '@supabase/supabase-js';
 import 'dotenv/config';
 import { sendStrategySignalNotifications } from '../lib/notifications/strategySignals.js';
+import { sendPlayConfirmationNudge } from '../lib/notifications/playSettlements.js';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
@@ -216,6 +217,108 @@ async function runStrategySignalSweep() {
   }
 }
 
+async function runPlayConfirmationSweep() {
+  try {
+    console.log('\n📝 Running play confirmation nudge sweep...');
+
+    const { data: predictions, error: predictionsError } = await supabase
+      .from('predictions')
+      .select('id, user_id, state, game, draw_date, draw_time, predicted_numbers, bonus_number')
+      .eq('is_saved', true)
+      .not('draw_date', 'is', null);
+
+    if (predictionsError) {
+      console.log(`   ⚠️ Prediction fetch skipped: ${predictionsError.message}`);
+      return;
+    }
+
+    if (!predictions || predictions.length === 0) {
+      console.log('   ⏭️ No saved predictions to check');
+      return;
+    }
+
+    let nudgesCreated = 0;
+
+    for (const prediction of predictions) {
+      const { data: existingLog } = await supabase
+        .from('play_logs')
+        .select('id')
+        .eq('prediction_id', prediction.id)
+        .maybeSingle();
+
+      if (existingLog) continue;
+
+      const stateCode = prediction.state === 'MULTI' ? 'NC' : prediction.state;
+      const gameKey = prediction.game === 'mega_millions' || prediction.game === 'mega' ? 'mega_millions' : prediction.game;
+
+      const { data: gameRow } = await supabase
+        .from('lottery_games')
+        .select('id, display_name')
+        .eq('game_key', gameKey)
+        .eq('state_code', stateCode)
+        .maybeSingle();
+
+      if (!gameRow) continue;
+
+      const { data: draws } = await supabase
+        .from('official_draws')
+        .select('primary_numbers, bonus_numbers')
+        .eq('game_id', gameRow.id)
+        .eq('draw_date', prediction.draw_date)
+        .eq('draw_window_label', prediction.draw_time);
+
+      if (!draws || draws.length === 0) continue;
+
+      const draw = draws[0];
+      const predictedNums = Array.isArray(prediction.predicted_numbers) ? prediction.predicted_numbers : [];
+      const drawNums = Array.isArray(draw.primary_numbers) ? draw.primary_numbers.filter((v) => typeof v === 'number') : [];
+      const drawBonus = Array.isArray(draw.bonus_numbers) ? draw.bonus_numbers[0] : null;
+
+      let matchCount = 0;
+      const remaining = [...drawNums];
+      for (const val of predictedNums) {
+        const idx = remaining.indexOf(val);
+        if (idx >= 0) { matchCount += 1; remaining.splice(idx, 1); }
+      }
+
+      if (matchCount === 0) continue;
+
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('email')
+        .eq('id', prediction.user_id)
+        .maybeSingle();
+
+      await sendPlayConfirmationNudge(supabase, {
+        userId: prediction.user_id,
+        contactEmail: profile?.email || null,
+        state: stateCode,
+        gameLabel: gameRow.display_name,
+        drawDate: prediction.draw_date,
+        drawWindowLabel: prediction.draw_time,
+        playedNumbers: predictedNums,
+        officialNumbers: drawNums,
+        matchCount,
+        positionalMatchCount: matchCount,
+        bonusMatch: drawBonus != null && prediction.bonus_number === drawBonus,
+        isWin: false,
+        payoutTier: null,
+        resultCode: matchCount >= 5 ? 'win' : 'partial',
+        payoutAmount: null,
+        payoutLabel: 'Pattern match',
+        payoutSummary: `Matched ${matchCount} number${matchCount === 1 ? '' : 's'}`,
+        fireballActive: false,
+      });
+
+      nudgesCreated += 1;
+    }
+
+    console.log(`   ✅ Created ${nudgesCreated} confirmation nudges`);
+  } catch (error) {
+    console.log(`   ⚠️ Play confirmation sweep failed: ${error.message}`);
+  }
+}
+
 async function runIngestionJob() {
   console.log('🚀 Starting Unified Ingestion Job');
   console.log(`📅 Date: ${new Date().toISOString()}`);
@@ -304,6 +407,8 @@ async function runIngestionJob() {
   await printSummary(results);
 
   await runStrategySignalSweep();
+
+  await runPlayConfirmationSweep();
 
   console.log('\n' + '═'.repeat(60));
   console.log('🎉 Ingestion job completed!');

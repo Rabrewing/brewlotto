@@ -83,6 +83,9 @@ official source → ingestion → Supabase → freshness view → API → UI
 | **Strategy tiered naming** | `lib/explainers/strategyExplainers.js`, `utils/strategyLabel.js`, `lib/voice/BREW_PHRASES.js` — 2026-05-11 | Replaced flat branded names with tiered ladder: HeatCheck → HeatCheck II → III → IV, HeatWave → II → III, PulseSync → II. Each family progresses across tier unlocks instead of showing unrelated brand names. Lucide icons assigned per family. AGENTS.md updated, CHANGELOG.md updated.
 | **Game-aware Strategy Locker** | `app/strategy-locker/page.tsx`, `app/api/strategy-locker/run/route.ts`, `app/my-picks/page.tsx` — 2026-05-11 | Added GameTabs selector and Midday/Evening toggle to Strategy Locker so users can strategize per game and draw window. Run route now accepts gameKey/state/drawWindow from request. My Picks link passes game context via URL params. Activity logging includes game/state for per-game tracking. |
 | **Match info gating** | `app/my-picks/page.tsx`, `app/api/predictions/route.ts`, `app/api/results/route.ts` — 2026-05-13 | Match info only shows after user confirms "I Played This". Results matches scoped to saved predictions with matching draw date and window. Fireball displayed as draw context, not match modifier. BrewU Hit vs Win lesson added. Stats already track wins from play_logs only (confirmed plays). |
+| **Play confirmation nudges** | `scripts/ingestionJob.js`, `lib/notifications/playSettlements.js` — 2026-05-13 | Added `runPlayConfirmationSweep()` to the ingestion pipeline. After scrapers insert new draws, checks saved predictions against them and creates "if you played this, confirm it" notifications for near-matches. |
+| **Settlement sweep** | `scripts/settlementSweep.js`, `scripts/ingestionServer.js` — 2026-05-13 | Created standalone settlement script and `/settle` endpoint. Added daily Cloud Scheduler job at 12:30 AM ET to auto-settle unsettled play_logs against official draws. |
+| **Tier-scaled draw counts** | `app/api/strategy-locker/run/route.ts` — 2026-05-13 | Strategy runs now fetch scaled draw counts by tier: Free=100, Starter=200, Pro=500, Master=1000. Recent momentum window scales dynamically. |
 | **BLOB_READ_WRITE_TOKEN** | Vercel Blob — 2026-05-04 | Blob store created, linked to project. Landing video + tutorial video uploaded to Blob. `NEXT_PUBLIC_LANDING_VIDEO_*_URL` and `NEXT_PUBLIC_TUTORIAL_VIDEO_URL` env vars set. |
 
 ### Auth & Email
@@ -531,7 +534,7 @@ The system is considered complete when:
 
 ## V1 Progress Tracker
 
-**Last Updated:** 2026-05-11 ET (Ingestion scrapers rewritten for multi-state, sufficiency gating, deferred retry, and CA backfill; prediction generator fixed for multi-state crash, window filtering, and proper state/game labeling; strategy names normalized across all surfaces with tiered ladder and Lucide icons; Strategy Locker game selector + draw window toggle added; momentum gauge re-centered with delta-distribution formula; BrewU Data Freshness section added; game-aware locker documented)
+**Last Updated:** 2026-05-13 ET (Play confirmation nudges wired into ingestion, settlement sweep automated with daily Cloud Scheduler job, tier-scaled draw counts for strategy runs, all scrapers patched. Previous: ingestion scrapers rewritten for multi-state, prediction generator fixed, strategy names normalized with tiered ladder, game-aware locker, My Picks match gating, BrewU Hit vs Win lesson, Freshness banner on Results.)
 
 ### Phase Status
 
@@ -607,11 +610,11 @@ The system is considered complete when:
 2. **Pricing / Subscription Polish** — Keep refining `/pricing` now that the state-aware plan selection and Stripe routing are live. Focus on visual hierarchy, monthly/yearly clarity, and the handoff between selection and the Billing manage surface.
 3. **Stripe Live Mode** — Flip the current test-mode billing path to live keys, then verify the production checkout/webhook path end-to-end
 4. **Landing Video Swap** — Replace the current landing-page reel with the watermark-free Blob asset once it lands locally, then deploy/update through the Vercel CLI path.
-5. **Customer Strategy Alerts** — When Brew detects meaningful strategy signals, write an event-driven `user_notifications` record and send email only for off-app or high-priority events, keeping the momentum meter as a single gauge and exposing hot/cold as separate cards. BrewCommand should surface the recent signals, recipients, and reasons in a dedicated Strategy Signals section so alerting can be audited.
-6. **Play Confirmation Nudges** — When a settled play has a near-hit or meaningful match, write a customer nudge that says “if you played this, confirm it” so the result history can stay honest before the confirmed-play workflow is fully interactive.
-7. **Results History / Win Ratios** — Continue tightening the confirmed-play workflow, keep `/results` grouped by draw date/time with the 3/6 month history toggle, surface win ratios by strategy/game/state in `/stats` and BrewCommand, and continue feeding the same confirmed-play signal into the Strategy Locker ratio chips and stats summaries.
-8. **Ingestion Midday / Evening Check** — Verified: Cloud Scheduler → Cloud Run ingestion path is healthy for midday and evening runs after the schedule change so NC/CA draw windows are not regressing.
-9. **Momentum Meter Regression** — Verified: the dashboard momentum gauge now shows a centered trend-strength value instead of flattening to zero, and keep an eye on whether any game-specific data shape still suppresses it.
+5. **Customer Strategy Alerts** — ✅ Done. Strategy signal notifications fire during every ingestion run via `runStrategySignalSweep()`. Resend configured, momentum-gated, deduped.
+6. **Play Confirmation Nudges** — ✅ Done. `runPlayConfirmationSweep()` in ingestionJob.js checks saved predictions against new draws and creates nudges for near-matches. Settlement sweep automated via daily Cloud Scheduler job at 12:30 AM ET.
+7. **Results History / Win Ratios** — ✅ Done. Results has 3/6 month toggle, Strategy Locker shows hit/win ratio chips, Stats has strategy breakdown. Data populates as users confirm plays.
+8. **Ingestion Midday / Evening Check** — ✅ Verified. Scheduler → Cloud Run path healthy after timing fixes.
+9. **Momentum Meter Regression** — ✅ Verified. Re-centered with delta-distribution formula.
 10. **Downgrade Rollback Check** — Stripe downgrades are already routed through the billing portal and `customer.subscription.updated` updates entitlements; keep this behavior documented and verify it in Stripe test mode before live mode.
 
 **ONBOARDING STATUS:**

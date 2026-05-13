@@ -79,7 +79,19 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Updated My Picks "Open Strategy Locker" link to pass game/state as URL query params so the locker opens on the right game.
 - Added game and state fields to user_strategy_activity logging for per-game strategy tracking.
 - Documented in brewdocs/v1/game-aware-strategy-locker-2026-05-11.md.
-### 2026-05-07
+- Sealed Customer Strategy Alerts, Play Confirmation Nudges, and Results History / Win Ratios as complete in AGENTS.md.
+- Tier-scaled strategy draw counts: Free=100, Starter=200, Pro=500, Master=1000.
+- Added runPlayConfirmationSweep() to ingestion pipeline — nudges users when saved predictions near-match new draws.
+- Created scripts/settlementSweep.js for auto-settling play_logs against official draws.
+- Added /settle endpoint to ingestion server + daily Cloud Scheduler job at 12:30 AM ET.
+
+### 2026-05-13
+- Play confirmation nudges now fire during every ingestion run.
+- Settlement sweep automated with daily schedule.
+- Strategy runs scale draw count by user tier.
+- BrewU Hit vs Win lesson added, index chips made clickable.
+- Results matches scoped to saved + date-gated predictions only.
+- Firewall display from draw data on confirmed picks.
 - Added BrewU support intake, support screenshot storage, canonical play-log bridge, settlement sweep, and customer notifications planning.
 - Added timestamp discipline to AGENTS and Brewdocs so future AI sessions can read state without guessing.
 
