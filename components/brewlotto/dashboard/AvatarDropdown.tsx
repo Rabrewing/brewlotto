@@ -51,6 +51,7 @@ interface MenuItem {
   href?: string;
   enabled: boolean;
   emphasis?: 'normal' | 'help';
+  description?: string;
 }
 
 interface MenuSection {
@@ -62,28 +63,28 @@ const MENU_SECTIONS: MenuSection[] = [
   {
     title: 'Gameplay',
     items: [
-      { label: 'My Picks', icon: 'picks', href: '/my-picks', enabled: true },
-      { label: "Today's Results", icon: 'results', href: '/results', enabled: true },
-      { label: 'Stats & Performance', icon: 'stats', href: '/stats', enabled: true },
-      { label: 'Strategy Locker', icon: 'locker', href: '/strategy-locker', enabled: true },
+      { label: 'My Picks', icon: 'picks', href: '/my-picks', enabled: true, description: 'Saved picks and play confirmation' },
+      { label: "Today's Results", icon: 'results', href: '/results', enabled: true, description: 'Latest draws and match tracking' },
+      { label: 'Stats & Performance', icon: 'stats', href: '/stats', enabled: true, description: 'Hit rates and strategy breakdowns' },
+      { label: 'Strategy Locker', icon: 'locker', href: '/strategy-locker', enabled: true, description: 'Run strategies and save picks' },
     ],
   },
   {
     title: 'Account',
     items: [
-      { label: 'Profile', icon: 'profile', href: '/profile', enabled: true },
-      { label: 'Notifications', icon: 'notifications', href: '/notifications', enabled: true },
-      { label: 'Settings', icon: 'settings', href: '/settings', enabled: true },
-      { label: 'Subscription / Billing', icon: 'billing', href: '/billing', enabled: true },
+      { label: 'Profile', icon: 'profile', href: '/profile', enabled: true, description: 'Manage your identity and preferences' },
+      { label: 'Notifications', icon: 'notifications', href: '/notifications', enabled: true, description: 'Alerts, nudges, and updates' },
+      { label: 'Settings', icon: 'settings', href: '/settings', enabled: true, description: 'Theme and gameplay defaults' },
+      { label: 'Subscription / Billing', icon: 'billing', href: '/billing', enabled: true, description: 'Plan details and payment history' },
     ],
   },
   {
     title: 'Systems',
     items: [
-      { label: 'BrewU', icon: 'learn', href: '/learn', enabled: true },
-      { label: 'Support', icon: 'notifications', href: '/support', enabled: true, emphasis: 'help' },
-      { label: 'Terms & Privacy', icon: 'legal', href: '/legal', enabled: true },
-      { label: 'Logout', icon: 'logout', href: '/logout', enabled: true },
+      { label: 'BrewU', icon: 'learn', href: '/learn', enabled: true, description: 'Tutorials, play styles, and help' },
+      { label: 'Support', icon: 'notifications', href: '/support', enabled: true, emphasis: 'help', description: 'Report issues and track tickets' },
+      { label: 'Terms & Privacy', icon: 'legal', href: '/legal', enabled: true, description: 'Policies and responsible use' },
+      { label: 'Logout', icon: 'logout', href: '/logout', enabled: true, description: 'Sign out of this session' },
     ],
   },
 ];
@@ -191,10 +192,26 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 function MenuRow({
   item,
   onClick,
+  isFocused = false,
+  onHover,
+  onHoverEnd,
+  setHoveredItem,
 }: {
   item: MenuItem;
   onClick?: () => void;
+  isFocused?: boolean;
+  onHover?: () => void;
+  onHoverEnd?: () => void;
+  setHoveredItem: (item: MenuItem | null) => void;
 }) {
+  const rowRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isFocused && rowRef.current) {
+      rowRef.current.scrollIntoView({ block: 'nearest' });
+    }
+  }, [isFocused]);
+
   const content = (
     <>
       <span className="flex h-9 w-9 items-center justify-center rounded-full border border-white/8 bg-white/[0.03] text-[#ffd27e]">
@@ -219,29 +236,29 @@ function MenuRow({
   );
 
   const className = `flex w-full items-center gap-3 rounded-[14px] px-3 py-2.5 text-[15px] transition-all ${
-    item.enabled
-      ? item.emphasis === 'help'
-        ? 'border border-[#72caff]/12 bg-[#72caff]/8 text-[#d8f1ff] hover:bg-[#72caff]/12 hover:text-white hover:shadow-[0_0_12px_rgba(114,202,255,0.12)]'
-        : 'text-[#f6ddb2] hover:bg-[#ffc742]/8 hover:text-white hover:shadow-[0_0_12px_rgba(255,199,66,0.12)]'
-      : 'cursor-default text-white/48'
+    isFocused
+      ? 'bg-[#ffc742]/12 text-white shadow-[0_0_12px_rgba(255,199,66,0.12)]'
+      : item.enabled
+        ? item.emphasis === 'help'
+          ? 'border border-[#72caff]/12 bg-[#72caff]/8 text-[#d8f1ff] hover:bg-[#72caff]/12 hover:text-white hover:shadow-[0_0_12px_rgba(114,202,255,0.12)]'
+          : 'text-[#f6ddb2] hover:bg-[#ffc742]/8 hover:text-white hover:shadow-[0_0_12px_rgba(255,199,66,0.12)]'
+        : 'cursor-default text-white/48'
   }`;
 
-  if (!item.enabled || !item.href) {
-    return <div className={className}>{content}</div>;
-  }
-
-  if (onClick) {
-    return (
-      <button type="button" onClick={onClick} className={className}>
-        {content}
-      </button>
-    );
-  }
+  const row = !item.enabled || !item.href
+    ? <div className={className}>{content}</div>
+    : onClick
+      ? <button type="button" onClick={onClick} className={className}>{content}</button>
+      : <Link href={item.href} className={className} onClick={onClick}>{content}</Link>;
 
   return (
-    <Link href={item.href} className={className} onClick={onClick}>
-      {content}
-    </Link>
+    <div
+      ref={rowRef}
+      onMouseEnter={() => { setHoveredItem(item); onHover?.(); }}
+      onMouseLeave={() => { setHoveredItem(null); onHoverEnd?.(); }}
+    >
+      {row}
+    </div>
   );
 }
 
@@ -250,6 +267,8 @@ export function AvatarDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const [confirmingLogout, setConfirmingLogout] = useState(false);
   const [preferredState, setPreferredState] = useState<PreferredStateCode>('NC');
+  const [focusedIndex, setFocusedIndex] = useState(-1);
+  const [hoveredItem, setHoveredItem] = useState<MenuItem | null>(null);
   const [userData, setUserData] = useState<{ name: string; email: string; initials: string }>({
     name: '',
     email: '',
@@ -257,29 +276,69 @@ export function AvatarDropdown() {
   });
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  const allItems = MENU_SECTIONS.flatMap((s) => s.items).filter((i) => i.enabled);
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
         setConfirmingLogout(false);
+        setFocusedIndex(-1);
+        setHoveredItem(null);
       }
     }
 
-    function handleEscape(event: KeyboardEvent) {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (!isOpen) return;
+
       if (event.key === 'Escape') {
         setIsOpen(false);
         setConfirmingLogout(false);
+        setFocusedIndex(-1);
+        setHoveredItem(null);
+        return;
+      }
+
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        setFocusedIndex((prev) => {
+          const next = prev < allItems.length - 1 ? prev + 1 : 0;
+          setHoveredItem(allItems[next]);
+          return next;
+        });
+      }
+
+      if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        setFocusedIndex((prev) => {
+          const next = prev > 0 ? prev - 1 : allItems.length - 1;
+          setHoveredItem(allItems[next]);
+          return next;
+        });
+      }
+
+      if (event.key === 'Enter' && focusedIndex >= 0 && focusedIndex < allItems.length) {
+        event.preventDefault();
+        const item = allItems[focusedIndex];
+        if (item.enabled && item.href) {
+          if (item.icon === 'logout') {
+            setConfirmingLogout(true);
+          } else {
+            setIsOpen(false);
+            router.push(item.href);
+          }
+        }
       }
     }
 
     document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', handleEscape);
+    document.addEventListener('keydown', handleKeyDown);
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleEscape);
+      document.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [isOpen, focusedIndex, allItems, router]);
 
   useEffect(() => {
     let cancelled = false;
@@ -431,10 +490,15 @@ export function AvatarDropdown() {
                 <div key={section.title} className={sectionIndex > 0 ? 'mt-2' : ''}>
                   <SectionLabel>{section.title}</SectionLabel>
                   <div className="space-y-0.5">
-                    {section.items.map((item) => (
+                    {section.items.map((item, itemIdx) => {
+                      const flatIdx = allItems.indexOf(item);
+                      return (
                         <MenuRow
                           key={item.label}
                           item={item}
+                          isFocused={focusedIndex === flatIdx}
+                          setHoveredItem={setHoveredItem}
+                          onHover={() => setFocusedIndex(flatIdx)}
                           onClick={
                             item.icon === 'logout'
                               ? () => setConfirmingLogout(true)
@@ -443,13 +507,20 @@ export function AvatarDropdown() {
                                 : undefined
                           }
                         />
-                    ))}
+                      );
+                    })}
                   </div>
                   {sectionIndex < MENU_SECTIONS.length - 1 ? (
                     <div className="mx-3 mt-2 h-px bg-white/6" />
                   ) : null}
                 </div>
               ))}
+
+              {hoveredItem?.description ? (
+                <div className="mx-3 mt-3 rounded-[14px] bg-[#ffc742]/8 px-4 py-3">
+                  <div className="text-[12px] leading-5 text-white/72">{hoveredItem.description}</div>
+                </div>
+              ) : null}
 
               {confirmingLogout ? (
                 <div className="mt-3 rounded-[16px] border border-[#ffc742]/18 bg-[#140f0e]/90 p-3">
