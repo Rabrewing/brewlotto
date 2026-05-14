@@ -849,10 +849,10 @@ export default function StrategyLockerPage() {
                                 </span>
                               </div>
                               <div className="mt-2 text-[13px] leading-6 text-white/72">
-                                Best play window: {runPreviews[strategy.id].timingProfile.windowStart} — {runPreviews[strategy.id].timingProfile.windowEnd}
+                                Tracking {runPreviews[strategy.id].primaryNumbers.join(' ')} — best play window: {runPreviews[strategy.id].timingProfile.windowStart} to {runPreviews[strategy.id].timingProfile.windowEnd}
                               </div>
                               <div className="mt-1 text-[11px] text-white/40">
-                                Based on {runPreviews[strategy.id].timingProfile.sampleSize} historical patterns • median {runPreviews[strategy.id].timingProfile.median} days • {runPreviews[strategy.id].timingProfile.spread}d spread
+                                Based on {runPreviews[strategy.id].timingProfile.sampleSize} historical {getStrategyLabel(runPreviews[strategy.id].engineKey)} patterns • median {runPreviews[strategy.id].timingProfile.median} days • {runPreviews[strategy.id].timingProfile.spread}d spread
                               </div>
                             </div>
                           ) : null}
