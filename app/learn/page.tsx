@@ -4,8 +4,11 @@ import { DashboardContainer, Header, NavigationTabs } from '@/components/brewlot
 import { BREWU_PLAY_STYLE_GUIDES } from '@/lib/brewwu/playStyleMatrix';
 import { BREWU_PAYOUT_GUIDES } from '@/lib/brewwu/payoutMatrix';
 import { BREWU_PRIZE_TABLES } from '@/lib/brewwu/prizeTableMatrix';
+import { createClient } from '@supabase/supabase-js';
 
-const LESSONS = [
+export const dynamic = 'force-dynamic';
+
+const FALLBACK_LESSONS = [
   {
     title: 'Hot and Cold Numbers',
     summary: 'Hot numbers have appeared more often in recent draws, while cold numbers have appeared less often. Neither guarantees the next result; they are just recent-frequency signals.',
@@ -118,7 +121,38 @@ const FIREBALL_GUIDE = [
   },
 ];
 
-export default function LearnPage() {
+export default async function LearnPage() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  let lessons = FALLBACK_LESSONS;
+  let fireballGuide = FIREBALL_GUIDE;
+
+  if (supabaseUrl) {
+    const supabase = createClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+
+    const { data: dbLessons } = await supabase
+      .from('brewu_content')
+      .select('title, body')
+      .like('section_key', 'lesson_%')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true });
+
+    if (dbLessons && dbLessons.length > 0) {
+      lessons = dbLessons.map((row) => ({ title: row.title, summary: row.body }));
+    }
+
+    const { data: dbFireball } = await supabase
+      .from('brewu_content')
+      .select('title, body')
+      .eq('section_key', 'fireball_context')
+      .eq('is_active', true)
+      .limit(1)
+      .maybeSingle();
+
+    if (dbFireball) {
+      fireballGuide = [{ label: 'Fireball is for reference only', summary: dbFireball.body }];
+    }
+  }
+
   return (
     <main className="min-h-screen bg-[#050505] text-white">
       <DashboardContainer>
@@ -236,7 +270,7 @@ export default function LearnPage() {
         </section>
 
         <section className="mt-5 grid gap-4 lg:grid-cols-2">
-          {LESSONS.map((lesson) => (
+          {lessons.map((lesson) => (
             <article key={lesson.title} className="rounded-[26px] border border-[#ffbd39]/18 bg-[linear-gradient(145deg,rgba(28,18,14,0.78),rgba(10,9,9,0.96))] px-5 py-5 shadow-[0_0_20px_rgba(255,184,28,0.05)]">
               <div className="text-[20px] font-medium text-[#f7ddb3]">{lesson.title}</div>
               <div className="mt-3 text-[15px] leading-7 text-white/62">{lesson.summary}</div>
@@ -291,7 +325,7 @@ export default function LearnPage() {
             with the ticket rules.
           </div>
           <div className="mt-5 grid gap-3 md:grid-cols-3">
-            {FIREBALL_GUIDE.map((item) => (
+            {fireballGuide.map((item) => (
               <div key={item.label} className="rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
                 <div className="text-[12px] uppercase tracking-[0.16em] text-[#9edcff]">{item.label}</div>
                 <div className="mt-3 text-[14px] leading-7 text-white/68">{item.summary}</div>

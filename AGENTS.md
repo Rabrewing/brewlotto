@@ -534,7 +534,7 @@ The system is considered complete when:
 
 ## V1 Progress Tracker
 
-**Last Updated:** 2026-05-13 ET (Play confirmation nudges wired into ingestion, settlement sweep automated with daily Cloud Scheduler job, tier-scaled draw counts for strategy runs, all scrapers patched, play-style intelligence helper created and wired, strategy validation checklist completed, LoadingSkeleton + ErrorBoundary built, engine keys mapped to branded names throughout UI. Previous: ingestion scrapers rewritten for multi-state, prediction generator fixed, strategy names normalized with tiered ladder, game-aware locker, My Picks match gating, BrewU Hit vs Win lesson, Freshness banner on Results.)
+**Last Updated:** 2026-05-13 ET (BrewU content management built: DB-backed editor in admin panel, Learn page reads from DB with hardcoded fallback. Previous: Play confirmation nudges, settlement sweep, tier-scaled draws, scrapers patched, strategy validation, shared components.)
 
 ### Phase Status
 
@@ -638,7 +638,7 @@ The system is considered complete when:
 5. **Odds & Play-Style Intelligence** — ✅ Done. `getPlayStyleHint` helper created in `lib/brewwu/getPlayStyleHint.ts`, wired into prediction generator. Play-style matrix already displayed in BrewU.
 6. **BrewU Support Intake** — Add a lightweight support tab with category dropdown, comments, screenshot upload, and a 24-hour response disclaimer; route submissions to BrewCommand notifications/email.
 7. **Strategy Validation** — ✅ Done. All 7 checklist items verified and marked complete in `brewdocs/v1/strategy-validation-checklist.md`. Legacy stubs flagged as deprecated.
-8. **BrewU Content Externalization** — If V1 content editing needs increase, move BrewU/help copy, support categories, and tutorial transcript content into DB/CMS-backed tables using the new plan doc as the handoff.
+8. **BrewU Content Externalization** — ✅ Done. DB-backed editor in admin panel at `/admin/brewu`. Learn page reads from `brewu_content` table with hardcoded fallback.
 
 **LOW PRIORITY / FOLLOW-ON:**
 1. **Stats Charts** — Add Chart.js visualizations for trends

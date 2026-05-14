@@ -96,6 +96,7 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Completed strategy validation checklist (all 7 checks verified).
 - Created `LoadingSkeleton` and `ErrorBoundary` shared components.
 - Mapped engine keys (poisson, momentum, markov, ensemble) to branded names in TIERED_MAP.
+- Built `brewu_content` DB-backed CMS: migration with seed data, admin API routes (GET/POST/PUT/DELETE), admin editor page at `/admin/brewu`, and updated Learn page to read from DB with hardcoded fallback.
 - Added BrewU support intake, support screenshot storage, canonical play-log bridge, settlement sweep, and customer notifications planning.
 - Added timestamp discipline to AGENTS and Brewdocs so future AI sessions can read state without guessing.
 
