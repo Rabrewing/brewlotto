@@ -652,6 +652,10 @@ export default function StrategyLockerPage() {
                           <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">Voice commentary</div>
                           <div className="mt-2 text-[16px] font-medium text-[#f7ddb3]">{entitlements?.voice_commentary_access ? 'Enabled' : 'Locked'}</div>
                         </div>
+                        <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-4 py-3">
+                          <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">TimePulse timing</div>
+                          <div className="mt-2 text-[16px] font-medium text-[#f7ddb3]">{currentTier === 'master' ? 'Enabled' : 'Locked'}</div>
+                        </div>
                       </div>
                     </div>
 

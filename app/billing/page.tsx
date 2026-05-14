@@ -250,6 +250,10 @@ export default function BillingPage() {
                     ['Premium explanations unlocked', entitlements?.premium_explanations_access ? 'Yes' : 'Locked'],
                     ['Prediction comparisons unlocked', entitlements?.premium_comparison_access ? 'Yes' : 'Locked'],
                     ['Voice commentary unlocked', entitlements?.voice_commentary_access ? 'Yes' : 'Locked'],
+                    ['TimePulse timing analysis', currentTier === 'master' ? 'Enabled' : 'Locked'],
+                    ['Premium explanations unlocked', entitlements?.premium_explanations_access ? 'Yes' : 'Locked'],
+                    ['Prediction comparisons unlocked', entitlements?.premium_comparison_access ? 'Yes' : 'Locked'],
+                    ['Voice commentary unlocked', entitlements?.voice_commentary_access ? 'Yes' : 'Locked'],
                   ].map(([label, value]) => (
                     <div key={label} className="rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
                       <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">{label}</div>

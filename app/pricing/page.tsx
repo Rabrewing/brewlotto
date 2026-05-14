@@ -112,7 +112,7 @@ export default function PricingPage() {
       monthlyPrice: '$19.99/mo',
       annualPrice: '$167.92/yr',
       annualSavings: 'Save 30% annually.',
-      features: ['Voice commentary', 'Largest AI quota', 'Full premium strategy access'],
+      features: ['Voice commentary', 'Largest AI quota', 'Full premium strategy access', 'TimePulse timing analysis'],
     },
   ];
 
