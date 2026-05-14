@@ -876,12 +876,13 @@ export default function StrategyLockerPage() {
                               const styleHint = runPreviews[strategy.id].timingProfile?.recommendedStyle;
                               const styleLabel = styleMap[styleHint] || null;
 
+                              const currentLabel = getStrategyLabel(strategy.strategy_key);
                               return (
                                 <div className="mt-2 rounded-[18px] border border-[#72caff]/14 bg-[#101922] px-4 py-3">
                                   <div className="text-[11px] font-medium text-[#9edcff]">Brew AI</div>
                                   <div className="mt-1 text-[13px] leading-6 text-white/72">
-                                    {best[0] !== strategy.strategy_key && spread < (currentSpread || 99)
-                                      ? `${getStrategyLabel(best[0])} has a tighter timing window (${best[1].p25}-${best[1].p75}d, ${best[1].sampleSize} samples). Consider running it for this game.`
+                                    {best[0] !== currentLabel && spread < (currentSpread || 99)
+                                      ? `${best[0]} has a tighter timing window (${best[1].p25}-${best[1].p75}d, ${best[1].sampleSize} samples). Consider running it for this game.`
                                       : `This strategy has the tightest timing window for ${runPreviews[strategy.id].gameKey.toUpperCase()} right now.`}
                                     {styleLabel ? (
                                       <span className="mt-1 block text-[#93efb8]">

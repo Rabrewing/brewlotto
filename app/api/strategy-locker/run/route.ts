@@ -479,14 +479,14 @@ export async function POST(request: NextRequest) {
               };
             });
 
-            timingProfile = runTiming(fp, fd, strategyRow.strategy_key);
+            timingProfile = runTiming(fp, fd, null);
 
-            const otherKeys = ['hot_cold', 'momentum', 'poisson_basic', 'advanced_scoring', 'strategy_explanations', 'early_access_strategies'];
+            const strategyLabels = ['HeatCheck', 'HeatCheck II', 'HeatCheck III', 'HeatCheck IV', 'HeatWave', 'HeatWave II', 'HeatWave III', 'PulseSync', 'PulseSync II', 'SequenceX'];
             strategyComparisons = {};
-            for (const key of otherKeys) {
-              if (key === strategyRow.strategy_key) continue;
-              const profile = runTiming(fp, fd, key);
-              if (profile) strategyComparisons[key] = profile;
+            for (const label of strategyLabels) {
+              if (label === getStrategyLabel(strategyRow.strategy_key)) continue;
+              const profile = runTiming(fp, fd, label);
+              if (profile) strategyComparisons[label] = profile;
             }
           }
         }
