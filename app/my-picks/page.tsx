@@ -583,23 +583,24 @@ export default function MyPicksPage() {
             ))}
           </select>
 
-          <div className="flex gap-1.5 self-center">
-            <button
-              type="button"
-              onClick={() => setSelectedWindow('ALL')}
-              className={`rounded-full px-3 py-1.5 text-[12px] font-medium uppercase tracking-[0.06em] transition-all ${
-                selectedWindow === 'ALL'
-                  ? 'bg-[#ffbd39]/15 text-[#ffbd39]'
-                  : 'bg-white/[0.04] text-white/45 hover:bg-white/[0.08] hover:text-white/70'
-              }`}
-            >
-              All
-            </button>
-            <button
-              type="button"
-              onClick={() => setSelectedWindow('midday')}
-              className={`rounded-full px-3 py-1.5 text-[12px] font-medium uppercase tracking-[0.06em] transition-all ${
-                selectedWindow === 'midday'
+          {selectedGame === 'pick3' || selectedGame === 'pick4' ? (
+            <div className="flex gap-1.5 self-center">
+              <button
+                type="button"
+                onClick={() => setSelectedWindow('ALL')}
+                className={`rounded-full px-3 py-1.5 text-[12px] font-medium uppercase tracking-[0.06em] transition-all ${
+                  selectedWindow === 'ALL'
+                    ? 'bg-[#ffbd39]/15 text-[#ffbd39]'
+                    : 'bg-white/[0.04] text-white/45 hover:bg-white/[0.08] hover:text-white/70'
+                }`}
+              >
+                All
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedWindow('midday')}
+                className={`rounded-full px-3 py-1.5 text-[12px] font-medium uppercase tracking-[0.06em] transition-all ${
+                  selectedWindow === 'midday'
                   ? 'bg-[#ffbd39]/15 text-[#ffbd39]'
                   : 'bg-white/[0.04] text-white/45 hover:bg-white/[0.08] hover:text-white/70'
               }`}
@@ -617,7 +618,8 @@ export default function MyPicksPage() {
             >
               Evening
             </button>
-          </div>
+            </div>
+          ) : null}
         </div>
 
         <div className="mb-6 flex rounded-full border border-[#ffbd39]/25 bg-[linear-gradient(145deg,rgba(35,19,12,0.74),rgba(10,8,8,0.92))] shadow-[0_0_18px_rgba(255,184,28,0.08)]">
