@@ -730,6 +730,11 @@ export default function StrategyLockerPage() {
                             <span className="rounded-full border border-white/8 bg-white/[0.03] px-2.5 py-1 text-[11px] uppercase tracking-[0.14em] text-white/38">
                               {formatCategoryLabel(strategy.category)}
                             </span>
+                            {strategy.min_tier === 'master' ? (
+                              <span className="rounded-full border border-[#ffbd39]/14 bg-[#1a140c] px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.12em] text-[#f5cf84]">
+                                TimePulse
+                              </span>
+                            ) : null}
                           </div>
                           <div className="mt-3 text-[14px] leading-7 text-white/58">
                             {strategy.description || 'No strategy description stored yet.'}
