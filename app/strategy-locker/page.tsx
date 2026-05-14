@@ -79,6 +79,24 @@ interface RunPreviewRecord {
   drawWindow: string | null;
   predictionId: string | null;
   predictionSaved: boolean;
+  timingProfile?: {
+    p25: number;
+    p75: number;
+    median: number;
+    spread: number;
+    sampleSize: number;
+    windowStart: string;
+    windowEnd: string;
+    confidence: string;
+  } | null;
+  strategyComparisons?: Record<string, {
+    median: number;
+    p25: number;
+    p75: number;
+    sampleSize: number;
+    windowStart: string;
+    windowEnd: string;
+  }> | null;
   createdAt: string;
 }
 
@@ -455,6 +473,8 @@ export default function StrategyLockerPage() {
           drawWindow: payload.data.drawWindow || null,
           predictionId: payload.data.prediction?.id || null,
           predictionSaved: false,
+          timingProfile: payload.data.timingProfile || null,
+          strategyComparisons: payload.data.strategyComparisons || null,
           createdAt: new Date().toISOString(),
         },
       }));
@@ -810,6 +830,57 @@ export default function StrategyLockerPage() {
                             {runPreviews[strategy.id].primaryNumbers.join(' ')}
                             {runPreviews[strategy.id].bonusNumbers.length > 0 ? ` + ${runPreviews[strategy.id].bonusNumbers.join(' ')}` : ''}
                           </div>
+                          <div className="mt-1 text-[11px] uppercase tracking-[0.14em] text-white/35">
+                            Pattern outcomes may surface within 1-2 weeks
+                          </div>
+                          {runPreviews[strategy.id].timingProfile ? (
+                            <div className="mt-3 rounded-[18px] border border-[#ffbd39]/14 bg-[#1a140c] px-4 py-3">
+                              <div className="flex items-center gap-2">
+                                <span className="text-[12px] font-medium text-[#f5cf84]">TimePulse</span>
+                                <span className="text-[11px] text-white/40">Master tier</span>
+                                <span className={`ml-auto rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.1em] ${
+                                  runPreviews[strategy.id].timingProfile.confidence === 'high'
+                                    ? 'bg-[#85d36c]/15 text-[#85d36c]'
+                                    : runPreviews[strategy.id].timingProfile.confidence === 'medium'
+                                      ? 'bg-[#f5cf84]/15 text-[#f5cf84]'
+                                      : 'bg-white/8 text-white/50'
+                                }`}>
+                                  {runPreviews[strategy.id].timingProfile.confidence}
+                                </span>
+                              </div>
+                              <div className="mt-2 text-[13px] leading-6 text-white/72">
+                                Best play window: {runPreviews[strategy.id].timingProfile.windowStart} — {runPreviews[strategy.id].timingProfile.windowEnd}
+                              </div>
+                              <div className="mt-1 text-[11px] text-white/40">
+                                Based on {runPreviews[strategy.id].timingProfile.sampleSize} historical patterns • median {runPreviews[strategy.id].timingProfile.median} days • {runPreviews[strategy.id].timingProfile.spread}d spread
+                              </div>
+                            </div>
+                          ) : null}
+                          {runPreviews[strategy.id].strategyComparisons ? (
+                            (function() {
+                              const comparisons = runPreviews[strategy.id].strategyComparisons;
+                              if (!comparisons) return null;
+                              const entries = Object.entries(comparisons).filter(function(e) { return e[1] && e[1].sampleSize >= 3; });
+                              if (entries.length === 0) return null;
+                              entries.sort(function(a, b) { return (a[1].p75 - a[1].p25) - (b[1].p75 - b[1].p25); });
+                              const best = entries[0];
+                              if (!best) return null;
+                              const spread = best[1].p75 - best[1].p25;
+                              const currentSpread = runPreviews[strategy.id].timingProfile
+                                ? runPreviews[strategy.id].timingProfile.p75 - runPreviews[strategy.id].timingProfile.p25
+                                : null;
+                              return (
+                                <div className="mt-2 rounded-[18px] border border-[#72caff]/14 bg-[#101922] px-4 py-3">
+                                  <div className="text-[11px] font-medium text-[#9edcff]">Brew AI</div>
+                                  <div className="mt-1 text-[13px] leading-6 text-white/72">
+                                    {best[0] !== strategy.strategy_key && spread < (currentSpread || 99)
+                                      ? `${getStrategyLabel(best[0])} has a tighter timing window (${best[1].p25}-${best[1].p75}d, ${best[1].sampleSize} samples). Consider running it for this game.`
+                                      : `This strategy has the tightest timing window for ${runPreviews[strategy.id].gameKey.toUpperCase()} right now.`}
+                                  </div>
+                                </div>
+                              );
+                            })()
+                          ) : null}
                           <div className="mt-2 text-[12px] uppercase tracking-[0.14em] text-white/40">
                             Stored at {new Date(runPreviews[strategy.id].createdAt).toLocaleString()}
                           </div>

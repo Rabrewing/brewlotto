@@ -5,6 +5,7 @@ import { getStrategyLabel } from '@/utils/strategyLabel';
 import { createSupabaseServerClient } from '@/lib/supabase/serverClient';
 import StrategyEngine from '@/lib/prediction/strategyEngine';
 import { PredictionStorage } from '@/lib/prediction/predictionStorage';
+import { computeTimingProfile } from '@/lib/prediction/timingAnalysis';
 
 type TierCode = 'free' | 'starter' | 'pro' | 'master';
 
@@ -439,6 +440,61 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    let timingProfile = null;
+    let strategyComparisons = null;
+    if (currentTier === 'master') {
+      try {
+        const { data: pastPredictions } = await admin
+          .from('predictions')
+          .select('id, created_at, predicted_numbers, draw_date, source_strategy_key')
+          .eq('game', gameKey)
+          .eq('state', homeState)
+          .not('predicted_numbers', 'is', null)
+          .order('created_at', { ascending: false })
+          .limit(200);
+
+        if (pastPredictions && pastPredictions.length > 5) {
+          const { data: allDraws } = await admin
+            .from('official_draws')
+            .select('draw_date, primary_numbers')
+            .eq('game_id', gameRow.id)
+            .order('draw_date', { ascending: false })
+            .limit(500);
+
+          if (allDraws && allDraws.length > 0) {
+            const { computeTimingProfile: runTiming } = await import('@/lib/prediction/timingAnalysis');
+            const fp = pastPredictions.map(function(p) {
+              return {
+                id: p.id,
+                created_at: p.created_at,
+                predicted_numbers: Array.isArray(p.predicted_numbers) ? p.predicted_numbers : [],
+                draw_date: p.draw_date,
+                source_strategy_key: p.source_strategy_key || null,
+              };
+            });
+            const fd = allDraws.map(function(d) {
+              return {
+                draw_date: d.draw_date,
+                primary_numbers: Array.isArray(d.primary_numbers) ? d.primary_numbers : [],
+              };
+            });
+
+            timingProfile = runTiming(fp, fd, strategyRow.strategy_key);
+
+            const otherKeys = ['hot_cold', 'momentum', 'poisson_basic', 'advanced_scoring', 'strategy_explanations', 'early_access_strategies'];
+            strategyComparisons = {};
+            for (const key of otherKeys) {
+              if (key === strategyRow.strategy_key) continue;
+              const profile = runTiming(fp, fd, key);
+              if (profile) strategyComparisons[key] = profile;
+            }
+          }
+        }
+      } catch {
+        // timing analysis is best-effort for Master tier
+      }
+    }
+
     return NextResponse.json({
       success: true,
       data: {
@@ -452,6 +508,8 @@ export async function POST(request: NextRequest) {
         prediction: stored,
         primaryNumbers,
         bonusNumbers,
+        timingProfile,
+        strategyComparisons,
       },
     });
   } catch (error: unknown) {
