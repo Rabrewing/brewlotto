@@ -649,6 +649,7 @@ The system is considered complete when:
 6. **E2E Tests** — Playwright tests for critical paths
 7. **Lint Debt** — Fix unused vars, re-enable ESLint
 8. **PWABuilder / Capacitor** — Package the PWA for Android/iOS after core V1 launch pressure is cleared
+9. **Dead Code Cleanup** — Audit the codebase to identify files not connected to the current BrewLotto app (legacy routes, old components, unreferenced utilities) and remove or archive them after V1 is stable. Start with the old game-specific pages (/pick3, /pick4, /pick5, /powerball, /mega), legacy component directories (/components/predict/), and unused API routes.
 
 **INTERNAL ADMIN / TEST-ONLY SURFACES:**
 1. BrewCommand onboarding reset stays in the admin console for launch testing.
