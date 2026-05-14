@@ -534,7 +534,7 @@ The system is considered complete when:
 
 ## V1 Progress Tracker
 
-**Last Updated:** 2026-05-13 ET (BrewU content management built: DB-backed editor in admin panel, Learn page reads from DB with hardcoded fallback. Previous: Play confirmation nudges, settlement sweep, tier-scaled draws, scrapers patched, strategy validation, shared components.)
+**Last Updated:** 2026-05-13 ET (BrewU content management built: DB-backed editor in admin panel at /admin/brewu, Learn page reads from DB with hardcoded fallback, API routes for content CRUD, bahavior documented in brewdocs/v1/brewu-content-management.md. Previous: Play confirmation nudges, settlement sweep, tier-scaled draws, scrapers patched, strategy validation, shared components.)
 
 ### Phase Status
 
