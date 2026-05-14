@@ -857,6 +857,16 @@ export default function StrategyLockerPage() {
                                 Based on {runPreviews[strategy.id].timingProfile.sampleSize} historical {getStrategyLabel(runPreviews[strategy.id].engineKey)} patterns • median {runPreviews[strategy.id].timingProfile.median} days • {runPreviews[strategy.id].timingProfile.spread}d spread
                               </div>
                             </div>
+                          ) : currentTier === 'master' && runPreviews[strategy.id].predictionId ? (
+                            <div className="mt-3 rounded-[18px] border border-[#ffbd39]/12 bg-[#1a140c]/60 px-4 py-3">
+                              <div className="flex items-center gap-2">
+                                <span className="text-[12px] font-medium text-[#f5cf84]">TimePulse</span>
+                                <span className="text-[11px] text-white/40">Master tier</span>
+                              </div>
+                              <div className="mt-2 text-[12px] leading-6 text-white/55">
+                                Gathering timing data — save picks and check back as draws accumulate to unlock your play window estimate.
+                              </div>
+                            </div>
                           ) : null}
                           {runPreviews[strategy.id].strategyComparisons ? (
                             (function() {
