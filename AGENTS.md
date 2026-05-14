@@ -643,14 +643,13 @@ The system is considered complete when:
 
 **LOW PRIORITY / FOLLOW-ON:**
 1. **Stats Charts** — Add Chart.js visualizations for trends
-2. **BrewU/Learn CMS** — Create `brewu_lessons` table, populate lessons
-3. **Legal Policies** — Add full Terms of Service, Privacy Policy, Responsible Use
-4. **Theme Application** — Wire settings theme selection to actual UI
-5. **Avatar Upload** — Add profile image upload
-6. **E2E Tests** — Playwright tests for critical paths
-7. **Lint Debt** — Fix unused vars, re-enable ESLint
-8. **PWABuilder / Capacitor** — Package the PWA for Android/iOS after core V1 launch pressure is cleared
-9. **Dead Code Cleanup** — Audit the codebase to identify files not connected to the current BrewLotto app (legacy routes, old components, unreferenced utilities) and remove or archive them after V1 is stable. Start with the old game-specific pages (/pick3, /pick4, /pick5, /powerball, /mega), legacy component directories (/components/predict/), and unused API routes.
+2. **Legal Policies** — Add full Terms of Service, Privacy Policy, Responsible Use
+3. **Theme Application** — Wire settings theme selection to actual UI
+4. **Avatar Upload** — Add profile image upload
+5. **E2E Tests** — Playwright tests for critical paths
+6. **Lint Debt** — Fix unused vars, re-enable ESLint
+7. **PWABuilder / Capacitor** — Package the PWA for Android/iOS after core V1 launch pressure is cleared
+8. **Dead Code Cleanup** — Audit the codebase to identify files not connected to the current BrewLotto app (legacy routes, old components, unreferenced utilities) and remove or archive them after V1 is stable. Start with the old game-specific pages (/pick3, /pick4, /pick5, /powerball, /mega), legacy component directories (/components/predict/), and unused API routes.
 
 **INTERNAL ADMIN / TEST-ONLY SURFACES:**
 1. BrewCommand onboarding reset stays in the admin console for launch testing.
