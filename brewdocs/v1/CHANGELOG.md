@@ -97,6 +97,13 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Created `LoadingSkeleton` and `ErrorBoundary` shared components.
 - Mapped engine keys (poisson, momentum, markov, ensemble) to branded names in TIERED_MAP.
 - Built `brewu_content` DB-backed CMS: migration with seed data, admin API routes (GET/POST/PUT/DELETE), admin editor page at `/admin/brewu`, and updated Learn page to read from DB with hardcoded fallback.
+- BrewU Content Management documented in `brewdocs/v1/brewu-content-management.md`.
+
+### 2026-05-14
+- Built TimePulse timing analysis (`lib/prediction/timingAnalysis.js`): per-strategy lag tracking, percentile windows, confidence badge (high/medium/low based on sample size and spread).
+- Brew AI compares timing profiles across all registered strategies and recommends the strategy with the tightest window.
+- TimePulse recommends play style (Straight / Box / 50/50) based on historical positional accuracy tracking.
+- My Picks draw window filter (Midday/Evening) now only visible for Pick 3/4 games.
 - Added BrewU support intake, support screenshot storage, canonical play-log bridge, settlement sweep, and customer notifications planning.
 - Added timestamp discipline to AGENTS and Brewdocs so future AI sessions can read state without guessing.
 
