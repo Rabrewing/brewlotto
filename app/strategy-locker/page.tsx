@@ -88,6 +88,8 @@ interface RunPreviewRecord {
     windowStart: string;
     windowEnd: string;
     confidence: string;
+    recommendedStyle: string | null;
+    styleDistribution: Record<string, number> | null;
   } | null;
   strategyComparisons?: Record<string, {
     median: number;
@@ -869,6 +871,11 @@ export default function StrategyLockerPage() {
                               const currentSpread = runPreviews[strategy.id].timingProfile
                                 ? runPreviews[strategy.id].timingProfile.p75 - runPreviews[strategy.id].timingProfile.p25
                                 : null;
+
+                              const styleMap = { straight: 'Straight', box: 'Box', '50_50': '50/50' };
+                              const styleHint = runPreviews[strategy.id].timingProfile?.recommendedStyle;
+                              const styleLabel = styleMap[styleHint] || null;
+
                               return (
                                 <div className="mt-2 rounded-[18px] border border-[#72caff]/14 bg-[#101922] px-4 py-3">
                                   <div className="text-[11px] font-medium text-[#9edcff]">Brew AI</div>
@@ -876,6 +883,11 @@ export default function StrategyLockerPage() {
                                     {best[0] !== strategy.strategy_key && spread < (currentSpread || 99)
                                       ? `${getStrategyLabel(best[0])} has a tighter timing window (${best[1].p25}-${best[1].p75}d, ${best[1].sampleSize} samples). Consider running it for this game.`
                                       : `This strategy has the tightest timing window for ${runPreviews[strategy.id].gameKey.toUpperCase()} right now.`}
+                                    {styleLabel ? (
+                                      <span className="mt-1 block text-[#93efb8]">
+                                        Historical pattern favors a <strong>{styleLabel}</strong> play style for this game.
+                                      </span>
+                                    ) : null}
                                   </div>
                                 </div>
                               );
