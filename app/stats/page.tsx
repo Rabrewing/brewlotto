@@ -278,6 +278,19 @@ export default function StatsPage() {
     return buildStrategyPerformanceSummary(predictions, playLogs);
   }, [playLogs, predictions]);
 
+  const [timingProfiles, setTimingProfiles] = useState<Record<string, { windowStart: string; windowEnd: string; sampleSize: number; confidence: string }>>({});
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      const res = await fetch('/api/stats/timing?game=pick3&state=NC');
+      const payload = await res.json();
+      if (!cancelled && payload.success) setTimingProfiles(payload.data || {});
+    }
+    load();
+    return () => { cancelled = true; };
+  }, []);
+
   const recentTrend = useMemo(() => {
     return [...dailyStats].reverse();
   }, [dailyStats]);
@@ -453,6 +466,11 @@ export default function StatsPage() {
                         <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
                           Avg confidence {entry.averageConfidence !== null ? `${entry.averageConfidence}%` : 'N/A'}
                         </span>
+                        {timingProfiles[getStrategyLabel(entry.strategy)] ? (
+                          <span className="rounded-full border border-[#ffbd39]/14 bg-[#1a140c] px-3 py-1 text-[#f5cf84]">
+                            TimePulse: {timingProfiles[getStrategyLabel(entry.strategy)].windowStart} — {timingProfiles[getStrategyLabel(entry.strategy)].windowEnd}
+                          </span>
+                        ) : null}
                       </div>
                     </div>
                   ))}
