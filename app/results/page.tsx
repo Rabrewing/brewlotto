@@ -177,7 +177,7 @@ export default function ResultsPage() {
     midday: 'Midday',
     day: 'Midday',
     evening: 'Evening',
-    daily: 'Daily',
+    daily: 'Nightly',
     nightly: 'Nightly',
   };
   const groupedDraws = filteredDraws.reduce<Array<{ drawDate: string | null; draws: Array<{ draw: DrawEntry; index: number }> }>>((groups, draw, index) => {
