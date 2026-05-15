@@ -260,6 +260,46 @@ interface SupportRequestRow {
   } | null;
 }
 
+interface QaReportRow {
+  id: string;
+  userId: string | null;
+  contactEmail: string | null;
+  testerName: string | null;
+  tierTested: string;
+  journeyStage: string;
+  featureArea: string;
+  pagePath: string | null;
+  loadedAsExpected: boolean;
+  tierMatched: boolean;
+  nextStepMatched: boolean;
+  fireballRelevant: boolean;
+  timepulseRelevant: boolean;
+  expectedBehavior: string;
+  actualBehavior: string;
+  notes: string | null;
+  browserInfo: Record<string, unknown>;
+  status: 'open' | 'reviewing' | 'triaged' | 'resolved' | 'closed' | string;
+  priority: 'low' | 'normal' | 'high' | 'urgent' | string;
+  screenshotCount: number;
+  screenshotPayload: Array<{ url?: string; path?: string; name?: string }>;
+  adminNotes: string | null;
+  firstResponseAt: string | null;
+  resolvedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  alertEventId: string | null;
+  alert: {
+    id: string;
+    title: string;
+    severity: 'critical' | 'warning' | 'info';
+    status: 'raised' | 'acknowledged' | 'resolved' | 'escalated';
+    triggeredAt: string;
+    alertKey: string | null;
+    alertName: string | null;
+    alertType: string | null;
+  } | null;
+}
+
 type RefreshTarget = 'all' | IngestionHealthRow['gameKey'];
 
 const EMPTY_SUMMARY: AlertSummary = {
@@ -508,6 +548,8 @@ export default function AdminPage() {
   const [alertDeliveries, setAlertDeliveries] = useState<AlertDeliveryRow[]>([]);
   const [alertDeliveryFilter, setAlertDeliveryFilter] = useState<AlertDeliveryFilter>('all');
   const [supportRequests, setSupportRequests] = useState<SupportRequestRow[]>([]);
+  const [qaReports, setQaReports] = useState<QaReportRow[]>([]);
+  const [qaMutatingId, setQaMutatingId] = useState<string | null>(null);
   const [runningSettlementSweep, setRunningSettlementSweep] = useState(false);
   const [settlementSweepMessage, setSettlementSweepMessage] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<AlertStatusFilter>('all');
@@ -569,6 +611,7 @@ export default function AdminPage() {
           fetch('/api/admin/alert-recipient', { cache: 'no-store' }),
           fetch('/api/admin/alert-deliveries', { cache: 'no-store' }),
           fetch('/api/admin/support-requests', { cache: 'no-store' }),
+          fetch('/api/admin/qa-reports', { cache: 'no-store' }),
         ];
 
     const responses = await Promise.all(requests);
@@ -590,8 +633,8 @@ export default function AdminPage() {
       return;
     }
 
-    const [summaryResponse, alertsResponse, ingestionResponse, aiUsageResponse, strategySignalsResponse, fireballResponse, alertRecipientResponse, alertDeliveriesResponse, supportRequestsResponse] = responses;
-    const [summaryPayload, alertsPayload, ingestionPayload, aiUsagePayload, strategySignalsPayload, fireballPayload, alertRecipientPayload, alertDeliveriesPayload, supportRequestsPayload] = payloads;
+    const [summaryResponse, alertsResponse, ingestionResponse, aiUsageResponse, strategySignalsResponse, fireballResponse, alertRecipientResponse, alertDeliveriesResponse, supportRequestsResponse, qaReportsResponse] = responses;
+    const [summaryPayload, alertsPayload, ingestionPayload, aiUsagePayload, strategySignalsPayload, fireballPayload, alertRecipientPayload, alertDeliveriesPayload, supportRequestsPayload, qaReportsPayload] = payloads;
 
     if (!summaryResponse.ok) {
       throw new Error(summaryPayload?.error?.message || 'Failed to load alert summary');
@@ -629,6 +672,10 @@ export default function AdminPage() {
       throw new Error(supportRequestsPayload?.error?.message || 'Failed to load support requests');
     }
 
+    if (!qaReportsResponse.ok) {
+      throw new Error(qaReportsPayload?.error?.message || 'Failed to load QA reports');
+    }
+
     setSummary(summaryPayload.data || EMPTY_SUMMARY);
     setAlerts(alertsPayload.data || []);
     setIngestionSummary(ingestionPayload.meta?.summary || EMPTY_INGESTION_SUMMARY);
@@ -655,6 +702,7 @@ export default function AdminPage() {
     });
     setAlertDeliveries(alertDeliveriesPayload.data || []);
     setSupportRequests(supportRequestsPayload.data || []);
+    setQaReports(qaReportsPayload.data || []);
   }
 
   useEffect(() => {
@@ -803,6 +851,32 @@ export default function AdminPage() {
       setError(actionError instanceof Error ? actionError.message : 'Failed to update support request');
     } finally {
       setSupportMutatingId(null);
+    }
+  }
+
+  async function updateQaReport(id: string, status: 'open' | 'reviewing' | 'triaged' | 'resolved' | 'closed') {
+    setQaMutatingId(id);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/admin/qa-reports/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status }),
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload?.error?.message || 'Failed to update QA report');
+      }
+
+      await loadAdminData();
+    } catch (actionError) {
+      setError(actionError instanceof Error ? actionError.message : 'Failed to update QA report');
+    } finally {
+      setQaMutatingId(null);
     }
   }
 
@@ -1787,6 +1861,111 @@ export default function AdminPage() {
                       <tr>
                         <td colSpan={5} className="px-4 py-8 text-center text-sm text-white/55">
                           No support requests are available yet.
+                        </td>
+                      </tr>
+                    ) : null}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-8">
+            <div className="mb-4 flex items-end justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-semibold text-white">QA Test Lab</h2>
+                <p className="mt-1 text-sm text-white/55">Structured tester reports from approved QA accounts. These stay separate from customer support.</p>
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <SummaryCard label="QA Reports" value={qaReports.length} accent="text-white" />
+              <SummaryCard label="Open / Reviewing" value={qaReports.filter((report) => report.status === 'open' || report.status === 'reviewing').length} accent="text-[#72caff]" />
+              <SummaryCard label="Needs Triage" value={qaReports.filter((report) => report.priority === 'high' || report.priority === 'urgent').length} accent="text-[#ffd873]" />
+              <SummaryCard label="Resolved" value={qaReports.filter((report) => report.status === 'resolved').length} accent="text-[#93efb8]" />
+            </div>
+
+            <div className="mt-5 overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(24,22,26,0.96),rgba(14,12,16,0.96))]">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-white/10 text-left text-sm">
+                  <thead className="bg-white/5 text-[11px] uppercase tracking-[0.16em] text-white/45">
+                    <tr>
+                      <th className="px-4 py-3">Time</th>
+                      <th className="px-4 py-3">Tester / Tier</th>
+                      <th className="px-4 py-3">Stage / Area</th>
+                      <th className="px-4 py-3">Checks</th>
+                      <th className="px-4 py-3">Report</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5 text-white/75">
+                    {qaReports.map((report) => {
+                      const screenshotLink = report.screenshotPayload?.[0]?.url || null;
+                      const checkSummary = [
+                        report.loadedAsExpected ? 'Loaded' : 'Load issue',
+                        report.tierMatched ? 'Tier match' : 'Tier mismatch',
+                        report.nextStepMatched ? 'CTA match' : 'CTA mismatch',
+                        report.fireballRelevant ? 'Fireball' : null,
+                        report.timepulseRelevant ? 'TimePulse' : null,
+                      ].filter(Boolean).join(' • ');
+
+                      return (
+                        <tr key={report.id} className="align-top">
+                          <td className="px-4 py-4 text-white/65">{formatDate(report.createdAt)}</td>
+                          <td className="px-4 py-4">
+                            <div className="font-semibold text-white">{report.testerName || report.contactEmail || 'Unknown tester'}</div>
+                            <div className="mt-1 text-xs uppercase tracking-[0.12em] text-white/40">{report.tierTested}</div>
+                            <div className="mt-2 text-xs uppercase tracking-[0.12em] text-white/35">{report.priority}</div>
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="font-semibold text-white">{report.journeyStage}</div>
+                            <div className="mt-1 text-xs uppercase tracking-[0.12em] text-white/40">{report.featureArea}</div>
+                            {report.pagePath ? <div className="mt-1 text-xs text-white/35">{report.pagePath}</div> : null}
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="text-white/80">{checkSummary || 'No checks recorded'}</div>
+                            <div className="mt-2 text-xs text-white/40">
+                              {report.loadedAsExpected ? 'Loaded yes' : 'Loaded no'} • {report.tierMatched ? 'Tier yes' : 'Tier no'} • {report.nextStepMatched ? 'Next step yes' : 'Next step no'}
+                            </div>
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="font-semibold text-white">{report.expectedBehavior.slice(0, 120) || 'No expected behavior'}</div>
+                            <div className="mt-2 text-xs text-white/60 line-clamp-3">{report.actualBehavior}</div>
+                            {screenshotLink ? (
+                              <a
+                                href={screenshotLink}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="mt-3 inline-flex rounded-full border border-[#72caff]/20 bg-[#72caff]/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#d8f1ff] transition hover:border-[#72caff]/35 hover:bg-[#72caff]/14"
+                              >
+                                View screenshot
+                              </a>
+                            ) : null}
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              <button
+                                type="button"
+                                onClick={() => void updateQaReport(report.id, 'reviewing')}
+                                disabled={Boolean(qaMutatingId) || report.status === 'reviewing' || report.status === 'resolved'}
+                                className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/72 transition hover:border-[#72caff]/25 hover:bg-[#72caff]/10 disabled:cursor-not-allowed disabled:opacity-50"
+                              >
+                                {qaMutatingId === report.id && report.status !== 'resolved' ? 'Updating...' : 'Review'}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => void updateQaReport(report.id, 'resolved')}
+                                disabled={Boolean(qaMutatingId) || report.status === 'resolved'}
+                                className="rounded-full border border-[#53d48a]/20 bg-[#102117] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#93efb8] transition hover:border-[#53d48a]/35 hover:bg-[#15311d] disabled:cursor-not-allowed disabled:opacity-50"
+                              >
+                                {qaMutatingId === report.id && report.status === 'resolved' ? 'Resolving...' : 'Resolve'}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {!loading && qaReports.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="px-4 py-8 text-center text-sm text-white/55">
+                          No QA reports are available yet.
                         </td>
                       </tr>
                     ) : null}

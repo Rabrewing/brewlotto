@@ -49,6 +49,7 @@ official source → ingestion → Supabase → freshness view → API → UI
 | **BrewU FAQ phrasing** | `app/learn/page.tsx`, `brewdocs/v1/current_state.md`, `brewdocs/v1/CHANGELOG.md` — 2026-05-13 | The BrewU index wording is now question-based ("How do I...?", "What is...?", "Where are...?" ) so the top-of-page help hub feels more like a browsable FAQ while keeping the same anchors and topic coverage. |
 | **Notifications snapshot polish** | `app/notifications/page.tsx`, `brewdocs/v1/current_state.md`, `brewdocs/v1/CHANGELOG.md` — 2026-05-15 | Notifications now opens with a compact state snapshot for unread count, enabled delivery channels, category coverage, quiet hours, and support/help links so the page reads more like a control center than a raw feed. |
 | **TimePulse Master entitlement** | `supabase/migrations/20260515140000_add_timepulse_timing_access.sql`, `lib/billing/stripe.ts`, `app/billing/page.tsx`, `app/strategy-locker/page.tsx`, `app/api/strategy-locker/run/route.ts`, `brewdocs/v1/current_state.md`, `brewdocs/v1/CHANGELOG.md` — 2026-05-15 | TimePulse timing analysis is now an explicit Master-tier entitlement flag (`timing_analysis_access`) instead of only a label-level rule, and Master records are backfilled so current users keep access. |
+| **QA Test Lab** | `app/qa/page.tsx`, `app/api/qa/submit/route.ts`, `app/api/admin/qa-reports/route.ts`, `app/api/admin/qa-reports/[id]/route.ts`, `supabase/migrations/20260515150000_add_qa_reports.sql`, `supabase/migrations/20260515150100_add_qa_screenshots_bucket.sql`, `components/brewlotto/dashboard/AvatarDropdown.tsx`, `app/login/page.tsx`, `app/auth/callback/route.ts` — 2026-05-15 | Approved QA tester accounts now sign in separately from superadmins, land in a dedicated Test Lab, and submit structured tier-by-tier reports with yes/no checks, notes, and screenshots into a BrewCommand QA queue. |
 | **Settings hero polish** | `app/settings/page.tsx`, `brewdocs/v1/current_state.md`, `brewdocs/v1/CHANGELOG.md` — 2026-05-10 | Reworked Settings into a centered account-style hero with clearer Gameplay / Notifications / Account groupings so the route better mirrors the settings mockup without using fake profile data. |
 | **Billing / notifications polish** | `app/billing/page.tsx`, `app/notifications/page.tsx`, `brewdocs/v1/current_state.md`, `brewdocs/v1/CHANGELOG.md` — 2026-05-10 | Reworked Billing into a centered account-style hero with a clearer benefits / billing / quick-links flow, and added New / All tabs to Notifications so the feed mirrors the mockup rhythm more closely. |
 | **Schema-name cleanup** | `app/billing/page.tsx`, `app/settings/page.tsx`, `app/stats/page.tsx`, `brewdocs/v1/current_state.md`, `brewdocs/v1/CHANGELOG.md` — 2026-05-15 | Removed visible internal table names like `user_settings`, `user_entitlements`, and `user_daily_stats` from user-facing captions so the product surfaces read like BrewLotto instead of a schema dump. |
@@ -654,12 +655,14 @@ The system is considered complete when:
 6. **Lint Debt** — Fix unused vars, re-enable ESLint
 7. **PWABuilder / Capacitor** — Package the PWA for Android/iOS after core V1 launch pressure is cleared
 8. **Dead Code Cleanup** — Audit the codebase to identify files not connected to the current BrewLotto app (legacy routes, old components, unreferenced utilities) and remove or archive them after V1 is stable. Start with the old game-specific pages (/pick3, /pick4, /pick5, /powerball, /mega), legacy component directories (/components/predict/), and unused API routes.
+9. **QA / Test Lab Expansion** — Keep the tester flow user-friendly, tier-aware, and separate from customer support while family testers validate the entire app.
 
 **INTERNAL ADMIN / TEST-ONLY SURFACES:**
 1. BrewCommand onboarding reset stays in the admin console for launch testing.
 2. AI usage monitoring stays visible in BrewCommand so token, latency, and estimated spend can be compared against tier pricing and customer billing.
 3. BrewCommand alert email history is visible in the admin console so the team can verify what sent, to whom, and whether delivery succeeded.
-4. BrewCommand still uses a superadmin allowlist rather than a full internal RBAC/user-provisioning system.
+4. Approved QA tester accounts are separate from superadmins and land in the Test Lab so family testers can walk the app without admin power.
+5. BrewCommand still uses a superadmin allowlist rather than a full internal RBAC/user-provisioning system.
 
 ### Mockup-to-Code Alignment Summary
 

@@ -4,7 +4,12 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, type FormEvent, useEffect, useState } from "react";
 
-import { isBrewCommandAdminUser, parseBrewCommandAdminEmails } from "../../lib/auth/brewcommandShared";
+import {
+    isBrewCommandAccessUser,
+    isBrewCommandAdminUser,
+    parseBrewCommandAdminEmails,
+    parseBrewQATesterEmails,
+} from "../../lib/auth/brewcommandShared";
 import { supabase } from "../../lib/supabase/browserClient";
 
 function LoginPageContent() {
@@ -19,7 +24,12 @@ function LoginPageContent() {
         process.env.NEXT_PUBLIC_LANDING_VIDEO_MP4_URL ||
         "/landing/brewlotto-no-watermark.mp4";
 
-    const adminEmails = parseBrewCommandAdminEmails();
+    const approvedEmails = Array.from(
+        new Set([
+            ...parseBrewCommandAdminEmails(),
+            ...parseBrewQATesterEmails(),
+        ]),
+    );
 
     useEffect(() => {
         let active = true;
@@ -33,7 +43,7 @@ function LoginPageContent() {
             if (accessError === "not-authorized") {
                 setMessage({
                     type: "error",
-                    text: "Access is restricted to BrewCommand superadmin accounts.",
+                    text: "Access is restricted to approved BrewCommand admin and tester accounts.",
                 });
             }
 
@@ -42,17 +52,18 @@ function LoginPageContent() {
                 return;
             }
 
-            if (!isBrewCommandAdminUser(user)) {
+            if (!isBrewCommandAccessUser(user)) {
                 await supabase.auth.signOut();
                 if (!active) return;
                 setMessage({
                     type: "error",
-                    text: "Access is restricted to BrewCommand superadmin accounts.",
+                    text: "Access is restricted to approved BrewCommand admin and tester accounts.",
                 });
                 setCheckingSession(false);
                 return;
             }
 
+            const isTester = !isBrewCommandAdminUser(user);
             const { data: prefs } = await supabase
                 .from("user_preferences")
                 .select("onboarding_completed")
@@ -61,7 +72,7 @@ function LoginPageContent() {
 
             if (!active) return;
 
-            router.replace(prefs?.onboarding_completed ? "/dashboard" : "/onboarding");
+            router.replace(isTester ? "/qa" : prefs?.onboarding_completed ? "/dashboard" : "/onboarding");
         };
 
         void checkSession();
@@ -77,10 +88,10 @@ function LoginPageContent() {
         setMessage(null);
 
         const normalizedEmail = email.trim().toLowerCase();
-        if (!adminEmails.includes(normalizedEmail)) {
+        if (!approvedEmails.includes(normalizedEmail)) {
             setMessage({
                 type: "error",
-                text: "Access is restricted to BrewCommand superadmin accounts.",
+                text: "Access is restricted to approved BrewCommand admin and tester accounts.",
             });
             setSubmitting(false);
             return;
@@ -162,12 +173,16 @@ function LoginPageContent() {
                         <p className="mt-4 max-w-xl text-[17px] leading-8 text-white/68 sm:text-[18px]">
                             Enter your email to receive a BrewLotto magic link, then continue through onboarding and into the dashboard.
                         </p>
+                        <p className="mt-3 max-w-xl text-[13px] leading-6 text-white/48">
+                            Approved BrewCommand tester accounts will land in the Test Lab so you can walk the app from the beginning and report what happened at each step.
+                        </p>
 
                         <div className="mt-6 flex flex-wrap gap-2 text-[13px] text-white/55">
                             <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1.5">Fast setup</span>
                             <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1.5">Remember this device</span>
                             <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1.5">Same-device recommended</span>
                             <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1.5">Tutorial follows sign-in</span>
+                            <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1.5">Approved testers land in QA</span>
                         </div>
                     </div>
 

@@ -5,6 +5,10 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase/browserClient';
 import {
+  isBrewCommandAdminUser,
+  isBrewQATesterUser,
+} from '@/lib/auth/brewcommandShared';
+import {
   normalizePreferredStateCode,
   savePreferredStateForUser,
   setStoredPreferredStateCode,
@@ -43,6 +47,7 @@ type MenuIconKey =
   | 'billing'
   | 'learn'
   | 'legal'
+  | 'lab'
   | 'logout';
 
 interface MenuItem {
@@ -59,35 +64,38 @@ interface MenuSection {
   items: MenuItem[];
 }
 
-const MENU_SECTIONS: MenuSection[] = [
-  {
-    title: 'Gameplay',
-    items: [
-      { label: 'My Picks', icon: 'picks', href: '/my-picks', enabled: true, description: 'Saved picks and play confirmation' },
-      { label: "Today's Results", icon: 'results', href: '/results', enabled: true, description: 'Latest draws and match tracking' },
-      { label: 'Stats & Performance', icon: 'stats', href: '/stats', enabled: true, description: 'Hit rates and strategy breakdowns' },
-      { label: 'Strategy Locker', icon: 'locker', href: '/strategy-locker', enabled: true, description: 'Run strategies and save picks' },
-    ],
-  },
-  {
-    title: 'Account',
-    items: [
-      { label: 'Profile', icon: 'profile', href: '/profile', enabled: true, description: 'Manage your identity and preferences' },
-      { label: 'Notifications', icon: 'notifications', href: '/notifications', enabled: true, description: 'Alerts, nudges, and updates' },
-      { label: 'Settings', icon: 'settings', href: '/settings', enabled: true, description: 'Theme and gameplay defaults' },
-      { label: 'Subscription / Billing', icon: 'billing', href: '/billing', enabled: true, description: 'Plan details and payment history' },
-    ],
-  },
-  {
-    title: 'Systems',
-    items: [
-      { label: 'BrewU', icon: 'learn', href: '/learn', enabled: true, description: 'Tutorials, play styles, and help' },
-      { label: 'Support', icon: 'notifications', href: '/support', enabled: true, emphasis: 'help', description: 'Report issues and track tickets' },
-      { label: 'Terms & Privacy', icon: 'legal', href: '/legal', enabled: true, description: 'Policies and responsible use' },
-      { label: 'Logout', icon: 'logout', href: '/logout', enabled: true, description: 'Sign out of this session' },
-    ],
-  },
-];
+function buildMenuSections(canAccessQa: boolean): MenuSection[] {
+  return [
+    {
+      title: 'Gameplay',
+      items: [
+        { label: 'My Picks', icon: 'picks', href: '/my-picks', enabled: true, description: 'Saved picks and play confirmation' },
+        { label: "Today's Results", icon: 'results', href: '/results', enabled: true, description: 'Latest draws and match tracking' },
+        { label: 'Stats & Performance', icon: 'stats', href: '/stats', enabled: true, description: 'Hit rates and strategy breakdowns' },
+        { label: 'Strategy Locker', icon: 'locker', href: '/strategy-locker', enabled: true, description: 'Run strategies and save picks' },
+      ],
+    },
+    {
+      title: 'Account',
+      items: [
+        { label: 'Profile', icon: 'profile', href: '/profile', enabled: true, description: 'Manage your identity and preferences' },
+        { label: 'Notifications', icon: 'notifications', href: '/notifications', enabled: true, description: 'Alerts, nudges, and updates' },
+        { label: 'Settings', icon: 'settings', href: '/settings', enabled: true, description: 'Theme and gameplay defaults' },
+        { label: 'Subscription / Billing', icon: 'billing', href: '/billing', enabled: true, description: 'Plan details and payment history' },
+      ],
+    },
+    {
+      title: 'Systems',
+      items: [
+        { label: 'BrewU', icon: 'learn', href: '/learn', enabled: true, description: 'Tutorials, play styles, and help' },
+        { label: 'Support', icon: 'notifications', href: '/support', enabled: true, emphasis: 'help', description: 'Report issues and track tickets' },
+        ...(canAccessQa ? [{ label: 'Test Lab', icon: 'lab', href: '/qa', enabled: true, description: 'Run tier-by-tier QA and submit findings' }] : []),
+        { label: 'Terms & Privacy', icon: 'legal', href: '/legal', enabled: true, description: 'Policies and responsible use' },
+        { label: 'Logout', icon: 'logout', href: '/logout', enabled: true, description: 'Sign out of this session' },
+      ],
+    },
+  ];
+}
 
 function MenuIcon({ icon }: { icon: MenuIconKey }) {
   const common = 'h-[19px] w-[19px]';
@@ -159,6 +167,14 @@ function MenuIcon({ icon }: { icon: MenuIconKey }) {
           <circle cx="12" cy="12" r="9" />
           <path d="M9.25 9a2.75 2.75 0 115.1 1.42c-.55.95-1.65 1.42-2.35 2.08V14" strokeLinecap="round" />
           <path d="M12 17h.01" strokeLinecap="round" />
+        </svg>
+      );
+    case 'lab':
+      return (
+        <svg className={common} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
+          <path d="M9 3h6" strokeLinecap="round" />
+          <path d="M10 3v6l-4.8 7.6A2.2 2.2 0 007.1 20h9.8a2.2 2.2 0 001.9-3.4L14 9V3" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M9.2 13.5h5.6" strokeLinecap="round" />
         </svg>
       );
     case 'legal':
@@ -269,6 +285,7 @@ export function AvatarDropdown() {
   const [preferredState, setPreferredState] = useState<PreferredStateCode>('NC');
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const [hoveredItem, setHoveredItem] = useState<MenuItem | null>(null);
+  const [canAccessQa, setCanAccessQa] = useState(false);
   const [userData, setUserData] = useState<{ name: string; email: string; initials: string }>({
     name: '',
     email: '',
@@ -276,7 +293,8 @@ export function AvatarDropdown() {
   });
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const allItems = MENU_SECTIONS.flatMap((s) => s.items).filter((i) => i.enabled);
+  const menuSections = buildMenuSections(canAccessQa);
+  const allItems = menuSections.flatMap((s) => s.items).filter((i) => i.enabled);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -348,6 +366,8 @@ export function AvatarDropdown() {
         const { data: { user } } = await supabase.auth.getUser();
 
         if (user) {
+          const isAdmin = isBrewCommandAdminUser(user);
+          const isTester = isBrewQATesterUser(user);
           const name = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || '';
           const initials = name
             ? name.split(' ').map((s: string) => s[0]).join('').toUpperCase().slice(0, 2)
@@ -356,6 +376,7 @@ export function AvatarDropdown() {
 
           if (!cancelled) {
             setUserData({ name, email: user.email || '', initials });
+            setCanAccessQa(isAdmin || isTester);
           }
 
           const { data: preferencesRow } = await supabase
@@ -486,7 +507,7 @@ export function AvatarDropdown() {
                 V1 destination rollout in progress
               </div>
 
-              {MENU_SECTIONS.map((section, sectionIndex) => (
+              {menuSections.map((section, sectionIndex) => (
                 <div key={section.title} className={sectionIndex > 0 ? 'mt-2' : ''}>
                   <SectionLabel>{section.title}</SectionLabel>
                   <div className="space-y-0.5">
@@ -510,7 +531,7 @@ export function AvatarDropdown() {
                       );
                     })}
                   </div>
-                  {sectionIndex < MENU_SECTIONS.length - 1 ? (
+                  {sectionIndex < menuSections.length - 1 ? (
                     <div className="mx-3 mt-2 h-px bg-white/6" />
                   ) : null}
                 </div>

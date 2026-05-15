@@ -80,6 +80,8 @@ BrewLotto is designed with modularity and AI-first strategy in mind — here’s
     # Add BrewCommand admin values for protected admin access:
     # BREWCOMMAND_ADMIN_EMAILS=email1@example.com,email2@example.com
     # BREWCOMMAND_ADMIN_SECRET=your-server-to-server-secret
+    # Add approved QA tester emails for the BrewLotto Test Lab:
+    # BREWQA_TESTER_EMAILS=tester1@example.com,tester2@example.com
     ```
 
 3. **Install dependencies**
