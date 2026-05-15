@@ -17,7 +17,7 @@ function LoginPageContent() {
 
     const videoSrc =
         process.env.NEXT_PUBLIC_LANDING_VIDEO_MP4_URL ||
-        "/landing/brewlotto-cta.mp4";
+        "/landing/brewlotto-no-watermark.mp4";
 
     const adminEmails = parseBrewCommandAdminEmails();
 

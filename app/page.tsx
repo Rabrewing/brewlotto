@@ -17,11 +17,11 @@ export default function HomePage() {
     const [isExpanded, setIsExpanded] = useState(true);
     const videoMp4Src =
         process.env.NEXT_PUBLIC_LANDING_VIDEO_MP4_URL ||
-        "/landing/brewlotto-cta-mobile.mp4";
+        "/landing/brewlotto-no-watermark.mp4";
     const videoWebmSrc =
         process.env.NEXT_PUBLIC_LANDING_VIDEO_WEBM_URL ||
         "/landing/brewlotto-cta-mobile.webm";
-    const videoFallbackSrc = "/landing/brewlotto-cta.mp4";
+    const videoFallbackSrc = "/landing/brewlotto-cta-mobile.mp4";
     const videoCaptionsSrc = "/landing/brewlotto-cta-mobile.vtt";
     const landingTranscript = [
         "Watch BrewLotto come alive.",

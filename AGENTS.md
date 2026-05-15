@@ -613,7 +613,7 @@ The system is considered complete when:
 1. **Mockup Alignment** — Visually QA all 15 mockup PNGs against rendered pages and lock designs, starting with Strategy Locker, Learn/BrewU, Billing, and Notifications
 2. **Pricing / Subscription Polish** — Keep refining `/pricing` now that the state-aware plan selection and Stripe routing are live. Focus on visual hierarchy, monthly/yearly clarity, and the handoff between selection and the Billing manage surface.
 3. **Stripe Live Mode** — Flip the current test-mode billing path to live keys, then verify the production checkout/webhook path end-to-end
-4. **Landing Video Swap** — Replace the current landing-page reel with the watermark-free Blob asset once it lands locally, then deploy/update through the Vercel CLI path.
+4. **Landing Video Swap** — Completed the landing-page reel swap to the local watermark-free asset (`public/landing/brewlotto-no-watermark.mp4`); keep the Vercel CLI/Blob path in reserve if a later external deploy is needed.
 5. **Customer Strategy Alerts** — ✅ Done. Strategy signal notifications fire during every ingestion run via `runStrategySignalSweep()`. Resend configured, momentum-gated, deduped.
 6. **Play Confirmation Nudges** — ✅ Done. `runPlayConfirmationSweep()` in ingestionJob.js checks saved predictions against new draws and creates nudges for near-matches. Settlement sweep automated via daily Cloud Scheduler job at 12:30 AM ET.
 7. **Results History / Win Ratios** — ✅ Done. Results has 3/6 month toggle, Strategy Locker shows hit/win ratio chips, Stats has strategy breakdown. Data populates as users confirm plays.
