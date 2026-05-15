@@ -108,6 +108,7 @@ interface UserEntitlementRecord {
   premium_explanations_access?: boolean | null;
   premium_comparison_access?: boolean | null;
   voice_commentary_access?: boolean | null;
+  timing_analysis_access?: boolean | null;
 }
 
 interface SubscriptionTierRecord {
@@ -244,7 +245,7 @@ export default function StrategyLockerPage() {
             .limit(120),
           supabase
             .from('user_entitlements')
-            .select('tier_code, advanced_strategy_access, premium_explanations_access, premium_comparison_access, voice_commentary_access')
+            .select('tier_code, advanced_strategy_access, premium_explanations_access, premium_comparison_access, voice_commentary_access, timing_analysis_access')
             .eq('user_id', authUser.id)
             .maybeSingle(),
           supabase
@@ -654,7 +655,7 @@ export default function StrategyLockerPage() {
                         </div>
                         <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-4 py-3">
                           <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">TimePulse timing</div>
-                          <div className="mt-2 text-[16px] font-medium text-[#f7ddb3]">{currentTier === 'master' ? 'Enabled' : 'Locked'}</div>
+                          <div className="mt-2 text-[16px] font-medium text-[#f7ddb3]">{entitlements?.timing_analysis_access ? 'Enabled' : 'Locked'}</div>
                         </div>
                       </div>
                     </div>
@@ -866,7 +867,7 @@ export default function StrategyLockerPage() {
                                 Based on {runPreviews[strategy.id].timingProfile.sampleSize} historical {getStrategyLabel(runPreviews[strategy.id].engineKey)} patterns • median {runPreviews[strategy.id].timingProfile.median} days • {runPreviews[strategy.id].timingProfile.spread}d spread
                               </div>
                             </div>
-                          ) : currentTier === 'master' && runPreviews[strategy.id].predictionId ? (
+                          ) : entitlements?.timing_analysis_access && runPreviews[strategy.id].predictionId ? (
                             <div className="mt-3 rounded-[18px] border border-[#ffbd39]/12 bg-[#1a140c]/60 px-4 py-3">
                               <div className="flex items-center gap-2">
                                 <span className="text-[12px] font-medium text-[#f5cf84]">TimePulse</span>

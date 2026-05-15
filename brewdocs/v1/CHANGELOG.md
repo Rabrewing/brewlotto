@@ -112,6 +112,11 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Added BrewU support intake, support screenshot storage, canonical play-log bridge, settlement sweep, and customer notifications planning.
 - Added timestamp discipline to AGENTS and Brewdocs so future AI sessions can read state without guessing.
 
+### 2026-05-15
+- Made TimePulse timing analysis an explicit Master-tier entitlement (`timing_analysis_access`) instead of only a label-level rule.
+- Backfilled existing Master users so current entitlements keep TimePulse access without a Stripe catalog change.
+- Updated billing and Strategy Locker surfaces to read the explicit entitlement flag instead of only inferring access from tier text.
+
 ### 2026-05-05
 - Fixed cloud ingestion scheduler routing, AI usage tracking, and state-aware dashboard behavior.
 - Verified live NC and CA ingestion paths and updated the shared dashboard game mapping.

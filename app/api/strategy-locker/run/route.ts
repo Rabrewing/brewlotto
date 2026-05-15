@@ -222,7 +222,7 @@ export async function POST(request: NextRequest) {
           .maybeSingle(),
         admin
           .from('user_entitlements')
-          .select('tier_code')
+          .select('tier_code, timing_analysis_access')
           .eq('user_id', user.id)
           .maybeSingle(),
       ]);
@@ -267,6 +267,7 @@ export async function POST(request: NextRequest) {
     }
 
     const currentTier = normalizeTier(entitlementRow?.tier_code);
+    const hasTimingAnalysis = Boolean(entitlementRow?.timing_analysis_access || currentTier === 'master');
     const requiredTier = normalizeTier(strategyRow.min_tier);
 
     if (TIER_ORDER[currentTier] < TIER_ORDER[requiredTier]) {
@@ -442,7 +443,7 @@ export async function POST(request: NextRequest) {
 
     let timingProfile = null;
     let strategyComparisons = null;
-    if (currentTier === 'master') {
+    if (hasTimingAnalysis) {
       try {
         const { data: pastPredictions } = await admin
           .from('predictions')
@@ -491,7 +492,7 @@ export async function POST(request: NextRequest) {
           }
         }
       } catch {
-        // timing analysis is best-effort for Master tier
+        // timing analysis is best-effort for Master tier / TimePulse-enabled accounts
       }
     }
 
