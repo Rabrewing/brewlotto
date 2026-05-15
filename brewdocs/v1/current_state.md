@@ -367,7 +367,7 @@ npm run ingest-all
 2. Run a visual QA pass on the dropdown/menu destinations against the current mockups and rendered pages.
 3. Finish Stripe checkout, webhook, and customer portal wiring so `/billing` becomes a real self-serve flow.
 4. Run a tier matrix test across dashboard, strategy locker, pricing, billing, and AI commentary surfaces.
-5. Verify the strategy replay / run-strategy affordance and tighten the comparison/animation polish where needed, but keep the animation itself as polish-only rather than a launch blocker.
+5. Verify the strategy replay / run-strategy affordance and tighten the comparison/animation polish where needed, but keep the animation itself as polish-only rather than a launch blocker; the preferred version is a brief BrewLotto avatar running-in-place cue that says the strategy is being computed.
 6. Do a desktop/tablet/mobile responsive pass on the landing, login, and shared framework surfaces so the structure stays polished across devices.
 7. Finish the BrewCommand Strategy Signals view so every ingestion-driven alert shows the recipient, reason, and qualifying strategy keys before moving back to results-history work.
 

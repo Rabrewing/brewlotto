@@ -639,7 +639,7 @@ The system is considered complete when:
 **MEDIUM PRIORITY:**
 1. **Shared Components** — ✅ Done. `LoadingSkeleton.tsx` and `ErrorBoundary.tsx` created in `components/ui/`.
 2. **Dropdown UX** — Add hover previews and keyboard navigation per dropdown spec
-3. **"Run Strategy" Animation** — Polish-only, not a launch blocker. Wire up the animation from `strategy-locker-run-stratergy-animation.png` only after the launch-critical flows are complete.
+3. **"Run Strategy" Animation** — Polish-only, not a launch blocker. Preferred approach is a short BrewLotto avatar running-in-place cue that says the strategy is being computed; wire it only after the launch-critical flows are complete.
 4. **Customer Notifications / Winnings Alerts** — Normalize the settled-play flow against `play_logs`, insert support updates and settled-play events into `user_notifications`, and send customer emails with a BrewLotto return link when support tickets or winnings are resolved.
 5. **Odds & Play-Style Intelligence** — ✅ Done. `getPlayStyleHint` helper created in `lib/brewwu/getPlayStyleHint.ts`, wired into prediction generator. Play-style matrix already displayed in BrewU.
 6. **BrewU Support Intake** — Add a lightweight support tab with category dropdown, comments, screenshot upload, and a 24-hour response disclaimer; route submissions to BrewCommand notifications/email.
