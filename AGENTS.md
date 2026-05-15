@@ -1,6 +1,6 @@
 # AGENTS.md (BrewLotto V1)
 
-## Current Status (2026-05-12 ET)
+## Current Status (2026-05-15 ET)
 
 ### System Health — All NC + CA Launch Games Green
 
@@ -538,7 +538,7 @@ The system is considered complete when:
 
 ## V1 Progress Tracker
 
-**Last Updated:** 2026-05-14 ET (TimePulse timing analysis built with per-strategy profiling, confidence badge, play style recommendation, and Brew AI comparison across strategies. TimePulse added to My Picks cards with 36h refresh, Stats breakdown, Strategy Locker cards, Pricing, and Billing pages. BrewU content management built. Previous: Play confirmation nudges, settlement sweep, tier-scaled draws, scrapers patched, strategy validation, shared components.)
+**Last Updated:** 2026-05-15 ET (TimePulse timing analysis is now an explicit Master-tier entitlement with backfilled access for current Master users; Pricing, Billing, and Strategy Locker read the same flag. Previous: TimePulse timing analysis built with per-strategy profiling, confidence badge, play style recommendation, and Brew AI comparison across strategies. TimePulse added to My Picks cards with 36h refresh, Stats breakdown, Strategy Locker cards, Pricing, and Billing pages. BrewU content management built. Previous: Play confirmation nudges, settlement sweep, tier-scaled draws, scrapers patched, strategy validation, shared components.)
 
 ### Phase Status
 
