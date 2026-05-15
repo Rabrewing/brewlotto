@@ -383,7 +383,7 @@ export default function StatsPage() {
 
             <SectionCard
               title="Streak &amp; Hit-Rate Trends"
-              description="This surface reads `user_daily_stats` when that table has been populated for your account."
+              description="This surface reads the daily stats summary once it has been populated for your account."
             >
               {recentTrend.length === 0 ? (
                 <div className="rounded-[20px] border border-white/8 bg-black/20 px-4 py-4 text-[14px] leading-6 text-white/58">

@@ -243,7 +243,7 @@ export default function BillingPage() {
               </div>
             </section>
 
-            <SectionCard title="BrewMaster Benefits" description="Live account entitlements from `user_entitlements`.">
+            <SectionCard title="BrewMaster Benefits" description="Live account entitlements from your account record.">
               <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
                 <div className="space-y-3">
                   {[
@@ -304,7 +304,7 @@ export default function BillingPage() {
               </div>
             </SectionCard>
 
-            <SectionCard title="Plan Ladder" description="Canonical billing tiers from `subscription_tiers`.">
+            <SectionCard title="Plan Ladder" description="Canonical billing tiers used by BrewLotto.">
               <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                 {tiers.map((tier) => <div key={tier.tier_key} className={`rounded-[22px] border px-4 py-4 ${tier.tier_key === currentTier ? 'border-[#ffc742]/30 bg-[#ffc742]/10' : 'border-white/8 bg-black/20'}`}><div className="text-[12px] uppercase tracking-[0.16em] text-white/35">{tier.tier_key}</div><div className="mt-3 text-[20px] font-medium text-[#f7ddb3]">{tier.display_name}</div><div className="mt-2 text-[14px] text-white/58">{getPlanDisplayPrice(tier)}</div><div className="mt-4 text-[12px] uppercase tracking-[0.14em] text-white/42">{tier.tier_key === currentTier ? 'Current plan' : 'Available tier'}</div></div>)}
               </div>

@@ -175,7 +175,7 @@ export default function SettingsPage() {
                   Brew settings
                 </div>
                 <div className="mt-4 max-w-2xl text-[15px] leading-7 text-white/62">
-                  This page uses `user_settings` for app-level controls that are broader than profile
+                  This page uses your saved settings for app-level controls that are broader than profile
                   identity, and keeps future controls inside the same stable record.
                 </div>
                 <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
@@ -217,7 +217,7 @@ export default function SettingsPage() {
               </div>
             </SectionCard>
 
-            <SectionCard title="Notifications" description="These toggles use fields already defined on the `user_settings` table.">
+            <SectionCard title="Notifications" description="These toggles use fields already saved in your account settings.">
               <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                 {toggleFields.map((field) => (
                   <label key={field.key} className="rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
