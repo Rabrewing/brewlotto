@@ -87,6 +87,7 @@ official source → ingestion → Supabase → freshness view → API → UI
 | **Settlement sweep** | `scripts/settlementSweep.js`, `scripts/ingestionServer.js` — 2026-05-13 | Created standalone settlement script and `/settle` endpoint. Added daily Cloud Scheduler job at 12:30 AM ET to auto-settle unsettled play_logs against official draws. |
 | **Tier-scaled draw counts** | `app/api/strategy-locker/run/route.ts` — 2026-05-13 | Strategy runs now fetch scaled draw counts by tier: Free=100, Starter=200, Pro=500, Master=1000. Recent momentum window scales dynamically. |
 | **TimePulse timing analysis** | `lib/prediction/timingAnalysis.js`, `app/api/strategy-locker/run/route.ts`, `app/strategy-locker/page.tsx` — 2026-05-14 | Built per-strategy timing profile tracking (lag-to-hit percentile windows). Confidence badge (high/medium/low). Brew AI compares across all strategies. Play style recommendation (Straight/Box/50/50) based on positional accuracy. Master tier only. |
+| **My Picks TimePulse** | `app/my-picks/page.tsx`, `app/api/stats/timing/route.ts` — 2026-05-14 | Added TimePulse timing window chip to saved prediction cards with 36-hour refresh cooldown and blue pulsing refresh button. Integrated across Stats, Pricing, Billing, and Strategy Locker feature listings. |
 | **BLOB_READ_WRITE_TOKEN** | Vercel Blob — 2026-05-04 | Blob store created, linked to project. Landing video + tutorial video uploaded to Blob. `NEXT_PUBLIC_LANDING_VIDEO_*_URL` and `NEXT_PUBLIC_TUTORIAL_VIDEO_URL` env vars set. |
 
 ### Auth & Email
@@ -535,7 +536,7 @@ The system is considered complete when:
 
 ## V1 Progress Tracker
 
-**Last Updated:** 2026-05-14 ET (TimePulse timing analysis built with per-strategy profiling, confidence badge, play style recommendation, and Brew AI comparison across strategies. BrewU content management built. Previous: Play confirmation nudges, settlement sweep, tier-scaled draws, scrapers patched, strategy validation, shared components.)
+**Last Updated:** 2026-05-14 ET (TimePulse timing analysis built with per-strategy profiling, confidence badge, play style recommendation, and Brew AI comparison across strategies. TimePulse added to My Picks cards with 36h refresh, Stats breakdown, Strategy Locker cards, Pricing, and Billing pages. BrewU content management built. Previous: Play confirmation nudges, settlement sweep, tier-scaled draws, scrapers patched, strategy validation, shared components.)
 
 ### Phase Status
 

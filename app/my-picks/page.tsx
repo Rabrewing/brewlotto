@@ -206,6 +206,20 @@ function SummaryMetric({ label, value }: { label: string; value: string }) {
   );
 }
 
+interface PickCardProps {
+  prediction: PredictionRecord;
+  playLog: PlayLogRecord | null;
+  isConfirmed: boolean;
+  isConfirming: boolean;
+  onToggleSaved: (prediction: PredictionRecord) => Promise<void>;
+  onConfirmPlayed: (prediction: PredictionRecord) => Promise<void>;
+  onDelete: (prediction: PredictionRecord) => Promise<void>;
+  timingProfile?: { windowStart: string; windowEnd: string; sampleSize: number } | null;
+  onRefreshTiming?: () => void;
+  refreshingTiming?: boolean;
+  cooldownRemaining?: number;
+}
+
 function PickCard({
   prediction,
   playLog,
@@ -214,15 +228,11 @@ function PickCard({
   onToggleSaved,
   onConfirmPlayed,
   onDelete,
-}: {
-  prediction: PredictionRecord;
-  playLog?: PlayLogRecord | null;
-  isConfirmed: boolean;
-  isConfirming: boolean;
-  onToggleSaved: (prediction: PredictionRecord) => Promise<void>;
-  onConfirmPlayed: (prediction: PredictionRecord) => Promise<void>;
-  onDelete: (prediction: PredictionRecord) => Promise<void>;
-}) {
+  timingProfile,
+  onRefreshTiming,
+  refreshingTiming,
+  cooldownRemaining,
+}: PickCardProps) {
   const numbers = Array.isArray(prediction.predicted_numbers) ? prediction.predicted_numbers : [];
   const hasBonus = prediction.bonus_number !== null && prediction.bonus_number !== undefined;
   const status = getPickStatus(prediction);
@@ -293,6 +303,37 @@ function PickCard({
 
       <div className="mt-4 text-[14px] leading-7 text-white/66">{getPredictionSummary(prediction)}</div>
 
+      {timingProfile ? (
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <div className="rounded-full border border-[#ffbd39]/14 bg-[#1a140c] px-3 py-1 text-[11px] text-[#f5cf84]">
+            TimePulse: {timingProfile.windowStart} — {timingProfile.windowEnd}
+          </div>
+          {onRefreshTiming ? (
+            <button
+              type="button"
+              onClick={onRefreshTiming}
+              disabled={refreshingTiming || (cooldownRemaining != null && cooldownRemaining > 0)}
+              className={`flex h-7 w-7 items-center justify-center rounded-full transition-all ${
+                refreshingTiming
+                  ? 'animate-spin bg-[#3b82f6]/30 text-white/50'
+                  : cooldownRemaining != null && cooldownRemaining > 0
+                    ? 'bg-white/5 text-white/30 cursor-default'
+                    : 'bg-[#3b82f6]/15 text-[#60a5fa] hover:bg-[#3b82f6]/25 animate-pulse'
+              }`}
+              title={
+                cooldownRemaining != null && cooldownRemaining > 0
+                  ? `${Math.ceil(cooldownRemaining / 3600000)}h remaining`
+                  : 'Refresh timing window'
+              }
+            >
+              <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 2v6h-6" /><path d="M3 12a9 9 0 0 1 15-6.7L21 8" /><path d="M3 22v-6h6" /><path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
+              </svg>
+            </button>
+          ) : null}
+        </div>
+      ) : null}
+
       <div className="mt-5 flex flex-wrap items-center justify-between gap-4 border-t border-white/8 pt-4">
         <PickStatusPill status={status} createdAt={prediction.created_at} />
 
@@ -349,6 +390,9 @@ export default function MyPicksPage() {
   const [confirmedPredictionIds, setConfirmedPredictionIds] = useState<string[]>([]);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [confirmingPredictionId, setConfirmingPredictionId] = useState<string | null>(null);
+  const [timingProfiles, setTimingProfiles] = useState<Record<string, { windowStart: string; windowEnd: string; sampleSize: number; confidence: string }>>({});
+  const [timingRefreshCooldowns, setTimingRefreshCooldowns] = useState<Record<string, number>>({});
+  const [refreshingTiming, setRefreshingTiming] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -428,6 +472,19 @@ export default function MyPicksPage() {
     };
   }, [selectedGame, selectedState]);
 
+  useEffect(() => {
+    let cancelled = false;
+    async function loadTiming() {
+      const gameParam = selectedGame !== 'ALL' ? selectedGame : 'pick3';
+      const stateParam = selectedState !== 'ALL' ? selectedState : 'NC';
+      const res = await fetch(`/api/stats/timing?game=${gameParam}&state=${stateParam}`);
+      const payload = await res.json();
+      if (!cancelled && payload.success) setTimingProfiles(payload.data || {});
+    }
+    loadTiming();
+    return () => { cancelled = true; };
+  }, [selectedGame, selectedState]);
+
   const savedCount = useMemo(() => predictions.length, [predictions]);
 
   const primaryGame = useMemo(() => {
@@ -439,6 +496,28 @@ export default function MyPicksPage() {
     if (selectedWindow === 'ALL') return predictions;
     return predictions.filter((p) => p.draw_time === selectedWindow);
   }, [predictions, selectedWindow]);
+
+  const TIMING_COOLDOWN_MS = 36 * 60 * 60 * 1000;
+
+  async function handleRefreshTiming(game: string, state: string) {
+    const cacheKey = `brewlotto:timepulse-refresh-${game}-${state}`;
+    const lastRefresh = parseInt(localStorage.getItem(cacheKey) || '0', 10);
+    if (Date.now() - lastRefresh < TIMING_COOLDOWN_MS) return;
+
+    setRefreshingTiming(`${game}-${state}`);
+    localStorage.setItem(cacheKey, String(Date.now()));
+    setTimingRefreshCooldowns((prev) => ({ ...prev, [`${game}-${state}`]: Date.now() }));
+
+    try {
+      const res = await fetch(`/api/stats/timing?game=${game}&state=${state}`);
+      const payload = await res.json();
+      if (payload.success) setTimingProfiles(payload.data || {});
+    } catch {
+      // silently fail
+    } finally {
+      setRefreshingTiming(null);
+    }
+  }
 
   const groupedPredictions = useMemo(() => {
     return filteredPredictions.reduce<Array<{ createdAt: string | null; picks: PredictionRecord[] }>>((groups, prediction) => {
@@ -684,6 +763,20 @@ export default function MyPicksPage() {
                       onToggleSaved={handleToggleSaved}
                       onConfirmPlayed={handleConfirmPlayed}
                       onDelete={handleDelete}
+                      timingProfile={timingProfiles[getStrategyLabel(prediction.source_strategy_key)] || null}
+                      onRefreshTiming={() => {
+                        const game = prediction.game === 'mega_millions' ? 'mega' : prediction.game || 'pick3';
+                        const state = prediction.state || 'NC';
+                        handleRefreshTiming(game, state);
+                      }}
+                      refreshingTiming={refreshingTiming === `${prediction.game || 'pick3'}-${prediction.state || 'NC'}`}
+                      cooldownRemaining={(() => {
+                        const game = prediction.game === 'mega_millions' ? 'mega' : prediction.game || 'pick3';
+                        const state = prediction.state || 'NC';
+                        const cacheKey = `brewlotto:timepulse-refresh-${game}-${state}`;
+                        const last = parseInt(localStorage.getItem(cacheKey) || '0', 10);
+                        return last ? 36 * 60 * 60 * 1000 - (Date.now() - last) : 0;
+                      })()}
                     />
                   ))}
                 </div>

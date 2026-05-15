@@ -103,6 +103,8 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Built TimePulse timing analysis (`lib/prediction/timingAnalysis.js`): per-strategy lag tracking, percentile windows, confidence badge (high/medium/low based on sample size and spread).
 - Brew AI compares timing profiles across all registered strategies and recommends the strategy with the tightest window.
 - TimePulse recommends play style (Straight / Box / 50/50) based on historical positional accuracy tracking.
+- Added TimePulse to My Picks prediction cards with 36-hour refresh cooldown (blue pulsing refresh button).
+- Added TimePulse to Stats & Performance strategy breakdown, Pricing, Billing, and Strategy Locker Master tier feature listings.
 - My Picks draw window filter (Midday/Evening) now only visible for Pick 3/4 games.
 - Added BrewU support intake, support screenshot storage, canonical play-log bridge, settlement sweep, and customer notifications planning.
 - Added timestamp discipline to AGENTS and Brewdocs so future AI sessions can read state without guessing.
