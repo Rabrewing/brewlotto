@@ -19,14 +19,16 @@ Use the Test Lab to walk the full app the same way a real customer would, then r
 1. Sign in and wait for the intro overlay to explain the test flow.
 2. Acknowledge the guide, then start at `Onboarding` if you are new.
 3. Open the Dashboard and confirm the free-tier showcase looks right.
-4. Move to `Starter` and verify Strategy Locker unlocks the expected strategies.
-5. Run a strategy, save it to `My Picks`, and confirm the play.
-6. For NC Pick 3 / Pick 4, verify the Fireball prompt and Fireball display when relevant.
-7. Open `Results` and confirm only the matching draw date is treated as a match.
-8. Check `Stats & Performance` and confirm ratios track confirmed plays, not just generated previews.
-9. Repeat the flow on `Pro`.
-10. Repeat the flow on `Master` and verify TimePulse appears only for Master access.
-11. Use `/qa` to submit what you saw.
+4. If the page points you to `Pricing`, check that it explains the tier ladder, then use `Billing` to manage a plan if needed.
+5. Move to `Starter` and verify Strategy Locker unlocks the expected strategies.
+6. Run a strategy in Strategy Locker first, then save it to `My Picks` when the app asks you to.
+7. Use the `My Picks` confirm step (`I Played This` / `Played`) so BrewLotto can tell the difference between a generated preview and a real play.
+8. For NC Pick 3 / Pick 4, verify the Fireball prompt and Fireball display when relevant.
+9. Open `Results` and confirm only the matching draw date is treated as a match.
+10. Check `Stats & Performance` and confirm ratios track confirmed plays, not just generated previews.
+11. Repeat the flow on `Pro`.
+12. Repeat the flow on `Master` and verify TimePulse appears only for Master access.
+13. Use `/qa` to submit what you saw.
 
 ## What The Form Captures
 
@@ -52,6 +54,11 @@ Use the Test Lab to walk the full app the same way a real customer would, then r
 - The Test Lab saves in-progress answers per tester email.
 - If a tester closes the page or comes back later, the form should repopulate from the saved draft instead of starting over.
 - Use the reset button only if the tester wants to clear the current draft and restart that report from scratch.
+
+## Tester Access
+
+- Approved tester emails are seeded in `BREWQA_TESTER_EMAILS`.
+- The current roster includes `rb.brewington@gmail.com` so BrewLotto can be tested from the same signed-in account that owns the feature review.
 
 ## How BrewCommand Uses It
 

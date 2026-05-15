@@ -417,7 +417,7 @@ export default function QaPage() {
                 <NavigationTabs />
 
                 <div className="mb-4 mt-2 flex flex-wrap items-center justify-between gap-3">
-                    <div className="text-[40px] font-medium tracking-[-0.03em] text-[#f8cf98]">Test Lab</div>
+                    <div className="text-[32px] font-medium tracking-[-0.03em] text-[#f8cf98] sm:text-[40px]">Test Lab</div>
                     <button
                         type="button"
                         onClick={() => setIntroAccepted(false)}
@@ -428,39 +428,39 @@ export default function QaPage() {
                 </div>
 
                 {!introAccepted ? (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4 py-6 backdrop-blur-md">
-                        <div className="w-full max-w-3xl rounded-[30px] border border-[#72caff]/25 bg-[radial-gradient(circle_at_top_left,rgba(114,202,255,0.22),rgba(0,0,0,0)_32%),linear-gradient(145deg,rgba(14,20,28,0.98),rgba(6,6,6,0.98))] p-6 shadow-[0_0_60px_rgba(114,202,255,0.18)] sm:p-8">
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-3 py-4 backdrop-blur-md sm:px-4 sm:py-6">
+                        <div className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-[30px] border border-[#72caff]/25 bg-[radial-gradient(circle_at_top_left,rgba(114,202,255,0.22),rgba(0,0,0,0)_32%),linear-gradient(145deg,rgba(14,20,28,0.98),rgba(6,6,6,0.98))] p-4 shadow-[0_0_60px_rgba(114,202,255,0.18)] sm:p-8">
                             <div className="text-[12px] uppercase tracking-[0.18em] text-[#bde7ff]">Before you start</div>
-                            <div className="mt-3 text-[30px] font-semibold tracking-[-0.03em] text-[#d8f1ff]">Read this first so we capture the full test flow</div>
-                            <div className="mt-3 max-w-2xl text-[15px] leading-7 text-white/68">
-                                This Test Lab is for approved family testers. It guides you from the beginning of the app through each tier so you can report what you saw, what you expected, and where the flow changed.
+                            <div className="mt-3 text-[24px] font-semibold tracking-[-0.03em] text-[#d8f1ff] sm:text-[30px]">Read this first so we capture the full test flow</div>
+                            <div className="mt-3 max-w-2xl text-[14px] leading-7 text-white/68 sm:text-[15px]">
+                                This Test Lab is for approved family testers. It starts at the beginning of the app and walks you through the flow tier by tier. Follow the steps in order, then tell us what you saw, what you expected, and where the flow changed.
                             </div>
-                            <div className="mt-5 grid gap-3 text-[14px] leading-7 text-white/72 sm:grid-cols-2">
+                            <div className="mt-5 grid gap-3 text-[13px] leading-6 text-white/72 sm:grid-cols-2 sm:text-[14px] sm:leading-7">
                                 {[
-                                    "Start at onboarding or the dashboard, not the report form.",
-                                    "Work the tiers in order: Free, Starter, Pro, then Master.",
-                                    "Use Save to My Picks only when the app tells you to.",
-                                    "For NC Pick 3 / Pick 4, note whether Fireball was used.",
-                                    "Master testers should watch for TimePulse and its date range.",
-                                    "Report the beginning, middle, and end of the journey if something feels off.",
+                                    "Start at onboarding first if the app sends you there. If not, open the dashboard and follow the on-screen prompts.",
+                                    "Work the tiers in order: Free, Starter, Pro, then Master. Do not skip ahead unless the page tells you to.",
+                                    "Starter and Pro will show Strategy Locker. Run a strategy there first, then save it to My Picks when the app asks you to.",
+                                    "My Picks is where the real confirmation happens. Use the I Played This / Played step so we can tell the difference between a generated preview and a real play.",
+                                    "For NC Pick 3 / Pick 4, answer the Fireball question when it appears so the result can be tracked correctly.",
+                                    "Master testers should look for TimePulse and its lag window. It may point to a range, not the exact draw day.",
                                 ].map((item) => (
                                     <div key={item} className="rounded-[18px] border border-white/10 bg-white/[0.03] px-4 py-3">
                                         {item}
                                     </div>
                                 ))}
                             </div>
-                            <div className="mt-5 rounded-[22px] border border-white/10 bg-black/20 px-4 py-4 text-[14px] leading-7 text-white/66">
-                                If you test billing, use Stripe test cards only. For a normal successful checkout, use{" "}
+                            <div className="mt-5 rounded-[22px] border border-white/10 bg-black/20 px-4 py-4 text-[13px] leading-6 text-white/66 sm:text-[14px] sm:leading-7">
+                                If you reach pricing or billing, check that pricing shows the correct tier and that Billing opens the manage surface. Use Stripe test cards only. For a normal successful checkout, use{" "}
                                 <span className="text-[#d8f1ff]">4242 4242 4242 4242</span> with any future date and any CVC.
                                 If you need to test a decline path, use Stripe&apos;s generic decline card{" "}
                                 <span className="text-[#d8f1ff]">4000 0000 0000 0002</span> instead of a real card.
                             </div>
-                            <div className="mt-5 flex flex-wrap gap-3">
+                            <div className="mt-5 flex flex-col gap-3 sm:flex-row">
                                 <button
                                     type="button"
-                            onClick={() => {
-                                setIntroAccepted(true);
-                                try {
+                                    onClick={() => {
+                                        setIntroAccepted(true);
+                                        try {
                                             window.localStorage.setItem(QA_INTRO_STORAGE_KEY, "true");
                                         } catch {
                                             // ignore storage issues
