@@ -47,6 +47,12 @@ Use the Test Lab to walk the full app the same way a real customer would, then r
 - Optional screenshots
 - Browser / viewport metadata
 
+## Draft Resume
+
+- The Test Lab saves in-progress answers per tester email.
+- If a tester closes the page or comes back later, the form should repopulate from the saved draft instead of starting over.
+- Use the reset button only if the tester wants to clear the current draft and restart that report from scratch.
+
 ## How BrewCommand Uses It
 
 - QA reports land in `qa_reports`

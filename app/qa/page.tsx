@@ -109,6 +109,59 @@ const TEST_STEPS = [
     "Check Results for the correct date and time divider, then use the QA form below to report what happened.",
 ];
 
+const QA_INTRO_STORAGE_KEY = "brewlotto-qa-intro-accepted";
+const QA_DRAFT_STORAGE_PREFIX = "brewlotto:qa-draft:";
+
+function makeQaDraftKey(email: string) {
+    return `${QA_DRAFT_STORAGE_PREFIX}${email.trim().toLowerCase()}`;
+}
+
+function safeLoadDraft(email: string): Partial<QaReportFormState> | null {
+    if (typeof window === "undefined") {
+        return null;
+    }
+
+    try {
+        const raw = window.localStorage.getItem(makeQaDraftKey(email));
+        if (!raw) {
+            return null;
+        }
+
+        const parsed = JSON.parse(raw) as Partial<QaReportFormState>;
+        if (!parsed || typeof parsed !== "object") {
+            return null;
+        }
+
+        return parsed;
+    } catch {
+        return null;
+    }
+}
+
+function safeSaveDraft(email: string, formState: QaReportFormState) {
+    if (typeof window === "undefined") {
+        return;
+    }
+
+    try {
+        window.localStorage.setItem(makeQaDraftKey(email), JSON.stringify(formState));
+    } catch {
+        // ignore storage issues
+    }
+}
+
+function safeClearDraft(email: string) {
+    if (typeof window === "undefined") {
+        return;
+    }
+
+    try {
+        window.localStorage.removeItem(makeQaDraftKey(email));
+    } catch {
+        // ignore storage issues
+    }
+}
+
 function YesNoToggle({
     label,
     value,
@@ -215,9 +268,13 @@ export default function QaPage() {
                     pagePath: "/qa",
                     browserInfo,
                 });
+
+                const draft = user.email ? safeLoadDraft(user.email) : null;
                 setFormState((current) => ({
                     ...current,
-                    testerName,
+                    ...draft,
+                    testerName: draft?.testerName || testerName,
+                    pagePath: "/qa",
                 }));
             } finally {
                 if (active) {
@@ -235,11 +292,19 @@ export default function QaPage() {
 
     useEffect(() => {
         try {
-            setIntroAccepted(window.localStorage.getItem("brewlotto-qa-intro-accepted") === "true");
+            setIntroAccepted(window.localStorage.getItem(QA_INTRO_STORAGE_KEY) === "true");
         } catch {
             setIntroAccepted(false);
         }
     }, []);
+
+    useEffect(() => {
+        if (!userEmail) {
+            return;
+        }
+
+        safeSaveDraft(userEmail, formState);
+    }, [formState, userEmail]);
 
     const selectedTier = useMemo(
         () => TIER_OPTIONS.find((entry) => entry.value === formState.tierTested) || TIER_OPTIONS[0],
@@ -291,6 +356,9 @@ export default function QaPage() {
 
             setSubmissionMessage("QA report sent. BrewCommand will review it and track the next step.");
             event.currentTarget.reset();
+            if (meta.userEmail) {
+                safeClearDraft(meta.userEmail);
+            }
             setFormState({
                 testerName: meta.testerName || "",
                 tierTested: "free",
@@ -390,10 +458,10 @@ export default function QaPage() {
                             <div className="mt-5 flex flex-wrap gap-3">
                                 <button
                                     type="button"
-                                    onClick={() => {
-                                        setIntroAccepted(true);
-                                        try {
-                                            window.localStorage.setItem("brewlotto-qa-intro-accepted", "true");
+                            onClick={() => {
+                                setIntroAccepted(true);
+                                try {
+                                            window.localStorage.setItem(QA_INTRO_STORAGE_KEY, "true");
                                         } catch {
                                             // ignore storage issues
                                         }
@@ -730,17 +798,23 @@ export default function QaPage() {
                             </button>
                             <button
                                 type="button"
-                                onClick={() => setFormState((current) => ({
-                                    ...current,
-                                    loadedAsExpected: true,
-                                    tierMatched: true,
-                                    nextStepMatched: true,
-                                    fireballRelevant: false,
-                                    timepulseRelevant: false,
-                                    expectedBehavior: "",
-                                    actualBehavior: "",
-                                    notes: "",
-                                }))}
+                                onClick={() => {
+                                    if (meta.userEmail) {
+                                        safeClearDraft(meta.userEmail);
+                                    }
+
+                                    setFormState((current) => ({
+                                        ...current,
+                                        loadedAsExpected: true,
+                                        tierMatched: true,
+                                        nextStepMatched: true,
+                                        fireballRelevant: false,
+                                        timepulseRelevant: false,
+                                        expectedBehavior: "",
+                                        actualBehavior: "",
+                                        notes: "",
+                                    }));
+                                }}
                                 className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-3 text-[15px] font-semibold text-white/72 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
                             >
                                 Reset fields

@@ -21,6 +21,7 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Added a dedicated QA Test Lab for approved tester accounts, with a separate login allowlist, a gated intro overlay before the form unlocks, tier-by-tier test guidance, structured yes/no feedback, screenshot upload, and a BrewCommand QA queue.
 - Added a Stripe test-card cheat sheet to the QA Test Lab so testers can use `4242 4242 4242 4242` for successful tier testing and `4000 0000 0000 0002` for decline-path checks without using real cards.
 - Noted the preferred Run Strategy polish direction as a short BrewLotto avatar running-in-place cue that indicates the strategy is being computed, keeping the animation as post-core-flow polish only.
+- Added QA draft resume behavior so approved testers can close the Test Lab and come back later without losing the report in progress; the form is keyed per tester email and the reset button clears the saved draft when they want to start over.
 - Added a compact Notifications snapshot header with unread count, enabled delivery channels, category coverage, quiet hours, and support/help links so the page feels more like a control center than a raw list.
 - Removed duplicated benefit rows from the Billing Master-tier entitlement summary while keeping the TimePulse Master flag visible in the canonical account view.
 - Swapped the landing reel fallback to the watermark-free `public/landing/brewlotto-no-watermark.mp4` asset and synced the Vercel Blob MP4 URL so the live landing page no longer uses the older watermarked fallback.
