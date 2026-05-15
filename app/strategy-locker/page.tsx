@@ -215,7 +215,7 @@ export default function StrategyLockerPage() {
           return;
         }
 
-        const [strategiesResult, savedResult, activityResult, predictionsResult, playLogsResult, entitlementsResult, tiersResult] = await Promise.all([
+        const [strategiesResult, savedResult] = await Promise.all([
           supabase
             .from('strategy_registry')
             .select('id, strategy_key, public_name, description, category, min_tier, sort_order, metadata')
@@ -225,6 +225,16 @@ export default function StrategyLockerPage() {
             .from('user_saved_strategies')
             .select('strategy_id, is_favorite, nickname, updated_at')
             .eq('user_id', authUser.id),
+        ]);
+
+        if (strategiesResult.error) {
+          throw strategiesResult.error;
+        }
+        if (savedResult.error) {
+          throw savedResult.error;
+        }
+
+        const [activityResult, predictionsResult, playLogsResult, entitlementsResult, tiersResult] = await Promise.allSettled([
           supabase
             .from('user_strategy_activity')
             .select('strategy_id, game, state, context, occurred_at')
@@ -255,37 +265,50 @@ export default function StrategyLockerPage() {
             .order('sort_order', { ascending: true }),
         ]);
 
-        if (strategiesResult.error) {
-          throw strategiesResult.error;
-        }
-        if (savedResult.error) {
-          throw savedResult.error;
-        }
-        if (activityResult.error) {
-          throw activityResult.error;
-        }
-        if (predictionsResult.error) {
-          throw predictionsResult.error;
-        }
-        if (playLogsResult.error) {
-          throw playLogsResult.error;
-        }
-        if (entitlementsResult.error) {
-          throw entitlementsResult.error;
-        }
-        if (tiersResult.error) {
-          throw tiersResult.error;
-        }
+        const settledResults = [
+          ['activity', activityResult],
+          ['predictions', predictionsResult],
+          ['playLogs', playLogsResult],
+          ['entitlements', entitlementsResult],
+          ['tiers', tiersResult],
+        ] as const;
+
+        const optionalErrors = settledResults
+          .map(([label, result]) => {
+            if (result.status === 'fulfilled') {
+              const payload = result.value as { error?: { message?: string }; data?: unknown };
+              return payload.error ? `${label}: ${payload.error.message || 'unknown error'}` : null;
+            }
+
+            const reason = result.reason as { message?: string } | Error | null;
+            return `${label}: ${(reason && 'message' in reason && reason.message) || 'unknown error'}`;
+          })
+          .filter(Boolean);
 
         if (!cancelled) {
           setUser({ id: authUser.id, email: authUser.email });
           setStrategies((strategiesResult.data || []) as StrategyRecord[]);
           setSavedStrategies((savedResult.data || []) as SavedStrategyRecord[]);
-          setStrategyActivity((activityResult.data || []) as StrategyActivityRecord[]);
-          setPredictions((predictionsResult.data || []) as PredictionRecord[]);
-          setPlayLogs((playLogsResult.data || []) as PlayLogRecord[]);
-          setEntitlements((entitlementsResult.data as UserEntitlementRecord | null) || null);
-          setSubscriptionTiers((tiersResult.data || []) as SubscriptionTierRecord[]);
+          setStrategyActivity(
+            (activityResult.status === 'fulfilled' ? (activityResult.value.data || []) : []) as StrategyActivityRecord[],
+          );
+          setPredictions(
+            (predictionsResult.status === 'fulfilled' ? (predictionsResult.value.data || []) : []) as PredictionRecord[],
+          );
+          setPlayLogs(
+            (playLogsResult.status === 'fulfilled' ? (playLogsResult.value.data || []) : []) as PlayLogRecord[],
+          );
+          setEntitlements(
+            (entitlementsResult.status === 'fulfilled'
+              ? ((entitlementsResult.value.data as UserEntitlementRecord | null) || null)
+              : null),
+          );
+          setSubscriptionTiers(
+            (tiersResult.status === 'fulfilled' ? (tiersResult.value.data || []) : []) as SubscriptionTierRecord[],
+          );
+          if (optionalErrors.length > 0) {
+            console.warn('Strategy Locker loaded with partial data:', optionalErrors);
+          }
         }
       } catch (loadError) {
         if (!cancelled) {
