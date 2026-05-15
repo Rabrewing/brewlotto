@@ -491,6 +491,16 @@ export default function QaPage() {
                 <section className="mt-5 grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
                     <SectionCard title="What to report" description="Use simple yes / no answers plus one short note about what happened.">
                         <div id="qa-report-form" />
+                        <div className="mb-5 rounded-[20px] border border-[#72caff]/18 bg-[#0e1720] px-4 py-4">
+                            <div className="text-[12px] uppercase tracking-[0.16em] text-[#bde7ff]">Tester identity</div>
+                            <div className="mt-2 text-[14px] leading-7 text-white/68">
+                                Your sign-in email is captured automatically. You can confirm or tweak the display name below so BrewCommand can match your report to the right tester.
+                            </div>
+                            <div className="mt-3 grid gap-2 text-[13px] text-white/60 sm:grid-cols-2">
+                                <div>Signed in as: {userEmail || "Unknown"}</div>
+                                <div>Display name: {formState.testerName || "Not set yet"}</div>
+                            </div>
+                        </div>
                         <div className="grid gap-3 sm:grid-cols-3">
                             <YesNoToggle
                                 label="Page loaded cleanly?"

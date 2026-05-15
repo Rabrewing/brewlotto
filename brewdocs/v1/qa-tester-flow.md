@@ -30,6 +30,7 @@ Use the Test Lab to walk the full app the same way a real customer would, then r
 
 ## What The Form Captures
 
+- Tester identity is auto-captured from the signed-in account, and the page lets the tester confirm a display name before submitting.
 - Tester name
 - Tier tested
 - Journey stage
