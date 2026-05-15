@@ -382,8 +382,10 @@ export default function QaPage() {
                                 ))}
                             </div>
                             <div className="mt-5 rounded-[22px] border border-white/10 bg-black/20 px-4 py-4 text-[14px] leading-7 text-white/66">
-                                If you test billing, use Stripe test cards only. The common test number is{" "}
+                                If you test billing, use Stripe test cards only. For a normal successful checkout, use{" "}
                                 <span className="text-[#d8f1ff]">4242 4242 4242 4242</span> with any future date and any CVC.
+                                If you need to test a decline path, use Stripe&apos;s generic decline card{" "}
+                                <span className="text-[#d8f1ff]">4000 0000 0000 0002</span> instead of a real card.
                             </div>
                             <div className="mt-5 flex flex-wrap gap-3">
                                 <button

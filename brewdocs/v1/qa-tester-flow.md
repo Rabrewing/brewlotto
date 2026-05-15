@@ -57,6 +57,8 @@ Use the Test Lab to walk the full app the same way a real customer would, then r
 
 - Approved testers are separate from superadmins.
 - QA reports are not customer support requests.
-- Use fake Stripe test cards while the billing environment is still in test mode.
+- Use fake Stripe test cards while the billing environment is still in test mode:
+  - `4242 4242 4242 4242` for a normal successful checkout
+  - `4000 0000 0000 0002` to test a generic decline path
 - Keep screenshots and simple notes short and specific.
 - Focus on whether the app did what the page promised, not on general opinions.
