@@ -17,6 +17,9 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 ### 2026-05-13
 - Reworded the BrewU quick index so the top help surface reads like a browsable FAQ with question-style prompts and an "Ask BrewU" cue for faster topic discovery.
 
+### 2026-05-15
+- Added a compact Notifications snapshot header with unread count, enabled delivery channels, category coverage, quiet hours, and support/help links so the page feels more like a control center than a raw list.
+
 ### 2026-05-12
 - Confirmed the Stripe CLI is authenticated in test mode and ready for webhook verification, with the Brewlotto sandbox account and config file readable in the local environment.
 - Restyled the trial upgrade banner to a thinner blue/glow treatment and made expired trial generate actions route to `/pricing` instead of leaving users stuck at a hard lockout.

@@ -154,6 +154,20 @@ export default function NotificationsPage() {
     return notifications.filter((entry) => !entry.is_read);
   }, [notifications, selectedTab]);
   const compactNotificationTypes = new Set(['pick_reminder', 'draw_result']);
+  const enabledDeliveryChannels = [
+    preferences.email_enabled ? 'Email' : null,
+    preferences.push_enabled ? 'Push' : null,
+    preferences.sms_enabled ? 'SMS' : null,
+  ].filter(Boolean) as string[];
+  const preferenceCount = [
+    preferences.draw_results_enabled,
+    preferences.pick_reminders_enabled,
+    preferences.streak_alerts_enabled,
+    preferences.mission_alerts_enabled,
+    preferences.subscription_alerts_enabled,
+    preferences.security_alerts_enabled,
+    preferences.promo_alerts_enabled,
+  ].filter(Boolean).length;
 
   async function savePreferences() {
     if (!user) {
@@ -243,6 +257,50 @@ export default function NotificationsPage() {
           <div className="rounded-[28px] border border-[#ff8d7b]/25 bg-[#2a120d]/60 px-5 py-8 text-center text-[#ffc4b8]">{error}</div>
         ) : (
           <div className="space-y-5">
+            <section className="rounded-[30px] border border-[#72caff]/18 bg-[radial-gradient(circle_at_top_left,rgba(114,202,255,0.14),rgba(0,0,0,0)_34%),linear-gradient(145deg,rgba(18,24,36,0.9),rgba(8,8,8,0.98))] px-5 py-5 shadow-[0_0_28px_rgba(114,202,255,0.06)]">
+              <div className="text-[15px] uppercase tracking-[0.16em] text-white/38">Notification snapshot</div>
+              <div className="mt-3 text-[26px] font-semibold text-[#d7ecff]">Scan your delivery state at a glance</div>
+              <div className="mt-2 max-w-2xl text-[15px] leading-7 text-white/62">
+                This page combines your stored notification preferences with the real in-app inbox so you can see what&apos;s on, what&apos;s unread, and what channels are ready.
+              </div>
+
+              <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                <div className="rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
+                  <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">Unread</div>
+                  <div className="mt-2 text-[28px] font-semibold text-[#d7ecff]">{unreadCount}</div>
+                  <div className="mt-1 text-[13px] leading-6 text-white/52">Notifications waiting in the feed</div>
+                </div>
+                <div className="rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
+                  <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">Channels</div>
+                  <div className="mt-2 text-[18px] font-semibold text-[#f7ddb3]">{enabledDeliveryChannels.join(' • ') || 'None enabled'}</div>
+                  <div className="mt-1 text-[13px] leading-6 text-white/52">Current delivery preferences</div>
+                </div>
+                <div className="rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
+                  <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">Topics on</div>
+                  <div className="mt-2 text-[28px] font-semibold text-[#ddf7e2]">{preferenceCount}</div>
+                  <div className="mt-1 text-[13px] leading-6 text-white/52">Notification categories enabled</div>
+                </div>
+                <div className="rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
+                  <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">Quiet hours</div>
+                  <div className="mt-2 text-[18px] font-semibold text-[#f7ddb3]">
+                    {preferences.quiet_hours_enabled && preferences.quiet_hours_start && preferences.quiet_hours_end
+                      ? `${preferences.quiet_hours_start} - ${preferences.quiet_hours_end}`
+                      : 'Off'}
+                  </div>
+                  <div className="mt-1 text-[13px] leading-6 text-white/52">Delivery pause window</div>
+                </div>
+              </div>
+
+              <div className="mt-5 flex flex-wrap gap-3">
+                <Link href="/support" className="rounded-full bg-gradient-to-r from-[#ffc742] to-[#ffbe27] px-5 py-2.5 text-[14px] font-semibold text-black transition-transform hover:scale-[1.02]">
+                  Need help?
+                </Link>
+                <Link href="/learn#systems" className="rounded-full border border-white/10 bg-white/[0.03] px-5 py-2.5 text-[14px] text-white/80 transition-colors hover:text-white">
+                  Review BrewU systems
+                </Link>
+              </div>
+            </section>
+
             <section className="rounded-[30px] border border-[#ffc742]/24 bg-[radial-gradient(circle_at_top_left,rgba(255,199,66,0.18),rgba(0,0,0,0)_34%),linear-gradient(145deg,rgba(30,20,13,0.88),rgba(8,8,8,0.98))] px-5 py-5 shadow-[0_0_28px_rgba(255,184,28,0.08)]">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div>
