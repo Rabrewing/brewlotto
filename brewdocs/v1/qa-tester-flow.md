@@ -16,8 +16,8 @@ Use the Test Lab to walk the full app the same way a real customer would, then r
 
 ## Recommended Test Flow
 
-1. Sign in.
-2. Start at `Onboarding` if you are new.
+1. Sign in and wait for the intro overlay to explain the test flow.
+2. Acknowledge the guide, then start at `Onboarding` if you are new.
 3. Open the Dashboard and confirm the free-tier showcase looks right.
 4. Move to `Starter` and verify Strategy Locker unlocks the expected strategies.
 5. Run a strategy, save it to `My Picks`, and confirm the play.

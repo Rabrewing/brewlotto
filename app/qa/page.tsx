@@ -159,6 +159,7 @@ export default function QaPage() {
     const [submissionMessage, setSubmissionMessage] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [submitting, setSubmitting] = useState(false);
+    const [introAccepted, setIntroAccepted] = useState(false);
     const [meta, setMeta] = useState<QaMeta>({
         userEmail: "",
         testerName: "",
@@ -230,6 +231,14 @@ export default function QaPage() {
         return () => {
             active = false;
         };
+    }, []);
+
+    useEffect(() => {
+        try {
+            setIntroAccepted(window.localStorage.getItem("brewlotto-qa-intro-accepted") === "true");
+        } catch {
+            setIntroAccepted(false);
+        }
     }, []);
 
     const selectedTier = useMemo(
@@ -339,7 +348,72 @@ export default function QaPage() {
                 <Header />
                 <NavigationTabs />
 
-                <div className="mb-5 mt-2 text-[40px] font-medium tracking-[-0.03em] text-[#f8cf98]">Test Lab</div>
+                <div className="mb-4 mt-2 flex flex-wrap items-center justify-between gap-3">
+                    <div className="text-[40px] font-medium tracking-[-0.03em] text-[#f8cf98]">Test Lab</div>
+                    <button
+                        type="button"
+                        onClick={() => setIntroAccepted(false)}
+                        className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-[13px] font-semibold text-white/72 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
+                    >
+                        Review tester guide
+                    </button>
+                </div>
+
+                {!introAccepted ? (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4 py-6 backdrop-blur-md">
+                        <div className="w-full max-w-3xl rounded-[30px] border border-[#72caff]/25 bg-[radial-gradient(circle_at_top_left,rgba(114,202,255,0.22),rgba(0,0,0,0)_32%),linear-gradient(145deg,rgba(14,20,28,0.98),rgba(6,6,6,0.98))] p-6 shadow-[0_0_60px_rgba(114,202,255,0.18)] sm:p-8">
+                            <div className="text-[12px] uppercase tracking-[0.18em] text-[#bde7ff]">Before you start</div>
+                            <div className="mt-3 text-[30px] font-semibold tracking-[-0.03em] text-[#d8f1ff]">Read this first so we capture the full test flow</div>
+                            <div className="mt-3 max-w-2xl text-[15px] leading-7 text-white/68">
+                                This Test Lab is for approved family testers. It guides you from the beginning of the app through each tier so you can report what you saw, what you expected, and where the flow changed.
+                            </div>
+                            <div className="mt-5 grid gap-3 text-[14px] leading-7 text-white/72 sm:grid-cols-2">
+                                {[
+                                    "Start at onboarding or the dashboard, not the report form.",
+                                    "Work the tiers in order: Free, Starter, Pro, then Master.",
+                                    "Use Save to My Picks only when the app tells you to.",
+                                    "For NC Pick 3 / Pick 4, note whether Fireball was used.",
+                                    "Master testers should watch for TimePulse and its date range.",
+                                    "Report the beginning, middle, and end of the journey if something feels off.",
+                                ].map((item) => (
+                                    <div key={item} className="rounded-[18px] border border-white/10 bg-white/[0.03] px-4 py-3">
+                                        {item}
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="mt-5 rounded-[22px] border border-white/10 bg-black/20 px-4 py-4 text-[14px] leading-7 text-white/66">
+                                If you test billing, use Stripe test cards only. The common test number is{" "}
+                                <span className="text-[#d8f1ff]">4242 4242 4242 4242</span> with any future date and any CVC.
+                            </div>
+                            <div className="mt-5 flex flex-wrap gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setIntroAccepted(true);
+                                        try {
+                                            window.localStorage.setItem("brewlotto-qa-intro-accepted", "true");
+                                        } catch {
+                                            // ignore storage issues
+                                        }
+                                    }}
+                                    className="rounded-full bg-gradient-to-r from-[#72caff] to-[#52aefc] px-5 py-3 text-[15px] font-semibold text-black shadow-[0_0_18px_rgba(114,202,255,0.2)] transition hover:brightness-105"
+                                >
+                                    Begin Test Lab
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const target = document.getElementById("qa-report-form");
+                                        target?.scrollIntoView({ behavior: "smooth", block: "start" });
+                                    }}
+                                    className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-3 text-[15px] font-semibold text-white/72 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
+                                >
+                                    Go to report form
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                ) : null}
 
                 <section className="rounded-[30px] border border-[#72caff]/24 bg-[radial-gradient(circle_at_top_left,rgba(114,202,255,0.18),rgba(0,0,0,0)_34%),linear-gradient(145deg,rgba(18,24,34,0.9),rgba(8,8,8,0.98))] px-5 py-5 shadow-[0_0_28px_rgba(114,202,255,0.08)]">
                     <div className="text-[15px] uppercase tracking-[0.16em] text-[#bde7ff]">QA / tester workflow</div>
@@ -414,6 +488,7 @@ export default function QaPage() {
 
                 <section className="mt-5 grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
                     <SectionCard title="What to report" description="Use simple yes / no answers plus one short note about what happened.">
+                        <div id="qa-report-form" />
                         <div className="grid gap-3 sm:grid-cols-3">
                             <YesNoToggle
                                 label="Page loaded cleanly?"

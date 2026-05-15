@@ -18,7 +18,7 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Reworded the BrewU quick index so the top help surface reads like a browsable FAQ with question-style prompts and an "Ask BrewU" cue for faster topic discovery.
 
 ### 2026-05-15
-- Added a dedicated QA Test Lab for approved tester accounts, with a separate login allowlist, tier-by-tier test guidance, structured yes/no feedback, screenshot upload, and a BrewCommand QA queue.
+- Added a dedicated QA Test Lab for approved tester accounts, with a separate login allowlist, a gated intro overlay before the form unlocks, tier-by-tier test guidance, structured yes/no feedback, screenshot upload, and a BrewCommand QA queue.
 - Added a compact Notifications snapshot header with unread count, enabled delivery channels, category coverage, quiet hours, and support/help links so the page feels more like a control center than a raw list.
 - Removed duplicated benefit rows from the Billing Master-tier entitlement summary while keeping the TimePulse Master flag visible in the canonical account view.
 - Swapped the landing reel fallback to the watermark-free `public/landing/brewlotto-no-watermark.mp4` asset and synced the Vercel Blob MP4 URL so the live landing page no longer uses the older watermarked fallback.
