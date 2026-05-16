@@ -13,7 +13,7 @@ import {
   FreshnessBanner,
 } from '@/components/brewlotto/dashboard';
 import { resolveDashboardGameConfig } from '@/lib/dashboard/game-config';
-import { usePreferredState } from '@/hooks/usePreferredState';
+import { normalizePreferredStateCode, usePreferredState } from '@/hooks/usePreferredState';
 
 interface DrawEntry {
   drawDate: string | null;
@@ -59,6 +59,15 @@ interface ResultsPayload {
 
 type HistoryRange = 90 | 180;
 
+const EMPTY_RESULTS: ResultsPayload = {
+  draws: [],
+  closestPrediction: null,
+  matchCount: 0,
+  matchCounts: [],
+  insights: [],
+  freshness: undefined,
+};
+
 function formatDrawTime(value: string | null) {
   if (!value) return 'Time unavailable';
   const date = new Date(value);
@@ -94,6 +103,7 @@ function formatDrawDate(value: string | null) {
 
 export default function ResultsPage() {
   const { preferredState } = usePreferredState();
+  const preferredStateCode = normalizePreferredStateCode(preferredState);
   const [selectedGame, setSelectedGame] = useState<GameId>('pick3');
   const [selectedWindow, setSelectedWindow] = useState<string | null>(null);
 
@@ -117,7 +127,7 @@ export default function ResultsPage() {
       setError(null);
 
       try {
-        const response = await fetch(`/api/results?game=${selectedGame}&state=${preferredState}&history_days=${historyDays}`, {
+        const response = await fetch(`/api/results?game=${selectedGame}&state=${preferredStateCode}&history_days=${historyDays}`, {
           cache: 'no-store',
         });
         const payload = await response.json();
@@ -151,16 +161,17 @@ export default function ResultsPage() {
       cancelled = true;
       clearInterval(interval);
     };
-  }, [historyDays, selectedGame, preferredState]);
+  }, [historyDays, selectedGame, preferredStateCode]);
 
   useEffect(() => {
     setSelectedWindow(null);
-  }, [selectedGame, preferredState]);
+  }, [selectedGame, preferredStateCode]);
 
-  const gameConfig = resolveDashboardGameConfig(selectedGame, preferredState) || resolveDashboardGameConfig('pick3', 'NC')!;
+  const gameConfig = resolveDashboardGameConfig(selectedGame, preferredStateCode) || resolveDashboardGameConfig('pick3', 'NC')!;
+  const resultsData = results || EMPTY_RESULTS;
   const showBonus = selectedGame === 'powerball' || selectedGame === 'mega';
-  const freshnessBlocked = results?.freshness && (results.freshness.status === 'stale' || results.freshness.status === 'failed');
-  const draws = results?.draws || [];
+  const freshnessBlocked = resultsData.freshness && (resultsData.freshness.status === 'stale' || resultsData.freshness.status === 'failed');
+  const draws = resultsData.draws;
 
   const windowLabels = [...new Set(draws.map(d => d.windowLabel).filter(Boolean))] as string[];
   const activeWindow = selectedWindow || windowLabels[0] || null;
@@ -212,10 +223,10 @@ export default function ResultsPage() {
           stalenessMinutes={results?.freshness?.stalenessMinutes || null}
           expectedNextDrawAt={results?.freshness?.expectedNextDrawAt || null}
           loading={loading}
-          stateCode={preferredState}
+          stateCode={preferredStateCode}
         />
 
-        <GameTabs selectedGame={selectedGame} onSelect={setSelectedGame} stateCode={preferredState} />
+        <GameTabs selectedGame={selectedGame} onSelect={setSelectedGame} stateCode={preferredStateCode} />
 
         <div className="mb-5 flex flex-wrap gap-2">
           <button
@@ -277,7 +288,7 @@ export default function ResultsPage() {
         ) : filteredDraws.length === 0 ? (
           <div className={`rounded-[28px] px-5 py-8 text-center ${freshnessBlocked ? 'border border-[#ff8d7b]/25 bg-[#2a120d]/60 text-[#ffc4b8]' : 'border border-white/10 bg-white/[0.03] text-white/55'}`}>
             {freshnessBlocked
-              ? results?.insights?.[0] || `Official ${gameConfig.displayLabel} results are temporarily withheld until freshness returns to healthy.`
+              ? resultsData.insights?.[0] || `Official ${gameConfig.displayLabel} results are temporarily withheld until freshness returns to healthy.`
               : draws.length > 0
                 ? `No ${windowDisplayName[activeWindow || ''] || ''} draw available yet.`
                 : `No official draw is available yet for ${gameConfig.displayLabel}.`}
@@ -296,7 +307,7 @@ export default function ResultsPage() {
 
                 <div className="space-y-5">
                   {group.draws.map(({ draw, index }) => {
-                    const matchCountEntry = results?.matchCounts?.[index] || null;
+                    const matchCountEntry = resultsData.matchCounts?.[index] || null;
                     return (
                       <section
                         key={`${draw.drawDate}-${draw.windowLabel || index}`}
@@ -362,24 +373,24 @@ export default function ResultsPage() {
 
             <section>
               <div className="mb-3 text-[18px] font-medium text-[#f7d6ab]">
-                {results.closestPrediction
-                  ? `You matched: ${results.matchCount} number${results.matchCount === 1 ? '' : 's'}`
+                {resultsData.closestPrediction
+                  ? `You matched: ${resultsData.matchCount} number${resultsData.matchCount === 1 ? '' : 's'}`
                   : 'No nearby Brew pick found yet'}
               </div>
 
-              {results.closestPrediction ? (
+              {resultsData.closestPrediction ? (
                 <div className="rounded-[28px] border border-[#72caff]/20 bg-[linear-gradient(145deg,rgba(19,22,31,0.76),rgba(10,10,12,0.96))] px-5 py-4 shadow-[0_0_22px_rgba(114,202,255,0.06)]">
                   <div className="text-[16px] font-semibold text-[#d8e6f8]">Closest Pick</div>
                   <div className="mt-1 text-[13px] text-white/52">
-                    Generated on {formatDrawDate(results.closestPrediction.createdAt)} • confirm in My Picks if you actually played this draw
+                    Generated on {formatDrawDate(resultsData.closestPrediction.createdAt)} • confirm in My Picks if you actually played this draw
                   </div>
                   <div className="mt-5 flex flex-wrap items-start gap-2">
-                    {results.closestPrediction.primaryNumbers.map((value, i) => (
+                    {resultsData.closestPrediction.primaryNumbers.map((value, i) => (
                       <LotteryBall key={`pick-${value}-${i}`} number={value} variant="cold" size="tiny" />
                     ))}
-                    {showBonus && results.closestPrediction.bonusNumber !== null ? (
+                    {showBonus && resultsData.closestPrediction.bonusNumber !== null ? (
                       <LotteryBall
-                        number={results.closestPrediction.bonusNumber}
+                        number={resultsData.closestPrediction.bonusNumber}
                         variant="bonus-cold"
                         size="tiny"
                         label={gameConfig.bonusLabel}
@@ -388,7 +399,7 @@ export default function ResultsPage() {
                   </div>
                   <div className="mt-5 flex flex-wrap items-center justify-between gap-4 border-t border-white/8 pt-4 text-[15px]">
                     <div className="text-[#ffd27e]">
-                      Closest match: {results.closestPrediction.matchCount} number{results.closestPrediction.matchCount === 1 ? '' : 's'}
+                      Closest match: {resultsData.closestPrediction.matchCount} number{resultsData.closestPrediction.matchCount === 1 ? '' : 's'}
                     </div>
                     <div className="flex items-center gap-3 text-[#d9c39a]">
                       <Link href="/dashboard" className="transition-colors hover:text-white">Replay</Link>
@@ -412,7 +423,7 @@ export default function ResultsPage() {
             <section className="rounded-[28px] border border-[#ffbd39]/18 bg-[linear-gradient(145deg,rgba(28,18,14,0.75),rgba(12,10,10,0.95))] px-5 py-4 shadow-[0_0_20px_rgba(255,184,28,0.05)]">
               <div className="mb-4 text-[18px] font-medium text-[#f7d6ab]">Insights</div>
               <div className="space-y-3 text-[16px] text-white/78">
-                {results.insights.map((insight) => (
+                {resultsData.insights.map((insight) => (
                   <div key={insight} className="flex items-start gap-3">
                     <span className="mt-1 text-[#ffc742]">✦</span>
                     <span>{insight}</span>
@@ -424,11 +435,11 @@ export default function ResultsPage() {
             {latestDraw ? (
               <div className="mt-2 mb-4">
                 <LiveTrustBadge
-                  status={results.freshness?.status || 'unknown'}
+                  status={resultsData.freshness?.status || 'unknown'}
                   latestDrawDate={latestDraw.drawDate}
-                  stalenessMinutes={results.freshness?.stalenessMinutes}
-                  expectedNextDrawAt={results.freshness?.expectedNextDrawAt}
-                  stateCode={preferredState}
+                  stalenessMinutes={resultsData.freshness?.stalenessMinutes}
+                  expectedNextDrawAt={resultsData.freshness?.expectedNextDrawAt}
+                  stateCode={preferredStateCode}
                 />
               </div>
             ) : null}

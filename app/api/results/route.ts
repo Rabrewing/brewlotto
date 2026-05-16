@@ -93,6 +93,14 @@ export async function GET(request: NextRequest) {
     const freshnessRows = freshnessResult.data || [];
     const freshnessStatus = getWorstStatus(freshnessRows.map((row) => row.freshness_status || 'unknown'));
     const freshnessBlocked = freshnessStatus === 'stale' || freshnessStatus === 'failed';
+    const freshnessInsight =
+      freshnessStatus === 'delayed'
+        ? `Official ${gameConfig.displayLabel} draw data is still pending ingestion.`
+        : freshnessStatus === 'stale'
+          ? `Official ${gameConfig.displayLabel} draw data is stale and has been withheld from results.`
+          : freshnessStatus === 'failed'
+            ? `Official ${gameConfig.displayLabel} draw ingestion is currently unavailable.`
+            : `Official ${gameConfig.displayLabel} draw freshness could not be verified.`;
     const stalenessMinutes = freshnessRows.reduce<number | null>((maxValue, row) => {
       if (row.staleness_minutes == null) return maxValue;
       return maxValue == null ? row.staleness_minutes : Math.max(maxValue, row.staleness_minutes);
@@ -112,15 +120,7 @@ export async function GET(request: NextRequest) {
           draws: [],
           closestPrediction: null,
           matchCount: 0,
-          insights: [
-            freshnessStatus === 'delayed'
-              ? `Official ${gameConfig.displayLabel} draw data is still pending ingestion.`
-              : freshnessStatus === 'stale'
-                ? `Official ${gameConfig.displayLabel} draw data is stale and has been withheld from results.`
-                : freshnessStatus === 'failed'
-                  ? `Official ${gameConfig.displayLabel} draw ingestion is currently unavailable.`
-                  : `Official ${gameConfig.displayLabel} draw freshness could not be verified.`,
-          ],
+          insights: [freshnessInsight],
           freshness: {
             status: freshnessStatus,
             stalenessMinutes,

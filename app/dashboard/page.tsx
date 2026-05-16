@@ -17,7 +17,7 @@ import {
   TrialUpgradeBanner,
 } from '@/components/brewlotto/dashboard';
 import { resolveDashboardGameConfig } from '@/lib/dashboard/game-config';
-import { usePreferredState } from '@/hooks/usePreferredState';
+import { normalizePreferredStateCode, usePreferredState } from '@/hooks/usePreferredState';
 import { getStrategyLabel } from '@/utils/strategyLabel';
 import { useUserTier } from '@/hooks/useUserTier';
 
@@ -119,6 +119,7 @@ function normalizePredictionResponse(prediction: StoredPredictionResponse): Dash
 
 export default function DashboardPage() {
   const { preferredState } = usePreferredState();
+  const preferredStateCode = normalizePreferredStateCode(preferredState);
   const { currentTier, isTrial, trialEndsAt } = useUserTier();
   const [selectedGame, setSelectedGame] = useState<GameId>('pick3');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -132,13 +133,14 @@ export default function DashboardPage() {
   const [freshness, setFreshness] = useState<DashboardFreshness>(EMPTY_FRESHNESS);
   const [freshnessLoading, setFreshnessLoading] = useState(true);
 
-  const gameConfig = resolveDashboardGameConfig(selectedGame, preferredState) || resolveDashboardGameConfig('pick3', 'NC')!;
+  const gameConfig = resolveDashboardGameConfig(selectedGame, preferredStateCode) || resolveDashboardGameConfig('pick3', 'NC')!;
   const gameLabel = gameConfig.displayLabel;
   const showBonus = selectedGame === 'powerball' || selectedGame === 'mega';
   const freshnessBlocksLiveData = freshness.status === 'stale' || freshness.status === 'failed';
   const effectiveStats = freshnessBlocksLiveData ? EMPTY_STATS : stats;
   const effectiveStatsFallback = freshnessBlocksLiveData ? true : statsFallback;
-  const trialExpired = Boolean(trialEndsAt) && (isTrial || currentTier === 'free') && new Date(trialEndsAt).getTime() < Date.now();
+  const trialEndsAtMs = trialEndsAt ? new Date(trialEndsAt).getTime() : null;
+  const trialExpired = trialEndsAtMs !== null && (isTrial || currentTier === 'free') && trialEndsAtMs < Date.now();
   const effectiveCommentary = freshnessBlocksLiveData
     ? {
         ...EMPTY_COMMENTARY,
@@ -250,21 +252,21 @@ export default function DashboardPage() {
   useEffect(() => {
     const signal = { cancelled: false };
 
-    loadCommentary(selectedGame, preferredState, signal);
+    loadCommentary(selectedGame, preferredStateCode, signal);
 
     return () => {
       signal.cancelled = true;
     };
-  }, [selectedGame, preferredState]);
+  }, [selectedGame, preferredStateCode]);
 
   useEffect(() => {
     const signal = { cancelled: false };
 
-    loadStats(selectedGame, preferredState, signal);
+    loadStats(selectedGame, preferredStateCode, signal);
 
     const interval = setInterval(() => {
       if (!signal.cancelled) {
-        loadStats(selectedGame, preferredState, signal);
+        loadStats(selectedGame, preferredStateCode, signal);
       }
     }, 120000);
 
@@ -272,17 +274,17 @@ export default function DashboardPage() {
       signal.cancelled = true;
       clearInterval(interval);
     };
-  }, [selectedGame, preferredState]);
+  }, [selectedGame, preferredStateCode]);
 
   useEffect(() => {
     const signal = { cancelled: false };
 
-    loadFreshness(selectedGame, preferredState, signal);
+    loadFreshness(selectedGame, preferredStateCode, signal);
 
     return () => {
       signal.cancelled = true;
     };
-  }, [selectedGame, preferredState]);
+  }, [selectedGame, preferredStateCode]);
 
   const handleGenerate = async () => {
     setIsGenerating(true);
@@ -306,9 +308,9 @@ export default function DashboardPage() {
 
       setCommentary(normalizePredictionResponse(payload.data));
       await Promise.all([
-        loadCommentary(selectedGame, preferredState),
-        loadStats(selectedGame, preferredState),
-        loadFreshness(selectedGame, preferredState),
+        loadCommentary(selectedGame, preferredStateCode),
+        loadStats(selectedGame, preferredStateCode),
+        loadFreshness(selectedGame, preferredStateCode),
       ]);
     } catch (error) {
       setCommentary({
@@ -328,7 +330,7 @@ export default function DashboardPage() {
         <NavigationTabs />
         <TrialUpgradeBanner className="mt-4" />
         <SectionKicker />
-        <GameTabs selectedGame={selectedGame} onSelect={setSelectedGame} stateCode={preferredState} />
+        <GameTabs selectedGame={selectedGame} onSelect={setSelectedGame} stateCode={preferredStateCode} />
         
         <StatsGrid
           hotNumbers={effectiveStats.hotNumbers}
@@ -364,7 +366,7 @@ export default function DashboardPage() {
             latestDrawDate={null}
             stalenessMinutes={freshness.stalenessMinutes}
             expectedNextDrawAt={freshness.expectedNextDrawAt}
-            stateCode={preferredState}
+            stateCode={preferredStateCode}
           />
         </div>
 

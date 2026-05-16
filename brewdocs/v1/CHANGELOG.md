@@ -9,6 +9,7 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 ### 2026-05-16
 - Expanded the BrewCommand QA Test Lab into a copy-ready guided-pass and free-roam-pass roadmap with severity levels, tab-by-tab coverage, and a report template that matches the live `/qa` form fields.
 - Added `latasharorie@hotmail.com` to the default QA tester allowlist so the Test Lab can accept the new tester account without needing an env-only override.
+- Normalized the dashboard and results client pages to the shared NC/CA state helper types so the results API, dashboard freshness logic, and game tabs stay aligned with the same state-aware config as the rest of the app.
 
 ### 2026-05-12
 - Recorded that the AI provider layer is connected for commentary and suggestion routes with env-driven OpenAI / DeepSeek / NIM routing and BrewCommand usage logging.
