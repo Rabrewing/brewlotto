@@ -438,6 +438,16 @@ export function AvatarDropdown() {
     );
   };
 
+  async function handleLogout() {
+    try {
+      await supabase.auth.signOut();
+    } finally {
+      setIsOpen(false);
+      setConfirmingLogout(false);
+      router.replace('/login');
+    }
+  }
+
   return (
     <div ref={dropdownRef} className="relative z-30">
       <button
@@ -557,12 +567,13 @@ export function AvatarDropdown() {
                     >
                       Cancel
                     </button>
-                    <Link
-                      href="/logout"
+                    <button
+                      type="button"
+                      onClick={handleLogout}
                       className="flex-1 rounded-full bg-gradient-to-r from-[#ffc742] to-[#ffbe27] px-4 py-2 text-center text-[13px] font-semibold text-black shadow-[0_0_16px_rgba(255,199,66,0.2)]"
                     >
                       Logout
-                    </Link>
+                    </button>
                   </div>
                 </div>
               ) : null}
