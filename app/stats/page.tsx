@@ -73,6 +73,13 @@ type GameSummary = {
   bestMatch: number;
 };
 
+type TimingProfile = {
+  windowStart: string;
+  windowEnd: string;
+  sampleSize: number;
+  confidence: string;
+};
+
 const TIMING_LABELS = new Set([
   'HeatCheck',
   'HeatCheck II',
@@ -199,7 +206,7 @@ export default function StatsPage() {
           return;
         }
 
-        const [playLogsResult, pickResultsResult, dailyStatsResult, predictionsResult] = await Promise.all([
+        const [playLogsResult, pickResultsResult, dailyStatsResult, predictionsResult] = (await Promise.all([
           supabase
             .from('play_logs')
             .select('id, game, state, created_at, is_settled, outcome_match_count, outcome_bonus_match, outcome_payout_amount')
@@ -224,7 +231,7 @@ export default function StatsPage() {
             .eq('user_id', authUser.id)
             .order('created_at', { ascending: false })
             .limit(120),
-        ]);
+        ])) as any[];
 
         if (playLogsResult.error) {
           throw playLogsResult.error;
@@ -326,7 +333,7 @@ export default function StatsPage() {
     return buildStrategyPerformanceSummary(predictions, playLogs);
   }, [playLogs, predictions]);
 
-  const [timingProfiles, setTimingProfiles] = useState<Record<string, { windowStart: string; windowEnd: string; sampleSize: number; confidence: string }>>({});
+  const [timingProfiles, setTimingProfiles] = useState<Record<string, TimingProfile>>({});
 
   useEffect(() => {
     let cancelled = false;
@@ -352,20 +359,20 @@ export default function StatsPage() {
             cache: 'no-store',
           });
           const payload = await response.json();
-          return payload.success ? payload.data || {} : {};
+          return payload.success ? (payload.data || {}) as Record<string, TimingProfile> : {};
         }),
-      );
+      ) as Record<string, TimingProfile>[];
 
       if (cancelled) {
         return;
       }
 
-      const nextProfiles: Record<string, { windowStart: string; windowEnd: string; sampleSize: number; confidence: string }> = {};
+      const nextProfiles: Record<string, TimingProfile> = {};
       for (const profileSet of results) {
         for (const [label, profile] of Object.entries(profileSet)) {
           const current = nextProfiles[label];
           if (!current || (profile?.sampleSize || 0) > current.sampleSize) {
-            nextProfiles[label] = profile as { windowStart: string; windowEnd: string; sampleSize: number; confidence: string };
+            nextProfiles[label] = profile as TimingProfile;
           }
         }
       }

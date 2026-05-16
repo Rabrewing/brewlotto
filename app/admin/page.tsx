@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from 'react';
+import { getStrategyLabel } from '@/utils/strategyLabel';
 import { useRouter } from 'next/navigation';
 
 interface AlertSummary {
@@ -373,7 +374,7 @@ function SummaryCard({
   accent,
 }: {
   label: string;
-  value: number;
+  value: string | number;
   accent: string;
 }) {
   return (
@@ -1397,7 +1398,7 @@ export default function AdminPage() {
                                   key={`${signal.id}:${key}`}
                                   className="rounded-full border border-[#72caff]/20 bg-[#111f28] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#9edcff]"
                                 >
-                                  {key}
+                                  {getStrategyLabel(key)}
                                 </span>
                               )) : (
                                 <span className="text-white/45">No saved strategy keys</span>

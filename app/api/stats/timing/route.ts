@@ -5,6 +5,8 @@ import { resolveDashboardGameConfig, type DashboardGameId, type DashboardStateCo
 
 const TIMING_PROFILE_LABELS = ['HeatCheck', 'HeatCheck II', 'HeatCheck III', 'HeatCheck IV', 'HeatWave', 'HeatWave II', 'HeatWave III', 'PulseSync', 'PulseSync II', 'SequenceX'];
 
+type TimingProfile = NonNullable<ReturnType<typeof computeTimingProfile>>;
+
 function normalizeTimingGame(game: string): DashboardGameId {
   const normalized = game.trim().toLowerCase();
   if (normalized === 'pick3' || normalized === 'pick4' || normalized === 'cash5' || normalized === 'powerball' || normalized === 'mega') {
@@ -78,7 +80,7 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    const profiles = {};
+    const profiles: Record<string, TimingProfile> = {};
     for (const label of TIMING_PROFILE_LABELS) {
       const profile = computeTimingProfile(fp, fd, label);
       if (profile) profiles[label] = profile;
