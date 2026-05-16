@@ -51,5 +51,10 @@ export function useUserTier() {
         };
     }, []);
 
-    return { currentTier, isTrial, trialEndsAt };
+    return {
+        currentTier,
+        tier: currentTier,
+        isTrial,
+        trialEndsAt,
+    };
 }
