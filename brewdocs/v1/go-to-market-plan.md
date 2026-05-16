@@ -145,8 +145,8 @@ Week 5: Live on App Store
 |------|-------|----------|
 | Trial | 3 days, capped | Full product preview across all tiers with limited AI usage |
 | Starter | $4.99/mo | Basic AI commentary, saved picks, match tracking |
-| Pro | $9.99/mo | Advanced explanations, comparisons, higher AI quota |
-| Master | $19.99/mo | Voice commentary, TimePulse timing analysis, deepest analysis, highest AI quota |
+| Pro | $9.99/mo | Advanced explanations, comparisons, higher AI quota, TimePulse timing analysis |
+| Master | $19.99/mo | Voice commentary, TimePulse II adaptive timing, deepest analysis, highest AI quota |
 
 *Note: Stripe integration is not yet wired, so `/pricing` is the public comparison surface and `/billing` remains the authenticated account summary.*
 

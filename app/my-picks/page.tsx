@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { getStrategyLabel } from '@/utils/strategyLabel';
+import { useUserTier } from '@/hooks/useUserTier';
 import {
   DashboardContainer,
   Header,
@@ -61,6 +62,11 @@ interface PlayLogRecord {
   created_at: string;
   metadata?: unknown;
 }
+
+type QueryResult<T> = {
+  data: T | null;
+  error: { message: string } | null;
+};
 
 const GAME_OPTIONS: Array<{ value: FilterGame; label: string }> = [
   { value: 'ALL', label: 'All Games' },
@@ -241,6 +247,7 @@ interface PickCardProps {
   onToggleSaved: (prediction: PredictionRecord) => Promise<void>;
   onConfirmPlayed: (prediction: PredictionRecord) => Promise<void>;
   onDelete: (prediction: PredictionRecord) => Promise<void>;
+  timingLabel: string;
   timingProfile?: { windowStart: string; windowEnd: string; sampleSize: number } | null;
   onRefreshTiming?: () => void;
   refreshingTiming?: boolean;
@@ -255,6 +262,7 @@ function PickCard({
   onToggleSaved,
   onConfirmPlayed,
   onDelete,
+  timingLabel,
   timingProfile,
   onRefreshTiming,
   refreshingTiming,
@@ -333,7 +341,7 @@ function PickCard({
       {timingProfile ? (
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <div className="rounded-full border border-[#ffbd39]/14 bg-[#1a140c] px-3 py-1 text-[11px] text-[#f5cf84]">
-            TimePulse: {timingProfile.windowStart} — {timingProfile.windowEnd}
+            {timingLabel}: {timingProfile.windowStart} — {timingProfile.windowEnd}
           </div>
           {onRefreshTiming ? (
             <button
@@ -407,6 +415,7 @@ function PickCard({
 }
 
 export default function MyPicksPage() {
+  const { currentTier } = useUserTier();
   const [selectedState, setSelectedState] = useState<FilterState>('ALL');
   const [selectedGame, setSelectedGame] = useState<FilterGame>('ALL');
   const [selectedWindow, setSelectedWindow] = useState<FilterWindow>('ALL');
@@ -418,6 +427,7 @@ export default function MyPicksPage() {
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [confirmingPredictionId, setConfirmingPredictionId] = useState<string | null>(null);
   const [timingProfiles, setTimingProfiles] = useState<Record<string, { windowStart: string; windowEnd: string; sampleSize: number; confidence: string }>>({});
+  const timingLabel = currentTier === 'master' ? 'TimePulse II' : 'TimePulse';
   const [timingRefreshCooldowns, setTimingRefreshCooldowns] = useState<Record<string, number>>({});
   const [refreshingTiming, setRefreshingTiming] = useState<string | null>(null);
 
@@ -445,7 +455,7 @@ export default function MyPicksPage() {
           params.set('game', selectedGame);
         }
 
-        const [predictionsResponse, playLogsResponse] = await Promise.all([
+        const [predictionsResponse, playLogsResponse] = (await Promise.all([
           fetch(`/api/predictions?${params.toString()}`, {
             cache: 'no-store',
           }),
@@ -455,7 +465,7 @@ export default function MyPicksPage() {
             .eq('user_id', userId)
             .order('created_at', { ascending: false })
             .limit(120),
-        ]);
+        ])) as [Response, QueryResult<PlayLogRecord[]>];
 
         const payload = await predictionsResponse.json();
 
@@ -463,14 +473,16 @@ export default function MyPicksPage() {
           throw new Error(payload?.error?.message || 'Failed to load picks');
         }
 
-        if (playLogsResponse.error) {
-          throw playLogsResponse.error;
+        const typedPlayLogsResponse = playLogsResponse as QueryResult<PlayLogRecord[]>;
+
+        if (typedPlayLogsResponse.error) {
+          throw typedPlayLogsResponse.error;
         }
 
         const data = Array.isArray(payload.data) ? payload.data : [];
         if (!cancelled) {
           setPredictions(data);
-          const nextPlayLogs = (playLogsResponse.data || []) as PlayLogRecord[];
+          const nextPlayLogs = (typedPlayLogsResponse.data || []) as PlayLogRecord[];
           setPlayLogs(nextPlayLogs);
           setConfirmedPredictionIds(
             nextPlayLogs
@@ -504,13 +516,13 @@ export default function MyPicksPage() {
     async function loadTiming() {
       const gameParam = selectedGame !== 'ALL' ? selectedGame : 'pick3';
       const stateParam = selectedState !== 'ALL' ? selectedState : 'NC';
-      const res = await fetch(`/api/stats/timing?game=${gameParam}&state=${stateParam}`);
+      const res = await fetch(`/api/stats/timing?game=${gameParam}&state=${stateParam}&mode=${currentTier === 'master' ? 'master' : 'pro'}`);
       const payload = await res.json();
       if (!cancelled && payload.success) setTimingProfiles(payload.data || {});
     }
     loadTiming();
     return () => { cancelled = true; };
-  }, [selectedGame, selectedState]);
+  }, [currentTier, selectedGame, selectedState]);
 
   const savedCount = useMemo(() => predictions.length, [predictions]);
 
@@ -536,7 +548,7 @@ export default function MyPicksPage() {
     setTimingRefreshCooldowns((prev) => ({ ...prev, [`${game}-${state}`]: Date.now() }));
 
     try {
-      const res = await fetch(`/api/stats/timing?game=${game}&state=${state}`);
+      const res = await fetch(`/api/stats/timing?game=${game}&state=${state}&mode=${currentTier === 'master' ? 'master' : 'pro'}`);
       const payload = await res.json();
       if (payload.success) setTimingProfiles(payload.data || {});
     } catch {
@@ -566,7 +578,7 @@ export default function MyPicksPage() {
 
       return groups;
     }, []);
-  }, [predictions]);
+  }, [currentTier, predictions]);
 
   const savedDays = useMemo(() => groupedPredictions.length, [groupedPredictions]);
 
@@ -793,6 +805,7 @@ export default function MyPicksPage() {
                         onToggleSaved={handleToggleSaved}
                         onConfirmPlayed={handleConfirmPlayed}
                         onDelete={handleDelete}
+                        timingLabel={timingLabel}
                         timingProfile={timingProfileKey ? timingProfiles[timingProfileKey] || null : null}
                         onRefreshTiming={() => {
                           const game = prediction.game === 'mega_millions' ? 'mega' : prediction.game || 'pick3';

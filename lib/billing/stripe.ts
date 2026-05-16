@@ -16,6 +16,7 @@ export interface BillingTierEntitlementPayload {
   export_access: boolean;
   voice_commentary_access: boolean;
   notifications_premium_access: boolean;
+  timepulse_access: boolean;
   timing_analysis_access: boolean;
   effective_from: string;
   effective_to: string | null;
@@ -75,6 +76,7 @@ const TIER_FEATURES: Record<BillingTierCode, BillingTierEntitlementPayload> = {
     export_access: false,
     voice_commentary_access: false,
     notifications_premium_access: false,
+    timepulse_access: false,
     timing_analysis_access: false,
     effective_from: new Date().toISOString(),
     effective_to: null,
@@ -91,6 +93,7 @@ const TIER_FEATURES: Record<BillingTierCode, BillingTierEntitlementPayload> = {
     export_access: false,
     voice_commentary_access: false,
     notifications_premium_access: false,
+    timepulse_access: false,
     timing_analysis_access: false,
     effective_from: new Date().toISOString(),
     effective_to: null,
@@ -107,6 +110,7 @@ const TIER_FEATURES: Record<BillingTierCode, BillingTierEntitlementPayload> = {
     export_access: false,
     voice_commentary_access: false,
     notifications_premium_access: true,
+    timepulse_access: true,
     timing_analysis_access: false,
     effective_from: new Date().toISOString(),
     effective_to: null,
@@ -123,6 +127,7 @@ const TIER_FEATURES: Record<BillingTierCode, BillingTierEntitlementPayload> = {
     export_access: true,
     voice_commentary_access: true,
     notifications_premium_access: true,
+    timepulse_access: true,
     timing_analysis_access: true,
     effective_from: new Date().toISOString(),
     effective_to: null,

@@ -7,6 +7,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/serverClient';
 import StrategyEngine from '@/lib/prediction/strategyEngine';
 import { PredictionStorage } from '@/lib/prediction/predictionStorage';
 import { computeTimingProfile } from '@/lib/prediction/timingAnalysis';
+import { resolveTimingAccessLabel, resolveTimingAccessMode } from '@/utils/timepulse';
 
 type TierCode = 'free' | 'starter' | 'pro' | 'master';
 
@@ -237,7 +238,7 @@ export async function POST(request: NextRequest) {
           .maybeSingle(),
         admin
           .from('user_entitlements')
-          .select('tier_code, timing_analysis_access')
+          .select('tier_code, timepulse_access, timing_analysis_access')
           .eq('user_id', user.id)
           .maybeSingle(),
       ]);
@@ -282,7 +283,17 @@ export async function POST(request: NextRequest) {
     }
 
     const currentTier = normalizeTier(entitlementRow?.tier_code);
-    const hasTimingAnalysis = Boolean(entitlementRow?.timing_analysis_access || currentTier === 'master');
+    const timingMode = resolveTimingAccessMode({
+      tierCode: currentTier,
+      timepulseAccess: Boolean(entitlementRow?.timepulse_access),
+      timingAnalysisAccess: Boolean(entitlementRow?.timing_analysis_access),
+    });
+    const timingTierLabel = resolveTimingAccessLabel({
+      tierCode: currentTier,
+      timepulseAccess: Boolean(entitlementRow?.timepulse_access),
+      timingAnalysisAccess: Boolean(entitlementRow?.timing_analysis_access),
+    });
+    const hasTimingAnalysis = Boolean(timingMode);
     const requiredTier = normalizeTier(strategyRow.min_tier);
 
     if (TIER_ORDER[currentTier] < TIER_ORDER[requiredTier]) {
@@ -378,10 +389,11 @@ export async function POST(request: NextRequest) {
       },
     });
     const engineKey = getEngineKey(strategyRow.strategy_key);
-    const selectedScores: Record<string, number> | Record<string, number | null> =
+    const strategyScoreMap = strategyScores as Record<string, Record<string, number> | null | undefined>;
+    const selectedScores: Record<string, number | null> =
       engineKey === 'ensemble'
-        ? strategyEngine.calculateEnsembleScores(strategyScores)
-        : (strategyScores[engineKey] as Record<string, number> | null | undefined) || {};
+        ? (strategyEngine.calculateEnsembleScores(strategyScores) as Record<string, number | null>)
+        : ((strategyScoreMap[engineKey] as Record<string, number> | null | undefined) || {});
     const candidatePicks = strategyEngine.generateCandidatePicks(selectedScores, {
       primary_count: Number(gameRow.primary_count),
       primary_min: Number(gameRow.primary_min),
@@ -493,13 +505,13 @@ export async function POST(request: NextRequest) {
               };
             });
 
-            timingProfile = runTiming(fp, fd, null);
+            timingProfile = runTiming(fp, fd, null, { mode: timingMode || 'pro' });
 
             const strategyLabels = ['HeatCheck', 'HeatCheck II', 'HeatCheck III', 'HeatCheck IV', 'HeatWave', 'HeatWave II', 'HeatWave III', 'PulseSync', 'PulseSync II', 'SequenceX'];
             strategyComparisons = {};
             for (const label of strategyLabels) {
               if (label === getStrategyLabel(strategyRow.strategy_key)) continue;
-              const profile = runTiming(fp, fd, label);
+              const profile = runTiming(fp, fd, label, { mode: timingMode || 'pro' });
               if (profile) strategyComparisons[label] = profile;
             }
           }
@@ -519,6 +531,7 @@ export async function POST(request: NextRequest) {
         gameKey,
         homeState,
         drawWindow,
+        timingTierLabel,
         prediction: stored,
         primaryNumbers,
         bonusNumbers,

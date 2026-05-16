@@ -22,6 +22,7 @@ interface UserEntitlementRecord {
   export_access?: boolean | null;
   voice_commentary_access?: boolean | null;
   notifications_premium_access?: boolean | null;
+  timepulse_access?: boolean | null;
   timing_analysis_access?: boolean | null;
   effective_from?: string | null;
   effective_to?: string | null;
@@ -42,6 +43,11 @@ interface FeatureEntitlementRecord {
   category: string;
   sort_order: number;
 }
+
+type QueryResult<T> = {
+  data: T | null;
+  error: { message: string } | null;
+};
 
 const TIER_ORDER: Record<TierCode, number> = { free: 0, starter: 1, pro: 2, master: 3 };
 
@@ -81,28 +87,30 @@ export default function BillingPage() {
 
         const { data: entitlementsData, error: entitlementsError } = await supabase
           .from('user_entitlements')
-          .select('tier_code, ai_quota_monthly, ai_quota_used, pick_generation_limit_daily, advanced_strategy_access, premium_explanations_access, premium_comparison_access, export_access, voice_commentary_access, notifications_premium_access, timing_analysis_access, effective_from, effective_to')
+          .select('tier_code, ai_quota_monthly, ai_quota_used, pick_generation_limit_daily, advanced_strategy_access, premium_explanations_access, premium_comparison_access, export_access, voice_commentary_access, notifications_premium_access, timepulse_access, timing_analysis_access, effective_from, effective_to')
           .eq('user_id', authUser.id)
           .maybeSingle();
 
-        const [tiersResult, featuresResult] = await Promise.all([
+        const [tiersResult, featuresResult] = (await Promise.all([
           supabase.from('subscription_tiers').select('tier_key, display_name, marketing_label, price_monthly, price_annual, sort_order').eq('is_active', true).order('sort_order', { ascending: true }),
           supabase.from('feature_entitlements').select('feature_key, feature_name, description, min_tier, category, sort_order').eq('is_active', true).order('sort_order', { ascending: true }),
-        ]);
+        ])) as [QueryResult<SubscriptionTierRecord[]>, QueryResult<FeatureEntitlementRecord[]>];
         if (!cancelled) {
+          const typedTiersResult = tiersResult as QueryResult<SubscriptionTierRecord[]>;
+          const typedFeaturesResult = featuresResult as QueryResult<FeatureEntitlementRecord[]>;
           setUser({ id: authUser.id, email: authUser.email });
           setEntitlements((entitlementsData as UserEntitlementRecord | null) || null);
-          setTiers(((tiersResult.error ? [] : tiersResult.data) || []) as SubscriptionTierRecord[]);
-          setFeatures(((featuresResult.error ? [] : featuresResult.data) || []) as FeatureEntitlementRecord[]);
+          setTiers(((typedTiersResult.error ? [] : typedTiersResult.data) || []) as SubscriptionTierRecord[]);
+          setFeatures(((typedFeaturesResult.error ? [] : typedFeaturesResult.data) || []) as FeatureEntitlementRecord[]);
 
           if (entitlementsError) {
             console.warn('Billing entitlements load issue:', entitlementsError.message);
           }
 
-          if (tiersResult.error || featuresResult.error) {
+          if (typedTiersResult.error || typedFeaturesResult.error) {
             console.warn('Billing optional data load issue:', {
-              tiersError: tiersResult.error?.message || null,
-              featuresError: featuresResult.error?.message || null,
+              tiersError: typedTiersResult.error?.message || null,
+              featuresError: typedFeaturesResult.error?.message || null,
             });
           }
         }
@@ -288,7 +296,7 @@ export default function BillingPage() {
               </div>
             </section>
 
-            <SectionCard title="BrewMaster Benefits" description="Live account entitlements from your account record.">
+            <SectionCard title="Timing & Premium Benefits" description="Live account entitlements from your account record.">
               <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
                 <div className="space-y-3">
                   {[
@@ -296,11 +304,46 @@ export default function BillingPage() {
                     ['Premium explanations unlocked', entitlements?.premium_explanations_access ? 'Yes' : 'Locked'],
                     ['Prediction comparisons unlocked', entitlements?.premium_comparison_access ? 'Yes' : 'Locked'],
                     ['Voice commentary unlocked', entitlements?.voice_commentary_access ? 'Yes' : 'Locked'],
-                    ['TimePulse timing analysis', entitlements?.timing_analysis_access ? 'Enabled' : 'Locked'],
+                    ['TimePulse', entitlements?.timepulse_access ? 'Enabled' : 'Locked'],
+                    ['TimePulse II', entitlements?.timing_analysis_access ? 'Enabled' : 'Locked'],
                   ].map(([label, value]) => (
-                    <div key={label} className="rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
-                      <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">{label}</div>
-                      <div className="mt-3 text-[18px] font-medium text-[#f7ddb3]">{value}</div>
+                    <div
+                      key={label}
+                      className={`rounded-[22px] border px-4 py-4 ${
+                        String(label).includes('TimePulse II')
+                          ? 'border-[#ffbd39]/18 bg-[#1a140c]'
+                          : String(label).includes('TimePulse')
+                            ? 'border-[#72caff]/18 bg-[#111f28]'
+                            : 'border-white/8 bg-black/20'
+                      }`}
+                    >
+                      <div
+                        className={`text-[12px] uppercase tracking-[0.16em] ${
+                          String(label).includes('TimePulse II')
+                            ? 'text-[#f5cf84]'
+                            : String(label).includes('TimePulse')
+                              ? 'text-[#9edcff]'
+                              : 'text-white/35'
+                        }`}
+                      >
+                        {label}
+                      </div>
+                      <div
+                        className={`mt-3 text-[18px] font-medium ${
+                          String(label).includes('TimePulse II')
+                            ? 'text-[#f7ddb3]'
+                            : String(label).includes('TimePulse')
+                              ? 'text-[#d7ecff]'
+                              : 'text-[#f7ddb3]'
+                        }`}
+                      >
+                        {value}
+                      </div>
+                      {label === 'TimePulse' ? (
+                        <div className="mt-1 text-[12px] text-white/40">BrewPro timing window and lag profile</div>
+                      ) : label === 'TimePulse II' ? (
+                        <div className="mt-1 text-[12px] text-white/40">BrewMaster adaptive timing and regime shifts</div>
+                      ) : null}
                     </div>
                   ))}
                 </div>

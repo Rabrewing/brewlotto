@@ -15,6 +15,7 @@ import { buildStrategyPerformanceSummary, type StrategyPerformanceSummary } from
 import { getStrategyLabel } from '@/utils/strategyLabel';
 import { normalizePreferredStateCode, usePreferredState } from '@/hooks/usePreferredState';
 import { resolveDashboardGameConfig } from '@/lib/dashboard/game-config';
+import { resolveTimingAccessLabel, resolveTimingAccessMode } from '@/utils/timepulse';
 
 type TierCode = 'free' | 'starter' | 'pro' | 'master';
 
@@ -99,6 +100,7 @@ interface RunPreviewRecord {
     windowStart: string;
     windowEnd: string;
   }> | null;
+  timingTierLabel?: string | null;
   createdAt: string;
 }
 
@@ -108,6 +110,7 @@ interface UserEntitlementRecord {
   premium_explanations_access?: boolean | null;
   premium_comparison_access?: boolean | null;
   voice_commentary_access?: boolean | null;
+  timepulse_access?: boolean | null;
   timing_analysis_access?: boolean | null;
 }
 
@@ -117,6 +120,11 @@ interface SubscriptionTierRecord {
   price_monthly?: number | null;
   sort_order: number;
 }
+
+type QueryResult<T> = {
+  data: T | null;
+  error: { message: string } | null;
+};
 
 const TIER_ORDER: Record<TierCode, number> = {
   free: 0,
@@ -222,7 +230,7 @@ export default function StrategyLockerPage() {
           return;
         }
 
-        const [strategiesResult, savedResult] = await Promise.all([
+        const [strategiesResult, savedResult] = (await Promise.all([
           supabase
             .from('strategy_registry')
             .select('id, strategy_key, public_name, description, category, min_tier, sort_order, metadata')
@@ -232,7 +240,7 @@ export default function StrategyLockerPage() {
             .from('user_saved_strategies')
             .select('strategy_id, is_favorite, nickname, updated_at')
             .eq('user_id', authUser.id),
-        ]);
+        ])) as [QueryResult<StrategyRecord[]>, QueryResult<SavedStrategyRecord[]>];
 
         if (strategiesResult.error) {
           throw strategiesResult.error;
@@ -241,35 +249,40 @@ export default function StrategyLockerPage() {
           throw savedResult.error;
         }
 
-        const [activityResult, predictionsResult, playLogsResult, entitlementsResult, tiersResult] = await Promise.allSettled([
-          supabase
+        const activityQuery = supabase
             .from('user_strategy_activity')
             .select('strategy_id, game, state, context, occurred_at')
             .eq('user_id', authUser.id)
             .order('occurred_at', { ascending: false })
-            .limit(60),
-          supabase
+            .limit(60) as unknown as Promise<QueryResult<StrategyActivityRecord[]>>;
+        const predictionsQuery = supabase
             .from('predictions')
             .select('id, source_strategy_key, confidence_score, created_at')
             .eq('user_id', authUser.id)
             .order('created_at', { ascending: false })
-            .limit(120),
-          supabase
+            .limit(120) as unknown as Promise<QueryResult<PredictionRecord[]>>;
+        const playLogsQuery = supabase
             .from('play_logs')
             .select('id, prediction_id, outcome_result_code, outcome_match_count, is_settled, created_at, metadata')
             .eq('user_id', authUser.id)
             .order('created_at', { ascending: false })
-            .limit(120),
-          supabase
+            .limit(120) as unknown as Promise<QueryResult<PlayLogRecord[]>>;
+        const entitlementsQuery = supabase
             .from('user_entitlements')
-            .select('tier_code, advanced_strategy_access, premium_explanations_access, premium_comparison_access, voice_commentary_access, timing_analysis_access')
+            .select('tier_code, advanced_strategy_access, premium_explanations_access, premium_comparison_access, voice_commentary_access, timepulse_access, timing_analysis_access')
             .eq('user_id', authUser.id)
-            .maybeSingle(),
-          supabase
+            .maybeSingle() as unknown as Promise<QueryResult<UserEntitlementRecord | null>>;
+        const tiersQuery = supabase
             .from('subscription_tiers')
             .select('tier_key, display_name, price_monthly, sort_order')
             .eq('is_active', true)
-            .order('sort_order', { ascending: true }),
+            .order('sort_order', { ascending: true }) as unknown as Promise<QueryResult<SubscriptionTierRecord[]>>;
+        const [activityResult, predictionsResult, playLogsResult, entitlementsResult, tiersResult] = await Promise.allSettled([
+          activityQuery,
+          predictionsQuery,
+          playLogsQuery,
+          entitlementsQuery,
+          tiersQuery,
         ]);
 
         const settledResults = [
@@ -293,25 +306,33 @@ export default function StrategyLockerPage() {
           .filter(Boolean);
 
         if (!cancelled) {
+          const typedStrategiesResult = strategiesResult as QueryResult<StrategyRecord[]>;
+          const typedSavedResult = savedResult as QueryResult<SavedStrategyRecord[]>;
+          const typedActivityResult = activityResult as PromiseFulfilledResult<QueryResult<StrategyActivityRecord[]>>;
+          const typedPredictionsResult = predictionsResult as PromiseFulfilledResult<QueryResult<PredictionRecord[]>>;
+          const typedPlayLogsResult = playLogsResult as PromiseFulfilledResult<QueryResult<PlayLogRecord[]>>;
+          const typedEntitlementsResult = entitlementsResult as PromiseFulfilledResult<QueryResult<UserEntitlementRecord | null>>;
+          const typedTiersResult = tiersResult as PromiseFulfilledResult<QueryResult<SubscriptionTierRecord[]>>;
+
           setUser({ id: authUser.id, email: authUser.email });
-          setStrategies((strategiesResult.data || []) as StrategyRecord[]);
-          setSavedStrategies((savedResult.data || []) as SavedStrategyRecord[]);
+          setStrategies((typedStrategiesResult.data || []) as StrategyRecord[]);
+          setSavedStrategies((typedSavedResult.data || []) as SavedStrategyRecord[]);
           setStrategyActivity(
-            (activityResult.status === 'fulfilled' ? (activityResult.value.data || []) : []) as StrategyActivityRecord[],
+            (typedActivityResult.status === 'fulfilled' ? (typedActivityResult.value.data || []) : []) as StrategyActivityRecord[],
           );
           setPredictions(
-            (predictionsResult.status === 'fulfilled' ? (predictionsResult.value.data || []) : []) as PredictionRecord[],
+            (typedPredictionsResult.status === 'fulfilled' ? (typedPredictionsResult.value.data || []) : []) as PredictionRecord[],
           );
           setPlayLogs(
-            (playLogsResult.status === 'fulfilled' ? (playLogsResult.value.data || []) : []) as PlayLogRecord[],
+            (typedPlayLogsResult.status === 'fulfilled' ? (typedPlayLogsResult.value.data || []) : []) as PlayLogRecord[],
           );
           setEntitlements(
-            (entitlementsResult.status === 'fulfilled'
-              ? ((entitlementsResult.value.data as UserEntitlementRecord | null) || null)
+            (typedEntitlementsResult.status === 'fulfilled'
+              ? ((typedEntitlementsResult.value.data as UserEntitlementRecord | null) || null)
               : null),
           );
           setSubscriptionTiers(
-            (tiersResult.status === 'fulfilled' ? (tiersResult.value.data || []) : []) as SubscriptionTierRecord[],
+            (typedTiersResult.status === 'fulfilled' ? (typedTiersResult.value.data || []) : []) as SubscriptionTierRecord[],
           );
           if (optionalErrors.length > 0) {
             console.warn('Strategy Locker loaded with partial data:', optionalErrors);
@@ -338,6 +359,16 @@ export default function StrategyLockerPage() {
   const currentTier = useMemo<TierCode>(() => {
     return entitlements?.tier_code || 'free';
   }, [entitlements?.tier_code]);
+  const timingAccessLabel = resolveTimingAccessLabel({
+    tierCode: currentTier,
+    timepulseAccess: Boolean(entitlements?.timepulse_access),
+    timingAnalysisAccess: Boolean(entitlements?.timing_analysis_access),
+  });
+  const timingAccessMode = resolveTimingAccessMode({
+    tierCode: currentTier,
+    timepulseAccess: Boolean(entitlements?.timepulse_access),
+    timingAnalysisAccess: Boolean(entitlements?.timing_analysis_access),
+  });
 
   const currentTierIndex = TIER_ORDER[currentTier];
 
@@ -508,6 +539,7 @@ export default function StrategyLockerPage() {
           predictionSaved: false,
           timingProfile: payload.data.timingProfile || null,
           strategyComparisons: payload.data.strategyComparisons || null,
+          timingTierLabel: payload.data.timingTierLabel || null,
           createdAt: new Date().toISOString(),
         },
       }));
@@ -683,9 +715,15 @@ export default function StrategyLockerPage() {
                           <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">Voice commentary</div>
                           <div className="mt-2 text-[16px] font-medium text-[#f7ddb3]">{entitlements?.voice_commentary_access ? 'Enabled' : 'Locked'}</div>
                         </div>
-                        <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-4 py-3">
-                          <div className="text-[12px] uppercase tracking-[0.16em] text-white/35">TimePulse timing</div>
+                        <div className="rounded-[18px] border border-[#72caff]/18 bg-[#111f28] px-4 py-3">
+                          <div className="text-[12px] uppercase tracking-[0.16em] text-[#9edcff]">TimePulse</div>
+                          <div className="mt-2 text-[16px] font-medium text-[#d7ecff]">{entitlements?.timepulse_access ? 'Enabled' : 'Locked'}</div>
+                          <div className="mt-1 text-[12px] text-white/40">BrewPro timing window and lag profile</div>
+                        </div>
+                        <div className="rounded-[18px] border border-[#ffbd39]/18 bg-[#1a140c] px-4 py-3">
+                          <div className="text-[12px] uppercase tracking-[0.16em] text-[#f5cf84]">TimePulse II</div>
                           <div className="mt-2 text-[16px] font-medium text-[#f7ddb3]">{entitlements?.timing_analysis_access ? 'Enabled' : 'Locked'}</div>
+                          <div className="mt-1 text-[12px] text-white/40">BrewMaster adaptive timing and regime shifts</div>
                         </div>
                       </div>
                     </div>
@@ -761,9 +799,9 @@ export default function StrategyLockerPage() {
                             <span className="rounded-full border border-white/8 bg-white/[0.03] px-2.5 py-1 text-[11px] uppercase tracking-[0.14em] text-white/38">
                               {formatCategoryLabel(strategy.category)}
                             </span>
-                            {strategy.min_tier === 'master' ? (
+                            {hasAccess && timingAccessLabel ? (
                               <span className="rounded-full border border-[#ffbd39]/14 bg-[#1a140c] px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.12em] text-[#f5cf84]">
-                                TimePulse
+                                {timingAccessLabel}
                               </span>
                             ) : null}
                           </div>
@@ -876,35 +914,45 @@ export default function StrategyLockerPage() {
                             Pattern outcomes may surface within 1-2 weeks
                           </div>
                           {runPreviews[strategy.id].timingProfile ? (
-                            <div className="mt-3 rounded-[18px] border border-[#ffbd39]/14 bg-[#1a140c] px-4 py-3">
+                            (() => {
+                              const timingProfile = runPreviews[strategy.id].timingProfile;
+                              const timingMode = timingAccessMode || 'pro';
+                              if (!timingProfile) return null;
+
+                              return (
+                            <div className={`mt-3 rounded-[18px] px-4 py-3 ${timingMode === 'master' ? 'border border-[#ffbd39]/14 bg-[#1a140c]' : 'border border-[#72caff]/14 bg-[#111f28]'}`}>
                               <div className="flex items-center gap-2">
-                                <span className="text-[12px] font-medium text-[#f5cf84]">TimePulse</span>
-                                <span className="text-[11px] text-white/40">Master tier</span>
+                                <span className={`text-[12px] font-medium ${timingMode === 'master' ? 'text-[#f5cf84]' : 'text-[#9edcff]'}`}>{runPreviews[strategy.id].timingTierLabel || (timingMode === 'master' ? 'TimePulse II' : 'TimePulse')}</span>
+                                <span className="text-[11px] text-white/40">{timingMode === 'master' ? 'Master tier' : 'Pro tier'}</span>
                                 <span className={`ml-auto rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.1em] ${
-                                  runPreviews[strategy.id].timingProfile.confidence === 'high'
+                                  timingProfile.confidence === 'high'
                                     ? 'bg-[#85d36c]/15 text-[#85d36c]'
-                                    : runPreviews[strategy.id].timingProfile.confidence === 'medium'
+                                    : timingProfile.confidence === 'medium'
                                       ? 'bg-[#f5cf84]/15 text-[#f5cf84]'
                                       : 'bg-white/8 text-white/50'
                                 }`}>
-                                  {runPreviews[strategy.id].timingProfile.confidence}
+                                  {timingProfile.confidence}
                                 </span>
                               </div>
                               <div className="mt-2 text-[13px] leading-6 text-white/72">
-                                Tracking {runPreviews[strategy.id].primaryNumbers.join(' ')} — best play window: {runPreviews[strategy.id].timingProfile.windowStart} to {runPreviews[strategy.id].timingProfile.windowEnd}
+                                Tracking {runPreviews[strategy.id].primaryNumbers.join(' ')} — best play window: {timingProfile.windowStart} to {timingProfile.windowEnd}
                               </div>
                               <div className="mt-1 text-[11px] text-white/40">
-                                Based on {runPreviews[strategy.id].timingProfile.sampleSize} historical {getStrategyLabel(runPreviews[strategy.id].engineKey)} patterns • median {runPreviews[strategy.id].timingProfile.median} days • {runPreviews[strategy.id].timingProfile.spread}d spread
+                                Based on {timingProfile.sampleSize} historical {getStrategyLabel(runPreviews[strategy.id].engineKey)} patterns • median {timingProfile.median} days • {timingProfile.spread}d spread
                               </div>
                             </div>
-                          ) : entitlements?.timing_analysis_access && runPreviews[strategy.id].predictionId ? (
-                            <div className="mt-3 rounded-[18px] border border-[#ffbd39]/12 bg-[#1a140c]/60 px-4 py-3">
+                              );
+                            })()
+                          ) : timingAccessMode && runPreviews[strategy.id].predictionId ? (
+                            <div className={`mt-3 rounded-[18px] px-4 py-3 ${timingAccessMode === 'master' ? 'border border-[#ffbd39]/12 bg-[#1a140c]/60' : 'border border-[#72caff]/12 bg-[#111f28]/60'}`}>
                               <div className="flex items-center gap-2">
-                                <span className="text-[12px] font-medium text-[#f5cf84]">TimePulse</span>
-                                <span className="text-[11px] text-white/40">Master tier</span>
+                                <span className={`text-[12px] font-medium ${timingAccessMode === 'master' ? 'text-[#f5cf84]' : 'text-[#9edcff]'}`}>{runPreviews[strategy.id].timingTierLabel || (timingAccessMode === 'master' ? 'TimePulse II' : 'TimePulse')}</span>
+                                <span className="text-[11px] text-white/40">{timingAccessMode === 'master' ? 'Master tier' : 'Pro tier'}</span>
                               </div>
                               <div className="mt-2 text-[12px] leading-6 text-white/55">
-                                Gathering timing data — save picks and check back as draws accumulate to unlock your play window estimate.
+                                {timingAccessMode === 'master'
+                                  ? 'Gathering adaptive timing data — save picks and check back as draws accumulate to refine your play window estimate.'
+                                  : 'Gathering timing data — save picks and check back as draws accumulate to unlock your play window estimate.'}
                               </div>
                             </div>
                           ) : null}
@@ -918,13 +966,12 @@ export default function StrategyLockerPage() {
                               const best = entries[0];
                               if (!best) return null;
                               const spread = best[1].p75 - best[1].p25;
-                              const currentSpread = runPreviews[strategy.id].timingProfile
-                                ? runPreviews[strategy.id].timingProfile.p75 - runPreviews[strategy.id].timingProfile.p25
-                                : null;
+                              const currentTimingProfile = runPreviews[strategy.id].timingProfile;
+                              const currentSpread = currentTimingProfile ? currentTimingProfile.p75 - currentTimingProfile.p25 : null;
 
-                              const styleMap = { straight: 'Straight', box: 'Box', '50_50': '50/50' };
+                              const styleMap: Record<string, string> = { straight: 'Straight', box: 'Box', '50_50': '50/50' };
                               const styleHint = runPreviews[strategy.id].timingProfile?.recommendedStyle;
-                              const styleLabel = styleMap[styleHint] || null;
+                              const styleLabel = styleHint ? styleMap[styleHint] || null : null;
 
                               const currentLabel = getStrategyLabel(strategy.strategy_key);
                               return (

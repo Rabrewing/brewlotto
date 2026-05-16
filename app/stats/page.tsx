@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { getStrategyLabel } from '@/utils/strategyLabel';
+import { useUserTier } from '@/hooks/useUserTier';
 import {
   DashboardContainer,
   Header,
@@ -174,6 +175,7 @@ function StatCard({ label, value, helper }: StatCardProps) {
 }
 
 export default function StatsPage() {
+  const { currentTier } = useUserTier();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -181,6 +183,7 @@ export default function StatsPage() {
   const [pickResults, setPickResults] = useState<PickResultRecord[]>([]);
   const [dailyStats, setDailyStats] = useState<DailyStatRecord[]>([]);
   const [predictions, setPredictions] = useState<PredictionRecord[]>([]);
+  const timingLabel = currentTier === 'master' ? 'TimePulse II' : 'TimePulse';
 
   useEffect(() => {
     let cancelled = false;
@@ -302,7 +305,7 @@ export default function StatsPage() {
     }
 
     return Math.round(confidenceValues.reduce((sum, value) => sum + value, 0) / confidenceValues.length);
-  }, [predictions]);
+  }, [currentTier, predictions]);
 
   const currentStreak = useMemo(() => {
     return dailyStats[0]?.current_streak || 0;
@@ -355,7 +358,7 @@ export default function StatsPage() {
 
       const results = await Promise.all(
         [...combos.values()].map(async ({ game, state }) => {
-          const response = await fetch(`/api/stats/timing?game=${game}&state=${state}`, {
+          const response = await fetch(`/api/stats/timing?game=${game}&state=${state}&mode=${currentTier === 'master' ? 'master' : 'pro'}`, {
             cache: 'no-store',
           });
           const payload = await response.json();
@@ -568,7 +571,7 @@ export default function StatsPage() {
                           </span>
                           {timingProfile ? (
                             <span className="rounded-full border border-[#ffbd39]/14 bg-[#1a140c] px-3 py-1 text-[#f5cf84]">
-                              TimePulse: {timingProfile.windowStart} — {timingProfile.windowEnd}
+                              {timingLabel}: {timingProfile.windowStart} — {timingProfile.windowEnd}
                             </span>
                           ) : null}
                         </div>

@@ -67,8 +67,8 @@ interface QaMeta {
 const TIER_OPTIONS: Array<{ value: TierCode; label: string; description: string }> = [
     { value: "free", label: "Free", description: "Dashboard showcase, onboarding, and read-only surfaces." },
     { value: "starter", label: "Starter", description: "Strategy Locker entry with a small set of strategies." },
-    { value: "pro", label: "Pro", description: "Expanded strategy flow, confirmation, and tracking." },
-    { value: "master", label: "Master", description: "TimePulse timing analysis and lag-based ranges." },
+    { value: "pro", label: "Pro", description: "Expanded strategy flow, confirmation, tracking, and TimePulse." },
+    { value: "master", label: "Master", description: "TimePulse II adaptive timing and lag-based ranges." },
 ];
 
 const JOURNEY_STAGES: Array<{ value: JourneyStage; label: string; description: string }> = [
@@ -82,7 +82,7 @@ const JOURNEY_STAGES: Array<{ value: JourneyStage; label: string; description: s
     { value: "notifications", label: "Notifications", description: "Inbox, nudges, and delivery preferences." },
     { value: "support", label: "Support", description: "Report an issue and attach a screenshot." },
     { value: "brewu", label: "BrewU", description: "Help hub, play styles, and payout guidance." },
-    { value: "master_timepulse", label: "Master / TimePulse", description: "Timing window, lag range, and Master-only access." },
+    { value: "master_timepulse", label: "Master / TimePulse II", description: "Timing window, lag range, and Master-only access." },
     { value: "other", label: "Other", description: "Anything else the tester ran into." },
 ];
 
@@ -106,7 +106,8 @@ const GUIDED_TEST_STEPS = [
     "Move through the tier ladder in order: Free, Starter, Pro, then Master.",
     "For Starter and Pro, run a strategy, save it to My Picks, and confirm the play when prompted.",
     "For NC Pick 3 / Pick 4, note whether Fireball appears and whether the result copy explains it clearly.",
-    "For Master, check that TimePulse appears only on Master access and that the lag window copy makes sense.",
+    "For Pro, check that TimePulse appears on Pro access and that the lag window copy makes sense.",
+    "For Master, check that TimePulse II appears only on Master access and that the adaptive window copy makes sense.",
     "Check Results and Stats for the right date, divider, and confirmed-play behavior, then file the report.",
 ];
 
@@ -1004,7 +1005,7 @@ export default function QaPage() {
                             </div>
                             <div className="rounded-[20px] border border-white/10 bg-black/20 p-4">
                                 <div className="text-[11px] uppercase tracking-[0.16em] text-white/40">Master</div>
-                                <div className="mt-2 text-[15px] leading-7 text-white/72">TimePulse timing analysis, lag range guidance, and Master-only review surface. Check whether the Master cue feels clearly different from the lower tiers.</div>
+                                <div className="mt-2 text-[15px] leading-7 text-white/72">TimePulse and TimePulse II timing analysis, lag range guidance, and tier-specific review surfaces. Check whether the Pro cue feels clearly different from the Master cue.</div>
                             </div>
                         </div>
                     </SectionCard>

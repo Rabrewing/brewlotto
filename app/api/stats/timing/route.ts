@@ -21,6 +21,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const game = normalizeTimingGame(searchParams.get('game') || 'pick3');
     const state = (searchParams.get('state') || 'NC').toUpperCase() === 'CA' ? 'CA' : 'NC';
+    const mode = String(searchParams.get('mode') || 'pro').toLowerCase() === 'master' ? 'master' : 'pro';
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -82,7 +83,7 @@ export async function GET(request: NextRequest) {
 
     const profiles: Record<string, TimingProfile> = {};
     for (const label of TIMING_PROFILE_LABELS) {
-      const profile = computeTimingProfile(fp, fd, label);
+      const profile = computeTimingProfile(fp, fd, label, { mode });
       if (profile) profiles[label] = profile;
     }
 
