@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import Script from "next/script";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, type FormEvent, useEffect, useState } from "react";
+import { Suspense, type FormEvent, useEffect, useRef, useState } from "react";
 
 import {
     isBrewCommandAccessUser,
@@ -12,17 +13,66 @@ import {
 } from "../../lib/auth/brewcommandShared";
 import { supabase } from "../../lib/supabase/browserClient";
 
+declare global {
+    interface Window {
+        turnstile?: {
+            render: (
+                container: HTMLElement,
+                options: {
+                    sitekey: string;
+                    theme?: "light" | "dark" | "auto";
+                    callback?: (token: string) => void;
+                    "expired-callback"?: () => void;
+                    "error-callback"?: () => void;
+                },
+            ) => string;
+            reset?: (widgetId?: string) => void;
+            remove?: (widgetId?: string) => void;
+        };
+    }
+}
+
 function LoginPageContent() {
     const [email, setEmail] = useState("");
     const [message, setMessage] = useState<{ type: "error" | "success"; text: string } | null>(null);
     const [submitting, setSubmitting] = useState(false);
     const [checkingSession, setCheckingSession] = useState(true);
+    const turnstileContainerRef = useRef<HTMLDivElement | null>(null);
+    const turnstileWidgetIdRef = useRef<string | null>(null);
+    const turnstileTokenRef = useRef("");
     const router = useRouter();
     const searchParams = useSearchParams();
 
     const videoSrc =
         process.env.NEXT_PUBLIC_LANDING_VIDEO_MP4_URL ||
         "/landing/brewlotto-no-watermark.mp4";
+    const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
+    const turnstileEnabled = Boolean(turnstileSiteKey);
+
+    const renderTurnstile = () => {
+        if (!turnstileContainerRef.current || !window.turnstile || turnstileWidgetIdRef.current) {
+            return;
+        }
+
+        turnstileWidgetIdRef.current = window.turnstile.render(turnstileContainerRef.current, {
+            sitekey: turnstileSiteKey,
+            theme: "dark",
+            callback: (token: string) => {
+                turnstileTokenRef.current = token;
+                setMessage(null);
+            },
+            "expired-callback": () => {
+                turnstileTokenRef.current = "";
+            },
+            "error-callback": () => {
+                turnstileTokenRef.current = "";
+                setMessage({
+                    type: "error",
+                    text: "Turnstile verification failed. Refresh the widget and try again.",
+                });
+            },
+        });
+    };
 
     const approvedEmails = Array.from(
         new Set([
@@ -82,6 +132,23 @@ function LoginPageContent() {
         };
     }, [router]);
 
+    useEffect(() => {
+        if (!turnstileEnabled) {
+            return;
+        }
+
+        renderTurnstile();
+
+        return () => {
+            const widgetId = turnstileWidgetIdRef.current;
+            if (widgetId && window.turnstile?.remove) {
+                window.turnstile.remove(widgetId);
+            }
+            turnstileWidgetIdRef.current = null;
+            turnstileTokenRef.current = "";
+        };
+    }, [turnstileEnabled, turnstileSiteKey]);
+
     const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setSubmitting(true);
@@ -97,13 +164,30 @@ function LoginPageContent() {
             return;
         }
 
+        if (turnstileEnabled && !turnstileTokenRef.current) {
+            setMessage({
+                type: "error",
+                text: "Complete the Turnstile check before requesting a magic link.",
+            });
+            setSubmitting(false);
+            return;
+        }
+
         const { error } = await supabase.auth.signInWithOtp({
             email: normalizedEmail,
             options: {
                 shouldCreateUser: true,
                 emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/auth/callback`,
+                ...(turnstileEnabled ? { captchaToken: turnstileTokenRef.current } : {}),
             },
         });
+
+        if (turnstileEnabled) {
+            turnstileTokenRef.current = "";
+            if (turnstileWidgetIdRef.current && window.turnstile?.reset) {
+                window.turnstile.reset(turnstileWidgetIdRef.current);
+            }
+        }
 
         if (error) {
             const lower = error.message.toLowerCase();
@@ -132,6 +216,13 @@ function LoginPageContent() {
 
     return (
         <main className="min-h-screen overflow-hidden bg-[#050505] text-white">
+            {turnstileEnabled ? (
+                <Script
+                    src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
+                    strategy="afterInteractive"
+                    onLoad={renderTurnstile}
+                />
+            ) : null}
             <div className="relative mx-auto flex min-h-screen w-full max-w-6xl flex-col px-4 py-4 sm:px-6 lg:px-8">
                 <header className="flex items-center justify-between gap-4 rounded-[24px] border border-white/8 bg-black/20 px-4 py-4 backdrop-blur-sm">
                     <button
@@ -208,6 +299,21 @@ function LoginPageContent() {
                                         required
                                     />
                                 </label>
+
+                                {turnstileEnabled ? (
+                                    <div className="rounded-[18px] border border-white/10 bg-black/20 px-3 py-3">
+                                        <div className="mb-2 text-[12px] uppercase tracking-[0.16em] text-white/35">
+                                            Turnstile verification
+                                        </div>
+                                        <div ref={turnstileContainerRef} className="min-h-[72px]" />
+                                    </div>
+                                ) : (
+                                    <p className="rounded-[16px] border border-[#ffc742]/15 bg-[#1a1408]/50 px-4 py-3 text-[12px] leading-5 text-[#ffd988]/85">
+                                        CAPTCHA is not enabled yet. If you turn on Supabase CAPTCHA, set
+                                        <span className="font-semibold text-[#fff1d3]"> NEXT_PUBLIC_TURNSTILE_SITE_KEY </span>
+                                        in this app and the matching secret in Supabase Auth.
+                                    </p>
+                                )}
 
                                 <button
                                     type="submit"

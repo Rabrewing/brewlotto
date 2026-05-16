@@ -109,6 +109,7 @@ official source → ingestion → Supabase → freshness view → API → UI
 |------|--------|
 | Magic link auth | ✅ Live via `signInWithOtp` |
 | Auth callback | ✅ `/auth/callback` → `/onboarding` → `/dashboard` |
+| CAPTCHA / Turnstile | ✅ Optional on the login form; if enabled, set `NEXT_PUBLIC_TURNSTILE_SITE_KEY` in the app and the matching secret in Supabase Auth |
 | Resend domain | ✅ `brewlotto.app` verified (SPF, DKIM, MX, DMARC added to Vercel DNS) |
 | Custom SMTP | ⏳ Add Resend SMTP to Supabase Dashboard → Auth → Custom SMTP |
 | Email template | ✅ Dark/gold themed magic link template applied in Supabase |

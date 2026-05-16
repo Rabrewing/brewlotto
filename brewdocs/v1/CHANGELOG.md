@@ -139,6 +139,7 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Hardened the Supabase schema hygiene pass by pinning `search_path = public` on the core helper functions and narrowing legacy draw / `pick_history` write policies to `service_role` only, which clears the mutable search-path and permissive-write lint warnings without changing public read behavior.
 - Locked down anonymous GraphQL discovery across the public schema, removed authenticated access from admin/internal tables and helper views, and restricted SECURITY DEFINER RPCs to the service role so the remaining exposure is limited to user-owned tables the browser actually needs.
 - Added explicit `service_role` RLS policies to the policy-less admin/legacy tables Supabase flagged so those service-managed tables are no longer left enabled-without-policy.
+- Added optional Cloudflare Turnstile support to the magic-link login form so Supabase CAPTCHA can be enabled without changing the auth model away from passwordless email.
 
 ### 2026-05-05
 - Fixed cloud ingestion scheduler routing, AI usage tracking, and state-aware dashboard behavior.
