@@ -73,6 +73,19 @@ type GameSummary = {
   bestMatch: number;
 };
 
+const TIMING_LABELS = new Set([
+  'HeatCheck',
+  'HeatCheck II',
+  'HeatCheck III',
+  'HeatCheck IV',
+  'HeatWave',
+  'HeatWave II',
+  'HeatWave III',
+  'PulseSync',
+  'PulseSync II',
+  'SequenceX',
+]);
+
 function formatGameLabel(game: string) {
   switch (game) {
     case 'powerball':
@@ -106,6 +119,41 @@ function formatDayLabel(value: string) {
     month: 'short',
     day: 'numeric',
   });
+}
+
+function normalizeTimingGame(game: string) {
+  switch (game) {
+    case 'daily3':
+    case 'pick3':
+      return 'pick3';
+    case 'daily4':
+    case 'pick4':
+      return 'pick4';
+    case 'fantasy5':
+    case 'cash5':
+      return 'cash5';
+    case 'mega_millions':
+    case 'mega':
+      return 'mega';
+    case 'powerball':
+      return 'powerball';
+    default:
+      return game;
+  }
+}
+
+function getTimingProfileKey(strategyKey: string | null | undefined) {
+  if (!strategyKey) {
+    return null;
+  }
+
+  const trimmed = strategyKey.trim();
+  if (TIMING_LABELS.has(trimmed)) {
+    return trimmed;
+  }
+
+  const mapped = getStrategyLabel(trimmed);
+  return TIMING_LABELS.has(mapped) ? mapped : null;
 }
 
 function StatCard({ label, value, helper }: StatCardProps) {
@@ -282,14 +330,55 @@ export default function StatsPage() {
 
   useEffect(() => {
     let cancelled = false;
-    async function load() {
-      const res = await fetch('/api/stats/timing?game=pick3&state=NC');
-      const payload = await res.json();
-      if (!cancelled && payload.success) setTimingProfiles(payload.data || {});
+
+    async function loadTiming() {
+      if (predictions.length === 0) {
+        if (!cancelled) {
+          setTimingProfiles({});
+        }
+        return;
+      }
+
+      const combos = new Map<string, { game: string; state: string }>();
+      for (const prediction of predictions) {
+        const game = normalizeTimingGame(prediction.game || 'pick3');
+        const state = prediction.state === 'CA' ? 'CA' : 'NC';
+        combos.set(`${game}-${state}`, { game, state });
+      }
+
+      const results = await Promise.all(
+        [...combos.values()].map(async ({ game, state }) => {
+          const response = await fetch(`/api/stats/timing?game=${game}&state=${state}`, {
+            cache: 'no-store',
+          });
+          const payload = await response.json();
+          return payload.success ? payload.data || {} : {};
+        }),
+      );
+
+      if (cancelled) {
+        return;
+      }
+
+      const nextProfiles: Record<string, { windowStart: string; windowEnd: string; sampleSize: number; confidence: string }> = {};
+      for (const profileSet of results) {
+        for (const [label, profile] of Object.entries(profileSet)) {
+          const current = nextProfiles[label];
+          if (!current || (profile?.sampleSize || 0) > current.sampleSize) {
+            nextProfiles[label] = profile as { windowStart: string; windowEnd: string; sampleSize: number; confidence: string };
+          }
+        }
+      }
+
+      setTimingProfiles(nextProfiles);
     }
-    load();
-    return () => { cancelled = true; };
-  }, []);
+
+    loadTiming();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [predictions]);
 
   const recentTrend = useMemo(() => {
     return [...dailyStats].reverse();
@@ -433,47 +522,52 @@ export default function StatsPage() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {strategySummary.map((entry) => (
-                    <div
-                      key={entry.strategy}
-                      className="flex flex-col gap-3 rounded-[22px] border border-white/8 bg-black/20 px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
-                    >
-                      <div>
-                        <div className="text-[17px] font-medium text-[#f7ddb3]">{getStrategyLabel(entry.strategy)}</div>
-                        <div className="mt-1 text-[13px] text-white/52">
-                          {entry.predictions} stored predictions • {entry.confirmedPlays} confirmed plays
+                  {strategySummary.map((entry) => {
+                    const timingKey = getTimingProfileKey(entry.strategy);
+                    const timingProfile = timingKey ? timingProfiles[timingKey] || null : null;
+
+                    return (
+                      <div
+                        key={entry.strategy}
+                        className="flex flex-col gap-3 rounded-[22px] border border-white/8 bg-black/20 px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
+                      >
+                        <div>
+                          <div className="text-[17px] font-medium text-[#f7ddb3]">{getStrategyLabel(entry.strategy)}</div>
+                          <div className="mt-1 text-[13px] text-white/52">
+                            {entry.predictions} stored predictions • {entry.confirmedPlays} confirmed plays
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-2 text-[13px] uppercase tracking-[0.14em] text-white/42">
+                          <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
+                            Wins {entry.wins}
+                          </span>
+                          <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
+                            Hit rate {entry.hitRate !== null ? `${entry.hitRate}%` : 'N/A'}
+                          </span>
+                          <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
+                            Win rate {entry.winRate !== null ? `${entry.winRate}%` : 'N/A'}
+                          </span>
+                          <span className="rounded-full border border-[#72caff]/18 bg-[#111f28] px-3 py-1 text-[#9edcff]">
+                            Fireball plays {entry.fireballConfirmedPlays}
+                          </span>
+                          <span className="rounded-full border border-[#72caff]/18 bg-[#111f28] px-3 py-1 text-[#9edcff]">
+                            Fireball hits {entry.fireballHits}
+                          </span>
+                          <span className="rounded-full border border-[#72caff]/18 bg-[#111f28] px-3 py-1 text-[#9edcff]">
+                            Fireball win rate {entry.fireballWinRate !== null ? `${entry.fireballWinRate}%` : 'N/A'}
+                          </span>
+                          <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
+                            Avg confidence {entry.averageConfidence !== null ? `${entry.averageConfidence}%` : 'N/A'}
+                          </span>
+                          {timingProfile ? (
+                            <span className="rounded-full border border-[#ffbd39]/14 bg-[#1a140c] px-3 py-1 text-[#f5cf84]">
+                              TimePulse: {timingProfile.windowStart} — {timingProfile.windowEnd}
+                            </span>
+                          ) : null}
                         </div>
                       </div>
-                      <div className="flex flex-wrap gap-2 text-[13px] uppercase tracking-[0.14em] text-white/42">
-                        <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
-                          Wins {entry.wins}
-                        </span>
-                        <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
-                          Hit rate {entry.hitRate !== null ? `${entry.hitRate}%` : 'N/A'}
-                        </span>
-                        <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
-                          Win rate {entry.winRate !== null ? `${entry.winRate}%` : 'N/A'}
-                        </span>
-                        <span className="rounded-full border border-[#72caff]/18 bg-[#111f28] px-3 py-1 text-[#9edcff]">
-                          Fireball plays {entry.fireballConfirmedPlays}
-                        </span>
-                        <span className="rounded-full border border-[#72caff]/18 bg-[#111f28] px-3 py-1 text-[#9edcff]">
-                          Fireball hits {entry.fireballHits}
-                        </span>
-                        <span className="rounded-full border border-[#72caff]/18 bg-[#111f28] px-3 py-1 text-[#9edcff]">
-                          Fireball win rate {entry.fireballWinRate !== null ? `${entry.fireballWinRate}%` : 'N/A'}
-                        </span>
-                        <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
-                          Avg confidence {entry.averageConfidence !== null ? `${entry.averageConfidence}%` : 'N/A'}
-                        </span>
-                        {timingProfiles[getStrategyLabel(entry.strategy)] ? (
-                          <span className="rounded-full border border-[#ffbd39]/14 bg-[#1a140c] px-3 py-1 text-[#f5cf84]">
-                            TimePulse: {timingProfiles[getStrategyLabel(entry.strategy)].windowStart} — {timingProfiles[getStrategyLabel(entry.strategy)].windowEnd}
-                          </span>
-                        ) : null}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </SectionCard>

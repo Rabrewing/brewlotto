@@ -1,5 +1,7 @@
 import { STRATEGY_EXPLAINERS } from "@/lib/explainers/strategyExplainers";
 
+const normalize = (value) => String(value || '').trim().toLowerCase();
+
 const TIERED_MAP = {
   hot_cold: 'heatcheck',
   hotCold: 'heatcheck',
@@ -21,6 +23,21 @@ const TIERED_MAP = {
   ensemble: 'heatcheck_iii',
 };
 
+const LABEL_TO_KEY = Object.fromEntries(
+  Object.entries(STRATEGY_EXPLAINERS || {}).map(([key, value]) => [normalize(value?.label), key]),
+);
+
+const resolveStrategyKey = (id) => {
+  if (!id) return '';
+
+  if (TIERED_MAP[id]) {
+    return TIERED_MAP[id];
+  }
+
+  const normalized = normalize(id);
+  return LABEL_TO_KEY[normalized] || id;
+};
+
 const FALLBACK_CLEAN = (key) => {
   if (!key) return 'Brew Strategy';
   return key
@@ -31,30 +48,30 @@ const FALLBACK_CLEAN = (key) => {
 
 export const getStrategyLabel = (id) => {
   if (!id) return 'Brew Strategy';
-  const mapped = TIERED_MAP[id] || id;
+  const mapped = resolveStrategyKey(id);
   return STRATEGY_EXPLAINERS?.[mapped]?.label || FALLBACK_CLEAN(id);
 };
 
 export const getStrategyDesc = (id) => {
   if (!id) return '';
-  const mapped = TIERED_MAP[id] || id;
+  const mapped = resolveStrategyKey(id);
   return STRATEGY_EXPLAINERS?.[mapped]?.desc || '';
 };
 
 export const getStrategyIcon = (id) => {
   if (!id) return '';
-  const mapped = TIERED_MAP[id] || id;
+  const mapped = resolveStrategyKey(id);
   return STRATEGY_EXPLAINERS?.[mapped]?.icon || '';
 };
 
 export const getStrategyLucideIcon = (id) => {
   if (!id) return 'Zap';
-  const mapped = TIERED_MAP[id] || id;
+  const mapped = resolveStrategyKey(id);
   return STRATEGY_EXPLAINERS?.[mapped]?.lucide || 'Zap';
 };
 
 export const getStrategyColor = (id) => {
   if (!id) return '#94a3b8';
-  const mapped = TIERED_MAP[id] || id;
+  const mapped = resolveStrategyKey(id);
   return STRATEGY_EXPLAINERS?.[mapped]?.color || '#94a3b8';
 };
