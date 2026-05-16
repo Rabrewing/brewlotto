@@ -78,19 +78,31 @@ export default function BillingPage() {
           if (!cancelled) setError('You need to sign in before Brew can show billing status.');
           return;
         }
-        const [entitlementsResult, tiersResult, featuresResult] = await Promise.all([
-          supabase.from('user_entitlements').select('tier_code, ai_quota_monthly, ai_quota_used, pick_generation_limit_daily, advanced_strategy_access, premium_explanations_access, premium_comparison_access, export_access, voice_commentary_access, notifications_premium_access, timing_analysis_access, effective_from, effective_to').eq('user_id', authUser.id).maybeSingle(),
+
+        const { data: entitlementsData, error: entitlementsError } = await supabase
+          .from('user_entitlements')
+          .select('tier_code, ai_quota_monthly, ai_quota_used, pick_generation_limit_daily, advanced_strategy_access, premium_explanations_access, premium_comparison_access, export_access, voice_commentary_access, notifications_premium_access, timing_analysis_access, effective_from, effective_to')
+          .eq('user_id', authUser.id)
+          .maybeSingle();
+
+        if (entitlementsError) throw entitlementsError;
+
+        const [tiersResult, featuresResult] = await Promise.all([
           supabase.from('subscription_tiers').select('tier_key, display_name, marketing_label, price_monthly, price_annual, sort_order').eq('is_active', true).order('sort_order', { ascending: true }),
           supabase.from('feature_entitlements').select('feature_key, feature_name, description, min_tier, category, sort_order').eq('is_active', true).order('sort_order', { ascending: true }),
         ]);
-        if (entitlementsResult.error) throw entitlementsResult.error;
-        if (tiersResult.error) throw tiersResult.error;
-        if (featuresResult.error) throw featuresResult.error;
         if (!cancelled) {
           setUser({ id: authUser.id, email: authUser.email });
-          setEntitlements((entitlementsResult.data as UserEntitlementRecord | null) || null);
-          setTiers((tiersResult.data || []) as SubscriptionTierRecord[]);
-          setFeatures((featuresResult.data || []) as FeatureEntitlementRecord[]);
+          setEntitlements((entitlementsData as UserEntitlementRecord | null) || null);
+          setTiers(((tiersResult.error ? [] : tiersResult.data) || []) as SubscriptionTierRecord[]);
+          setFeatures(((featuresResult.error ? [] : featuresResult.data) || []) as FeatureEntitlementRecord[]);
+
+          if (tiersResult.error || featuresResult.error) {
+            console.warn('Billing optional data load issue:', {
+              tiersError: tiersResult.error?.message || null,
+              featuresError: featuresResult.error?.message || null,
+            });
+          }
         }
       } catch (loadError) {
         if (!cancelled) setError(loadError instanceof Error ? loadError.message : 'Failed to load billing');
