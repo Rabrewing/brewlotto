@@ -87,6 +87,11 @@ const TIMING_LABELS = new Set([
   'SequenceX',
 ]);
 
+const TIMING_PROFILE_ALIASES: Record<string, string> = {
+  'TimePulse': 'PulseSync',
+  'TimePulse II': 'PulseSync II',
+};
+
 function formatGameLabel(game: string | null) {
   if (!game) {
     return 'Unknown Game';
@@ -215,7 +220,14 @@ function getTimingProfileKey(strategyKey: string | null | undefined) {
     return trimmed;
   }
 
+  if (TIMING_PROFILE_ALIASES[trimmed]) {
+    return TIMING_PROFILE_ALIASES[trimmed];
+  }
+
   const mapped = getStrategyLabel(trimmed);
+  if (TIMING_PROFILE_ALIASES[mapped]) {
+    return TIMING_PROFILE_ALIASES[mapped];
+  }
   return TIMING_LABELS.has(mapped) ? mapped : null;
 }
 

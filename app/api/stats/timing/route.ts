@@ -4,6 +4,10 @@ import { computeTimingProfile } from '@/lib/prediction/timingAnalysis';
 import { resolveDashboardGameConfig, type DashboardGameId, type DashboardStateCode } from '@/lib/dashboard/game-config';
 
 const TIMING_PROFILE_LABELS = ['HeatCheck', 'HeatCheck II', 'HeatCheck III', 'HeatCheck IV', 'HeatWave', 'HeatWave II', 'HeatWave III', 'PulseSync', 'PulseSync II', 'SequenceX'];
+const TIMING_PROFILE_ALIASES: Record<string, string> = {
+  TimePulse: 'PulseSync',
+  'TimePulse II': 'PulseSync II',
+};
 
 type TimingProfile = NonNullable<ReturnType<typeof computeTimingProfile>>;
 
@@ -85,6 +89,12 @@ export async function GET(request: NextRequest) {
     for (const label of TIMING_PROFILE_LABELS) {
       const profile = computeTimingProfile(fp, fd, label, { mode });
       if (profile) profiles[label] = profile;
+    }
+
+    for (const [alias, canonical] of Object.entries(TIMING_PROFILE_ALIASES)) {
+      if (profiles[canonical]) {
+        profiles[alias] = profiles[canonical];
+      }
     }
 
     return NextResponse.json({ success: true, data: profiles });
