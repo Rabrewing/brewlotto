@@ -12,7 +12,7 @@ import {
 } from '@/components/brewlotto/dashboard';
 import { supabase } from '@/lib/supabase/browserClient';
 
-type FilterState = 'NC' | 'CA' | 'MULTI';
+type FilterState = 'ALL' | 'NC' | 'CA';
 type FilterGame = 'ALL' | 'pick3' | 'pick4' | 'cash5' | 'powerball' | 'mega_millions';
 type FilterWindow = 'ALL' | 'midday' | 'evening';
 type PickStatus = 'saved' | 'pending';
@@ -69,9 +69,9 @@ type QueryResult<T> = {
 };
 
 const STATE_OPTIONS: Array<{ value: FilterState; label: string }> = [
+  { value: 'ALL', label: 'All States' },
   { value: 'NC', label: 'NC' },
   { value: 'CA', label: 'CA' },
-  { value: 'MULTI', label: 'Multi-State' },
 ];
 
 const TIMING_LABELS = new Set([
@@ -466,7 +466,7 @@ function PickCard({
 
 export default function MyPicksPage() {
   const { currentTier } = useUserTier();
-  const [selectedState, setSelectedState] = useState<FilterState>('NC');
+  const [selectedState, setSelectedState] = useState<FilterState>('ALL');
   const [selectedGame, setSelectedGame] = useState<FilterGame>('ALL');
   const [selectedWindow, setSelectedWindow] = useState<FilterWindow>('ALL');
   const [predictions, setPredictions] = useState<PredictionRecord[]>([]);
@@ -498,7 +498,9 @@ export default function MyPicksPage() {
         params.set('created_after', createdAfter.toISOString());
         params.set('saved', 'true');
 
-        params.set('state', selectedState);
+        if (selectedState !== 'ALL') {
+          params.set('state', selectedState);
+        }
 
         if (selectedWindow !== 'ALL') {
           params.set('draw_window', selectedWindow);
@@ -564,7 +566,7 @@ export default function MyPicksPage() {
     let cancelled = false;
     async function loadTiming() {
       const gameParam = selectedGame !== 'ALL' ? selectedGame : 'pick3';
-      const stateParam = selectedState === 'MULTI' ? 'NC' : selectedState;
+      const stateParam = selectedState === 'ALL' ? 'NC' : selectedState;
       const res = await fetch(`/api/stats/timing?game=${gameParam}&state=${stateParam}&mode=${currentTier === 'master' ? 'master' : 'pro'}`);
       const payload = await res.json();
       if (!cancelled && payload.success) setTimingProfiles(payload.data || {});
@@ -822,8 +824,8 @@ export default function MyPicksPage() {
             </div>
             <Link
               href={
-                selectedGame !== 'ALL' || selectedState !== 'NC'
-                  ? `/strategy-locker?game=${selectedGame === 'mega_millions' ? 'mega' : selectedGame}&state=${selectedState === 'MULTI' ? 'NC' : selectedState}`
+                selectedGame !== 'ALL' || selectedState !== 'ALL'
+                  ? `/strategy-locker?game=${selectedGame === 'mega_millions' ? 'mega' : selectedGame}&state=${selectedState === 'ALL' ? 'NC' : selectedState}`
                   : '/strategy-locker'
               }
               className="mt-6 inline-flex rounded-full bg-gradient-to-r from-[#ffc742] to-[#ffbe27] px-8 py-3 text-[17px] font-semibold text-black shadow-[0_0_18px_rgba(255,199,66,0.22)]"
