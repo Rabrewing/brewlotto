@@ -16,6 +16,7 @@
 - BrewCommand AI usage monitoring is being added so request count, tokens, latency, and estimated spend can be compared against tier pricing and customer billing.
 - The AI provider layer is connected end-to-end for commentary and suggestion routes via env-driven OpenAI / DeepSeek / NIM routing, and usage logging writes tokens/cost to BrewCommand; deterministic pick generation remains the launch default. The provider selector now accepts explicit `AI_PROVIDER=nim` instead of only implicit fallback.
 - TimePulse timing analysis is now a real Master-tier entitlement (`timing_analysis_access`) instead of only a label in the UI. The billing and strategy locker surfaces read the explicit flag, and Master entitlements are backfilled so existing users keep access.
+- Master purchases now show as the current plan in Billing once `user_entitlements.tier_code` is updated, so the Billing surface reflects the Stripe-backed account state instead of stale auth metadata.
 - BrewCommand now has a notification bell for the admin surface, critical/email-worthy alerts are fanned out to one selected superadmin inbox by email, and the admin console shows recent alert delivery history alongside the shared alert center.
 - Sentry remains an external observability tool; BrewCommand should track product/business truth directly and only mirror Sentry status if we later decide we need a lightweight dashboard summary.
 - `SectionCard` is centralized in `components/brewlotto/dashboard/SectionCard.tsx` and the duplicated copies are gone.
