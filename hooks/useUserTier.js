@@ -35,11 +35,7 @@ export function useUserTier() {
 
             if (!mounted) return;
 
-            if (!error && entitlements?.tier_code) {
-                setCurrentTier(entitlements.tier_code);
-            } else {
-                setCurrentTier(metadata.tier || "free");
-            }
+            setCurrentTier(!error && entitlements?.tier_code ? entitlements.tier_code : "free");
 
             setIsTrial(Boolean(metadata.isTrial));
             setTrialEndsAt(metadata.trialEndsAt || entitlements?.effective_to || null);
