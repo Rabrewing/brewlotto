@@ -27,6 +27,7 @@
 - The middleware auth gate now allows approved BrewCommand tester accounts as well as admins, so QA sign-ins can land on `/qa` and continue through the tester flow instead of bouncing back to login.
 - BrewCommand now has a notification bell for the admin surface, critical/email-worthy alerts are fanned out to one selected superadmin inbox by email, and the admin console shows recent alert delivery history alongside the shared alert center.
 - Dashboard and Results now normalize the preferred state code before calling the shared NC/CA game resolver, which keeps the client pages and results API aligned with Strategy Locker and My Picks instead of widening the helper types.
+- Strategy Locker now clears the current run preview when switching Midday/Evening on Pick 3 / Pick 4 so a midday run does not linger into the evening save path.
 - Sentry remains an external observability tool; BrewCommand should track product/business truth directly and only mirror Sentry status if we later decide we need a lightweight dashboard summary.
 - `SectionCard` is centralized in `components/brewlotto/dashboard/SectionCard.tsx` and the duplicated copies are gone.
 - Dropdown menu destinations are wired to live routes for gameplay, account, and system surfaces, and the older shared `Header` account button now points to `/profile` instead of a dead `/account` route.

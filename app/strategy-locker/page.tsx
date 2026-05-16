@@ -13,7 +13,7 @@ import {
 import { supabase } from '@/lib/supabase/browserClient';
 import { buildStrategyPerformanceSummary, type StrategyPerformanceSummary } from '@/lib/stats/strategyPerformance';
 import { getStrategyLabel } from '@/utils/strategyLabel';
-import { usePreferredState } from '@/hooks/usePreferredState';
+import { normalizePreferredStateCode, usePreferredState } from '@/hooks/usePreferredState';
 import { resolveDashboardGameConfig } from '@/lib/dashboard/game-config';
 
 type TierCode = 'free' | 'starter' | 'pro' | 'master';
@@ -172,6 +172,7 @@ export default function StrategyLockerPage() {
   const [runPreviews, setRunPreviews] = useState<Record<string, RunPreviewRecord>>({});
   const [savingPredictionId, setSavingPredictionId] = useState<string | null>(null);
   const { preferredState } = usePreferredState();
+  const preferredStateCode = normalizePreferredStateCode(preferredState);
   const [selectedGame, setSelectedGame] = useState<GameId>('pick3');
   const [selectedDrawWindow, setSelectedDrawWindow] = useState<'midday' | 'evening'>('midday');
 
@@ -188,8 +189,14 @@ export default function StrategyLockerPage() {
     setRunPreviews({});
   }, [selectedGame]);
 
-  const gameConfig = resolveDashboardGameConfig(selectedGame, preferredState) || resolveDashboardGameConfig('pick3', 'NC')!;
+  const gameConfig = resolveDashboardGameConfig(selectedGame, preferredStateCode) || resolveDashboardGameConfig('pick3', 'NC')!;
   const hasDrawWindow = selectedGame === 'pick3' || selectedGame === 'pick4';
+
+  useEffect(() => {
+    if (hasDrawWindow) {
+      setRunPreviews({});
+    }
+  }, [hasDrawWindow, selectedDrawWindow]);
 
   useEffect(() => {
     let cancelled = false;
@@ -474,7 +481,7 @@ export default function StrategyLockerPage() {
         body: JSON.stringify({
           strategyId: strategy.id,
           gameKey: selectedGame,
-          state: preferredState,
+          state: preferredStateCode,
           drawWindow: hasDrawWindow ? selectedDrawWindow : null,
         }),
       });
@@ -580,7 +587,7 @@ export default function StrategyLockerPage() {
             </section>
 
             <div className="text-[12px] uppercase tracking-[0.16em] text-white/38">Choose your game to strategize in</div>
-            <GameTabs selectedGame={selectedGame} onSelect={setSelectedGame} stateCode={preferredState} />
+            <GameTabs selectedGame={selectedGame} onSelect={setSelectedGame} stateCode={preferredStateCode} />
 
             {hasDrawWindow ? (
               <div className="flex gap-2">
