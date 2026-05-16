@@ -57,7 +57,7 @@ Use the Test Lab to walk the full app the same way a real customer would, then r
 
 ## Tester Access
 
-- Approved tester emails are seeded in `BREWQA_TESTER_EMAILS`.
+- Approved tester emails are seeded in the shared auth helper and can be extended via `BREWQA_TESTER_EMAILS`.
 - The current roster includes `rb.brewington@gmail.com` so BrewLotto can be tested from the same signed-in account that owns the feature review.
 
 ## How BrewCommand Uses It

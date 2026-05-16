@@ -10,7 +10,17 @@ const DEFAULT_BREWCOMMAND_ADMIN_EMAILS = [
   'tlloretta30@gmail.com',
 ];
 
-const DEFAULT_BREW_QA_TESTER_EMAILS: string[] = [];
+const DEFAULT_BREW_QA_TESTER_EMAILS = [
+  'michael.brewington@gmail.com',
+  'jhardygraham@gmail.com',
+  'mariaarellanonc@gmail.com',
+  'tlloretta30@gmail.com',
+  'audrea1153@aol.com',
+  'kappaphi0@gmail.com',
+  'dannyenorman@icloud.com',
+  'nygyrl85@yahoo.com',
+  'rb.brewington@gmail.com',
+];
 
 export function parseBrewCommandAdminEmails() {
   const configuredEmails = (process.env.BREWCOMMAND_ADMIN_EMAILS || '')
