@@ -20,6 +20,7 @@ const DEFAULT_BREW_QA_TESTER_EMAILS = [
   'dannyenorman@icloud.com',
   'nygyrl85@yahoo.com',
   'rb.brewington@gmail.com',
+  'latasharorie@hotmail.com',
 ];
 
 export function parseBrewCommandAdminEmails() {

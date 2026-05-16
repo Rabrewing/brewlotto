@@ -101,15 +101,27 @@ const FEATURE_AREAS: Array<{ value: FeatureArea; label: string; description: str
     { value: "other", label: "Other", description: "Something outside the list above." },
 ];
 
-const TEST_STEPS = [
-    "Start at the dashboard or onboarding page and confirm the app opens cleanly.",
-    "Move through the tier flow in order: Free, Starter, Pro, then Master.",
+const GUIDED_TEST_STEPS = [
+    "Start at login or onboarding, then confirm the app opens cleanly and lands where the flow expects.",
+    "Move through the tier ladder in order: Free, Starter, Pro, then Master.",
     "For Starter and Pro, run a strategy, save it to My Picks, and confirm the play when prompted.",
-    "For NC Pick 3 / Pick 4, say whether Fireball was used. For Master, check TimePulse only on Master access.",
-    "Check Results for the correct date and time divider, then use the QA form below to report what happened.",
+    "For NC Pick 3 / Pick 4, note whether Fireball appears and whether the result copy explains it clearly.",
+    "For Master, check that TimePulse appears only on Master access and that the lag window copy makes sense.",
+    "Check Results and Stats for the right date, divider, and confirmed-play behavior, then file the report.",
 ];
 
+const FREE_ROAM_PROMPTS = [
+    "Can the tester find how to upgrade without being told where to click?",
+    "Can the tester find saved picks, results, stats, notifications, BrewU, and support on their own?",
+    "Can the tester tell what the current tier is and what the next step should be?",
+    "Can the tester explain whether the app felt obvious or whether it needed too much coaching?",
+];
+
+const BRANDED_SELECT_CLASS =
+    "w-full appearance-none rounded-[18px] border border-[#72caff]/18 bg-[linear-gradient(180deg,rgba(16,25,34,0.98),rgba(8,13,18,0.98))] px-4 py-3 pr-10 text-[#f7f2e8] outline-none transition focus:border-[#72caff]/45";
+
 const QA_INTRO_STORAGE_KEY = "brewlotto-qa-intro-accepted";
+const QA_START_DATE_STORAGE_KEY = "brewlotto-qa-start-date";
 const QA_DRAFT_STORAGE_PREFIX = "brewlotto:qa-draft:";
 
 function makeQaDraftKey(email: string) {
@@ -160,6 +172,76 @@ function safeClearDraft(email: string) {
     } catch {
         // ignore storage issues
     }
+}
+
+function safeLoadQaStartDate() {
+    if (typeof window === "undefined") {
+        return "";
+    }
+
+    try {
+        return window.localStorage.getItem(QA_START_DATE_STORAGE_KEY) || "";
+    } catch {
+        return "";
+    }
+}
+
+function safeSaveQaStartDate(nextDate: string) {
+    if (typeof window === "undefined") {
+        return;
+    }
+
+    try {
+        window.localStorage.setItem(QA_START_DATE_STORAGE_KEY, nextDate);
+    } catch {
+        // ignore storage issues
+    }
+}
+
+function formatQaDate(value: string) {
+    if (!value) {
+        return "";
+    }
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+        return value;
+    }
+
+    return new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+    }).format(date);
+}
+
+function addDays(value: string, days: number) {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+        return "";
+    }
+
+    date.setDate(date.getDate() + days);
+    return date.toISOString();
+}
+
+function formatQaDateTime(value: string) {
+    if (!value) {
+        return "";
+    }
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+        return value;
+    }
+
+    return new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+    }).format(date);
 }
 
 function YesNoToggle({
@@ -213,6 +295,7 @@ export default function QaPage() {
     const [error, setError] = useState<string | null>(null);
     const [submitting, setSubmitting] = useState(false);
     const [introAccepted, setIntroAccepted] = useState(false);
+    const [qaStartDate, setQaStartDate] = useState("");
     const [meta, setMeta] = useState<QaMeta>({
         userEmail: "",
         testerName: "",
@@ -293,8 +376,10 @@ export default function QaPage() {
     useEffect(() => {
         try {
             setIntroAccepted(window.localStorage.getItem(QA_INTRO_STORAGE_KEY) === "true");
+            setQaStartDate(safeLoadQaStartDate());
         } catch {
             setIntroAccepted(false);
+            setQaStartDate("");
         }
     }, []);
 
@@ -433,24 +518,52 @@ export default function QaPage() {
                             <div className="text-[12px] uppercase tracking-[0.18em] text-[#bde7ff]">Before you start</div>
                             <div className="mt-3 text-[24px] font-semibold tracking-[-0.03em] text-[#d8f1ff] sm:text-[30px]">Read this first so we capture the full test flow</div>
                             <div className="mt-3 max-w-2xl text-[14px] leading-7 text-white/68 sm:text-[15px]">
-                                This Test Lab is for approved family testers. It starts at the beginning of the app and walks you through the flow tier by tier. Follow the steps in order, then tell us what you saw, what you expected, and where the flow changed.
+                                This Test Lab is for approved family testers. It uses two passes: first a guided pass so we can verify the core flow, then a free-roam pass so we can see whether the app gives enough cues for people to find their way around on their own.
                             </div>
                             <div className="mt-5 grid gap-3 text-[13px] leading-6 text-white/72 sm:grid-cols-2 sm:text-[14px] sm:leading-7">
                                 {[
-                                    "Start at onboarding first if the app sends you there. If not, open the dashboard and follow the on-screen prompts.",
-                                    "Work the tiers in order: Free, Starter, Pro, then Master. Do not skip ahead unless the page tells you to.",
-                                    "Starter and Pro will show Strategy Locker. Run a strategy there first, then save it to My Picks when the app asks you to.",
-                                    "My Picks is where the real confirmation happens. Use the I Played This / Played step so we can tell the difference between a generated preview and a real play.",
-                                    "For NC Pick 3 / Pick 4, answer the Fireball question when it appears so the result can be tracked correctly.",
-                                    "Master testers should look for TimePulse and its lag window. It may point to a range, not the exact draw day.",
+                                    "Guided pass: start at login or onboarding, then follow the flow in order so we can verify the app does what the page promises.",
+                                    "Guided pass: work the tiers in order: Free, Starter, Pro, then Master. Do not skip ahead unless the app sends you there.",
+                                    "Guided pass: Starter and Pro should show Strategy Locker. Run a strategy there first, then save it to My Picks when the app asks you to.",
+                                    "Guided pass: My Picks is where the real confirmation happens. Use the I Played This / Played step so we can tell generated previews from real plays.",
+                                    "Guided pass: for NC Pick 3 / Pick 4, answer the Fireball question when it appears so the result can be tracked correctly.",
+                                    "Guided pass: Master testers should look for TimePulse and its lag window. It may point to a range, not the exact draw day.",
+                                    "Guided pass: on the free tier, confirm the blue trial banner shows a countdown and points the user toward pricing or the next step.",
                                 ].map((item) => (
                                     <div key={item} className="rounded-[18px] border border-white/10 bg-white/[0.03] px-4 py-3">
                                         {item}
                                     </div>
                                 ))}
                             </div>
+                            <div className="mt-5 rounded-[22px] border border-[#72caff]/18 bg-[#101922] px-4 py-4">
+                                <div className="text-[12px] uppercase tracking-[0.16em] text-[#bde7ff]">Free-roam pass</div>
+                                <div className="mt-2 text-[14px] leading-7 text-white/68">
+                                    After the guided pass, try to find the important surfaces without instructions and tell us whether the app gave you enough clues.
+                                </div>
+                                <div className="mt-3 grid gap-2 text-[13px] leading-6 text-white/64">
+                                    {FREE_ROAM_PROMPTS.map((item) => (
+                                        <div key={item} className="rounded-[16px] border border-white/8 bg-black/20 px-3 py-2">
+                                            {item}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="mt-5 rounded-[22px] border border-[#ffc742]/18 bg-[#20170a] px-4 py-4 text-[13px] leading-6 text-[#f7ddb3] sm:text-[14px] sm:leading-7">
+                                <div className="text-[12px] uppercase tracking-[0.16em] text-[#ffd873]">Testing window</div>
+                                <div className="mt-2">
+                                    You have <span className="font-semibold text-white">7 days</span> from your first entry to test.
+                                </div>
+                                <div className="mt-2 text-white/74">
+                                    Start date: {qaStartDate ? formatQaDateTime(qaStartDate) : "It starts when you click Begin Test Lab."}
+                                </div>
+                                {qaStartDate ? (
+                                    <div className="mt-1 text-white/74">
+                                        Recommended by: {formatQaDateTime(addDays(qaStartDate, 7))}
+                                    </div>
+                                ) : null}
+                            </div>
                             <div className="mt-5 rounded-[22px] border border-white/10 bg-black/20 px-4 py-4 text-[13px] leading-6 text-white/66 sm:text-[14px] sm:leading-7">
-                                If you reach pricing or billing, check that pricing shows the correct tier and that Billing opens the manage surface. Use Stripe test cards only. For a normal successful checkout, use{" "}
+                                If you reach pricing or billing, check that pricing shows the correct tier ladder and that Billing opens the manage surface. Use Stripe test cards only. For a normal successful checkout, use{" "}
                                 <span className="text-[#d8f1ff]">4242 4242 4242 4242</span> with any future date and any CVC.
                                 If you need to test a decline path, use Stripe&apos;s generic decline card{" "}
                                 <span className="text-[#d8f1ff]">4000 0000 0000 0002</span> instead of a real card.
@@ -459,6 +572,11 @@ export default function QaPage() {
                                 <button
                                     type="button"
                                     onClick={() => {
+                                        const startDate = qaStartDate || new Date().toISOString();
+                                        if (!qaStartDate) {
+                                            setQaStartDate(startDate);
+                                            safeSaveQaStartDate(startDate);
+                                        }
                                         setIntroAccepted(true);
                                         try {
                                             window.localStorage.setItem(QA_INTRO_STORAGE_KEY, "true");
@@ -487,13 +605,34 @@ export default function QaPage() {
 
                 <section className="rounded-[30px] border border-[#72caff]/24 bg-[radial-gradient(circle_at_top_left,rgba(114,202,255,0.18),rgba(0,0,0,0)_34%),linear-gradient(145deg,rgba(18,24,34,0.9),rgba(8,8,8,0.98))] px-5 py-5 shadow-[0_0_28px_rgba(114,202,255,0.08)]">
                     <div className="text-[15px] uppercase tracking-[0.16em] text-[#bde7ff]">QA / tester workflow</div>
-                    <div className="mt-3 text-[26px] font-semibold text-[#d8f1ff]">Walk the app from sign-in to tier testing, then file what you saw</div>
+                    <div className="mt-3 text-[26px] font-semibold text-[#d8f1ff]">Walk the app from sign-in to tier testing, then tell us what happened</div>
                     <div className="mt-2 max-w-3xl text-[15px] leading-7 text-white/62">
-                        This page is for approved testers only. Start at the beginning, move through each tier, and use the form below to report what happened versus what should have happened. Your report will land in BrewCommand, not customer support.
+                        This page is for approved testers only. Start at the beginning, move through each tier, then do a second free-roam pass to see whether the app teaches itself clearly enough. Use the form below to report what happened versus what should have happened. Your report will land in BrewCommand, not customer support.
+                    </div>
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                        <div className="rounded-[20px] border border-[#ffc742]/18 bg-[#20170a] px-4 py-4 text-[13px] leading-6 text-[#f7ddb3]">
+                            <div className="text-[11px] uppercase tracking-[0.16em] text-[#ffd873]">Testing window</div>
+                            <div className="mt-2 text-[14px] text-white/82">
+                                You have <span className="font-semibold text-white">7 days</span> from your first entry to finish the guided and free-roam passes.
+                            </div>
+                        </div>
+                        <div className="rounded-[20px] border border-[#72caff]/18 bg-[#101922] px-4 py-4 text-[13px] leading-6 text-[#d8f1ff]">
+                            <div className="text-[11px] uppercase tracking-[0.16em] text-[#bde7ff]">Start date</div>
+                            <div className="mt-2 text-[14px] text-white/82">
+                                {qaStartDate ? formatQaDateTime(qaStartDate) : "It starts when you click Begin Test Lab."}
+                            </div>
+                            {qaStartDate ? (
+                                <div className="mt-1 text-white/64">
+                                    Recommended by: {formatQaDateTime(addDays(qaStartDate, 7))}
+                                </div>
+                            ) : null}
+                        </div>
                     </div>
                     <div className="mt-4 flex flex-wrap gap-2 text-[12px] text-white/58">
                         <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5">Start at login / onboarding</span>
                         <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5">Test each tier in order</span>
+                        <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5">Do a free-roam pass after</span>
+                        <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5">Check the free-tier countdown banner</span>
                         <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5">Use fake Stripe test cards only</span>
                         <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5">Reports go to BrewCommand</span>
                     </div>
@@ -514,18 +653,28 @@ export default function QaPage() {
                 </section>
 
                 <section className="mt-5 grid gap-4 xl:grid-cols-2">
-                    <SectionCard title="How to test" description="A simple path your family can follow without needing BrewCommand access.">
+                    <SectionCard title="How to test" description="Guided pass first, then a free-roam pass to check whether the app explains itself.">
                         <div className="space-y-3">
-                            {TEST_STEPS.map((step, index) => (
+                            {GUIDED_TEST_STEPS.map((step, index) => (
                                 <div key={step} className="rounded-[20px] border border-white/10 bg-black/20 p-4">
                                     <div className="text-[11px] uppercase tracking-[0.16em] text-[#ffd873]">Step {index + 1}</div>
                                     <div className="mt-2 text-[15px] leading-7 text-white/74">{step}</div>
                                 </div>
                             ))}
                         </div>
+                        <div className="mt-5 rounded-[20px] border border-[#72caff]/18 bg-[#101922] p-4">
+                            <div className="text-[11px] uppercase tracking-[0.16em] text-[#bde7ff]">Free-roam prompts</div>
+                            <div className="mt-3 space-y-2">
+                                {FREE_ROAM_PROMPTS.map((prompt) => (
+                                    <div key={prompt} className="rounded-[16px] border border-white/8 bg-black/20 px-3 py-2 text-[14px] leading-6 text-white/68">
+                                        {prompt}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
                     </SectionCard>
 
-                    <SectionCard title="Tier notes" description="What each tester should look for at each level.">
+                    <SectionCard title="Tier notes" description="What each tester should look for at each level, including cues and next steps.">
                         <div className="grid gap-3">
                             {TIER_OPTIONS.map((tier) => (
                                 <button
@@ -569,6 +718,12 @@ export default function QaPage() {
                                 <div>Display name: {formState.testerName || "Not set yet"}</div>
                             </div>
                         </div>
+                        <div className="mb-5 rounded-[20px] border border-white/8 bg-black/20 px-4 py-4">
+                            <div className="text-[12px] uppercase tracking-[0.16em] text-white/38">What counts as a good report</div>
+                            <div className="mt-2 text-[14px] leading-7 text-white/62">
+                                If something feels off, say where you were, what you expected, and what actually happened. Use the priority that matches the impact: blocker, major, medium, minor, or polish.
+                            </div>
+                        </div>
                         <div className="grid gap-3 sm:grid-cols-3">
                             <YesNoToggle
                                 label="Page loaded cleanly?"
@@ -600,10 +755,10 @@ export default function QaPage() {
                                     name="journeyStage"
                                     value={formState.journeyStage}
                                     onChange={(event) => setFormState((current) => ({ ...current, journeyStage: event.target.value as JourneyStage }))}
-                                    className="w-full rounded-[18px] border border-white/10 bg-black/30 px-4 py-3 text-white outline-none transition focus:border-[#72caff]/45"
+                                    className={BRANDED_SELECT_CLASS}
                                 >
                                     {JOURNEY_STAGES.map((stage) => (
-                                        <option key={stage.value} value={stage.value}>
+                                        <option key={stage.value} value={stage.value} className="bg-[#101922] text-[#f7f2e8]">
                                             {stage.label}
                                         </option>
                                     ))}
@@ -620,10 +775,10 @@ export default function QaPage() {
                                     name="featureArea"
                                     value={formState.featureArea}
                                     onChange={(event) => setFormState((current) => ({ ...current, featureArea: event.target.value as FeatureArea }))}
-                                    className="w-full rounded-[18px] border border-white/10 bg-black/30 px-4 py-3 text-white outline-none transition focus:border-[#72caff]/45"
+                                    className={BRANDED_SELECT_CLASS}
                                 >
                                     {FEATURE_AREAS.map((area) => (
-                                        <option key={area.value} value={area.value}>
+                                        <option key={area.value} value={area.value} className="bg-[#101922] text-[#f7f2e8]">
                                             {area.label}
                                         </option>
                                     ))}
@@ -657,12 +812,20 @@ export default function QaPage() {
                                     name="priority"
                                     value={formState.priority}
                                     onChange={(event) => setFormState((current) => ({ ...current, priority: event.target.value as QaReportFormState["priority"] }))}
-                                    className="w-full rounded-[18px] border border-white/10 bg-black/30 px-4 py-3 text-white outline-none transition focus:border-[#72caff]/45"
+                                    className={BRANDED_SELECT_CLASS}
                                 >
-                                    <option value="low">Low</option>
-                                    <option value="normal">Normal</option>
-                                    <option value="high">High</option>
-                                    <option value="urgent">Urgent</option>
+                                    <option value="low" className="bg-[#101922] text-[#f7f2e8]">
+                                        Low
+                                    </option>
+                                    <option value="normal" className="bg-[#101922] text-[#f7f2e8]">
+                                        Normal
+                                    </option>
+                                    <option value="high" className="bg-[#101922] text-[#f7f2e8]">
+                                        High
+                                    </option>
+                                    <option value="urgent" className="bg-[#101922] text-[#f7f2e8]">
+                                        Urgent
+                                    </option>
                                 </select>
                             </div>
                         </div>
@@ -714,7 +877,7 @@ export default function QaPage() {
                                 name="expectedBehavior"
                                 value={formState.expectedBehavior}
                                 onChange={(event) => setFormState((current) => ({ ...current, expectedBehavior: event.target.value }))}
-                                placeholder="Describe the expected flow in plain words."
+                                placeholder="Describe the expected flow in plain words, including the page and next step."
                                 rows={4}
                                 className="w-full rounded-[18px] border border-white/10 bg-black/30 px-4 py-3 text-white outline-none transition focus:border-[#72caff]/45"
                             />
@@ -729,7 +892,7 @@ export default function QaPage() {
                                 name="actualBehavior"
                                 value={formState.actualBehavior}
                                 onChange={(event) => setFormState((current) => ({ ...current, actualBehavior: event.target.value }))}
-                                placeholder="Tell us what you saw instead."
+                                placeholder="Tell us what you saw instead, even if the page mostly worked."
                                 rows={5}
                                 className="w-full rounded-[18px] border border-white/10 bg-black/30 px-4 py-3 text-white outline-none transition focus:border-[#72caff]/45"
                             />
@@ -744,7 +907,7 @@ export default function QaPage() {
                                 name="notes"
                                 value={formState.notes}
                                 onChange={(event) => setFormState((current) => ({ ...current, notes: event.target.value }))}
-                                placeholder="Optional extra detail, browser quirks, or anything else helpful."
+                                placeholder="Optional extra detail, browser quirks, or whether the app was easy to follow."
                                 rows={4}
                                 className="w-full rounded-[18px] border border-white/10 bg-black/30 px-4 py-3 text-white outline-none transition focus:border-[#72caff]/45"
                             />
@@ -824,24 +987,24 @@ export default function QaPage() {
 
                     <SectionCard
                         title="Tier reminder"
-                        description={`Quick reminders for what testers should verify at each plan level. Current selection: ${selectedTier.label}.`}
+                        description={`Quick reminders for what testers should verify at each plan level, including the cue quality. Current selection: ${selectedTier.label}.`}
                     >
                         <div className="space-y-3">
                             <div className="rounded-[20px] border border-white/10 bg-black/20 p-4">
                                 <div className="text-[11px] uppercase tracking-[0.16em] text-white/40">Free</div>
-                                <div className="mt-2 text-[15px] leading-7 text-white/72">Dashboard, BrewU, Results, Support, and the trial / upgrade prompts.</div>
+                                <div className="mt-2 text-[15px] leading-7 text-white/72">Dashboard, BrewU, Results, Support, and the trial / upgrade prompts. Check whether the page explains what to do next.</div>
                             </div>
                             <div className="rounded-[20px] border border-white/10 bg-black/20 p-4">
                                 <div className="text-[11px] uppercase tracking-[0.16em] text-white/40">Starter</div>
-                                <div className="mt-2 text-[15px] leading-7 text-white/72">Strategy Locker entry, run strategy, save to My Picks, and confirm the play.</div>
+                                <div className="mt-2 text-[15px] leading-7 text-white/72">Strategy Locker entry, run strategy, save to My Picks, and confirm the play. Check whether the app makes the save / confirm path obvious.</div>
                             </div>
                             <div className="rounded-[20px] border border-white/10 bg-black/20 p-4">
                                 <div className="text-[11px] uppercase tracking-[0.16em] text-white/40">Pro</div>
-                                <div className="mt-2 text-[15px] leading-7 text-white/72">Expanded strategy flow, Fireball on NC Pick 3 / Pick 4, and richer stats / ratios.</div>
+                                <div className="mt-2 text-[15px] leading-7 text-white/72">Expanded strategy flow, Fireball on NC Pick 3 / Pick 4, and richer stats / ratios. Check whether the extra detail still reads clearly.</div>
                             </div>
                             <div className="rounded-[20px] border border-white/10 bg-black/20 p-4">
                                 <div className="text-[11px] uppercase tracking-[0.16em] text-white/40">Master</div>
-                                <div className="mt-2 text-[15px] leading-7 text-white/72">TimePulse timing analysis, lag range guidance, and Master-only review surface.</div>
+                                <div className="mt-2 text-[15px] leading-7 text-white/72">TimePulse timing analysis, lag range guidance, and Master-only review surface. Check whether the Master cue feels clearly different from the lower tiers.</div>
                             </div>
                         </div>
                     </SectionCard>

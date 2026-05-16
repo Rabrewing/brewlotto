@@ -128,6 +128,14 @@ export function TutorialVideoPanel({
     setIsCaptionsOn((value) => !value);
   };
 
+  const soundButtonClass = isMuted
+    ? "rounded-full border border-[#ffc742]/32 bg-[linear-gradient(180deg,rgba(56,39,10,0.98),rgba(21,16,10,0.98))] px-3 py-1.5 text-[12px] font-medium text-[#fff3cf] shadow-[0_0_18px_rgba(255,199,66,0.28)] backdrop-blur-md transition-colors hover:border-[#ffd978]/45 hover:text-white"
+    : "rounded-full border border-white/12 bg-black/65 px-3 py-1.5 text-[12px] font-medium text-white/80 backdrop-blur-md transition-colors hover:text-white";
+  const replayButtonClass =
+    "rounded-full border border-[#ffc742]/16 bg-[linear-gradient(180deg,rgba(35,24,11,0.96),rgba(16,12,8,0.98))] px-3 py-1.5 text-[12px] font-medium text-[#f6e2b3] shadow-[0_0_10px_rgba(255,199,66,0.16)] backdrop-blur-md transition-colors hover:border-[#ffd978]/28 hover:text-white";
+  const utilityButtonClass =
+    "rounded-full border border-[#ffc742]/14 bg-[linear-gradient(180deg,rgba(28,20,12,0.94),rgba(14,11,8,0.96))] px-3 py-1.5 text-[12px] font-medium text-[#f3dfb0] shadow-[0_0_8px_rgba(255,199,66,0.12)] backdrop-blur-md transition-colors hover:border-[#ffd978]/24 hover:text-white";
+
   return (
     <section className="rounded-[28px] border border-[#ffbd39]/22 bg-[linear-gradient(145deg,rgba(32,19,13,0.82),rgba(13,10,10,0.96))] px-5 py-5 shadow-[0_0_22px_rgba(255,184,28,0.08)]">
       <div className="text-[13px] uppercase tracking-[0.18em] text-white/38">{eyebrow}</div>
@@ -146,7 +154,7 @@ export function TutorialVideoPanel({
             type="button"
             aria-label="Close expanded tutorial"
             onClick={() => setIsExpanded(false)}
-            className="absolute right-4 top-4 z-20 rounded-full border border-white/12 bg-black/70 px-3 py-1.5 text-[12px] font-medium text-white/78 backdrop-blur-md transition-colors hover:text-white"
+            className="absolute right-4 top-4 z-20 rounded-full border border-[#ffc742]/18 bg-[linear-gradient(180deg,rgba(36,25,12,0.88),rgba(14,11,8,0.95))] px-3 py-1.5 text-[12px] font-medium text-[#f7ddb3] shadow-[0_0_10px_rgba(255,199,66,0.14)] backdrop-blur-md transition-colors hover:border-[#ffd978]/28 hover:text-white"
           >
             Close
           </button>
@@ -197,14 +205,14 @@ export function TutorialVideoPanel({
               <button
                 type="button"
                 onClick={() => void replay()}
-                className="rounded-full border border-white/12 bg-black/65 px-3 py-1.5 text-[12px] font-medium text-white/80 backdrop-blur-md transition-colors hover:text-white"
+                className={replayButtonClass}
               >
                 Replay
               </button>
               <button
                 type="button"
                 onClick={() => void toggleMute()}
-                className="rounded-full border border-white/12 bg-black/65 px-3 py-1.5 text-[12px] font-medium text-white/80 backdrop-blur-md transition-colors hover:text-white"
+                className={soundButtonClass}
               >
                 {isMuted ? "Play with sound" : "Mute"}
               </button>
@@ -212,14 +220,14 @@ export function TutorialVideoPanel({
                 type="button"
                 onClick={toggleCaptions}
                 disabled={!captionsSrc}
-                className="rounded-full border border-white/12 bg-black/65 px-3 py-1.5 text-[12px] font-medium text-white/80 backdrop-blur-md transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                className={`${utilityButtonClass} disabled:cursor-not-allowed disabled:opacity-40`}
               >
                 {isCaptionsOn ? "CC on" : "CC off"}
               </button>
               <button
                 type="button"
                 onClick={() => setIsExpanded((value) => !value)}
-                className="rounded-full border border-white/12 bg-black/65 px-3 py-1.5 text-[12px] font-medium text-white/80 backdrop-blur-md transition-colors hover:text-white"
+                className={utilityButtonClass}
               >
                 {isExpanded ? "Shrink" : "Expand"}
               </button>
@@ -239,8 +247,11 @@ export function TutorialVideoPanel({
 
       <div className="mt-4 space-y-4">
         <details className="mx-auto max-w-3xl rounded-[20px] border border-white/8 bg-black/20 px-4 py-4 text-center">
-          <summary className="cursor-pointer list-none text-[14px] font-medium text-[#f7ddb3] outline-none">
-            {transcriptTitle}
+          <summary className="flex cursor-pointer list-none items-center justify-center gap-2 text-[14px] font-medium text-[#f7ddb3] outline-none">
+            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-[#ffc742]/20 bg-[linear-gradient(180deg,rgba(36,25,12,0.9),rgba(14,11,8,0.96))] text-[10px] text-[#ffd873] shadow-[0_0_8px_rgba(255,199,66,0.12)]">
+              ▾
+            </span>
+            <span>{transcriptTitle}</span>
           </summary>
           <div className="mt-3 space-y-2 text-[14px] leading-7 text-white/66">
             {transcript.map((line) => (

@@ -122,6 +122,14 @@ export default function HomePage() {
         }
     };
 
+    const soundButtonClass = isMuted
+        ? "rounded-full border border-[#ffc742]/32 bg-[linear-gradient(180deg,rgba(56,39,10,0.98),rgba(21,16,10,0.98))] px-3 py-1.5 text-[12px] font-medium text-[#fff3cf] shadow-[0_0_18px_rgba(255,199,66,0.28)] backdrop-blur-md transition-colors hover:border-[#ffd978]/45 hover:text-white"
+        : "rounded-full border border-white/12 bg-black/65 px-3 py-1.5 text-[12px] font-medium text-white/80 backdrop-blur-md transition-colors hover:text-white";
+    const replayButtonClass =
+        "rounded-full border border-[#ffc742]/16 bg-[linear-gradient(180deg,rgba(35,24,11,0.96),rgba(16,12,8,0.98))] px-3 py-1.5 text-[12px] font-medium text-[#f6e2b3] shadow-[0_0_10px_rgba(255,199,66,0.16)] backdrop-blur-md transition-colors hover:border-[#ffd978]/28 hover:text-white";
+    const utilityButtonClass =
+        "rounded-full border border-[#ffc742]/14 bg-[linear-gradient(180deg,rgba(28,20,12,0.94),rgba(14,11,8,0.96))] px-3 py-1.5 text-[12px] font-medium text-[#f3dfb0] shadow-[0_0_8px_rgba(255,199,66,0.12)] backdrop-blur-md transition-colors hover:border-[#ffd978]/24 hover:text-white";
+
     const toggleMute = async () => {
         const video = videoRef.current;
         const nextMuted = !isMuted;
@@ -186,7 +194,7 @@ export default function HomePage() {
 
                 <section className="flex flex-1 items-center py-6 lg:py-10">
                     <div className="w-full">
-                        <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/30 px-3 py-1.5 text-[12px] uppercase tracking-[0.16em] text-white/72 backdrop-blur-md">
+                        <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#ffc742]/16 bg-[linear-gradient(180deg,rgba(36,25,12,0.88),rgba(14,11,8,0.94))] px-3 py-1.5 text-[12px] uppercase tracking-[0.16em] text-[#f7ddb3] shadow-[0_0_10px_rgba(255,199,66,0.12)] backdrop-blur-md">
                             <span className="h-2 w-2 rounded-full bg-[#ffcb4d] shadow-[0_0_10px_rgba(255,203,77,0.85)] animate-brew-pulse" />
                             BrewLotto reel
                         </div>
@@ -203,7 +211,7 @@ export default function HomePage() {
                                     type="button"
                                     aria-label="Close expanded video"
                                     onClick={() => setIsExpanded(false)}
-                                    className="absolute right-4 top-4 z-20 rounded-full border border-white/12 bg-black/70 px-3 py-1.5 text-[12px] font-medium text-white/78 backdrop-blur-md transition-colors hover:text-white"
+                                    className="absolute right-4 top-4 z-20 rounded-full border border-[#ffc742]/18 bg-[linear-gradient(180deg,rgba(36,25,12,0.88),rgba(14,11,8,0.95))] px-3 py-1.5 text-[12px] font-medium text-[#f7ddb3] shadow-[0_0_10px_rgba(255,199,66,0.14)] backdrop-blur-md transition-colors hover:border-[#ffd978]/28 hover:text-white"
                                 >
                                     Close
                                 </button>
@@ -260,21 +268,21 @@ export default function HomePage() {
                                         <button
                                             type="button"
                                             onClick={() => void handleReplay()}
-                                            className="rounded-full border border-white/12 bg-black/65 px-3 py-1.5 text-[12px] font-medium text-white/80 backdrop-blur-md transition-colors hover:text-white"
+                                            className={replayButtonClass}
                                         >
                                             Replay
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => void (isMuted ? playWithSound() : toggleMute())}
-                                            className="rounded-full border border-white/12 bg-black/65 px-3 py-1.5 text-[12px] font-medium text-white/80 backdrop-blur-md transition-colors hover:text-white"
+                                            className={soundButtonClass}
                                         >
                                             {isMuted ? "Play with sound" : "Mute"}
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => setIsExpanded((value) => !value)}
-                                            className="rounded-full border border-white/12 bg-black/65 px-3 py-1.5 text-[12px] font-medium text-white/80 backdrop-blur-md transition-colors hover:text-white"
+                                            className={utilityButtonClass}
                                         >
                                             {isExpanded ? "Shrink" : "Expand"}
                                         </button>
@@ -308,8 +316,11 @@ export default function HomePage() {
                             </div>
 
                             <details className="border-t border-white/8 px-5 py-4 text-[14px] leading-7 text-white/64 sm:px-6">
-                                <summary className="cursor-pointer list-none font-medium text-[#f7ddb3] outline-none">
-                                    Read landing transcript
+                                <summary className="flex cursor-pointer list-none items-center justify-center gap-2 font-medium text-[#f7ddb3] outline-none">
+                                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-[#ffc742]/20 bg-[linear-gradient(180deg,rgba(36,25,12,0.9),rgba(14,11,8,0.96))] text-[10px] text-[#ffd873] shadow-[0_0_8px_rgba(255,199,66,0.12)]">
+                                        ▾
+                                    </span>
+                                    <span>Read landing transcript</span>
                                 </summary>
                                 <div className="mt-3 space-y-2">
                                     {landingTranscript.map((line) => (
