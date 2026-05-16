@@ -1,6 +1,6 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
-import { isBrewCommandAdminUser } from '@/lib/auth/brewcommandShared';
+import { isBrewCommandAccessUser } from '@/lib/auth/brewcommandShared';
 
 type CookieEntry = {
   name: string;
@@ -49,7 +49,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (!isBrewCommandAdminUser(user)) {
+  if (!isBrewCommandAccessUser(user)) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     url.searchParams.set('error', 'not-authorized');

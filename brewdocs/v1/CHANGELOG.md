@@ -25,6 +25,7 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Restored the legacy `tier` alias from `useUserTier` so older prediction components still see the paid tier after the entitlement-backed billing refactor, which keeps Master-gated strategy paths from acting like the user is still free.
 - Made the Billing page resilient to lookup failures by degrading entitlements, tiers, and features gracefully instead of collapsing the whole page into `Failed to load billing`.
 - Added a Billing `Refresh Access` recovery path and `/api/billing/sync` endpoint so a successful Stripe checkout can rehydrate `user_entitlements` from the latest subscription record if the webhook write lagged or missed an update.
+- Updated the global middleware gate to allow approved BrewCommand tester accounts as well as admins, fixing the regression where QA sign-ins could not reach `/qa` and were bounced back to login before the callback redirect landed.
 - Seeded the initial QA tester allowlist with the current family roster so the Test Lab can open for approved testers as soon as they sign in.
 - Moved the QA tester roster into the shared auth helper default allowlist so the approved tester emails work in the deployed app, not only in local `.env.local`.
 - Restored direct desktop logout from the avatar menu so BrewCommand/admin sessions can sign out immediately, with `/logout` kept as a fallback route.
