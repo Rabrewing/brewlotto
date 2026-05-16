@@ -146,7 +146,7 @@ export function getDashboardGameTabs(state: DashboardStateCode) {
 }
 
 export function getDashboardDefaultGame(state: DashboardStateCode): DashboardGameId {
-  return state === 'CA' ? 'pick3' : 'pick3';
+  return 'pick3';
 }
 
 export const DASHBOARD_GAME_CONFIG = DASHBOARD_GAME_CONFIG_BASE;

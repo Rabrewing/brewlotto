@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { getStrategyLabel } from '@/utils/strategyLabel';
+import { resolveDashboardGameConfig, type DashboardGameId, type DashboardStateCode } from '@/lib/dashboard/game-config';
 
 import { createSupabaseServerClient } from '@/lib/supabase/serverClient';
 import StrategyEngine from '@/lib/prediction/strategyEngine';
@@ -34,6 +35,11 @@ const TIER_DRAW_LIMITS: Record<TierCode, number> = {
   starter: 200,
   pro: 500,
   master: 1000,
+};
+
+const DEFAULT_STRATEGY_GAME_BY_STATE: Record<DashboardStateCode, DashboardGameId> = {
+  NC: 'pick3',
+  CA: 'pick3',
 };
 
 const ENGINE_BY_REGISTRY_KEY: Partial<Record<RegistryStrategyKey, EngineKey>> = {
@@ -127,6 +133,15 @@ function summarizeScoreMap(scoreMap: Record<string, number> | undefined | null) 
   }
 
   return Number((values.reduce((sum, value) => sum + Number(value), 0) / values.length).toFixed(4));
+}
+
+function normalizeStrategyGameKey(gameKey: string): DashboardGameId {
+  const normalized = gameKey.trim().toLowerCase();
+  if (normalized === 'pick3' || normalized === 'pick4' || normalized === 'cash5' || normalized === 'powerball' || normalized === 'mega') {
+    return normalized;
+  }
+
+  return 'pick3';
 }
 
 async function resolveHomeState(admin: ReturnType<typeof getAdminClient>, userId: string): Promise<'NC' | 'CA'> {
@@ -285,16 +300,13 @@ export async function POST(request: NextRequest) {
 
     await ensureProfileRows(admin, user.id, user.email || null);
 
-    const GAME_KEY_MAP: Record<string, string> = {
-      pick3: 'pick3',
-      pick4: 'pick4',
-      cash5: 'cash5',
-      powerball: 'powerball',
-      mega: 'mega_millions',
-    };
-
-    const homeState = (requestState || await resolveHomeState(admin, user.id)) as 'NC' | 'CA';
-    const gameKey = GAME_KEY_MAP[requestGameKey] || requestGameKey || 'pick3';
+    const homeState = (requestState || await resolveHomeState(admin, user.id)) as DashboardStateCode;
+    const requestedGame = normalizeStrategyGameKey(requestGameKey || DEFAULT_STRATEGY_GAME_BY_STATE[homeState]);
+    const gameConfig =
+      resolveDashboardGameConfig(requestedGame, homeState) ||
+      resolveDashboardGameConfig(DEFAULT_STRATEGY_GAME_BY_STATE[homeState], homeState) ||
+      resolveDashboardGameConfig('pick3', 'NC')!;
+    const gameKey = gameConfig.statsGameKey;
     const drawWindow = requestDrawWindow || null;
 
     const { data: gameRow, error: gameError } = await admin
@@ -366,10 +378,10 @@ export async function POST(request: NextRequest) {
       },
     });
     const engineKey = getEngineKey(strategyRow.strategy_key);
-    const selectedScores =
+    const selectedScores: Record<string, number> | Record<string, number | null> =
       engineKey === 'ensemble'
         ? strategyEngine.calculateEnsembleScores(strategyScores)
-        : strategyScores[engineKey] || {};
+        : (strategyScores[engineKey] as Record<string, number> | null | undefined) || {};
     const candidatePicks = strategyEngine.generateCandidatePicks(selectedScores, {
       primary_count: Number(gameRow.primary_count),
       primary_min: Number(gameRow.primary_min),
@@ -391,7 +403,7 @@ export async function POST(request: NextRequest) {
       notes: [`Engine run via ${engineKey}`],
     }));
 
-    const storage = new PredictionStorage(admin);
+    const storage = new PredictionStorage(admin as any);
     const stored = await storage.storePrediction({
       user_id: user.id,
       state: homeState,
@@ -411,7 +423,8 @@ export async function POST(request: NextRequest) {
       },
       evidence_bundle: {
         homeState,
-        gameKey,
+        gameKey: requestedGame,
+        stateGameKey: gameKey,
         drawCount: (drawRows || []).length,
         engineKey,
       },
@@ -442,7 +455,7 @@ export async function POST(request: NextRequest) {
     });
 
     let timingProfile = null;
-    let strategyComparisons = null;
+    let strategyComparisons: Record<string, unknown> | null = null;
     if (hasTimingAnalysis) {
       try {
         const { data: pastPredictions } = await admin
