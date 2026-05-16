@@ -1,6 +1,6 @@
 # BrewLotto V1 - Current State & Next Steps
 
-**Last Updated:** 2026-05-16 ET (desktop/tablet shell widened, changelog + responsive checklist added, admin alerting cleanup, branch truth update, blob-backed landing reel, home-state preference wiring, billing live-mode verification, strategy locker save/run flow fix, compact entitlement summary + collapsible ladder, BrewU Systems support scaffold, support screenshots bucket added, canonical play log bridge, support inbox notifications, settlement sweep, customer notifications plan added, docs timestamp rule added, BrewU play-style guidance live, shared play-style and payout matrix centralized, settlement classification upgraded, strategy validation pass queued, landing video replacement completed with the watermark-free local asset, AI strategy notifications tracked, momentum meter kept single, ingestion-driven strategy signal sweep wired, Strategy Signals BrewCommand section added, play confirmation nudges added, My Picks confirm-play action added, results page date/time dividers added, results history range controls added, strategy locker ratio chips live, results history and win-ratio plan added, My Picks saved-only 30-day history added, Fireball modifier now tracked in play logs and settlement labels for NC Pick 3/4, Fireball visibility surfaced in results / My Picks / Strategy Locker / Stats / Admin, Fireball clarity added to BrewU/help, prize-table snapshots added to BrewU/help, BrewU quick index added for fast topic jumping, BrewU index polish added with chips and a popular-topics strip, BrewU FAQ phrasing added so the index reads like a browsable question hub, Notifications snapshot polish added so the feed opens with a compact state summary, TimePulse / TimePulse II timing analysis now splits Pro timing from Master adaptive timing, Billing benefit list deduped so timing rows remain visible without repeated duplicates, visible schema names were cleaned from Billing, Settings, and Stats copy, QA Test Lab added for approved tester accounts and queued into BrewCommand, visual polish sweep on BrewU/Strategy Locker in progress, `/pricing` is now a real state-aware plan-selection surface with monthly/yearly toggle and billing-portal handoff, pricing route map normalized, pricing page CTA flow tightened so the primary action matches trial/free/paid state, Stripe CLI test-mode readiness confirmed, midday/evening ingestion verified, momentum gauge re-centered, Supabase helper functions hardened with explicit search_path and legacy write policies narrowed to service_role, and dashboard/results state normalization now keeps the client surfaces aligned with the shared NC/CA helper types)
+**Last Updated:** 2026-05-16 ET (desktop/tablet shell widened, responsive checklist added, dropdown/menu cleanup and tier normalization implemented, admin alerting cleanup, branch truth update, blob-backed landing reel, home-state preference wiring, billing live-mode verification, strategy locker save/run flow fix, compact entitlement summary + collapsible ladder, BrewU Systems support scaffold, support screenshots bucket added, canonical play log bridge, support inbox notifications, settlement sweep, customer notifications plan added, docs timestamp rule added, BrewU play-style guidance live, shared play-style and payout matrix centralized, settlement classification upgraded, strategy validation pass queued, landing video replacement completed with the watermark-free local asset, AI strategy notifications tracked, momentum meter kept single, ingestion-driven strategy signal sweep wired, Strategy Signals BrewCommand section added, play confirmation nudges added, My Picks confirm-play action added, results page date/time dividers added, results history range controls added, strategy locker ratio chips live, results history and win-ratio plan added, My Picks saved-only 30-day history added, Fireball modifier now tracked in play logs and settlement labels for NC Pick 3/4, Fireball visibility surfaced in results / My Picks / Strategy Locker / Stats / Admin, Fireball clarity added to BrewU/help, prize-table snapshots added to BrewU/help, BrewU quick index added for fast topic jumping, BrewU index polish added with chips and a popular-topics strip, BrewU FAQ phrasing added so the index reads like a browsable question hub, Notifications snapshot polish added so the feed opens with a compact state summary, TimePulse / TimePulse II timing analysis now splits Pro timing from Master adaptive timing, Billing benefit list deduped so timing rows remain visible without repeated duplicates, visible schema names were cleaned from Billing, Settings, and Stats copy, QA Test Lab added for approved tester accounts and queued into BrewCommand, visual polish sweep on BrewU/Strategy Locker in progress, `/pricing` is now a real state-aware plan-selection surface with monthly/yearly toggle and billing-portal handoff, pricing route map normalized, pricing page CTA flow tightened so the primary action matches trial/free/paid state, Stripe CLI test-mode readiness confirmed, midday/evening ingestion verified, momentum gauge re-centered, Supabase helper functions hardened with explicit search_path and legacy write policies narrowed to service_role, and dashboard/results state normalization now keeps the client surfaces aligned with the shared NC/CA helper types)
 **Phase:** Shared UI/UX framework and product truth pass
 
 ## 2026-05-05 Truth Update
@@ -9,7 +9,7 @@
 - Public landing page, login page, pricing page, onboarding flow, and dashboard entry points are live on the `brew2-overhaul` preview branch; production tracks `brewlotto-v1`.
 - Stripe downgrades are currently managed through the billing portal, and the webhook path reflects the new tier via `customer.subscription.updated` so entitlements roll back cleanly when Stripe changes the subscription.
 - Stripe CLI test-mode is authenticated and ready for webhook verification (`acct_1TTVRiCi8lUllKJd`, test keys configured, config.toml readable).
-- Landing reel now uses a Vercel Blob-backed source with muted autoplay plus explicit `Play with sound`, `Replay`, and `Expand` controls.
+- Landing reel now uses a Vercel Blob-backed source with muted autoplay plus explicit `Play with sound`, `Replay`, and `Expand` controls, and the watermark-free landing-video swap is complete.
 - Landing reel now starts in its expanded movie-style state by default and includes captions plus a transcript toggle for accessibility.
 - The BrewU/onboarding tutorial is now Blob-backed as well, with captions, a transcript toggle, and a BrewU replay path at `/learn#tutorial`.
 - BrewCommand now has an internal onboarding reset action so the disclaimer/tutorial flow can be re-run without manual database edits during launch testing.
@@ -78,12 +78,12 @@
 - Learn and Legal are lightweight V1 shells, not full CMS/legal surfaces yet.
 - Settings stores values, but full theme application across the UI is still future work.
 - Notifications stores preferences and reads history, but real delivery wiring still needs a full verification pass.
-- Menu/tab and mockup QA still needs another visual pass against the current rendered routes, with Strategy Locker and Learn/BrewU still the highest-priority polish pages.
+- Menu/tab and mockup QA are mostly cleaned up at the route level; the remaining work is a browser screenshot spot-check against the rendered routes, with Strategy Locker and Learn/BrewU still the highest-priority polish pages.
 - Settings now uses a centered account-style hero with clearer Gameplay / Notifications / Account groupings, which brings it closer to the mockup rhythm without inventing fake profile data.
 - Billing now uses a centered account-style hero with clearer benefits / billing / quick-links flow, and Notifications now has a New / All tab strip so the live feed reads closer to the mockup rhythm.
 - The watermark-free landing-page video is now synced across the local `brewlotto-no-watermark.mp4` asset and the Vercel Blob MP4 URL, with the CLI deploy path still available if you later want to promote a new variant externally.
-- Tier gating still needs a deliberate test matrix across dashboard, strategy locker, pricing, billing, and AI surfaces.
-- Route wiring is now cleaner, but the next visual pass should still check whether the shared dashboard surfaces breathe as well on desktop/tablet as they do on mobile mockups.
+- Tier gating wiring now matches across dashboard, strategy locker, pricing, billing, and AI surfaces; the remaining work is live browser spot-checking rather than route-level alignment.
+- Route wiring is now cleaner, and the shared dashboard shell is widened for desktop/tablet while preserving the mobile stack; the remaining work is a final browser spot-check.
 - Strategy validation still needs a spec cross-check pass that verifies each live engine module and its tests against the BrewLotto V1 strategy spec.
 - BrewU content externalization is intentionally deferred until launch pressure justifies a content-management layer; the current static content is truthful and tied to real product surfaces.
 - BrewCommand alerting is now operational with a single selected recipient plus history/filtering, but full internal RBAC and user provisioning are still deferred.
@@ -100,20 +100,18 @@
 - AI usage logging now feeds an internal BrewCommand spend dashboard so token usage and estimated model cost can be audited before margin-sensitive launch decisions.
 
 ### 🎯 Current Truth Priority
-1. Do a desktop/tablet/mobile responsive pass on the landing, login, and shared framework surfaces so the structure stays polished across devices. The new checklist lives in `brewdocs/v1/responsive-layout-checklist.md`.
-2. Run a visual QA pass on the dropdown/menu destinations against the current mockups and rendered pages, focusing next on any remaining spacing or rhythm gaps in Billing and Notifications.
-3. Run a tier matrix test across dashboard, strategy locker, pricing, billing, and AI commentary surfaces.
-4. Verify Stripe live-mode checkout/webhook flow against the current billing ladder.
-5. Finish the CA Powerball/Mega live scraper work that remains stale/expected.
-6. Keep the BrewCommand AI usage ledger visible while live-mode billing is validated.
-7. Keep the onboarding tutorial and future Opus Clip clips aligned with the landing/login flow.
-8. Tighten the BrewU support intake flow and verify screenshot upload / notification delivery.
-9. Build the QA/Test Lab flow for approved testers so the whole app can be exercised tier-by-tier, with yes/no checks, screenshots, and simple notes written into the BrewCommand QA queue.
-10. Normalize the customer notification pipeline so support updates, settlement events, and Brew AI strategy detections can write to `user_notifications` and email the correct BrewLotto return link.
-11. Continue tightening the confirmed-play workflow so same-day wins are counted correctly and retroactive close matches never masquerade as a real win; near-hit play confirmation nudges are the interim bridge.
-12. Capture every launch game’s play-style odds and payout ladders, including NC Fireball handling, then teach the AI layer plus BrewU/help content to offer educational straight/box/50/50/combo suggestions per game.
-13. Replace the landing-page video with the watermark-free Blob asset once it lands, and use the Vercel CLI deployment path for the swap.
-14. Keep the referral growth loop deferred until billing, notifications, and strategy gating are stable.
+1. Run a final browser spot-check on the widened desktop/tablet/mobile shell and the dropdown/menu spacing across the landing, login, and shared framework surfaces. The implementation is already in place and the checklist lives in `brewdocs/v1/responsive-layout-checklist.md`.
+2. Keep the remaining screenshot-rhythm QA focused on Billing and Notifications rather than route wiring.
+3. Verify Stripe live-mode checkout/webhook flow against the current billing ladder.
+4. Finish the CA Powerball/Mega live scraper work that remains stale/expected.
+5. Keep the BrewCommand AI usage ledger visible while live-mode billing is validated.
+6. Keep the onboarding tutorial and future Opus Clip clips aligned with the landing/login flow.
+7. Tighten the BrewU support intake flow and verify screenshot upload / notification delivery.
+8. Build the QA/Test Lab flow for approved testers so the whole app can be exercised tier-by-tier, with yes/no checks, screenshots, and simple notes written into the BrewCommand QA queue.
+9. Normalize the customer notification pipeline so support updates, settlement events, and Brew AI strategy detections can write to `user_notifications` and email the correct BrewLotto return link.
+10. Continue tightening the confirmed-play workflow so same-day wins are counted correctly and retroactive close matches never masquerade as a real win; near-hit play confirmation nudges are the interim bridge.
+11. Capture every launch game’s play-style odds and payout ladders, including NC Fireball handling, then teach the AI layer plus BrewU/help content to offer educational straight/box/50/50/combo suggestions per game.
+12. Keep the referral growth loop deferred until billing, notifications, and strategy gating are stable.
 
 ### Tutorial Prompt Status
 - Opus Clip prompt pack is ready to generate for the disclaimer, walkthrough, and dashboard intro clips.
@@ -378,11 +376,11 @@ npm run ingest-all
 
 ### High Priority
 1. Keep ingestion on the Cloud Scheduler + Cloud Run path and leave the local cron helper archived.
-2. Run a visual QA pass on the dropdown/menu destinations against the current mockups and rendered pages.
+2. Run a final browser spot-check on the dropdown/menu destinations against the current mockups and rendered pages.
 3. Finish Stripe checkout, webhook, and customer portal wiring so `/billing` becomes a real self-serve flow.
-4. Run a tier matrix test across dashboard, strategy locker, pricing, billing, and AI commentary surfaces.
+4. Keep the tier matrix wiring aligned across dashboard, strategy locker, pricing, billing, and AI commentary surfaces.
 5. Verify the strategy replay / run-strategy affordance and tighten the comparison/animation polish where needed, but keep the animation itself as polish-only rather than a launch blocker; the preferred version is a brief BrewLotto avatar running-in-place cue that says the strategy is being computed.
-6. Do a desktop/tablet/mobile responsive pass on the landing, login, and shared framework surfaces so the structure stays polished across devices.
+6. Do a final desktop/tablet/mobile browser spot-check on the landing, login, and shared framework surfaces now that the widened shell is in place.
 7. Finish the BrewCommand Strategy Signals view so every ingestion-driven alert shows the recipient, reason, and qualifying strategy keys before moving back to results-history work.
 
 ### Medium Priority
