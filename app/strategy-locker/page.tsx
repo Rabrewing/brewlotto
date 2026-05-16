@@ -111,7 +111,6 @@ interface UserEntitlementRecord {
   premium_explanations_access?: boolean | null;
   premium_comparison_access?: boolean | null;
   voice_commentary_access?: boolean | null;
-  timepulse_access?: boolean | null;
   timing_analysis_access?: boolean | null;
 }
 
@@ -271,7 +270,7 @@ export default function StrategyLockerPage() {
             .limit(120) as unknown as Promise<QueryResult<PlayLogRecord[]>>;
         const entitlementsQuery = supabase
             .from('user_entitlements')
-            .select('tier_code, advanced_strategy_access, premium_explanations_access, premium_comparison_access, voice_commentary_access, timepulse_access, timing_analysis_access')
+            .select('tier_code, advanced_strategy_access, premium_explanations_access, premium_comparison_access, voice_commentary_access, timing_analysis_access')
             .eq('user_id', authUser.id)
             .maybeSingle() as unknown as Promise<QueryResult<UserEntitlementRecord | null>>;
         const tiersQuery = supabase
@@ -362,15 +361,17 @@ export default function StrategyLockerPage() {
     const tier = (userTier || entitlements?.tier_code || 'free') as TierCode;
     return tier;
   }, [entitlements?.tier_code, userTier]);
+  const hasTimePulseAccess = currentTier === 'pro' || currentTier === 'master';
+  const hasTimePulseIIAccess = currentTier === 'master' || Boolean(entitlements?.timing_analysis_access);
   const timingAccessLabel = resolveTimingAccessLabel({
     tierCode: currentTier,
-    timepulseAccess: Boolean(entitlements?.timepulse_access),
-    timingAnalysisAccess: Boolean(entitlements?.timing_analysis_access),
+    timepulseAccess: hasTimePulseAccess,
+    timingAnalysisAccess: hasTimePulseIIAccess,
   });
   const timingAccessMode = resolveTimingAccessMode({
     tierCode: currentTier,
-    timepulseAccess: Boolean(entitlements?.timepulse_access),
-    timingAnalysisAccess: Boolean(entitlements?.timing_analysis_access),
+    timepulseAccess: hasTimePulseAccess,
+    timingAnalysisAccess: hasTimePulseIIAccess,
   });
 
   const currentTierIndex = TIER_ORDER[currentTier];
@@ -720,12 +721,12 @@ export default function StrategyLockerPage() {
                         </div>
                         <div className="rounded-[18px] border border-[#72caff]/18 bg-[#111f28] px-4 py-3">
                           <div className="text-[12px] uppercase tracking-[0.16em] text-[#9edcff]">TimePulse</div>
-                          <div className="mt-2 text-[16px] font-medium text-[#d7ecff]">{entitlements?.timepulse_access ? 'Enabled' : 'Locked'}</div>
+                          <div className="mt-2 text-[16px] font-medium text-[#d7ecff]">{hasTimePulseAccess ? 'Enabled' : 'Locked'}</div>
                           <div className="mt-1 text-[12px] text-white/40">BrewPro timing window and lag profile</div>
                         </div>
                         <div className="rounded-[18px] border border-[#ffbd39]/18 bg-[#1a140c] px-4 py-3">
                           <div className="text-[12px] uppercase tracking-[0.16em] text-[#f5cf84]">TimePulse II</div>
-                          <div className="mt-2 text-[16px] font-medium text-[#f7ddb3]">{entitlements?.timing_analysis_access ? 'Enabled' : 'Locked'}</div>
+                          <div className="mt-2 text-[16px] font-medium text-[#f7ddb3]">{hasTimePulseIIAccess ? 'Enabled' : 'Locked'}</div>
                           <div className="mt-1 text-[12px] text-white/40">BrewMaster adaptive timing and regime shifts</div>
                         </div>
                       </div>

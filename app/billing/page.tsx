@@ -23,7 +23,6 @@ interface UserEntitlementRecord {
   export_access?: boolean | null;
   voice_commentary_access?: boolean | null;
   notifications_premium_access?: boolean | null;
-  timepulse_access?: boolean | null;
   timing_analysis_access?: boolean | null;
   effective_from?: string | null;
   effective_to?: string | null;
@@ -95,7 +94,7 @@ export default function BillingPage() {
 
         const { data: entitlementsData, error: entitlementsError } = await supabase
           .from('user_entitlements')
-          .select('tier_code, ai_quota_monthly, ai_quota_used, pick_generation_limit_daily, advanced_strategy_access, premium_explanations_access, premium_comparison_access, export_access, voice_commentary_access, notifications_premium_access, timepulse_access, timing_analysis_access, effective_from, effective_to')
+          .select('tier_code, ai_quota_monthly, ai_quota_used, pick_generation_limit_daily, advanced_strategy_access, premium_explanations_access, premium_comparison_access, export_access, voice_commentary_access, notifications_premium_access, timing_analysis_access, effective_from, effective_to')
           .eq('user_id', authUser.id)
           .maybeSingle();
 
@@ -133,6 +132,8 @@ export default function BillingPage() {
   }, []);
 
   const currentTier = userTier as TierCode;
+  const hasTimePulseAccess = currentTier === 'pro' || currentTier === 'master';
+  const hasTimePulseIIAccess = currentTier === 'master' || Boolean(entitlements?.timing_analysis_access);
   const currentPlan = tiers.find((entry) => entry.tier_key === currentTier) || null;
   const displayName = user?.email?.split('@')[0]?.replace(/[._-]+/g, ' ').trim() || 'Brew User';
   const initials =
@@ -312,8 +313,8 @@ export default function BillingPage() {
                     ['Premium explanations unlocked', entitlements?.premium_explanations_access ? 'Yes' : 'Locked'],
                     ['Prediction comparisons unlocked', entitlements?.premium_comparison_access ? 'Yes' : 'Locked'],
                     ['Voice commentary unlocked', entitlements?.voice_commentary_access ? 'Yes' : 'Locked'],
-                    ['TimePulse', entitlements?.timepulse_access ? 'Enabled' : 'Locked'],
-                    ['TimePulse II', entitlements?.timing_analysis_access ? 'Enabled' : 'Locked'],
+                    ['TimePulse', hasTimePulseAccess ? 'Enabled' : 'Locked'],
+                    ['TimePulse II', hasTimePulseIIAccess ? 'Enabled' : 'Locked'],
                   ].map(([label, value]) => (
                     <div
                       key={label}

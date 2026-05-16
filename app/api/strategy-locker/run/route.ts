@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import { getStrategyLabel } from '@/utils/strategyLabel';
 import { resolveDashboardGameConfig, type DashboardGameId, type DashboardStateCode } from '@/lib/dashboard/game-config';
 
 import { createSupabaseServerClient } from '@/lib/supabase/serverClient';
+import { createBillingAdminClient, getEffectiveBillingTier, loadCurrentBillingSubscription } from '@/lib/billing/stripe';
 import StrategyEngine from '@/lib/prediction/strategyEngine';
 import { PredictionStorage } from '@/lib/prediction/predictionStorage';
 import { computeTimingProfile } from '@/lib/prediction/timingAnalysis';
@@ -54,13 +54,6 @@ const ENGINE_BY_REGISTRY_KEY: Partial<Record<RegistryStrategyKey, EngineKey>> = 
   deep_ai_explanations: 'ensemble',
   early_access_strategies: 'ensemble',
 };
-
-function getAdminClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  );
-}
 
 function normalizeTier(value: unknown): TierCode {
   const tier = String(value || '').toLowerCase();
@@ -145,7 +138,7 @@ function normalizeStrategyGameKey(gameKey: string): DashboardGameId {
   return 'pick3';
 }
 
-async function resolveHomeState(admin: ReturnType<typeof getAdminClient>, userId: string): Promise<'NC' | 'CA'> {
+async function resolveHomeState(admin: ReturnType<typeof createBillingAdminClient>, userId: string): Promise<'NC' | 'CA'> {
   const { data } = await admin
     .from('user_preferences')
     .select('default_state_code')
@@ -156,7 +149,7 @@ async function resolveHomeState(admin: ReturnType<typeof getAdminClient>, userId
   return state === 'CA' ? 'CA' : 'NC';
 }
 
-async function ensureProfileRows(admin: ReturnType<typeof getAdminClient>, userId: string, email: string | null) {
+async function ensureProfileRows(admin: ReturnType<typeof createBillingAdminClient>, userId: string, email: string | null) {
   await admin.from('profiles').upsert(
     {
       id: userId,
@@ -227,21 +220,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const admin = getAdminClient();
+    const admin = createBillingAdminClient();
 
-    const [{ data: strategyRow, error: strategyError }, { data: entitlementRow, error: entitlementError }] =
-      await Promise.all([
-        admin
-          .from('strategy_registry')
-          .select('id, strategy_key, public_name, description, min_tier, is_active, category, metadata')
-          .eq('id', strategyId)
-          .maybeSingle(),
-        admin
-          .from('user_entitlements')
-          .select('tier_code, timepulse_access, timing_analysis_access')
-          .eq('user_id', user.id)
-          .maybeSingle(),
-      ]);
+    const [
+      { data: strategyRow, error: strategyError },
+      { data: entitlementRow, error: entitlementError },
+      { subscription, error: subscriptionError },
+    ] = await Promise.all([
+      admin
+        .from('strategy_registry')
+        .select('id, strategy_key, public_name, description, min_tier, is_active, category, metadata')
+        .eq('id', strategyId)
+        .maybeSingle(),
+      admin
+        .from('user_entitlements')
+        .select('tier_code, timing_analysis_access')
+        .eq('user_id', user.id)
+        .maybeSingle(),
+      loadCurrentBillingSubscription(admin, user.id),
+    ]);
 
     if (strategyError) {
       return NextResponse.json(
@@ -269,6 +266,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (subscriptionError) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'FETCH_ERROR',
+            message: subscriptionError.message,
+          },
+        },
+        { status: 500 },
+      );
+    }
+
     if (!strategyRow || !strategyRow.is_active) {
       return NextResponse.json(
         {
@@ -282,15 +292,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const currentTier = normalizeTier(entitlementRow?.tier_code);
+    const currentTier = getEffectiveBillingTier(subscription) || normalizeTier(entitlementRow?.tier_code);
+    const hasTimePulseAccess = currentTier === 'pro' || currentTier === 'master';
     const timingMode = resolveTimingAccessMode({
       tierCode: currentTier,
-      timepulseAccess: Boolean(entitlementRow?.timepulse_access),
+      timepulseAccess: hasTimePulseAccess,
       timingAnalysisAccess: Boolean(entitlementRow?.timing_analysis_access),
     });
     const timingTierLabel = resolveTimingAccessLabel({
       tierCode: currentTier,
-      timepulseAccess: Boolean(entitlementRow?.timepulse_access),
+      timepulseAccess: hasTimePulseAccess,
       timingAnalysisAccess: Boolean(entitlementRow?.timing_analysis_access),
     });
     const hasTimingAnalysis = Boolean(timingMode);

@@ -16,10 +16,19 @@ export interface BillingTierEntitlementPayload {
   export_access: boolean;
   voice_commentary_access: boolean;
   notifications_premium_access: boolean;
-  timepulse_access: boolean;
   timing_analysis_access: boolean;
   effective_from: string;
   effective_to: string | null;
+}
+
+export interface BillingSubscriptionRecord {
+  status?: string | null;
+  metadata?: Record<string, unknown> | null;
+  subscription_products?: {
+    code?: string | null;
+  } | Array<{
+    code?: string | null;
+  }> | null;
 }
 
 const TIER_ORDER: Record<BillingTierCode, number> = {
@@ -76,7 +85,6 @@ const TIER_FEATURES: Record<BillingTierCode, BillingTierEntitlementPayload> = {
     export_access: false,
     voice_commentary_access: false,
     notifications_premium_access: false,
-    timepulse_access: false,
     timing_analysis_access: false,
     effective_from: new Date().toISOString(),
     effective_to: null,
@@ -93,7 +101,6 @@ const TIER_FEATURES: Record<BillingTierCode, BillingTierEntitlementPayload> = {
     export_access: false,
     voice_commentary_access: false,
     notifications_premium_access: false,
-    timepulse_access: false,
     timing_analysis_access: false,
     effective_from: new Date().toISOString(),
     effective_to: null,
@@ -110,7 +117,6 @@ const TIER_FEATURES: Record<BillingTierCode, BillingTierEntitlementPayload> = {
     export_access: false,
     voice_commentary_access: false,
     notifications_premium_access: true,
-    timepulse_access: true,
     timing_analysis_access: false,
     effective_from: new Date().toISOString(),
     effective_to: null,
@@ -127,7 +133,6 @@ const TIER_FEATURES: Record<BillingTierCode, BillingTierEntitlementPayload> = {
     export_access: true,
     voice_commentary_access: true,
     notifications_premium_access: true,
-    timepulse_access: true,
     timing_analysis_access: true,
     effective_from: new Date().toISOString(),
     effective_to: null,
@@ -142,6 +147,45 @@ function getRequiredEnv(name: string) {
     throw new Error(`Missing required env var: ${name}`);
   }
   return value;
+}
+
+export function normalizeBillingTier(value: unknown): BillingTierCode | null {
+  const tier = String(value || '').toLowerCase();
+  if (tier === 'starter' || tier === 'pro' || tier === 'master' || tier === 'free') {
+    return tier;
+  }
+
+  return null;
+}
+
+export function tierFromBillingProductCode(code: unknown): BillingTierCode | null {
+  const productCode = String(code || '').toLowerCase();
+  if (productCode.includes('master')) return 'master';
+  if (productCode.includes('pro')) return 'pro';
+  if (productCode.includes('starter')) return 'starter';
+  if (productCode.includes('free')) return 'free';
+  return null;
+}
+
+export function getEffectiveBillingTier(subscription: BillingSubscriptionRecord | null): BillingTierCode | null {
+  if (!subscription) {
+    return null;
+  }
+
+  const status = String(subscription.status || '').toLowerCase();
+  if (status === 'canceled' || status === 'incomplete_expired' || status === 'unpaid') {
+    return 'free';
+  }
+
+  const product = Array.isArray(subscription.subscription_products)
+    ? subscription.subscription_products[0] || null
+    : subscription.subscription_products;
+
+  return (
+    normalizeBillingTier(subscription.metadata?.tier_code) ||
+    tierFromBillingProductCode(product?.code) ||
+    null
+  );
 }
 
 export function getStripeSecretKey() {
@@ -335,6 +379,35 @@ export async function upsertBillingEntitlements(
   }
 
   return payload;
+}
+
+export async function loadCurrentBillingSubscription(supabase: SupabaseClient, userId: string) {
+  const activeQuery = supabase
+    .from('user_subscriptions')
+    .select('status, metadata, subscription_products!inner(code)')
+    .eq('user_id', userId)
+    .in('status', ['active', 'trialing', 'past_due'])
+    .order('updated_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const latestQuery = supabase
+    .from('user_subscriptions')
+    .select('status, metadata, subscription_products!inner(code)')
+    .eq('user_id', userId)
+    .order('updated_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const [
+    { data: activeSubscription, error: activeError },
+    { data: latestSubscription, error: latestError },
+  ] = await Promise.all([activeQuery, latestQuery]);
+
+  return {
+    subscription: activeSubscription || latestSubscription,
+    error: activeError || latestError,
+  };
 }
 
 export async function upsertBillingWebhookEvent(
