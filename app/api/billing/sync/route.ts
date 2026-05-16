@@ -45,6 +45,35 @@ function getEffectiveTier(
   );
 }
 
+async function loadCurrentSubscription(admin: ReturnType<typeof createBillingAdminClient>, userId: string) {
+  const activeQuery = admin
+    .from('user_subscriptions')
+    .select('status, metadata, subscription_products!inner(code)')
+    .eq('user_id', userId)
+    .in('status', ['active', 'trialing', 'past_due'])
+    .order('updated_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const latestQuery = admin
+    .from('user_subscriptions')
+    .select('status, metadata, subscription_products!inner(code)')
+    .eq('user_id', userId)
+    .order('updated_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const [
+    { data: activeSubscription, error: activeError },
+    { data: latestSubscription, error: latestError },
+  ] = await Promise.all([activeQuery, latestQuery]);
+
+  return {
+    subscription: activeSubscription || latestSubscription,
+    error: activeError || latestError,
+  };
+}
+
 export async function POST(request: NextRequest) {
   try {
     const supabase = createSupabaseServerClient();
@@ -65,13 +94,7 @@ export async function POST(request: NextRequest) {
     }
 
     const admin = createBillingAdminClient();
-    const { data: subscription, error: subscriptionError } = await admin
-      .from('user_subscriptions')
-      .select('status, metadata, subscription_products!inner(code)')
-      .eq('user_id', user.id)
-      .order('updated_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    const { subscription, error: subscriptionError } = await loadCurrentSubscription(admin, user.id);
 
     if (subscriptionError) {
       throw subscriptionError;

@@ -58,13 +58,27 @@ export function useUserTier() {
                 return;
             }
 
-            const { data: subscription, error: subscriptionError } = await supabase
+            const activeSubscriptionQuery = supabase
+                .from("user_subscriptions")
+                .select("status, metadata, subscription_products!inner(code)")
+                .eq("user_id", user.id)
+                .in("status", ["active", "trialing", "past_due"])
+                .order("updated_at", { ascending: false })
+                .limit(1)
+                .maybeSingle();
+
+            const latestSubscriptionQuery = supabase
                 .from("user_subscriptions")
                 .select("status, metadata, subscription_products!inner(code)")
                 .eq("user_id", user.id)
                 .order("updated_at", { ascending: false })
                 .limit(1)
                 .maybeSingle();
+
+            const [
+                { data: activeSubscription, error: activeSubscriptionError },
+                { data: latestSubscription, error: latestSubscriptionError },
+            ] = await Promise.all([activeSubscriptionQuery, latestSubscriptionQuery]);
 
             const { data: entitlements, error } = await supabase
                 .from("user_entitlements")
@@ -74,6 +88,8 @@ export function useUserTier() {
 
             if (!mounted) return;
 
+            const subscription = activeSubscription || latestSubscription;
+            const subscriptionError = activeSubscriptionError || latestSubscriptionError;
             const subscriptionTier = !subscriptionError ? getEffectiveTier(subscription) : null;
             setCurrentTier(subscriptionTier || (!error && entitlements?.tier_code ? entitlements.tier_code : "free"));
 
