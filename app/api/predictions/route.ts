@@ -34,33 +34,50 @@ const GAME_KEY_MAP: Record<string, string> = {
   mega: 'mega_millions',
 };
 
-async function attachMatchInfo(supabase: ReturnType<typeof createClient>, predictions: any[]) {
-  const enriched: any[] = [];
+type PredictionRow = {
+  game?: string | null;
+  state?: string | null;
+  draw_date?: string | null;
+  draw_time?: string | null;
+  predicted_numbers?: unknown;
+  bonus_number?: unknown;
+};
+
+type DrawRow = {
+  primary_numbers?: unknown;
+  bonus_numbers?: unknown;
+  fireball_value?: unknown;
+};
+
+async function attachMatchInfo(supabase: any, predictions: PredictionRow[]) {
+  const enriched: Array<PredictionRow & { matchInfo: Record<string, unknown> | null }> = [];
 
   for (const prediction of predictions) {
     const game = prediction.game;
     const state = prediction.state;
     const drawDate = prediction.draw_date;
     const drawWindow = prediction.draw_time;
-    const gameKey = GAME_KEY_MAP[game];
+    const gameKey = GAME_KEY_MAP[String(game || '')];
     let matchInfo: Record<string, unknown> | null = null;
 
     if (gameKey && state && drawDate && drawWindow) {
       const stateCode = state === 'MULTI' ? 'NC' : state;
-      const { data: gameRow } = await supabase
+      const { data: gameRowData } = await supabase
         .from('lottery_games')
         .select('id, has_bonus')
         .eq('game_key', gameKey)
         .eq('state_code', stateCode)
         .maybeSingle();
+      const gameRow = gameRowData as { id?: string; has_bonus?: boolean | null } | null;
 
       if (gameRow) {
-        const { data: draws } = await supabase
+        const { data: drawsData } = await supabase
           .from('official_draws')
           .select('primary_numbers, bonus_numbers, fireball_value')
           .eq('game_id', gameRow.id)
           .eq('draw_date', drawDate)
           .eq('draw_window_label', drawWindow);
+        const draws = (drawsData || []) as DrawRow[];
 
         if (draws && draws.length > 0) {
           const draw = draws[0];
@@ -127,6 +144,7 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0');
     const createdAfter = searchParams.get('created_after');
     const savedParam = searchParams.get('saved');
+    const drawWindow = searchParams.get('draw_window');
     const savedOnly = savedParam === 'true';
     
     let query = supabase
@@ -147,6 +165,9 @@ export async function GET(request: NextRequest) {
     }
     if (createdAfter) {
       query = query.gte('created_at', createdAfter);
+    }
+    if (drawWindow) {
+      query = query.eq('draw_time', drawWindow);
     }
     if (savedOnly) {
       query = query.eq('is_saved', true);

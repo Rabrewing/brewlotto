@@ -68,15 +68,6 @@ type QueryResult<T> = {
   error: { message: string } | null;
 };
 
-const GAME_OPTIONS: Array<{ value: FilterGame; label: string }> = [
-  { value: 'ALL', label: 'All Games' },
-  { value: 'powerball', label: 'Powerball' },
-  { value: 'mega_millions', label: 'Mega Millions' },
-  { value: 'cash5', label: 'Cash 5' },
-  { value: 'pick4', label: 'Pick 4' },
-  { value: 'pick3', label: 'Pick 3' },
-];
-
 const STATE_OPTIONS: Array<{ value: FilterState; label: string }> = [
   { value: 'ALL', label: 'All States' },
   { value: 'NC', label: 'NC' },
@@ -106,15 +97,62 @@ function formatGameLabel(game: string | null) {
       return 'Powerball';
     case 'mega_millions':
       return 'Mega Millions';
+    case 'mega':
+      return 'Mega Millions';
     case 'cash5':
       return 'Cash 5';
+    case 'fantasy5':
+      return 'Fantasy 5';
     case 'pick3':
       return 'Pick 3';
+    case 'daily3':
+      return 'Daily 3';
     case 'pick4':
       return 'Pick 4';
+    case 'daily4':
+      return 'Daily 4';
     default:
       return game;
   }
+}
+
+function normalizePredictionGame(game: string | null) {
+  const normalized = String(game || '').trim().toLowerCase();
+  if (normalized === 'daily3') return 'pick3';
+  if (normalized === 'daily4') return 'pick4';
+  if (normalized === 'fantasy5') return 'cash5';
+  if (normalized === 'mega') return 'mega_millions';
+  return normalized as FilterGame;
+}
+
+function matchesGameFilter(predictionGame: string | null, selectedGame: FilterGame) {
+  if (selectedGame === 'ALL') {
+    return true;
+  }
+
+  return normalizePredictionGame(predictionGame) === selectedGame;
+}
+
+function normalizeDrawWindow(value: string | null) {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (normalized === 'midday' || normalized === 'morning' || normalized === 'day') {
+    return 'midday';
+  }
+  if (normalized === 'evening' || normalized === 'night' || normalized === 'pm') {
+    return 'evening';
+  }
+  return normalized || null;
+}
+
+function getGameOptions() {
+  return [
+    { value: 'ALL' as const, label: 'All Games' },
+    { value: 'powerball' as const, label: 'Powerball' },
+    { value: 'mega_millions' as const, label: 'Mega Millions' },
+    { value: 'cash5' as const, label: 'Cash 5' },
+    { value: 'pick4' as const, label: 'Pick 4 / Daily 4' },
+    { value: 'pick3' as const, label: 'Pick 3 / Daily 3' },
+  ];
 }
 
 function formatCreatedAt(value: string | null) {
@@ -430,6 +468,7 @@ export default function MyPicksPage() {
   const timingLabel = currentTier === 'master' ? 'TimePulse II' : 'TimePulse';
   const [timingRefreshCooldowns, setTimingRefreshCooldowns] = useState<Record<string, number>>({});
   const [refreshingTiming, setRefreshingTiming] = useState<string | null>(null);
+  const gameOptions = useMemo(() => getGameOptions(), []);
 
   useEffect(() => {
     let cancelled = false;
@@ -451,8 +490,8 @@ export default function MyPicksPage() {
           params.set('state', selectedState);
         }
 
-        if (selectedGame !== 'ALL') {
-          params.set('game', selectedGame);
+        if (selectedWindow !== 'ALL') {
+          params.set('draw_window', selectedWindow);
         }
 
         const [predictionsResponse, playLogsResponse] = (await Promise.all([
@@ -509,7 +548,7 @@ export default function MyPicksPage() {
     return () => {
       cancelled = true;
     };
-  }, [selectedGame, selectedState]);
+  }, [selectedGame, selectedState, selectedWindow]);
 
   useEffect(() => {
     let cancelled = false;
@@ -524,17 +563,20 @@ export default function MyPicksPage() {
     return () => { cancelled = true; };
   }, [currentTier, selectedGame, selectedState]);
 
-  const savedCount = useMemo(() => predictions.length, [predictions]);
+  const filteredPredictions = useMemo(() => {
+    return predictions.filter((prediction) => {
+      const gameMatches = matchesGameFilter(prediction.game, selectedGame);
+      const windowMatches = selectedWindow === 'ALL' || normalizeDrawWindow(prediction.draw_time ?? null) === selectedWindow;
+      return gameMatches && windowMatches;
+    });
+  }, [predictions, selectedGame, selectedWindow]);
+
+  const savedCount = useMemo(() => filteredPredictions.length, [filteredPredictions]);
 
   const primaryGame = useMemo(() => {
-    const first = predictions[0]?.game;
+    const first = filteredPredictions[0]?.game;
     return first ? formatGameLabel(first) : 'No game yet';
-  }, [predictions]);
-
-  const filteredPredictions = useMemo(() => {
-    if (selectedWindow === 'ALL') return predictions;
-    return predictions.filter((p) => p.draw_time === selectedWindow);
-  }, [predictions, selectedWindow]);
+  }, [filteredPredictions]);
 
   const TIMING_COOLDOWN_MS = 36 * 60 * 60 * 1000;
 
@@ -578,7 +620,7 @@ export default function MyPicksPage() {
 
       return groups;
     }, []);
-  }, [currentTier, predictions]);
+  }, [filteredPredictions]);
 
   const savedDays = useMemo(() => groupedPredictions.length, [groupedPredictions]);
 
@@ -694,9 +736,9 @@ export default function MyPicksPage() {
             onChange={(event) => setSelectedGame(event.target.value as FilterGame)}
             className="rounded-full border border-[#ffbd39]/25 bg-[#120e0e]/85 px-4 py-3 text-[15px] text-[#ffd27e] shadow-[0_0_12px_rgba(255,184,28,0.08)] outline-none"
           >
-            {GAME_OPTIONS.map((option) => (
+            {gameOptions.map((option) => (
               <option key={option.value} value={option.value}>
-                {option.label}
+                {option.value === 'ALL' ? option.label : option.label}
               </option>
             ))}
           </select>
@@ -745,7 +787,7 @@ export default function MyPicksPage() {
           <div className="my-4 w-px bg-white/10" />
           <SummaryMetric label="Saved Days" value={String(savedDays)} />
           <div className="my-4 w-px bg-white/10" />
-          <SummaryMetric label="Latest Game" value={predictions.length > 0 ? primaryGame : '--'} />
+          <SummaryMetric label="Latest Game" value={filteredPredictions.length > 0 ? primaryGame : '--'} />
         </div>
 
         {actionMessage ? (
