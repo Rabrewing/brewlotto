@@ -609,6 +609,8 @@ export default function MyPicksPage() {
   const [confirmingPredictionId, setConfirmingPredictionId] = useState<
     string | null
   >(null);
+  const [pendingFireballPrediction, setPendingFireballPrediction] =
+    useState<PredictionRecord | null>(null);
   const [timingProfiles, setTimingProfiles] = useState<
     Record<string, TimingProfileRecord>
   >({});
@@ -922,7 +924,10 @@ export default function MyPicksPage() {
     );
   }
 
-  async function handleConfirmPlayed(prediction: PredictionRecord) {
+  async function submitConfirmedPlay(
+    prediction: PredictionRecord,
+    fireballActive: boolean
+  ) {
     if (confirmedPredictionIds.includes(prediction.id)) {
       return;
     }
@@ -931,11 +936,6 @@ export default function MyPicksPage() {
     setConfirmingPredictionId(prediction.id);
 
     try {
-      const fireballActive =
-        typeof window !== 'undefined' &&
-        supportsFireballForPrediction(prediction)
-          ? window.confirm('Did you play Fireball on this pick?')
-          : false;
       const drawDate = prediction.created_at
         ? new Date(prediction.created_at).toISOString().slice(0, 10)
         : new Date().toISOString().slice(0, 10);
@@ -986,6 +986,29 @@ export default function MyPicksPage() {
     } finally {
       setConfirmingPredictionId(null);
     }
+  }
+
+  async function handleConfirmPlayed(prediction: PredictionRecord) {
+    if (confirmedPredictionIds.includes(prediction.id)) {
+      return;
+    }
+
+    if (supportsFireballForPrediction(prediction)) {
+      setPendingFireballPrediction(prediction);
+      return;
+    }
+
+    await submitConfirmedPlay(prediction, false);
+  }
+
+  async function handleFireballChoice(fireballActive: boolean) {
+    if (!pendingFireballPrediction) {
+      return;
+    }
+
+    const prediction = pendingFireballPrediction;
+    setPendingFireballPrediction(null);
+    await submitConfirmedPlay(prediction, fireballActive);
   }
 
   return (
@@ -1080,6 +1103,66 @@ export default function MyPicksPage() {
         {actionMessage ? (
           <div className="mb-5 rounded-[22px] border border-[#53d48a]/20 bg-[#102117] px-4 py-3 text-[14px] leading-6 text-[#c8f4d8]">
             {actionMessage}
+          </div>
+        ) : null}
+
+        {pendingFireballPrediction ? (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm">
+            <div className="w-full max-w-[520px] rounded-[30px] border border-[#ffbd39]/30 bg-[linear-gradient(145deg,rgba(32,19,13,0.98),rgba(13,10,10,0.98))] p-6 shadow-[0_0_40px_rgba(255,184,28,0.16)]">
+              <div className="text-[12px] uppercase tracking-[0.18em] text-[#f6d29f]">
+                Fireball check
+              </div>
+              <div className="mt-2 text-[28px] font-semibold tracking-[-0.03em] text-[#fff0c8]">
+                Did you play Fireball on this pick?
+              </div>
+              <div className="mt-3 text-[16px] leading-7 text-white/70">
+                We ask this now so the Fireball badge shows on the saved pick
+                right away when it applies.
+              </div>
+              <div className="mt-5 rounded-[22px] border border-white/8 bg-white/[0.03] px-4 py-3 text-[14px] text-white/65">
+                <div className="font-medium text-[#f7d6ab]">
+                  {formatGameLabel(pendingFireballPrediction.game)} •{' '}
+                  {pendingFireballPrediction.state || 'N/A'}
+                </div>
+                <div className="mt-1 text-white/45">
+                  {getStrategyLabel(
+                    pendingFireballPrediction.source_strategy_key
+                  )}
+                </div>
+              </div>
+              <div className="mt-6 flex flex-wrap items-center justify-end gap-3">
+                <button
+                  type="button"
+                  className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2.5 text-[14px] font-medium text-white/70 transition-colors hover:bg-white/[0.08] hover:text-white"
+                  onClick={() => setPendingFireballPrediction(null)}
+                  disabled={
+                    confirmingPredictionId === pendingFireballPrediction.id
+                  }
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="rounded-full border border-[#6ec6ff]/25 bg-[#103047] px-4 py-2.5 text-[14px] font-semibold text-[#a6dbff] transition-colors hover:bg-[#143a57]"
+                  onClick={() => handleFireballChoice(false)}
+                  disabled={
+                    confirmingPredictionId === pendingFireballPrediction.id
+                  }
+                >
+                  No, no Fireball
+                </button>
+                <button
+                  type="button"
+                  className="rounded-full bg-gradient-to-r from-[#ffc742] to-[#ffbe27] px-4 py-2.5 text-[14px] font-semibold text-black shadow-[0_0_18px_rgba(255,199,66,0.22)] transition-opacity hover:opacity-95"
+                  onClick={() => handleFireballChoice(true)}
+                  disabled={
+                    confirmingPredictionId === pendingFireballPrediction.id
+                  }
+                >
+                  Yes, Fireball
+                </button>
+              </div>
+            </div>
           </div>
         ) : null}
 
