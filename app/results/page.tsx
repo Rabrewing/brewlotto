@@ -59,6 +59,11 @@ interface ResultsPayload {
 
 type HistoryRange = 90 | 180;
 
+const WINDOW_ORDER = {
+  midday: 0,
+  evening: 1,
+} as const;
+
 const EMPTY_RESULTS: ResultsPayload = {
   draws: [],
   closestPrediction: null,
@@ -173,7 +178,11 @@ export default function ResultsPage() {
   const freshnessBlocked = resultsData.freshness && (resultsData.freshness.status === 'stale' || resultsData.freshness.status === 'failed');
   const draws = resultsData.draws;
 
-  const windowLabels = [...new Set(draws.map(d => d.windowLabel).filter(Boolean))] as string[];
+  const windowLabels = [...new Set(draws.map((d) => d.windowLabel).filter(Boolean))].sort((a, b) => {
+    const left = WINDOW_ORDER[(a || '').toLowerCase() as keyof typeof WINDOW_ORDER] ?? 99;
+    const right = WINDOW_ORDER[(b || '').toLowerCase() as keyof typeof WINDOW_ORDER] ?? 99;
+    return left - right;
+  }) as string[];
   const activeWindow = selectedWindow || windowLabels[0] || null;
   const filteredDraws = activeWindow ? draws.filter(d => d.windowLabel === activeWindow) : draws;
   const latestDraw = draws[0] || null;
