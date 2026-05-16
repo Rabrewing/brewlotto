@@ -91,7 +91,7 @@
 - Shared tier access now normalizes legacy `brew` labels and numeric strategy tiers into the current `free / starter / pro / master` ladder, and the dashboard generate action plus strategy smoke tests now pass against historical-style feature data.
 - State analytics is intentionally deferred until the state preference flow settles, but the data model is ready for it once we instrument events.
 - The results/history workflow still needs a confirmed-play layer so a prediction created after a draw does not get described as a win just because it matched an earlier result.
-- Pricing direction is now locked for the next billing pass: 3-day capped trial, then Starter at $4.99, Pro at $9.99, and Master at $19.99, with AI starting in Starter and expanding upward; annual billing should target a 30% savings message.
+- Pricing direction is now locked for the next billing pass: 3-day capped trial, then Starter at $4.99 / $41.99 yearly, Pro at $9.99 / $83.99 yearly, and Master at $19.99 / $167.99 yearly, with AI starting in Starter and expanding upward; annual billing should target a 30% savings message.
 - Stripe setup should mirror that ladder with six price records: Starter monthly/yearly, Pro monthly/yearly, and Master monthly/yearly, with live-mode confirmation still pending.
 - Trial nudges are now contextual only and appear on dashboard, billing, and profile instead of periodic nags.
 - The onboarding tutorial is now a skippable BrewLotto avatar-led video step, and the same replayable tutorial is exposed from BrewU at `/learn#tutorial`.

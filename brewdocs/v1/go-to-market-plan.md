@@ -156,9 +156,9 @@ When you create the Stripe catalog, use one product family per tier and two pric
 
 | Tier | Product Name | Monthly Price | Yearly Price | Stripe Env Vars |
 |------|--------------|---------------|--------------|-----------------|
-| Starter | BrewStarter | $4.99/mo | 30% discounted annual | `STRIPE_PRICE_STARTER_MONTHLY`, `STRIPE_PRICE_STARTER_YEARLY` |
-| Pro | BrewPro | $9.99/mo | 30% discounted annual | `STRIPE_PRICE_PRO_MONTHLY`, `STRIPE_PRICE_PRO_YEARLY` |
-| Master | BrewMaster | $19.99/mo | 30% discounted annual | `STRIPE_PRICE_MASTER_MONTHLY`, `STRIPE_PRICE_MASTER_YEARLY` |
+| Starter | BrewStarter | $4.99/mo | $41.99/yr | `STRIPE_PRICE_STARTER_MONTHLY`, `STRIPE_PRICE_STARTER_YEARLY` |
+| Pro | BrewPro | $9.99/mo | $83.99/yr | `STRIPE_PRICE_PRO_MONTHLY`, `STRIPE_PRICE_PRO_YEARLY` |
+| Master | BrewMaster | $19.99/mo | $167.99/yr | `STRIPE_PRICE_MASTER_MONTHLY`, `STRIPE_PRICE_MASTER_YEARLY` |
 
 Implementation notes:
 - The app resolves tier/interval from the Stripe price ID, so the env vars are the source of truth for the active catalog.
