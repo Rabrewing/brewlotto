@@ -17,12 +17,32 @@ export function useUserTier() {
                 data: { session }
             } = await supabase.auth.getSession();
 
-            const metadata = session?.user?.user_metadata;
-            if (!metadata || !mounted) return;
+            const metadata = session?.user?.user_metadata || {};
+            const user = session?.user;
 
-            setCurrentTier(metadata.tier || "free");
-            setIsTrial(metadata.isTrial || false);
-            setTrialEndsAt(metadata.trialEndsAt || null);
+            if (!user || !mounted) {
+                setCurrentTier("free");
+                setIsTrial(Boolean(metadata.isTrial));
+                setTrialEndsAt(metadata.trialEndsAt || null);
+                return;
+            }
+
+            const { data: entitlements, error } = await supabase
+                .from("user_entitlements")
+                .select("tier_code, effective_to")
+                .eq("user_id", user.id)
+                .maybeSingle();
+
+            if (!mounted) return;
+
+            if (!error && entitlements?.tier_code) {
+                setCurrentTier(entitlements.tier_code);
+            } else {
+                setCurrentTier(metadata.tier || "free");
+            }
+
+            setIsTrial(Boolean(metadata.isTrial));
+            setTrialEndsAt(metadata.trialEndsAt || entitlements?.effective_to || null);
         };
 
         fetchSession();

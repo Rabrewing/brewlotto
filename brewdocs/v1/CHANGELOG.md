@@ -25,6 +25,7 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Seeded the initial QA tester allowlist with the current family roster so the Test Lab can open for approved testers as soon as they sign in.
 - Moved the QA tester roster into the shared auth helper default allowlist so the approved tester emails work in the deployed app, not only in local `.env.local`.
 - Restored direct desktop logout from the avatar menu so BrewCommand/admin sessions can sign out immediately, with `/logout` kept as a fallback route.
+- Switched `useUserTier` to read the Stripe-backed `user_entitlements` row first so Master purchases surface correctly in Pricing and Dashboard after checkout/webhook processing.
 - Added a compact Notifications snapshot header with unread count, enabled delivery channels, category coverage, quiet hours, and support/help links so the page feels more like a control center than a raw list.
 - Removed duplicated benefit rows from the Billing Master-tier entitlement summary while keeping the TimePulse Master flag visible in the canonical account view.
 - Swapped the landing reel fallback to the watermark-free `public/landing/brewlotto-no-watermark.mp4` asset and synced the Vercel Blob MP4 URL so the live landing page no longer uses the older watermarked fallback.
