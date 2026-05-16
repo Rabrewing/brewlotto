@@ -304,7 +304,11 @@ function getGameAndStateForTiming(prediction: PredictionRecord) {
 
 function supportsFireballForPrediction(prediction: PredictionRecord) {
   const normalizedGame = normalizeTimingGame(prediction.game);
-  return normalizedGame === 'pick3' || normalizedGame === 'pick4';
+  const normalizedState = normalizeTimingState(prediction.state);
+  return (
+    normalizedState === 'NC' &&
+    (normalizedGame === 'pick3' || normalizedGame === 'pick4')
+  );
 }
 
 function getPickStatus(prediction: PredictionRecord): PickStatus {
@@ -1116,8 +1120,9 @@ export default function MyPicksPage() {
                 Did you play Fireball on this pick?
               </div>
               <div className="mt-3 text-[16px] leading-7 text-white/70">
-                We ask this now so the Fireball badge shows on the saved pick
-                right away when it applies.
+                Fireball is tracked here for NC Pick 3 and Pick 4 only. If this
+                was an NC play, choose yes or no so the saved pick shows the
+                right badge right away.
               </div>
               <div className="mt-5 rounded-[22px] border border-white/8 bg-white/[0.03] px-4 py-3 text-[14px] text-white/65">
                 <div className="font-medium text-[#f7d6ab]">
