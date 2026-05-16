@@ -20,6 +20,7 @@
 - The shared `useUserTier` hook still returns a legacy `tier` alias for compatibility, but the active current-tier display now comes from `user_entitlements` only so Pricing, Billing, and Strategy Locker cannot disagree about whether `command@brewlotto.app` is actually on Master.
 - Billing now degrades entitlements, tiers, and features gracefully if a lookup table fails, so a permission issue on one supporting table no longer collapses the whole page into `Failed to load billing`.
 - Billing now includes a manual `Refresh Access` recovery path that rehydrates `user_entitlements` from the latest Stripe subscription record, which lets a successful checkout recover Master access even if the webhook write lagged or missed one update.
+- The `public.__lottery_game_fk_diag` helper view has been flipped to `security_invoker` so it respects caller RLS and stops tripping the Supabase security-definer-view lint.
 - The middleware auth gate now allows approved BrewCommand tester accounts as well as admins, so QA sign-ins can land on `/qa` and continue through the tester flow instead of bouncing back to login.
 - BrewCommand now has a notification bell for the admin surface, critical/email-worthy alerts are fanned out to one selected superadmin inbox by email, and the admin console shows recent alert delivery history alongside the shared alert center.
 - Sentry remains an external observability tool; BrewCommand should track product/business truth directly and only mirror Sentry status if we later decide we need a lightweight dashboard summary.
