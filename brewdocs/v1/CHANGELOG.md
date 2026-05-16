@@ -1,6 +1,6 @@
 # BrewLotto V1 Changelog
 
-**Last Updated:** 2026-05-15 ET
+**Last Updated:** 2026-05-16 ET
 
 This changelog records shipped or committed V1 changes in a compact, timestamped format.
 
@@ -134,6 +134,9 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Made TimePulse timing analysis an explicit Master-tier entitlement (`timing_analysis_access`) instead of only a label-level rule.
 - Backfilled existing Master users so current entitlements keep TimePulse access without a Stripe catalog change.
 - Updated billing and Strategy Locker surfaces to read the explicit entitlement flag instead of only inferring access from tier text.
+
+### 2026-05-16
+- Hardened the Supabase schema hygiene pass by pinning `search_path = public` on the core helper functions and narrowing legacy draw / `pick_history` write policies to `service_role` only, which clears the mutable search-path and permissive-write lint warnings without changing public read behavior.
 
 ### 2026-05-05
 - Fixed cloud ingestion scheduler routing, AI usage tracking, and state-aware dashboard behavior.
