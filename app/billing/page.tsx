@@ -85,8 +85,6 @@ export default function BillingPage() {
           .eq('user_id', authUser.id)
           .maybeSingle();
 
-        if (entitlementsError) throw entitlementsError;
-
         const [tiersResult, featuresResult] = await Promise.all([
           supabase.from('subscription_tiers').select('tier_key, display_name, marketing_label, price_monthly, price_annual, sort_order').eq('is_active', true).order('sort_order', { ascending: true }),
           supabase.from('feature_entitlements').select('feature_key, feature_name, description, min_tier, category, sort_order').eq('is_active', true).order('sort_order', { ascending: true }),
@@ -96,6 +94,10 @@ export default function BillingPage() {
           setEntitlements((entitlementsData as UserEntitlementRecord | null) || null);
           setTiers(((tiersResult.error ? [] : tiersResult.data) || []) as SubscriptionTierRecord[]);
           setFeatures(((featuresResult.error ? [] : featuresResult.data) || []) as FeatureEntitlementRecord[]);
+
+          if (entitlementsError) {
+            console.warn('Billing entitlements load issue:', entitlementsError.message);
+          }
 
           if (tiersResult.error || featuresResult.error) {
             console.warn('Billing optional data load issue:', {

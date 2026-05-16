@@ -18,7 +18,7 @@
 - TimePulse timing analysis is now a real Master-tier entitlement (`timing_analysis_access`) instead of only a label in the UI. The billing and strategy locker surfaces read the explicit flag, and Master entitlements are backfilled so existing users keep access.
 - Master purchases now show as the current plan in Billing once `user_entitlements.tier_code` is updated, so the Billing surface reflects the Stripe-backed account state instead of stale auth metadata.
 - The shared `useUserTier` hook also returns a legacy `tier` alias so older prediction components that still read `tier` continue to unlock Master-only paths correctly after the entitlement-backed billing refactor.
-- Billing now treats `user_entitlements` as the hard dependency and degrades optional tiers / feature lookups gracefully, so a permission issue on one supporting table no longer collapses the whole page into `Failed to load billing`.
+- Billing now degrades entitlements, tiers, and features gracefully if a lookup table fails, so a permission issue on one supporting table no longer collapses the whole page into `Failed to load billing`.
 - BrewCommand now has a notification bell for the admin surface, critical/email-worthy alerts are fanned out to one selected superadmin inbox by email, and the admin console shows recent alert delivery history alongside the shared alert center.
 - Sentry remains an external observability tool; BrewCommand should track product/business truth directly and only mirror Sentry status if we later decide we need a lightweight dashboard summary.
 - `SectionCard` is centralized in `components/brewlotto/dashboard/SectionCard.tsx` and the duplicated copies are gone.

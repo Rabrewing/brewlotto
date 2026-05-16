@@ -23,7 +23,7 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Noted the preferred Run Strategy polish direction as a short BrewLotto avatar running-in-place cue that indicates the strategy is being computed, keeping the animation as post-core-flow polish only.
 - Added QA draft resume behavior so approved testers can close the Test Lab and come back later without losing the report in progress; the form is keyed per tester email and the reset button clears the saved draft when they want to start over.
 - Restored the legacy `tier` alias from `useUserTier` so older prediction components still see the paid tier after the entitlement-backed billing refactor, which keeps Master-gated strategy paths from acting like the user is still free.
-- Made the Billing page resilient to optional lookup failures by treating `user_entitlements` as the hard dependency and degrading tiers/features gracefully instead of collapsing the whole page into `Failed to load billing`.
+- Made the Billing page resilient to lookup failures by degrading entitlements, tiers, and features gracefully instead of collapsing the whole page into `Failed to load billing`.
 - Seeded the initial QA tester allowlist with the current family roster so the Test Lab can open for approved testers as soon as they sign in.
 - Moved the QA tester roster into the shared auth helper default allowlist so the approved tester emails work in the deployed app, not only in local `.env.local`.
 - Restored direct desktop logout from the avatar menu so BrewCommand/admin sessions can sign out immediately, with `/logout` kept as a fallback route.
