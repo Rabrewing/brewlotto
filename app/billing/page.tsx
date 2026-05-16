@@ -198,6 +198,29 @@ export default function BillingPage() {
     }
   }
 
+  async function refreshAccess() {
+    setActionLoading('refresh');
+    setActionMessage(null);
+
+    try {
+      const response = await fetch('/api/billing/sync', {
+        method: 'POST',
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload?.error?.message || 'Failed to refresh access');
+      }
+
+      setActionMessage(`Access refreshed to ${payload?.data?.tier || 'your current tier'}. Reloading billing...`);
+      window.location.reload();
+    } catch (refreshError) {
+      setActionMessage(refreshError instanceof Error ? refreshError.message : 'Failed to refresh access');
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
   function getPlanDisplayPrice(tier: Pick<SubscriptionTierRecord, 'price_monthly' | 'price_annual'>) {
     if (selectedInterval === 'year') {
       if (tier.price_annual != null) {
@@ -245,6 +268,14 @@ export default function BillingPage() {
                   <Link href="/pricing" className="rounded-full bg-gradient-to-r from-[#ffc742] to-[#ffbe27] px-6 py-3 text-[15px] font-semibold text-black shadow-[0_0_18px_rgba(255,199,66,0.18)]">
                     Manage / Upgrade
                   </Link>
+                  <button
+                    type="button"
+                    onClick={refreshAccess}
+                    disabled={actionLoading === 'refresh'}
+                    className="rounded-full border border-[#8ad4ff]/25 bg-[#0d1d2b] px-6 py-3 text-[15px] font-medium text-[#b9e3ff] transition-colors hover:border-[#8ad4ff]/40 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {actionLoading === 'refresh' ? 'Refreshing...' : 'Refresh Access'}
+                  </button>
                   <button
                     type="button"
                     onClick={openPortal}
