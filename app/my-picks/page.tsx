@@ -302,6 +302,11 @@ function getGameAndStateForTiming(prediction: PredictionRecord) {
   };
 }
 
+function supportsFireballForPrediction(prediction: PredictionRecord) {
+  const normalizedGame = normalizeTimingGame(prediction.game);
+  return normalizedGame === 'pick3' || normalizedGame === 'pick4';
+}
+
 function getPickStatus(prediction: PredictionRecord): PickStatus {
   return prediction.is_saved ? 'saved' : 'pending';
 }
@@ -926,6 +931,11 @@ export default function MyPicksPage() {
     setConfirmingPredictionId(prediction.id);
 
     try {
+      const fireballActive =
+        typeof window !== 'undefined' &&
+        supportsFireballForPrediction(prediction)
+          ? window.confirm('Did you play Fireball on this pick?')
+          : false;
       const drawDate = prediction.created_at
         ? new Date(prediction.created_at).toISOString().slice(0, 10)
         : new Date().toISOString().slice(0, 10);
@@ -944,6 +954,7 @@ export default function MyPicksPage() {
           prediction_id: prediction.id,
           draw_type: null,
           add_on: null,
+          fireball: fireballActive,
         }),
       });
 
@@ -952,9 +963,19 @@ export default function MyPicksPage() {
         throw new Error(payload?.error?.message || 'Failed to confirm play');
       }
 
+      if (payload?.data) {
+        const savedPlayLog = payload.data as PlayLogRecord;
+        setPlayLogs((current) => [
+          savedPlayLog,
+          ...current.filter((entry) => entry.prediction_id !== prediction.id),
+        ]);
+      }
+
       setConfirmedPredictionIds((current) => [...current, prediction.id]);
       setActionMessage(
-        'Play confirmed. Brew will use this as the canonical play history entry for the selected draw date.'
+        fireballActive
+          ? 'Play confirmed with Fireball active. Brew will show the Fireball badge on this saved pick.'
+          : 'Play confirmed. Brew will use this as the canonical play history entry for the selected draw date.'
       );
     } catch (confirmError) {
       setActionMessage(
