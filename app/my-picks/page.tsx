@@ -77,6 +77,19 @@ const STATE_OPTIONS: Array<{ value: FilterState; label: string }> = [
   { value: 'MULTI', label: 'Multi-State' },
 ];
 
+const TIMING_LABELS = new Set([
+  'HeatCheck',
+  'HeatCheck II',
+  'HeatCheck III',
+  'HeatCheck IV',
+  'HeatWave',
+  'HeatWave II',
+  'HeatWave III',
+  'PulseSync',
+  'PulseSync II',
+  'SequenceX',
+]);
+
 function formatGameLabel(game: string | null) {
   if (!game) {
     return 'Unknown Game';
@@ -146,6 +159,20 @@ function getPredictionSummary(prediction: PredictionRecord) {
   }
 
   return 'Stored Brew pick ready for replay or save actions.';
+}
+
+function getTimingProfileKey(strategyKey: string | null | undefined) {
+  if (!strategyKey) {
+    return null;
+  }
+
+  const trimmed = strategyKey.trim();
+  if (TIMING_LABELS.has(trimmed)) {
+    return trimmed;
+  }
+
+  const mapped = getStrategyLabel(trimmed);
+  return TIMING_LABELS.has(mapped) ? mapped : null;
 }
 
 function getPickStatus(prediction: PredictionRecord): PickStatus {
@@ -753,32 +780,36 @@ export default function MyPicksPage() {
                 </div>
 
                 <div className="space-y-4">
-                  {group.picks.map((prediction) => (
-                    <PickCard
-                      key={prediction.id}
-                      prediction={prediction}
-                      playLog={playLogMap.get(prediction.id) || null}
-                      isConfirmed={confirmedPredictionIds.includes(prediction.id)}
-                      isConfirming={confirmingPredictionId === prediction.id}
-                      onToggleSaved={handleToggleSaved}
-                      onConfirmPlayed={handleConfirmPlayed}
-                      onDelete={handleDelete}
-                      timingProfile={timingProfiles[getStrategyLabel(prediction.source_strategy_key)] || null}
-                      onRefreshTiming={() => {
-                        const game = prediction.game === 'mega_millions' ? 'mega' : prediction.game || 'pick3';
-                        const state = prediction.state || 'NC';
-                        handleRefreshTiming(game, state);
-                      }}
-                      refreshingTiming={refreshingTiming === `${prediction.game || 'pick3'}-${prediction.state || 'NC'}`}
-                      cooldownRemaining={(() => {
-                        const game = prediction.game === 'mega_millions' ? 'mega' : prediction.game || 'pick3';
-                        const state = prediction.state || 'NC';
-                        const cacheKey = `brewlotto:timepulse-refresh-${game}-${state}`;
-                        const last = parseInt(localStorage.getItem(cacheKey) || '0', 10);
-                        return last ? 36 * 60 * 60 * 1000 - (Date.now() - last) : 0;
-                      })()}
-                    />
-                  ))}
+                  {group.picks.map((prediction) => {
+                    const timingProfileKey = getTimingProfileKey(prediction.source_strategy_key);
+
+                    return (
+                      <PickCard
+                        key={prediction.id}
+                        prediction={prediction}
+                        playLog={playLogMap.get(prediction.id) || null}
+                        isConfirmed={confirmedPredictionIds.includes(prediction.id)}
+                        isConfirming={confirmingPredictionId === prediction.id}
+                        onToggleSaved={handleToggleSaved}
+                        onConfirmPlayed={handleConfirmPlayed}
+                        onDelete={handleDelete}
+                        timingProfile={timingProfileKey ? timingProfiles[timingProfileKey] || null : null}
+                        onRefreshTiming={() => {
+                          const game = prediction.game === 'mega_millions' ? 'mega' : prediction.game || 'pick3';
+                          const state = prediction.state || 'NC';
+                          handleRefreshTiming(game, state);
+                        }}
+                        refreshingTiming={refreshingTiming === `${prediction.game || 'pick3'}-${prediction.state || 'NC'}`}
+                        cooldownRemaining={(() => {
+                          const game = prediction.game === 'mega_millions' ? 'mega' : prediction.game || 'pick3';
+                          const state = prediction.state || 'NC';
+                          const cacheKey = `brewlotto:timepulse-refresh-${game}-${state}`;
+                          const last = parseInt(localStorage.getItem(cacheKey) || '0', 10);
+                          return last ? 36 * 60 * 60 * 1000 - (Date.now() - last) : 0;
+                        })()}
+                      />
+                    );
+                  })}
                 </div>
               </section>
             ))}
