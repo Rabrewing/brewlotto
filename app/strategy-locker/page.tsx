@@ -14,6 +14,7 @@ import { supabase } from '@/lib/supabase/browserClient';
 import { buildStrategyPerformanceSummary, type StrategyPerformanceSummary } from '@/lib/stats/strategyPerformance';
 import { getStrategyLabel } from '@/utils/strategyLabel';
 import { normalizePreferredStateCode, usePreferredState } from '@/hooks/usePreferredState';
+import { useUserTier } from '@/hooks/useUserTier';
 import { resolveDashboardGameConfig } from '@/lib/dashboard/game-config';
 import { resolveTimingAccessLabel, resolveTimingAccessMode } from '@/utils/timepulse';
 
@@ -164,6 +165,7 @@ function formatCategoryLabel(category: string) {
 }
 
 export default function StrategyLockerPage() {
+  const { currentTier: userTier } = useUserTier();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -357,8 +359,9 @@ export default function StrategyLockerPage() {
   }, []);
 
   const currentTier = useMemo<TierCode>(() => {
-    return entitlements?.tier_code || 'free';
-  }, [entitlements?.tier_code]);
+    const tier = (userTier || entitlements?.tier_code || 'free') as TierCode;
+    return tier;
+  }, [entitlements?.tier_code, userTier]);
   const timingAccessLabel = resolveTimingAccessLabel({
     tierCode: currentTier,
     timepulseAccess: Boolean(entitlements?.timepulse_access),
