@@ -564,9 +564,9 @@ export default function QaPage() {
                             </div>
                             <div className="mt-5 rounded-[22px] border border-white/10 bg-black/20 px-4 py-4 text-[13px] leading-6 text-white/66 sm:text-[14px] sm:leading-7">
                                 If you reach pricing or billing, check that pricing shows the correct tier ladder and that Billing opens the manage surface. Use Stripe test cards only. For a normal successful checkout, use{" "}
-                                <span className="text-[#d8f1ff]">4242 4242 4242 4242</span> with any future date and any CVC.
+                                <span className="text-[#d8f1ff]">4242 4242 4242 4242</span> with any future expiry date like <span className="text-[#d8f1ff]">09/30</span> and any 3-digit CVC like <span className="text-[#d8f1ff]">222</span>.
                                 If you need to test a decline path, use Stripe&apos;s generic decline card{" "}
-                                <span className="text-[#d8f1ff]">4000 0000 0000 0002</span> instead of a real card.
+                                <span className="text-[#d8f1ff]">4000 0000 0000 0002</span> with any future expiry date like <span className="text-[#d8f1ff]">09/30</span> and any 3-digit CVC like <span className="text-[#d8f1ff]">222</span> instead of a real card.
                             </div>
                             <div className="mt-5 flex flex-col gap-3 sm:flex-row">
                                 <button
@@ -637,7 +637,7 @@ export default function QaPage() {
                         <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5">Reports go to BrewCommand</span>
                     </div>
                     <div className="mt-3 max-w-3xl text-[13px] leading-6 text-white/48">
-                        If you reach billing, use Stripe test cards only. The common test number is <span className="text-[#d8f1ff]">4242 4242 4242 4242</span> with any future expiry date and any CVC.
+                        If you reach billing, use Stripe test cards only. The common test number is <span className="text-[#d8f1ff]">4242 4242 4242 4242</span> with any future expiry date like <span className="text-[#d8f1ff]">09/30</span> and any 3-digit CVC like <span className="text-[#d8f1ff]">222</span>.
                     </div>
                     <div className="mt-5 flex flex-wrap gap-3">
                         <Link href="/onboarding" className="rounded-full border border-[#72caff]/20 bg-[#111f28] px-4 py-2 text-sm font-semibold text-[#d8f1ff] transition hover:border-[#72caff]/35 hover:bg-[#162732]">

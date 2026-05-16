@@ -153,8 +153,8 @@ The point of this pass is not just bug hunting. It is to measure whether the app
 
 Use these test cards in Stripe test mode:
 
-- `4242 4242 4242 4242` for a successful checkout
-- `4000 0000 0000 0002` for a generic decline path
+- `4242 4242 4242 4242` with any future expiry date like `09/30` and any 3-digit CVC like `222` for a successful checkout
+- `4000 0000 0000 0002` with any future expiry date like `09/30` and any 3-digit CVC like `222` for a generic decline path
 
 ### 9. Notifications
 
