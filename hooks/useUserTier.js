@@ -4,6 +4,37 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase/browserClient";
 
+function normalizeTier(value) {
+    const tier = String(value || "").toLowerCase();
+    if (tier === "starter" || tier === "pro" || tier === "master" || tier === "free") {
+        return tier;
+    }
+
+    return null;
+}
+
+function tierFromProductCode(code) {
+    const productCode = String(code || "").toLowerCase();
+    if (productCode.includes("master")) return "master";
+    if (productCode.includes("pro")) return "pro";
+    if (productCode.includes("starter")) return "starter";
+    if (productCode.includes("free")) return "free";
+    return null;
+}
+
+function getEffectiveTier(subscription) {
+    if (!subscription) {
+        return null;
+    }
+
+    const status = String(subscription.status || "").toLowerCase();
+    if (status === "canceled" || status === "incomplete_expired" || status === "unpaid") {
+        return "free";
+    }
+
+    return normalizeTier(subscription.metadata?.tier_code) || tierFromProductCode(subscription.subscription_products?.code) || null;
+}
+
 export function useUserTier() {
     const [currentTier, setCurrentTier] = useState("free");
     const [isTrial, setIsTrial] = useState(false);
@@ -27,6 +58,14 @@ export function useUserTier() {
                 return;
             }
 
+            const { data: subscription, error: subscriptionError } = await supabase
+                .from("user_subscriptions")
+                .select("status, metadata, subscription_products!inner(code)")
+                .eq("user_id", user.id)
+                .order("updated_at", { ascending: false })
+                .limit(1)
+                .maybeSingle();
+
             const { data: entitlements, error } = await supabase
                 .from("user_entitlements")
                 .select("tier_code, effective_to")
@@ -35,7 +74,8 @@ export function useUserTier() {
 
             if (!mounted) return;
 
-            setCurrentTier(!error && entitlements?.tier_code ? entitlements.tier_code : "free");
+            const subscriptionTier = !subscriptionError ? getEffectiveTier(subscription) : null;
+            setCurrentTier(subscriptionTier || (!error && entitlements?.tier_code ? entitlements.tier_code : "free"));
 
             setIsTrial(Boolean(metadata.isTrial));
             setTrialEndsAt(metadata.trialEndsAt || entitlements?.effective_to || null);

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { DashboardContainer, Header, NavigationTabs, SectionCard, TrialUpgradeBanner } from '@/components/brewlotto/dashboard';
 import { supabase } from '@/lib/supabase/browserClient';
+import { useUserTier } from '@/hooks/useUserTier';
 
 type TierCode = 'free' | 'starter' | 'pro' | 'master';
 
@@ -52,6 +53,7 @@ type QueryResult<T> = {
 const TIER_ORDER: Record<TierCode, number> = { free: 0, starter: 1, pro: 2, master: 3 };
 
 export default function BillingPage() {
+  const { currentTier: userTier, trialEndsAt } = useUserTier();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -83,6 +85,12 @@ export default function BillingPage() {
         if (!authUser) {
           if (!cancelled) setError('You need to sign in before Brew can show billing status.');
           return;
+        }
+
+        try {
+          await fetch('/api/billing/sync', { method: 'POST' });
+        } catch {
+          // Ignore sync failures here; we still fall back to the cached entitlement row.
         }
 
         const { data: entitlementsData, error: entitlementsError } = await supabase
@@ -124,7 +132,7 @@ export default function BillingPage() {
     return () => { cancelled = true; };
   }, []);
 
-  const currentTier = (entitlements?.tier_code || 'free') as TierCode;
+  const currentTier = userTier as TierCode;
   const currentPlan = tiers.find((entry) => entry.tier_key === currentTier) || null;
   const displayName = user?.email?.split('@')[0]?.replace(/[._-]+/g, ' ').trim() || 'Brew User';
   const initials =
@@ -137,8 +145,8 @@ export default function BillingPage() {
   const unlockedFeatures = useMemo(() => features.filter((entry) => TIER_ORDER[currentTier] >= TIER_ORDER[entry.min_tier]), [currentTier, features]);
   const lockedFeatures = useMemo(() => features.filter((entry) => TIER_ORDER[currentTier] < TIER_ORDER[entry.min_tier]), [currentTier, features]);
   const aiQuotaRemaining = entitlements?.ai_quota_monthly != null && entitlements?.ai_quota_used != null ? Math.max(0, entitlements.ai_quota_monthly - entitlements.ai_quota_used) : null;
-  const nextBillingLabel = entitlements?.effective_to
-    ? new Date(entitlements.effective_to).toLocaleDateString(undefined, {
+  const nextBillingLabel = entitlements?.effective_to || trialEndsAt
+    ? new Date((entitlements?.effective_to || trialEndsAt) as string).toLocaleDateString(undefined, {
         month: 'long',
         day: 'numeric',
         year: 'numeric',
