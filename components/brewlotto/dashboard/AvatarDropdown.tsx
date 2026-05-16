@@ -492,7 +492,7 @@ export function AvatarDropdown() {
           <div className="absolute right-0 top-[calc(100%+14px)] z-30 w-[332px] max-w-[calc(100vw-2rem)]">
             <div className="absolute right-8 top-[-7px] h-4 w-4 rotate-45 rounded-[4px] border-l border-t border-[#ffc742]/28 bg-[linear-gradient(145deg,rgba(255,255,255,0.08),rgba(6,4,4,0.92))] shadow-[0_0_18px_rgba(255,199,66,0.18)]" />
 
-            <div className="overflow-hidden rounded-[22px] border border-[#ffc742]/28 bg-[linear-gradient(145deg,rgba(255,255,255,0.06),rgba(9,6,6,0.95))] p-2 shadow-[0_0_40px_rgba(255,200,0,0.20)] backdrop-blur-xl">
+            <div className="flex max-h-[calc(100vh-7rem)] flex-col overflow-hidden rounded-[22px] border border-[#ffc742]/28 bg-[linear-gradient(145deg,rgba(255,255,255,0.06),rgba(9,6,6,0.95))] p-2 shadow-[0_0_40px_rgba(255,200,0,0.20)] backdrop-blur-xl">
               <div className="rounded-[18px] border border-white/6 bg-black/15 px-3 py-3">
                 <div className="flex items-start gap-3">
                   <div className="flex h-12 w-12 overflow-hidden rounded-full border-2 border-[#ffc742]/70 bg-[#1a1a1c] shadow-[0_0_10px_rgba(255,200,0,0.4)]">
@@ -517,66 +517,68 @@ export function AvatarDropdown() {
                 V1 destination rollout in progress
               </div>
 
-              {menuSections.map((section, sectionIndex) => (
-                <div key={section.title} className={sectionIndex > 0 ? 'mt-2' : ''}>
-                  <SectionLabel>{section.title}</SectionLabel>
-                  <div className="space-y-0.5">
-                    {section.items.map((item, itemIdx) => {
-                      const flatIdx = allItems.indexOf(item);
-                      return (
-                        <MenuRow
-                          key={item.label}
-                          item={item}
-                          isFocused={focusedIndex === flatIdx}
-                          setHoveredItem={setHoveredItem}
-                          onHover={() => setFocusedIndex(flatIdx)}
-                          onClick={
-                            item.icon === 'logout'
-                              ? () => setConfirmingLogout(true)
-                              : item.enabled && item.href
-                                ? () => { setIsOpen(false); router.push(item.href!); }
-                                : undefined
-                          }
-                        />
-                      );
-                    })}
+              <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+                {menuSections.map((section, sectionIndex) => (
+                  <div key={section.title} className={sectionIndex > 0 ? 'mt-2' : ''}>
+                    <SectionLabel>{section.title}</SectionLabel>
+                    <div className="space-y-0.5">
+                      {section.items.map((item, itemIdx) => {
+                        const flatIdx = allItems.indexOf(item);
+                        return (
+                          <MenuRow
+                            key={item.label}
+                            item={item}
+                            isFocused={focusedIndex === flatIdx}
+                            setHoveredItem={setHoveredItem}
+                            onHover={() => setFocusedIndex(flatIdx)}
+                            onClick={
+                              item.icon === 'logout'
+                                ? () => setConfirmingLogout(true)
+                                : item.enabled && item.href
+                                  ? () => { setIsOpen(false); router.push(item.href!); }
+                                  : undefined
+                            }
+                          />
+                        );
+                      })}
+                    </div>
+                    {sectionIndex < menuSections.length - 1 ? (
+                      <div className="mx-3 mt-2 h-px bg-white/6" />
+                    ) : null}
                   </div>
-                  {sectionIndex < menuSections.length - 1 ? (
-                    <div className="mx-3 mt-2 h-px bg-white/6" />
-                  ) : null}
-                </div>
-              ))}
+                ))}
 
-              {hoveredItem?.description ? (
-                <div className="mx-3 mt-3 rounded-[14px] bg-[#ffc742]/8 px-4 py-3">
-                  <div className="text-[12px] leading-5 text-white/72">{hoveredItem.description}</div>
-                </div>
-              ) : null}
+                {hoveredItem?.description ? (
+                  <div className="mx-3 mt-3 rounded-[14px] bg-[#ffc742]/8 px-4 py-3">
+                    <div className="text-[12px] leading-5 text-white/72">{hoveredItem.description}</div>
+                  </div>
+                ) : null}
 
-              {confirmingLogout ? (
-                <div className="mt-3 rounded-[16px] border border-[#ffc742]/18 bg-[#140f0e]/90 p-3">
-                  <div className="text-[13px] font-medium text-[#f6ddb2]">Logout now?</div>
-                  <div className="mt-1 text-[12px] leading-5 text-white/52">
-                    You will be returned through the existing logout flow.
+                {confirmingLogout ? (
+                  <div className="mt-3 rounded-[16px] border border-[#ffc742]/18 bg-[#140f0e]/90 p-3">
+                    <div className="text-[13px] font-medium text-[#f6ddb2]">Logout now?</div>
+                    <div className="mt-1 text-[12px] leading-5 text-white/52">
+                      You will be returned through the existing logout flow.
+                    </div>
+                    <div className="mt-3 flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setConfirmingLogout(false)}
+                        className="flex-1 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[13px] text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="flex-1 rounded-full bg-gradient-to-r from-[#ffc742] to-[#ffbe27] px-4 py-2 text-center text-[13px] font-semibold text-black shadow-[0_0_16px_rgba(255,199,66,0.2)]"
+                      >
+                        Logout
+                      </button>
+                    </div>
                   </div>
-                  <div className="mt-3 flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setConfirmingLogout(false)}
-                      className="flex-1 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[13px] text-white/70 transition-colors hover:bg-white/10 hover:text-white"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleLogout}
-                      className="flex-1 rounded-full bg-gradient-to-r from-[#ffc742] to-[#ffbe27] px-4 py-2 text-center text-[13px] font-semibold text-black shadow-[0_0_16px_rgba(255,199,66,0.2)]"
-                    >
-                      Logout
-                    </button>
-                  </div>
-                </div>
-              ) : null}
+                ) : null}
+              </div>
             </div>
           </div>
         </>
