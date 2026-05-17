@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -40,7 +41,21 @@ const SUPPORT_CATEGORIES: Array<{ value: SupportCategory; label: string; descrip
 
 const MAX_SCREENSHOTS = 3;
 
-export default function SupportPage() {
+export default function SupportPageWrapper() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen bg-[#050505] text-white">
+        <div className="flex min-h-[60vh] items-center justify-center">
+          <div className="text-white/55">Loading support form...</div>
+        </div>
+      </main>
+    }>
+      <SupportPage />
+    </Suspense>
+  );
+}
+
+function SupportPage() {
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
