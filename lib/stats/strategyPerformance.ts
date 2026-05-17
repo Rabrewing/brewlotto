@@ -96,7 +96,8 @@ function extractFireballFlag(metadata: unknown, resultCode?: string | null) {
 
 export function buildStrategyPerformanceSummary(
   predictions: PredictionLike[],
-  playLogs: PlayLogLike[]
+  playLogs: PlayLogLike[],
+  savedPredictions?: PredictionLike[]
 ): StrategyPerformanceSummary[] {
   const summary = new Map<
     string,
@@ -139,9 +140,32 @@ export function buildStrategyPerformanceSummary(
 
     existing.predictions += 1;
     existing.savedCount += prediction.is_saved ? 1 : 0;
-    if (prediction.is_saved && (prediction.matchInfo?.totalMatch || 0) > 0) {
+
+    if (
+      prediction.confidence_score != null &&
+      Number.isFinite(Number(prediction.confidence_score))
+    ) {
+      existing.confidenceTotal += Number(prediction.confidence_score);
+      existing.confidenceCount += 1;
+    }
+
+    existing.lastActivityAt =
+      existing.lastActivityAt || prediction.created_at || null;
+    summary.set(strategy, existing);
+  }
+
+  for (const saved of savedPredictions || []) {
+    const strategy = getStrategyLabel(saved.source_strategy_key);
+    if (!strategy) continue;
+
+    const existing = summary.get(strategy);
+    if (!existing) continue;
+
+    const matchTotal = saved.matchInfo?.totalMatch || 0;
+    if (saved.is_saved && matchTotal > 0) {
       existing.savedHits += 1;
     }
+  }
 
     if (
       prediction.confidence_score != null &&

@@ -8,6 +8,7 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 
 ### 2026-05-17
 
+- Replaced the Support category select with a branded custom dropdown so the support form no longer falls back to the browser’s white native picker.
 - Polished the legal hub and policy pages into more publishable copy so the Terms, Privacy, California addendum, AI Usage, Internet Property, and Responsible Play routes read like launch-facing pages instead of internal draft notes.
 - Split the legal hub so Privacy now points to a dedicated California addendum route, and added a privacy request shortcut / category in Support so general privacy and California requests no longer share the same inline page.
 - Added opt-in generated-tone sound effects for Settings, Strategy Locker saves, My Picks play confirmations, and failure states so the V1 UI can give subtle feedback without a separate audio asset workflow.

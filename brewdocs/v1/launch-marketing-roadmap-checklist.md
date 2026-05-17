@@ -127,6 +127,18 @@ If users do not reach step 3 quickly, improve onboarding and store pages before 
   - whether they needed help
 - If they get lost, that is a product cue issue, not just a bug.
 
+### Test Lab hardening follow-up
+
+These are the QA gaps that should stay visible after the guided/free-roam pass:
+
+- [ ] Add a BrewCommand `/admin/qa` dashboard so QA reports can be browsed in one place over time
+- [ ] Add CA-specific guided coverage for Daily 3, Daily 4, and Fantasy 5
+- [ ] Add a freshness pre-check step so testers confirm the game is healthy before they run a flow
+- [ ] Add explicit match-chip / hit-vs-win verification in My Picks and Stats
+- [ ] Add TimePulse refresh / cooldown verification to the guided flow
+- [ ] Add My Picks draw-window filter verification for Pick 3 / Pick 4 and confirm the filter stays hidden for Cash 5 / Powerball
+- [ ] Keep these items tracked as QA hardening follow-ups, not launch blockers, unless they expose a real product break
+
 ## Phase 3 - First 30 Days
 
 ### Week 1

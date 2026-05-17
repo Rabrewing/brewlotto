@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { DashboardContainer, Header, NavigationTabs, SectionCard } from '@/components/brewlotto/dashboard';
 import { supabase } from '@/lib/supabase/browserClient';
@@ -59,15 +59,28 @@ function SupportPage() {
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [categoryMenuOpen, setCategoryMenuOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState('');
+  const categoryMenuRef = useRef<HTMLDivElement | null>(null);
   const [formState, setFormState] = useState({
     category: 'dashboard' as SupportCategory,
     subject: '',
     page: '/support',
   });
+
+  useEffect(() => {
+    function handlePointerDown(event: MouseEvent) {
+      if (categoryMenuRef.current && !categoryMenuRef.current.contains(event.target as Node)) {
+        setCategoryMenuOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handlePointerDown);
+    return () => document.removeEventListener('mousedown', handlePointerDown);
+  }, []);
 
   useEffect(() => {
     const category = searchParams.get('category');
@@ -113,6 +126,8 @@ function SupportPage() {
     () => SUPPORT_CATEGORIES.find((entry) => entry.value === formState.category) || SUPPORT_CATEGORIES[0],
     [formState.category],
   );
+
+  const selectedCategoryLabel = selectedCategory.label;
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -182,23 +197,51 @@ function SupportPage() {
               description="Category, comments, and screenshots are routed to BrewCommand."
           >
             <form className="space-y-4" onSubmit={handleSubmit}>
-              <div className="space-y-2">
+              <div className="space-y-2" ref={categoryMenuRef}>
                 <label className="block text-[12px] uppercase tracking-[0.16em] text-white/38" htmlFor="category">
                   Section
                 </label>
-                <select
-                  id="category"
-                  name="category"
-                  value={formState.category}
-                  onChange={(event) => setFormState((current) => ({ ...current, category: event.target.value as SupportCategory }))}
-                  className="w-full rounded-[18px] border border-white/10 bg-black/30 px-4 py-3 text-white outline-none transition focus:border-[#ffc742]/45"
+                <input type="hidden" id="category" name="category" value={formState.category} />
+                <button
+                  type="button"
+                  onClick={() => setCategoryMenuOpen((current) => !current)}
+                  className="flex w-full items-center justify-between rounded-[18px] border border-[#ffc742]/16 bg-[linear-gradient(145deg,rgba(28,18,14,0.96),rgba(9,9,10,0.98))] px-4 py-3 text-left text-white outline-none transition hover:border-[#ffc742]/34 focus:border-[#ffc742]/45"
                 >
-                  {SUPPORT_CATEGORIES.map((category) => (
-                    <option key={category.value} value={category.value}>
-                      {category.label}
-                    </option>
-                  ))}
-                </select>
+                  <span>
+                    <span className="block text-[15px] font-medium text-[#f7ddb3]">{selectedCategoryLabel}</span>
+                    <span className="mt-1 block text-[13px] text-white/48">{selectedCategory.description}</span>
+                  </span>
+                  <span className="ml-4 text-[#ffc742]">{categoryMenuOpen ? '▴' : '▾'}</span>
+                </button>
+                {categoryMenuOpen ? (
+                  <div className="overflow-hidden rounded-[18px] border border-[#ffc742]/18 bg-[linear-gradient(180deg,rgba(17,12,10,0.98),rgba(8,8,8,0.98))] shadow-[0_20px_40px_rgba(0,0,0,0.45)]">
+                    <div className="max-h-72 overflow-y-auto p-2">
+                      {SUPPORT_CATEGORIES.map((category) => {
+                        const isActive = category.value === formState.category;
+                        return (
+                          <button
+                            key={category.value}
+                            type="button"
+                            onClick={() => {
+                              setFormState((current) => ({ ...current, category: category.value }));
+                              setCategoryMenuOpen(false);
+                            }}
+                            className={`flex w-full flex-col items-start rounded-[14px] px-4 py-3 text-left transition ${
+                              isActive
+                                ? 'border border-[#ffc742]/28 bg-[#ffc742]/12'
+                                : 'border border-transparent bg-transparent hover:border-[#ffc742]/16 hover:bg-white/[0.03]'
+                            }`}
+                          >
+                            <span className={`text-[15px] font-medium ${isActive ? 'text-[#ffe0a1]' : 'text-white/88'}`}>
+                              {category.label}
+                            </span>
+                            <span className="mt-1 text-[13px] leading-6 text-white/48">{category.description}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : null}
                 <div className="text-[13px] leading-6 text-white/50">{selectedCategory.description}</div>
               </div>
 
