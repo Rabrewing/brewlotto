@@ -228,13 +228,19 @@ const FEATURE_AREAS: Array<{
 
 const GUIDED_TEST_STEPS = [
   'Start at login or onboarding, then confirm the app opens cleanly and lands where the flow expects.',
+  'Before testing, check that freshness shows healthy for the game you plan to test. Stale data = skip or flag it.',
   'Move through the tier ladder in order: Free, Starter, Pro, then Master.',
   'For Starter and Pro, run a strategy, save it to My Picks, and confirm the play when prompted.',
   'For NC Pick 3 / Pick 4, note whether Fireball appears and whether the result copy explains it clearly.',
   'For Pro, check that TimePulse appears on Pro access and that the lag window copy makes sense.',
   'For Master, check that TimePulse II appears only on Master access and that the adaptive window copy makes sense.',
   'TimePulse should be visible in Strategy Locker, My Picks, and Stats for the matching tier; make sure the saved-pick badges and review cards agree.',
+  'Test the TimePulse refresh button: click it, confirm the cooldown indicator appears, and verify the 36-hour wait text shows.',
   'Check Results and Stats for the right date, divider, and confirmed-play behavior, then file the report.',
+  'For My Picks: save from Strategy Locker, verify NO match chip appears until you confirm. Confirm the play, then verify the match chip appears.',
+  'For My Picks: test the Midday/Evening filter for Pick 3/4. Switch to Cash 5 or Powerball and confirm the filter hides.',
+  'For CA games: test Daily 3, Daily 4, and Fantasy 5 through the same save-confirm-match flow. Verify draw window labels show Nightly for Fantasy 5 and Midday/Evening for Daily 3.',
+  'Verify the draw window toggle in Strategy Locker: Midday/Evening should appear for Pick 3/4, hide for Cash 5/Powerball.',
 ];
 
 const FREE_ROAM_PROMPTS = [

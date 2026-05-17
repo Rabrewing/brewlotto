@@ -47,6 +47,8 @@ If users do not reach step 3 quickly, improve onboarding and store pages before 
 
 - [ ] Confirm V1 feature scope is frozen
 - [ ] Confirm the landing page, onboarding, dashboard, Strategy Locker, My Picks, Results, Stats, Billing, BrewU, Support, and QA/Test Lab are stable
+- [ ] Draft and review the BrewLotto legal policy pack: Terms of Use, Privacy Policy, California supplement, AI Usage Disclosure, Intellectual Property / Internet Property, and Responsible Play disclaimer
+- [x] Add a dedicated privacy request path and confirm the California privacy addendum has its own route
 - [ ] Keep the referral loop deferred until billing, notifications, and strategy gating are stable
 - [ ] Verify the current tier ladder copy is final
 - [ ] Verify the Fireball copy is final for NC Pick 3 and Pick 4

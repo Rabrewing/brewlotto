@@ -50,6 +50,7 @@
 - `useUserTier` now reads `user_entitlements.tier_code` first so Pricing and Dashboard reflect the Stripe-backed entitlement row instead of stale auth metadata after a real upgrade.
 - BrewU now also has a quick index at the top of the page so users can jump straight to tutorial replay, play-style guides, TimePulse strategy guidance, Fireball, payout ladders, freshness, AI guidance, prize tables, and systems links without scrolling.
 - BrewU now has a customer-friendly strategy and timing section that explains TimePulse for BrewPro, TimePulse II for BrewMaster, and how saved picks carry the same timing badge into My Picks and Stats.
+- The legal hub now has separate Terms, Privacy, California addendum, AI Usage, Internet Property, and Responsible Play routes, and Support has a dedicated privacy request category / shortcut so California and general privacy requests do not share the same inline page.
 - Optional sound effects now use a lightweight generated-tone approach in the app settings and on save/confirm success states, with a small preview tap and error buzz for failed saves, so no separate audio asset pipeline is required for V1.
 - Resolved support tickets now also create an in-app `user_notifications` record so the customer notification center reflects support updates in addition to email.
 - The legacy play-log path now writes into the canonical `play_logs` table with auth validation and normalized draw-time / number payloads, which makes it possible to build settlement and winnings alerts on one source of truth.
@@ -80,7 +81,7 @@
 - `My Picks` now shows saved picks only, loads a broader 30-day-ish history window, and groups the saved entries by date so customers can confirm older saved picks without leaving the app while keeping the confirmation action tied to the saved record.
 - `Today's Results` now groups draw history by date with visible time chips and offers a 3- or 6-month history toggle, while still keeping the closest prediction separate from the confirmed-play workflow.
 - `Logout` signs out immediately; the confirm-modal UX called for in the screen map is still pending.
-- Learn and Legal are lightweight V1 shells, not full CMS/legal surfaces yet.
+- Learn is still a lightweight V1 shell, while Legal now has publishable draft routes that still need counsel review before launch.
 - Settings stores values, but full theme application across the UI is still future work.
 - Notifications stores preferences and reads history, but real delivery wiring still needs a full verification pass.
 - Menu/tab and mockup QA are mostly cleaned up at the route level; the remaining work is a browser screenshot spot-check against the rendered routes, with Strategy Locker and Learn/BrewU still the highest-priority polish pages.
@@ -422,17 +423,21 @@ npm run ingest-all
 
 ### Medium Priority
 
-1. Replace the lightweight Learn and Legal shells with fuller CMS-backed and policy-backed content.
-2. Wire settings theme application into the actual UI so stored settings affect the experience.
-3. Complete notifications delivery integration so in-app history and delivery are fully connected.
-4. Add/update the Opus Clip tutorial prompts for onboarding once the current flow is stable.
-5. Add the remaining Playwright/E2E coverage for the public landing, login, onboarding, and menu flows.
+1. Wire settings theme application into the actual UI so stored settings affect the experience.
+2. Complete notifications delivery integration so in-app history and delivery are fully connected.
+3. Add/update the Opus Clip tutorial prompts for onboarding once the current flow is stable.
+4. Add the remaining Playwright/E2E coverage for the public landing, login, onboarding, and menu flows.
 
 ### Low Priority
 
 1. Add Chart.js or equivalent stats visualizations if they still add value after the live data pass.
-2. Clean up lint debt after the current product passes stabilize.
-3. Expand profile polish such as avatar upload if it remains in scope.
+2. Expand profile polish such as avatar upload if it remains in scope.
+3. Add the remaining Playwright/E2E coverage for the public landing, login, onboarding, and menu flows.
+4. Clean up lint debt after the current product passes stabilize.
+5. Finish PWABuilder packaging and any related store-readiness prep if the mobile launch path needs it.
+6. Remove dead code and legacy scaffolding once the main flows are stable.
+7. Finalize and publish the BrewLotto legal policy pack after counsel review, then replace the draft legal index with the approved pages.
+8. Wire settings theme application into the actual UI so stored settings affect the experience.
 
 ### Deferred / V1.5 Growth
 

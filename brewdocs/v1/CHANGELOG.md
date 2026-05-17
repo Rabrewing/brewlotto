@@ -1,6 +1,6 @@
 # BrewLotto V1 Changelog
 
-**Last Updated:** 2026-05-16 ET
+**Last Updated:** 2026-05-17 ET
 
 This changelog records shipped or committed V1 changes in a compact, timestamped format.
 
@@ -8,6 +8,8 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 
 ### 2026-05-17
 
+- Polished the legal hub and policy pages into more publishable copy so the Terms, Privacy, California addendum, AI Usage, Internet Property, and Responsible Play routes read like launch-facing pages instead of internal draft notes.
+- Split the legal hub so Privacy now points to a dedicated California addendum route, and added a privacy request shortcut / category in Support so general privacy and California requests no longer share the same inline page.
 - Added opt-in generated-tone sound effects for Settings, Strategy Locker saves, My Picks play confirmations, and failure states so the V1 UI can give subtle feedback without a separate audio asset workflow.
 - Clarified the Notifications surface so in-app and email read as the live channels today, while push and SMS are clearly marked as future Twilio-backed options.
 - Polished the QA Test Lab guidance, BrewU strategy copy, and Notifications labels so the customer-facing language stays plain while still calling out TimePulse / TimePulse II where testers should look for it.
@@ -24,6 +26,8 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Replaced the overlapping responsive checklists with a single canonical `responsive-visual-qa.md` so the final layout pass can be run in one ordered sequence across laptop, tablet, and mobile widths.
 - Moved the avatar dropdown Logout action into a visible footer row so tablet users do not have to hunt for the sign-out control inside the scrollable menu.
 - Expanded the My Picks TimePulse card so saved picks now show the full timing summary from Strategy Locker: play window, confidence, sample size, median/spread, and the historical play-style hint when the data favors Box / Straight / 50-50.
+- Added a BrewLotto legal policy pack spec covering Terms of Use, Privacy Policy, California supplement, AI usage, intellectual property / internet property, and responsible-play language, and updated the Legal page to point at the draft pack instead of pretending the stub copy is final.
+- Split the legal surface into real draft routes for Terms, Privacy, California notice, AI usage, Internet Property, and Responsible Play, and added a Support prefill path for privacy / legal requests.
 
 ### 2026-05-12
 
@@ -154,6 +158,8 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Added TimePulse to My Picks prediction cards with 36-hour refresh cooldown (blue pulsing refresh button).
 - Added TimePulse to Stats & Performance strategy breakdown, Pricing, Billing, and Strategy Locker Master tier feature listings.
 - My Picks draw window filter (Midday/Evening) now only visible for Pick 3/4 games.
+- Admin QA dashboard at `/admin/qa` with report list, tier/status filters, and inline status management.
+- QA guided test steps expanded with CA game coverage, freshness pre-check, match info validation, TimePulse refresh testing, and draw window filter verification.
 - Added BrewU support intake, support screenshot storage, canonical play-log bridge, settlement sweep, and customer notifications planning.
 - Added timestamp discipline to AGENTS and Brewdocs so future AI sessions can read state without guessing.
 

@@ -672,7 +672,8 @@ The system is considered complete when:
 2. AI usage monitoring stays visible in BrewCommand so token, latency, and estimated spend can be compared against tier pricing and customer billing.
 3. BrewCommand alert email history is visible in the admin console so the team can verify what sent, to whom, and whether delivery succeeded.
 4. Approved QA tester accounts are separate from superadmins and land in the Test Lab so family testers can walk the app without admin power.
-5. BrewCommand still uses a superadmin allowlist rather than a full internal RBAC/user-provisioning system.
+5. **QA Test Lab** — Admin QA dashboard at `/admin/qa` with report list, status management, tier/status filters, inline editing. Guided test steps updated with CA game coverage, freshness pre-check, match info verification, TimePulse refresh testing, and draw window filter tests.
+6. BrewCommand still uses a superadmin allowlist rather than a full internal RBAC/user-provisioning system.
 
 ### Mockup-to-Code Alignment Summary
 

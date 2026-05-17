@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
 import { DashboardContainer, Header, NavigationTabs, SectionCard } from '@/components/brewlotto/dashboard';
@@ -16,6 +17,7 @@ type SupportCategory =
   | 'notifications'
   | 'learn'
   | 'legal'
+  | 'privacy'
   | 'login'
   | 'settings'
   | 'other';
@@ -30,6 +32,7 @@ const SUPPORT_CATEGORIES: Array<{ value: SupportCategory; label: string; descrip
   { value: 'notifications', label: 'Notifications', description: 'Delivery and inbox flow' },
   { value: 'learn', label: 'BrewU', description: 'Tutorials and explainers' },
   { value: 'legal', label: 'Terms & Privacy', description: 'Policies and responsible use' },
+  { value: 'privacy', label: 'Privacy', description: 'Personal data and request questions' },
   { value: 'login', label: 'Login / Auth', description: 'Magic link or callback errors' },
   { value: 'settings', label: 'Settings', description: 'Theme and profile defaults' },
   { value: 'other', label: 'Other', description: 'Anything else BrewCommand should know' },
@@ -38,6 +41,7 @@ const SUPPORT_CATEGORIES: Array<{ value: SupportCategory; label: string; descrip
 const MAX_SCREENSHOTS = 3;
 
 export default function SupportPage() {
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState('');
@@ -49,6 +53,24 @@ export default function SupportPage() {
     subject: '',
     page: '/support',
   });
+
+  useEffect(() => {
+    const category = searchParams.get('category');
+    const subject = searchParams.get('subject');
+    const page = searchParams.get('page');
+
+    if (category && SUPPORT_CATEGORIES.some((entry) => entry.value === category)) {
+      setFormState((current) => ({ ...current, category: category as SupportCategory }));
+    }
+
+    if (subject) {
+      setFormState((current) => ({ ...current, subject }));
+    }
+
+    if (page) {
+      setFormState((current) => ({ ...current, page }));
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     let cancelled = false;
@@ -259,6 +281,14 @@ export default function SupportPage() {
                 <Link href="/learn" className="block rounded-[20px] border border-white/8 bg-black/20 px-4 py-4 transition-colors hover:border-[#ffc742]/20 hover:bg-[#ffc742]/8">
                   <div className="text-[18px] font-medium text-[#f7ddb3]">BrewU</div>
                   <div className="mt-2 text-[14px] leading-7 text-white/60">Tutorial replay and core explainers.</div>
+                </Link>
+                <Link href="/legal" className="block rounded-[20px] border border-white/8 bg-black/20 px-4 py-4 transition-colors hover:border-[#ffc742]/20 hover:bg-[#ffc742]/8">
+                  <div className="text-[18px] font-medium text-[#f7ddb3]">Legal index</div>
+                  <div className="mt-2 text-[14px] leading-7 text-white/60">Open the policy pack and send a legal question.</div>
+                </Link>
+                <Link href="/support?category=privacy&subject=Privacy%20request" className="block rounded-[20px] border border-[#72caff]/12 bg-[#111f28]/60 px-4 py-4 transition-colors hover:border-[#72caff]/22 hover:bg-[#111f28]">
+                  <div className="text-[18px] font-medium text-[#9edcff]">Privacy / legal request</div>
+                  <div className="mt-2 text-[14px] leading-7 text-white/60">Prefill a support request for policy or privacy questions.</div>
                 </Link>
                 <Link href="/support" className="block rounded-[20px] border border-[#ffc742]/20 bg-[#ffc742]/10 px-4 py-4 transition-colors hover:border-[#ffc742]/35 hover:bg-[#ffc742]/14">
                   <div className="text-[18px] font-medium text-[#f7ddb3]">Support</div>
