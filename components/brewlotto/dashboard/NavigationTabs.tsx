@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useBrewSoundEffects } from '@/hooks/useBrewSoundEffects';
 
 type TabId = 'dashboard' | 'results' | 'picks';
 
@@ -19,6 +20,7 @@ const TABS: Tab[] = [
 
 export function NavigationTabs() {
   const pathname = usePathname();
+  const { playSound } = useBrewSoundEffects();
 
   return (
     <nav className="mb-4">
@@ -27,6 +29,9 @@ export function NavigationTabs() {
           <Link
             key={tab.id}
             href={tab.href}
+            onClick={() => {
+              void playSound('click');
+            }}
             className={`relative inline-flex shrink-0 items-center rounded-full border px-4 py-2 text-[14px] font-medium transition-all ${
               pathname === tab.href
                 ? 'border-[#ffc742]/28 bg-[#ffc742]/12 text-[#ffe39a] shadow-[0_0_16px_rgba(255,199,66,0.12)]'

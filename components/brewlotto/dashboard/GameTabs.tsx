@@ -1,6 +1,11 @@
 'use client';
 
-import { getDashboardGameTabs, type DashboardStateCode, type DashboardGameId } from '@/lib/dashboard/game-config';
+import {
+  getDashboardGameTabs,
+  type DashboardStateCode,
+  type DashboardGameId,
+} from '@/lib/dashboard/game-config';
+import { useBrewSoundEffects } from '@/hooks/useBrewSoundEffects';
 
 export type GameId = DashboardGameId;
 
@@ -10,8 +15,13 @@ interface GameTabsProps {
   stateCode?: DashboardStateCode;
 }
 
-export function GameTabs({ selectedGame = 'pick3', onSelect, stateCode = 'NC' }: GameTabsProps) {
+export function GameTabs({
+  selectedGame = 'pick3',
+  onSelect,
+  stateCode = 'NC',
+}: GameTabsProps) {
   const games = getDashboardGameTabs(stateCode);
+  const { playSound } = useBrewSoundEffects();
 
   return (
     <div className="mb-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -19,7 +29,10 @@ export function GameTabs({ selectedGame = 'pick3', onSelect, stateCode = 'NC' }:
         {games.map((game) => (
           <button
             key={game.id}
-            onClick={() => onSelect?.(game.id)}
+            onClick={() => {
+              void playSound('click');
+              onSelect?.(game.id);
+            }}
             className={`rounded-full border px-3 py-1 text-[12px] font-medium transition-all ${
               selectedGame === game.id
                 ? 'border-[#ffe08a] bg-gradient-to-r from-[#ffc742] to-[#ffd364] text-black ring-1 ring-[#fff0ab]/35 shadow-[0_0_16px_rgba(255,199,66,0.54),0_0_28px_rgba(255,174,42,0.2)]'
