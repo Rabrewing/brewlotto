@@ -49,7 +49,7 @@
 - `useUserTier` now reads `user_entitlements.tier_code` first so Pricing and Dashboard reflect the Stripe-backed entitlement row instead of stale auth metadata after a real upgrade.
 - BrewU now also has a quick index at the top of the page so users can jump straight to tutorial replay, play-style guides, TimePulse strategy guidance, Fireball, payout ladders, freshness, AI guidance, prize tables, and systems links without scrolling.
 - BrewU now has a customer-friendly strategy and timing section that explains TimePulse for BrewPro, TimePulse II for BrewMaster, and how saved picks carry the same timing badge into My Picks and Stats.
-- Optional sound effects now use a lightweight generated-tone approach in the app settings and on save/confirm success states, so no separate audio asset pipeline is required for V1.
+- Optional sound effects now use a lightweight generated-tone approach in the app settings and on save/confirm success states, with a small preview tap and error buzz for failed saves, so no separate audio asset pipeline is required for V1.
 - Resolved support tickets now also create an in-app `user_notifications` record so the customer notification center reflects support updates in addition to email.
 - The legacy play-log path now writes into the canonical `play_logs` table with auth validation and normalized draw-time / number payloads, which makes it possible to build settlement and winnings alerts on one source of truth.
 - BrewCommand now has a settlement sweep endpoint and admin trigger that can settle unsettled `play_logs` against official draws, covering both NC and CA through the same state/game mapping the dashboard uses.

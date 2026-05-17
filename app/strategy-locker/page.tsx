@@ -617,6 +617,7 @@ export default function StrategyLockerPage() {
 
       setError(null);
     } catch (saveError) {
+      void playSound('error');
       setError(
         saveError instanceof Error
           ? saveError.message
@@ -636,6 +637,7 @@ export default function StrategyLockerPage() {
       setError(
         `This strategy requires ${formatTierLabel(strategy.min_tier)} access.`
       );
+      void playSound('error');
       return;
     }
 
@@ -685,6 +687,7 @@ export default function StrategyLockerPage() {
       }));
       setError(null);
     } catch (runError) {
+      void playSound('error');
       setError(
         runError instanceof Error ? runError.message : 'Failed to run strategy'
       );
@@ -715,6 +718,7 @@ export default function StrategyLockerPage() {
       void playSound('success');
       setError(null);
     } catch (err) {
+      void playSound('error');
       setError(err instanceof Error ? err.message : 'Failed to save pick');
     } finally {
       setSavingPredictionId(null);

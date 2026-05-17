@@ -8,6 +8,7 @@ import {
   NavigationTabs,
   SectionCard,
 } from '@/components/brewlotto/dashboard';
+import { useBrewSoundEffects } from '@/hooks/useBrewSoundEffects';
 import { supabase } from '@/lib/supabase/browserClient';
 
 interface AuthUser {
@@ -84,6 +85,7 @@ export default function NotificationsPage() {
   const [selectedTab, setSelectedTab] = useState<'new' | 'all'>('new');
   const [savingPreferences, setSavingPreferences] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const { playSound } = useBrewSoundEffects();
 
   useEffect(() => {
     let cancelled = false;
@@ -217,6 +219,7 @@ export default function NotificationsPage() {
 
       setMessage('Notification preferences saved.');
     } catch (saveError) {
+      void playSound('error');
       setMessage(
         saveError instanceof Error
           ? saveError.message
@@ -234,6 +237,7 @@ export default function NotificationsPage() {
       .eq('id', notificationId);
 
     if (updateError) {
+      void playSound('error');
       setMessage(updateError.message);
       return;
     }
@@ -257,6 +261,7 @@ export default function NotificationsPage() {
       .eq('is_read', false);
 
     if (updateError) {
+      void playSound('error');
       setMessage(updateError.message);
       return;
     }

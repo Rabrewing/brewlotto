@@ -942,37 +942,47 @@ export default function MyPicksPage() {
   }, [playLogs]);
 
   async function handleToggleSaved(prediction: PredictionRecord) {
-    const response = await fetch(`/api/predictions/${prediction.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ is_saved: !prediction.is_saved }),
-    });
+    try {
+      const response = await fetch(`/api/predictions/${prediction.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_saved: !prediction.is_saved }),
+      });
 
-    const payload = await response.json();
-    if (!response.ok) {
-      throw new Error(
-        payload?.error?.message || 'Failed to update saved state'
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(
+          payload?.error?.message || 'Failed to update saved state'
+        );
+      }
+
+      setPredictions((current) =>
+        current.filter((item) => item.id !== prediction.id)
       );
+    } catch (err) {
+      void playSound('error');
+      throw err;
     }
-
-    setPredictions((current) =>
-      current.filter((item) => item.id !== prediction.id)
-    );
   }
 
   async function handleDelete(prediction: PredictionRecord) {
-    const response = await fetch(`/api/predictions/${prediction.id}`, {
-      method: 'DELETE',
-    });
+    try {
+      const response = await fetch(`/api/predictions/${prediction.id}`, {
+        method: 'DELETE',
+      });
 
-    const payload = await response.json();
-    if (!response.ok) {
-      throw new Error(payload?.error?.message || 'Failed to delete pick');
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload?.error?.message || 'Failed to delete pick');
+      }
+
+      setPredictions((current) =>
+        current.filter((item) => item.id !== prediction.id)
+      );
+    } catch (err) {
+      void playSound('error');
+      throw err;
     }
-
-    setPredictions((current) =>
-      current.filter((item) => item.id !== prediction.id)
-    );
   }
 
   async function submitConfirmedPlay(
@@ -1030,6 +1040,7 @@ export default function MyPicksPage() {
           : 'Play confirmed. Brew will use this as the canonical play history entry for the selected draw date.'
       );
     } catch (confirmError) {
+      void playSound('error');
       setActionMessage(
         confirmError instanceof Error
           ? confirmError.message

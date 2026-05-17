@@ -8,7 +8,7 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 
 ### 2026-05-17
 
-- Added opt-in generated-tone sound effects for Settings, Strategy Locker saves, and My Picks play confirmations so the V1 UI can give subtle success feedback without a separate audio asset workflow.
+- Added opt-in generated-tone sound effects for Settings, Strategy Locker saves, My Picks play confirmations, and failure states so the V1 UI can give subtle feedback without a separate audio asset workflow.
 - Clarified the Notifications surface so in-app and email read as the live channels today, while push and SMS are clearly marked as future Twilio-backed options.
 - Polished the QA Test Lab guidance, BrewU strategy copy, and Notifications labels so the customer-facing language stays plain while still calling out TimePulse / TimePulse II where testers should look for it.
 - Added `haywood.loven@gmail.com` to the default QA tester allowlist so the Test Lab can accept the new tester account without needing an env-only override.

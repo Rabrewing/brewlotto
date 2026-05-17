@@ -143,6 +143,9 @@ export default function SettingsPage() {
         void playBrewSound('success');
       }
     } catch (saveError) {
+      if (settings.sound_effects_enabled) {
+        void playBrewSound('error');
+      }
       setMessage(
         saveError instanceof Error
           ? saveError.message
@@ -159,6 +162,7 @@ export default function SettingsPage() {
       return;
     }
 
+    await playBrewSound('click');
     await playBrewSound('success');
     setMessage('Sound preview played.');
   }
