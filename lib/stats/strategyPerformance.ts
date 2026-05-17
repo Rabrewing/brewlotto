@@ -6,6 +6,11 @@ type PredictionLike = {
   confidence_score?: number | null;
   is_saved?: boolean | null;
   created_at?: string | null;
+  matchInfo?: {
+    totalMatch?: number | null;
+    primaryMatch?: number | null;
+    bonusMatch?: boolean | null;
+  } | null;
 };
 
 type PlayLogLike = {
@@ -21,6 +26,8 @@ export type StrategyPerformanceSummary = {
   strategy: string;
   predictions: number;
   savedCount: number;
+  savedHits: number;
+  savedHitRate: number | null;
   averageConfidence: number | null;
   confirmedPlays: number;
   wins: number;
@@ -48,7 +55,8 @@ function extractMetadataStrategy(metadata: unknown) {
   }
 
   const value = metadata as Record<string, unknown>;
-  const raw = value.strategy ?? value.source_strategy_key ?? value.strategy_key ?? null;
+  const raw =
+    value.strategy ?? value.source_strategy_key ?? value.strategy_key ?? null;
 
   return typeof raw === 'string' && raw.trim() ? raw.trim() : null;
 }
@@ -73,22 +81,29 @@ function extractFireballFlag(metadata: unknown, resultCode?: string | null) {
     return true;
   }
 
-  if (typeof value.fireball_value === 'string' && value.fireball_value.trim() !== '' && Number.isFinite(Number(value.fireball_value))) {
+  if (
+    typeof value.fireball_value === 'string' &&
+    value.fireball_value.trim() !== '' &&
+    Number.isFinite(Number(value.fireball_value))
+  ) {
     return true;
   }
 
-  return Boolean(resultCode && String(resultCode).toLowerCase().includes('fireball'));
+  return Boolean(
+    resultCode && String(resultCode).toLowerCase().includes('fireball')
+  );
 }
 
 export function buildStrategyPerformanceSummary(
   predictions: PredictionLike[],
-  playLogs: PlayLogLike[],
+  playLogs: PlayLogLike[]
 ): StrategyPerformanceSummary[] {
   const summary = new Map<
     string,
     {
       predictions: number;
       savedCount: number;
+      savedHits: number;
       confidenceTotal: number;
       confidenceCount: number;
       confirmedPlays: number;
@@ -110,6 +125,7 @@ export function buildStrategyPerformanceSummary(
     const existing = summary.get(strategy) || {
       predictions: 0,
       savedCount: 0,
+      savedHits: 0,
       confidenceTotal: 0,
       confidenceCount: 0,
       confirmedPlays: 0,
@@ -123,13 +139,20 @@ export function buildStrategyPerformanceSummary(
 
     existing.predictions += 1;
     existing.savedCount += prediction.is_saved ? 1 : 0;
+    if (prediction.is_saved && (prediction.matchInfo?.totalMatch || 0) > 0) {
+      existing.savedHits += 1;
+    }
 
-    if (prediction.confidence_score != null && Number.isFinite(Number(prediction.confidence_score))) {
+    if (
+      prediction.confidence_score != null &&
+      Number.isFinite(Number(prediction.confidence_score))
+    ) {
       existing.confidenceTotal += Number(prediction.confidence_score);
       existing.confidenceCount += 1;
     }
 
-    existing.lastActivityAt = existing.lastActivityAt || prediction.created_at || null;
+    existing.lastActivityAt =
+      existing.lastActivityAt || prediction.created_at || null;
     summary.set(strategy, existing);
   }
 
@@ -139,7 +162,11 @@ export function buildStrategyPerformanceSummary(
     }
 
     const metadataStrategy = extractMetadataStrategy(playLog.metadata);
-    const strategy = metadataStrategy || (playLog.prediction_id ? strategyByPredictionId.get(playLog.prediction_id) : null);
+    const strategy =
+      metadataStrategy ||
+      (playLog.prediction_id
+        ? strategyByPredictionId.get(playLog.prediction_id)
+        : null);
 
     if (!strategy) {
       continue;
@@ -148,6 +175,7 @@ export function buildStrategyPerformanceSummary(
     const existing = summary.get(strategy) || {
       predictions: 0,
       savedCount: 0,
+      savedHits: 0,
       confidenceTotal: 0,
       confidenceCount: 0,
       confirmedPlays: 0,
@@ -165,7 +193,10 @@ export function buildStrategyPerformanceSummary(
       existing.hitCount += 1;
     }
 
-    const fireballActive = extractFireballFlag(playLog.metadata, playLog.outcome_result_code);
+    const fireballActive = extractFireballFlag(
+      playLog.metadata,
+      playLog.outcome_result_code
+    );
     if (fireballActive) {
       existing.fireballConfirmedPlays += 1;
       if ((playLog.outcome_match_count || 0) > 0) {
@@ -191,16 +222,40 @@ export function buildStrategyPerformanceSummary(
   return [...summary.entries()]
     .map(([strategy, entry]) => {
       const averageConfidence =
-        entry.confidenceCount > 0 ? Math.round(entry.confidenceTotal / entry.confidenceCount) : null;
-      const hitRate = entry.confirmedPlays > 0 ? Math.round((entry.hitCount / entry.confirmedPlays) * 100) : null;
-      const winRate = entry.confirmedPlays > 0 ? Math.round((entry.wins / entry.confirmedPlays) * 100) : null;
-      const fireballHitRate = entry.fireballConfirmedPlays > 0 ? Math.round((entry.fireballHits / entry.fireballConfirmedPlays) * 100) : null;
-      const fireballWinRate = entry.fireballConfirmedPlays > 0 ? Math.round((entry.fireballWins / entry.fireballConfirmedPlays) * 100) : null;
+        entry.confidenceCount > 0
+          ? Math.round(entry.confidenceTotal / entry.confidenceCount)
+          : null;
+      const savedHitRate =
+        entry.savedCount > 0
+          ? Math.round((entry.savedHits / entry.savedCount) * 100)
+          : null;
+      const hitRate =
+        entry.confirmedPlays > 0
+          ? Math.round((entry.hitCount / entry.confirmedPlays) * 100)
+          : null;
+      const winRate =
+        entry.confirmedPlays > 0
+          ? Math.round((entry.wins / entry.confirmedPlays) * 100)
+          : null;
+      const fireballHitRate =
+        entry.fireballConfirmedPlays > 0
+          ? Math.round(
+              (entry.fireballHits / entry.fireballConfirmedPlays) * 100
+            )
+          : null;
+      const fireballWinRate =
+        entry.fireballConfirmedPlays > 0
+          ? Math.round(
+              (entry.fireballWins / entry.fireballConfirmedPlays) * 100
+            )
+          : null;
 
       return {
         strategy,
         predictions: entry.predictions,
         savedCount: entry.savedCount,
+        savedHits: entry.savedHits,
+        savedHitRate,
         averageConfidence,
         confirmedPlays: entry.confirmedPlays,
         wins: entry.wins,
@@ -214,5 +269,10 @@ export function buildStrategyPerformanceSummary(
         lastActivityAt: entry.lastActivityAt,
       };
     })
-    .sort((a, b) => b.confirmedPlays - a.confirmedPlays || b.predictions - a.predictions || a.strategy.localeCompare(b.strategy));
+    .sort(
+      (a, b) =>
+        b.confirmedPlays - a.confirmedPlays ||
+        b.predictions - a.predictions ||
+        a.strategy.localeCompare(b.strategy)
+    );
 }

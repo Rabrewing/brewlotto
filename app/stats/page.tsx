@@ -61,6 +61,11 @@ interface PredictionRecord {
   source_strategy_key?: string | null;
   confidence_score?: number | null;
   is_saved: boolean;
+  matchInfo?: {
+    totalMatch?: number | null;
+    primaryMatch?: number | null;
+    bonusMatch?: boolean | null;
+  } | null;
 }
 
 type QueryResult<T> = {
@@ -207,6 +212,9 @@ export default function StatsPage() {
   const [pickResults, setPickResults] = useState<PickResultRecord[]>([]);
   const [dailyStats, setDailyStats] = useState<DailyStatRecord[]>([]);
   const [predictions, setPredictions] = useState<PredictionRecord[]>([]);
+  const [savedPredictions, setSavedPredictions] = useState<PredictionRecord[]>(
+    []
+  );
   const timingLabel = currentTier === 'master' ? 'TimePulse II' : 'TimePulse';
 
   useEffect(() => {
@@ -240,6 +248,7 @@ export default function StatsPage() {
           pickResultsResult,
           dailyStatsResult,
           predictionsResult,
+          savedPredictionsResult,
         ] = (await Promise.all([
           supabase
             .from('play_logs')
@@ -273,11 +282,15 @@ export default function StatsPage() {
             .eq('user_id', authUser.id)
             .order('created_at', { ascending: false })
             .limit(120),
+          fetch('/api/predictions?saved=true&limit=400', {
+            cache: 'no-store',
+          }),
         ])) as [
           QueryResult<PlayLogRecord[]>,
           QueryResult<PickResultRecord[]>,
           QueryResult<DailyStatRecord[]>,
           QueryResult<PredictionRecord[]>,
+          Response,
         ];
 
         if (playLogsResult.error) {
@@ -293,12 +306,25 @@ export default function StatsPage() {
           throw predictionsResult.error;
         }
 
+        const savedPredictionsPayload = await savedPredictionsResult.json();
+        if (!savedPredictionsResult.ok) {
+          throw new Error(
+            savedPredictionsPayload?.error?.message ||
+              'Failed to load saved hit data'
+          );
+        }
+
         if (!cancelled) {
           setUser({ id: authUser.id, email: authUser.email });
           setPlayLogs(playLogsResult.data || []);
           setPickResults(pickResultsResult.data || []);
           setDailyStats(dailyStatsResult.data || []);
           setPredictions(predictionsResult.data || []);
+          setSavedPredictions(
+            Array.isArray(savedPredictionsPayload.data)
+              ? savedPredictionsPayload.data
+              : []
+          );
         }
       } catch (loadError) {
         if (!cancelled) {
@@ -307,6 +333,7 @@ export default function StatsPage() {
               ? loadError.message
               : 'Failed to load stats'
           );
+          setSavedPredictions([]);
         }
       } finally {
         if (!cancelled) {
@@ -403,8 +430,17 @@ export default function StatsPage() {
   }, [pickResults]);
 
   const strategySummary = useMemo<StrategyPerformanceSummary[]>(() => {
-    return buildStrategyPerformanceSummary(predictions, playLogs);
-  }, [playLogs, predictions]);
+    return buildStrategyPerformanceSummary(
+      predictions,
+      playLogs,
+      savedPredictions
+    );
+  }, [playLogs, predictions, savedPredictions]);
+
+  const savedHitsTotal = useMemo(
+    () => strategySummary.reduce((sum, entry) => sum + entry.savedHits, 0),
+    [strategySummary]
+  );
 
   const [timingProfiles, setTimingProfiles] = useState<
     Record<string, TimingProfile>
@@ -512,11 +548,16 @@ export default function StatsPage() {
               </div>
             </section>
 
-            <section className="grid gap-4 lg:grid-cols-4">
+            <section className="grid gap-4 lg:grid-cols-5">
               <StatCard
                 label="Settled Plays"
                 value={String(settledPlays.length)}
                 helper="Only play logs that have been settled against official outcomes."
+              />
+              <StatCard
+                label="Saved Hits"
+                value={String(savedHitsTotal)}
+                helper="Saved picks that matched an official draw before confirmation."
               />
               <StatCard
                 label="Wins Logged"
@@ -524,7 +565,7 @@ export default function StatsPage() {
                 helper="Confirmed win rows from stored result comparisons."
               />
               <StatCard
-                label="Hit Rate"
+                label="Confirmed Hit Rate"
                 value={`${hitRate}%`}
                 helper="Wins plus partial hits across stored result records."
               />
@@ -664,12 +705,22 @@ export default function StatsPage() {
                           </div>
                           <div className="mt-1 text-[13px] text-white/52">
                             {entry.predictions} stored predictions •{' '}
+                            {entry.savedHits} saved hits •{' '}
                             {entry.confirmedPlays} confirmed plays
                           </div>
                         </div>
                         <div className="flex flex-wrap gap-2 text-[13px] uppercase tracking-[0.14em] text-white/42">
                           <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
                             Wins {entry.wins}
+                          </span>
+                          <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
+                            Saved hits {entry.savedHits}
+                          </span>
+                          <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
+                            Saved hit rate{' '}
+                            {entry.savedHitRate !== null
+                              ? `${entry.savedHitRate}%`
+                              : 'N/A'}
                           </span>
                           <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
                             Hit rate{' '}

@@ -4,12 +4,13 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import {
   resolveDashboardGameConfig,
   type DashboardGameId,
   type DashboardStateCode,
 } from '@/lib/dashboard/game-config';
+import { createSupabaseServerClient } from '@/lib/supabase/serverClient';
 
 const getSupabase = () =>
   createClient(
@@ -57,7 +58,10 @@ type DrawRow = {
   fireball_value?: unknown;
 };
 
-async function attachMatchInfo(supabase: any, predictions: PredictionRow[]) {
+async function attachMatchInfo(
+  supabase: SupabaseClient,
+  predictions: PredictionRow[]
+) {
   const enriched: Array<
     PredictionRow & { matchInfo: Record<string, unknown> | null }
   > = [];
@@ -196,6 +200,25 @@ function resolveDashboardConfig(gameKey: string, state: string) {
 
 export async function GET(request: NextRequest) {
   try {
+    const authClient = createSupabaseServerClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await authClient.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'UNAUTHORIZED',
+            message: 'Please sign in to view predictions.',
+          },
+        },
+        { status: 401 }
+      );
+    }
+
     const supabase = getSupabase();
     const { searchParams } = new URL(request.url);
 
@@ -235,6 +258,7 @@ export async function GET(request: NextRequest) {
     if (savedOnly) {
       query = query.eq('is_saved', true);
     }
+    query = query.eq('user_id', user.id);
 
     const { data, error, count } = await query;
 
@@ -256,12 +280,18 @@ export async function GET(request: NextRequest) {
       data: enriched,
       meta: { total: count || 0, limit, offset },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Predictions GET error:', error);
     return NextResponse.json(
       {
         success: false,
-        error: { code: 'SERVER_ERROR', message: error.message },
+        error: {
+          code: 'SERVER_ERROR',
+          message:
+            error instanceof Error
+              ? error.message
+              : 'Failed to load predictions.',
+        },
       },
       { status: 500 }
     );
@@ -351,12 +381,18 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Predictions POST error:', error);
     return NextResponse.json(
       {
         success: false,
-        error: { code: 'SERVER_ERROR', message: error.message },
+        error: {
+          code: 'SERVER_ERROR',
+          message:
+            error instanceof Error
+              ? error.message
+              : 'Failed to create prediction.',
+        },
       },
       { status: 500 }
     );
