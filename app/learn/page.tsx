@@ -111,6 +111,11 @@ const BREWU_INDEX = [
     hint: 'Prize shape and certified values',
   },
   {
+    label: 'How does TimePulse work?',
+    href: '#timepulse',
+    hint: 'Timing analysis for strategy picks',
+  },
+  {
     label: 'Why are results delayed?',
     href: '#freshness',
     hint: 'Healthy vs delayed vs stale',
@@ -148,6 +153,7 @@ const BREWU_INDEX_CHIPS = [
   { label: 'Hit vs Win', href: '#lessons' },
   { label: 'Strategy and TimePulse', href: '#strategy' },
   { label: 'Fireball', href: '#fireball' },
+  { label: 'TimePulse', href: '#timepulse' },
   { label: 'Freshness', href: '#freshness' },
   { label: 'Payouts', href: '#payouts' },
   { label: 'AI help', href: '#ai-guidance' },
@@ -158,6 +164,7 @@ const BREWU_POPULAR_TOPICS = [
   { label: 'Fireball rules', href: '#fireball' },
   { label: 'Hit vs Win explained', href: '#lessons' },
   { label: 'Prize tables', href: '#prize-tables' },
+  { label: 'How TimePulse works', href: '#timepulse' },
   { label: 'Data Freshness', href: '#freshness' },
   { label: 'Where to use this', href: '#where-to-use' },
 ];
@@ -642,6 +649,50 @@ export default async function LearnPage() {
             current freshness status, the latest draw date, and a short
             disclaimer. If data is stale, the app will state it clearly and
             resume normal operation as soon as the next draw is ingested.
+          </div>
+        </section>
+
+        <section
+          id="timepulse"
+          className="mt-5 rounded-[30px] border border-[#ffbd39]/18 bg-[radial-gradient(circle_at_top_left,rgba(255,189,57,0.14),rgba(0,0,0,0)_34%),linear-gradient(145deg,rgba(28,20,12,0.92),rgba(8,8,8,0.98))] px-5 py-5 shadow-[0_0_28px_rgba(255,189,57,0.08)]"
+        >
+          <div className="text-[15px] uppercase tracking-[0.16em] text-white/38">TimePulse</div>
+          <div className="mt-3 text-[26px] font-semibold text-[#f7ddb3]">Timing analysis for your strategy picks</div>
+          <div className="mt-2 max-w-3xl text-[15px] leading-7 text-white/62">
+            TimePulse watches your saved predictions and tracks how long it takes for pattern matches
+            to surface in official draws. The more picks you save, the more accurate the timing window
+            becomes. Available on Pro (TimePulse) and Master (TimePulse II).
+          </div>
+          <div className="mt-5 grid gap-3 md:grid-cols-3">
+            <div className="rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
+              <div className="text-[12px] font-semibold uppercase tracking-[0.16em] text-[#93efb8]">Tracking</div>
+              <div className="mt-2 text-[14px] leading-7 text-white/68">
+                Initial state while TimePulse collects data. Save strategy picks and check back
+                after draws accumulate — the timing window will appear as matches are detected.
+              </div>
+            </div>
+            <div className="rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
+              <div className="text-[12px] font-semibold uppercase tracking-[0.16em] text-[#f5cf84]">Play window</div>
+              <div className="mt-2 text-[14px] leading-7 text-white/68">
+                Once enough data exists, a date range appears: &ldquo;May 16 — May 24.&rdquo; This is the
+                estimated window when similar patterns have historically surfaced — not a guarantee
+                for the current pick.
+              </div>
+            </div>
+            <div className="rounded-[22px] border border-white/8 bg-black/20 px-4 py-4">
+              <div className="text-[12px] font-semibold uppercase tracking-[0.16em] text-[#9edcff]">Confidence</div>
+              <div className="mt-2 text-[14px] leading-7 text-white/68">
+                High (20+ samples, tight spread), Medium (10+ samples), or Low (fewer samples).
+                Confidence improves naturally as more picks are saved and matched over time.
+              </div>
+            </div>
+          </div>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <div className="rounded-[22px] border border-[#ffbd39]/12 bg-[#1a140c] px-4 py-3 text-[14px] leading-7 text-white/68">
+              <span className="font-semibold text-white">Refresh: </span>
+              A blue pulsing button lets you request fresh timing data once per 36 hours.
+              My Picks, Stats, and the Strategy Locker all show the same TimePulse data.
+            </div>
           </div>
         </section>
 
