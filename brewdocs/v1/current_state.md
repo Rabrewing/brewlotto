@@ -6,6 +6,7 @@
 ## 2026-05-05 Truth Update
 
 ### ✅ Already Real
+
 - Public landing page, login page, pricing page, onboarding flow, and dashboard entry points are live on the `brew2-overhaul` preview branch; production tracks `brewlotto-v1`.
 - Stripe downgrades are currently managed through the billing portal, and the webhook path reflects the new tier via `customer.subscription.updated` so entitlements roll back cleanly when Stripe changes the subscription.
 - Stripe CLI test-mode is authenticated and ready for webhook verification (`acct_1TTVRiCi8lUllKJd`, test keys configured, config.toml readable).
@@ -43,7 +44,7 @@
 - BrewCommand does not yet have a full internal RBAC / user-provisioning system; it still relies on the superadmin allowlist for internal admin work, while approved QA testers are routed into a separate Test Lab.
 - Home-state preference is now a first-class V1 preference (`user_preferences.default_state_code`) and is being used to drive dashboard/result labels, freshness, and default game selection; it can become a future analytics dimension later.
 - BrewU now has a Systems area and a support intake scaffold with category dropdown, comments, screenshots, and a 24-hour response disclaimer; submissions route into BrewCommand alerting, a tracked `support_requests` ticket table, and email fan-out to the selected superadmin inbox. A private `support-screenshots` Supabase bucket is also seeded for storage sync, and resolved tickets now trigger a customer-facing status email.
-- BrewU now also has a dedicated Test Lab flow for approved QA testers. Family testers can sign in with approved tester emails, see a gated intro overlay first, then walk the app by tier and submit yes/no + freeform QA reports with screenshots into a separate BrewCommand QA queue backed by `qa_reports` and `qa-screenshots`. Tester identity is auto-captured from the signed-in account so the form can stay simple, drafts are saved per tester email so they can stop and resume later without starting over, the initial tester roster is seeded in the shared auth helper and can still be extended via `BREWQA_TESTER_EMAILS` including `rb.brewington@gmail.com` and `latasharorie@hotmail.com`, and the tester guide now tells people to start in Strategy Locker first, then flow to My Picks for the real confirmation step before they report back. The Test Lab now uses a hybrid guided-pass plus free-roam-pass roadmap so testers can verify core flows and also tell us whether the app gives them enough cues to navigate on their own. The Test Lab popup and main page now also show a 1-week testing window from the tester start date so the guided/free-roam pass is time-bounded. The Test Lab also documents Stripe test-card usage (`4242...` for success, `4000...0002` for a generic decline) so tier upgrades can be exercised without real cards.
+- BrewU now also has a dedicated Test Lab flow for approved QA testers. Family testers can sign in with approved tester emails, see a gated intro overlay first, then walk the app by tier and submit yes/no + freeform QA reports with screenshots into a separate BrewCommand QA queue backed by `qa_reports` and `qa-screenshots`. Tester identity is auto-captured from the signed-in account so the form can stay simple, drafts are saved per tester email so they can stop and resume later without starting over, the initial tester roster is seeded in the shared auth helper and can still be extended via `BREWQA_TESTER_EMAILS` including `rb.brewington@gmail.com`, `latasharorie@hotmail.com`, and `haywood.loven@gmail.com`, and the tester guide now tells people to start in Strategy Locker first, then flow to My Picks for the real confirmation step before they report back. The Test Lab now uses a hybrid guided-pass plus free-roam-pass roadmap so testers can verify core flows and also tell us whether the app gives them enough cues to navigate on their own. The Test Lab popup and main page now also show a 1-week testing window from the tester start date so the guided/free-roam pass is time-bounded. The Test Lab also documents Stripe test-card usage (`4242...` for success, `4000...0002` for a generic decline) so tier upgrades can be exercised without real cards.
 - Logout from the desktop avatar menu is now direct and immediate again, with `/logout` kept as a fallback redirect route so BrewCommand and tester sessions can be ended cleanly.
 - `useUserTier` now reads `user_entitlements.tier_code` first so Pricing and Dashboard reflect the Stripe-backed entitlement row instead of stale auth metadata after a real upgrade.
 - BrewU now also has a quick index at the top of the page so users can jump straight to tutorial replay, play-style guides, Fireball, payout ladders, freshness, AI guidance, prize tables, and systems links without scrolling.
@@ -65,6 +66,7 @@
 - Confirmed wins still need a tighter play-date confirmation layer before the app can safely say a user truly won on that draw; the new results-history plan tracks that as a launch-critical flow item so a May 10 prediction cannot masquerade as a May 9 win.
 
 ### ⚠️ Still Partial Or Needs Verification
+
 - `scripts/ingestionScheduler.js` has been archived; Cloud Scheduler + Cloud Run are the active production ingestion path.
 - Billing has checkout, webhook, and customer portal API scaffolding, and the remaining step is live-mode verification plus production transaction confirmation.
 - Billing downgrades are portal-managed rather than custom-coded; the webhook should remain the source of truth for tier rollback and entitlement updates.
@@ -100,6 +102,7 @@
 - AI usage logging now feeds an internal BrewCommand spend dashboard so token usage and estimated model cost can be audited before margin-sensitive launch decisions.
 
 ### 🎯 Current Truth Priority
+
 1. Run a final browser spot-check on the widened desktop/tablet/mobile shell and the dropdown/menu spacing across the landing, login, and shared framework surfaces. The implementation is already in place and the checklist lives in `brewdocs/v1/responsive-layout-checklist.md`.
 2. Keep the remaining screenshot-rhythm QA focused on Billing and Notifications rather than route wiring.
 3. Verify Stripe live-mode checkout/webhook flow against the current billing ladder.
@@ -114,6 +117,7 @@
 12. Keep the referral growth loop deferred until billing, notifications, and strategy gating are stable.
 
 ### Tutorial Prompt Status
+
 - Opus Clip prompt pack is ready to generate for the disclaimer, walkthrough, and dashboard intro clips.
 
 ---
@@ -121,9 +125,11 @@
 ## 🔧 2026-05-01 INGESTION FIX SUMMARY
 
 ### Problem
+
 NC scrapers reported "Success" but no data was inserted into `official_draws`. Root cause: adapter schema mismatched V1 canonical schema.
 
 ### Solution Applied
+
 1. Fixed ESM/CommonJS compatibility by renaming adapter files to `.cjs`
 2. Fixed hardcoded path `/home/brewexec/brewlotto/data` → `process.cwd() + '/data'`
 3. Fixed typo in require statement (mismatched quotes)
@@ -131,6 +137,7 @@ NC scrapers reported "Success" but no data was inserted into `official_draws`. R
 5. Reduced scrape count from 1000 to 50 draws per run (faster, only latest data)
 
 ### Result
+
 - ✅ All 8/8 scrapers now insert into canonical `official_draws` table
 - ✅ NC Pick 3, Pick 4, Cash 5 data flowing
 - ✅ CA Daily 3, Daily 4, Fantasy 5 data flowing
@@ -142,28 +149,32 @@ NC scrapers reported "Success" but no data was inserted into `official_draws`. R
 ## Data Files Status
 
 ### ✅ California Data
-| Game | File | Draws | Date Range | Source | Status |
-|------|------|-------|------------|--------|--------|
-| Daily 3 | `/data/ca/ca-daily3.csv` | 200 | 2025-12-07 to 2026-03-16 | lotteryextreme.com | ✅ VALIDATED |
-| Daily 4 | `/data/ca/ca-daily4.csv` | 200 | 2025-08-29 to 2026-03-16 | lotteryextreme.com | ✅ VALIDATED |
-| Fantasy 5 | `/data/ca/ca-fantasy5.csv` | 30 | Recent | lotto-8.com | ⚠️ Needs more |
+
+| Game      | File                       | Draws | Date Range               | Source             | Status        |
+| --------- | -------------------------- | ----- | ------------------------ | ------------------ | ------------- |
+| Daily 3   | `/data/ca/ca-daily3.csv`   | 200   | 2025-12-07 to 2026-03-16 | lotteryextreme.com | ✅ VALIDATED  |
+| Daily 4   | `/data/ca/ca-daily4.csv`   | 200   | 2025-08-29 to 2026-03-16 | lotteryextreme.com | ✅ VALIDATED  |
+| Fantasy 5 | `/data/ca/ca-fantasy5.csv` | 30    | Recent                   | lotto-8.com        | ⚠️ Needs more |
 
 ### ✅ North Carolina Data
-| Game | File | Draws | Source | Status |
-|------|------|-------|--------|--------|
+
+| Game   | File                    | Draws   | Source        | Status                                       |
+| ------ | ----------------------- | ------- | ------------- | -------------------------------------------- |
 | Pick 3 | `/data/nc/nc-pick3.csv` | ~13,600 | nclottery.com | ✅ In Database (adapter verified 2026-05-01) |
 | Pick 4 | `/data/nc/nc-pick4.csv` | ~11,700 | nclottery.com | ✅ In Database (adapter verified 2026-05-01) |
-| Cash 5 | `/data/nc/nc-cash5.csv` | ~8,800 | nclottery.com | ✅ In Database (adapter verified 2026-05-01) |
+| Cash 5 | `/data/nc/nc-cash5.csv` | ~8,800  | nclottery.com | ✅ In Database (adapter verified 2026-05-01) |
 
 ### ✅ Multi-State Data
-| Game | File | Draws | Source | Status |
-|------|------|-------|--------|--------|
-| Powerball | `/data/multi-state/powerball.csv` | 2,373 | NCEL | ✅ Ready |
-| Mega Millions | `/data/multi-state/mega-millions.csv` | 1,682 | NCEL | ✅ Ready |
+
+| Game          | File                                  | Draws | Source | Status   |
+| ------------- | ------------------------------------- | ----- | ------ | -------- |
+| Powerball     | `/data/multi-state/powerball.csv`     | 2,373 | NCEL   | ✅ Ready |
+| Mega Millions | `/data/multi-state/mega-millions.csv` | 1,682 | NCEL   | ✅ Ready |
 
 ## Data Fetching Scripts
 
 ### ✅ Created Scripts
+
 1. **`scripts/scrapeCA_Data.js`** - Fetches CA Daily 3/Daily 4 from lotteryextreme.com
    - Daily 3: Working (2 draws/day)
    - Daily 4: Working (1 draw/day)
@@ -194,27 +205,30 @@ NC scrapers reported "Success" but no data was inserted into `official_draws`. R
    - Command: `node scripts/ingestionHealth.js`
 
 ### ✅ Live Scrapers Now Present
+
 1. **`scripts/scrapeCA_Live.js`** - Live CA scraper for calottery.com pages
 2. **`scripts/scrapeNC_Live.js`** - Live NC scraper for nclottery.com pages
 
 These are already referenced by `scripts/ingestionJob.js`; the scheduler still needs to be aligned with them.
 
 ### Data Source Summary
-| Game | State | Source | Script |
-|------|-------|--------|--------|
-| Daily 3 | CA | lotteryextreme.com | scrapeCA_Data.js |
-| Daily 4 | CA | lotteryextreme.com | scrapeCA_Data.js |
-| Fantasy 5 | CA | lotto-8.com | fetchCAData.js |
-| Pick 3 | NC | nclottery.com | scrapeNC_Pick3.js |
-| Pick 4 | NC | nclottery.com | scrapeNC_Pick4.js |
-| Cash 5 | NC | nclottery.com | scrapeNC_Cash5.js |
-| Powerball | NC/CA | NCEL (fallback) | scrapePowerball.js |
-| Mega Millions | NC/CA | NCEL (fallback) | scrapeMega.js |
-| Mega Millions | NC/CA | NCEL (fallback) | scrapeMega.js |
+
+| Game          | State | Source             | Script             |
+| ------------- | ----- | ------------------ | ------------------ |
+| Daily 3       | CA    | lotteryextreme.com | scrapeCA_Data.js   |
+| Daily 4       | CA    | lotteryextreme.com | scrapeCA_Data.js   |
+| Fantasy 5     | CA    | lotto-8.com        | fetchCAData.js     |
+| Pick 3        | NC    | nclottery.com      | scrapeNC_Pick3.js  |
+| Pick 4        | NC    | nclottery.com      | scrapeNC_Pick4.js  |
+| Cash 5        | NC    | nclottery.com      | scrapeNC_Cash5.js  |
+| Powerball     | NC/CA | NCEL (fallback)    | scrapePowerball.js |
+| Mega Millions | NC/CA | NCEL (fallback)    | scrapeMega.js      |
+| Mega Millions | NC/CA | NCEL (fallback)    | scrapeMega.js      |
 
 ## Parser Implementation
 
 ### ✅ Created Parsers
+
 1. **`lib/ingestion/parsers/caPick3Parser.js`** - CA Daily 3 parser
 2. **`lib/ingestion/parsers/caPick4Parser.js`** - CA Daily 4 parser
 3. **`lib/ingestion/parsers/caFantasy5Parser.js`** - CA Fantasy 5 parser (new)
@@ -227,9 +241,11 @@ These are already referenced by `scripts/ingestionJob.js`; the scheduler still n
 **Total Duration**: ~3 hours
 
 ### ✅ Created Adapter
+
 1. **`lib/ingestion/adapters/caHistoricalAdapter.ts`** - CA historical data ingestion adapter
 
 ### ✅ Adapter Features
+
 - Parses CA Daily 3, Daily 4, and Fantasy 5 CSV files
 - Normalizes data using the core ingestion framework
 - Validates records using the validator
@@ -243,6 +259,7 @@ These are already referenced by `scripts/ingestionJob.js`; the scheduler still n
 ### ✅ Test Results (2026-03-18 15:30 ET)
 
 **California Lottery Draw Schedule (Verified from calottery.com)**:
+
 - **Daily 3**: 2 draws per day
   - Day draw: 1:00 PM PT (ticket close: 1:00 PM)
   - Evening draw: 6:30 PM PT (ticket close: 6:30 PM)
@@ -252,6 +269,7 @@ These are already referenced by `scripts/ingestionJob.js`; the scheduler still n
   - Nightly draw: 6:30 PM PT
 
 **North Carolina Lottery Draw Schedule (Verified from nclottery.com)**:
+
 - **Pick 3**: 2 draws per day
   - Daytime: 3:00 PM ET
   - Evening: 11:22 PM ET
@@ -262,6 +280,7 @@ These are already referenced by `scripts/ingestionJob.js`; the scheduler still n
   - Evening: 11:22 PM ET (with Double Play option)
 
 **Data Processing Results (CA Historical)**:
+
 - **CA Daily 3**: 199 valid out of 200 records (1 invalid with all zeros from 2026-02-28)
   - Most recent date: 2026-03-16 (2 draws: day @ 1:00 PM PT = 9-3-5, evening @ 6:30 PM PT = 7-8-8)
 - **CA Daily 4**: 200 valid out of 200 records (1 draw per day)
@@ -273,14 +292,17 @@ These are already referenced by `scripts/ingestionJob.js`; the scheduler still n
 **Note**: NC data is available but not yet ingested. The NC CSV files have proper day/evening markers ("D"/"E") for Pick 3 and Pick 4.
 
 ### Test Command
+
 ```bash
 npx tsx scripts/testCAIngestion.ts
 ```
 
 ### ✅ D7.3 - Multi-State Adapters & Infrastructure (COMPLETED)
+
 **Completion Time**: 2026-03-18 ET
 
 #### ✅ Created Components
+
 1. **`lib/ingestion/adapters/multiStatePowerballAdapter.ts`** - Powerball adapter for NC/CA
 2. **`lib/ingestion/adapters/multiStateMegaMillionsAdapter.ts`** - Mega Millions adapter for NC/CA
 3. **`scripts/ingestionJob.js`** - Unified ingestion job with retry logic
@@ -290,6 +312,7 @@ npx tsx scripts/testCAIngestion.ts
 7. **`scripts/scrapeMega.js`** - Mega Millions scraper with NCEL fallback
 
 #### ✅ D7.3 Features
+
 - Multi-state game adapters for Powerball and Mega Millions
 - State-specific database entries (NC vs CA) for multi-state games
 - DoubleDraw handling as separate draw window variant
@@ -299,6 +322,7 @@ npx tsx scripts/testCAIngestion.ts
 - Unified job runner for all ingestion tasks
 
 #### ✅ NPM Scripts Added
+
 ```bash
 # Fetch California data
 npm run fetch-ca-data
@@ -308,6 +332,7 @@ npm run ingest-all
 ```
 
 ### Next Steps (D8 - Cross-Source Validation)
+
 - Compare data from multiple sources to ensure accuracy
 - Identify and resolve data discrepancies
 - Implement automated data reconciliation
@@ -317,6 +342,7 @@ npm run ingest-all
 ## Ingestion Core Modules (Phase D1)
 
 ### ✅ Created
+
 1. **`lib/ingestion/core/fetcher.ts`** - HTTP fetcher with retry logic
 2. **`lib/ingestion/core/parser.ts`** - CSV and HTML parser utilities
 3. **`lib/ingestion/core/normalizer.ts`** - Converts all sources to canonical format
@@ -324,6 +350,7 @@ npm run ingest-all
 5. **`lib/ingestion/core/sourceRegistry.ts`** - Central registry of all ingest sources
 
 ### Source Registry
+
 - NC official sources (tier 1, trust 100)
 - CA official page sources (tier 1, trust 90)
 - CA historical archive sources (tier 2, trust 75)
@@ -332,11 +359,13 @@ npm run ingest-all
 ## Documentation Updates
 
 ### ✅ Created Files
+
 1. **`brewdocs/v1/future_growth.md`** - State expansion strategy
 2. **`brewdocs/v1/data-sources.md`** - Official lottery data sources
 3. **`brewdocs/v1/current_state.md`** - This file
 
 ### ✅ Updated Files
+
 1. **`AGENTS.md`** - Added data fetching commands and directory structure
 2. **`brewdocs/v1/ingestion-freshness-policy.md`** - Canonical freshness and UI-gating policy
 3. **`brewdocs/v1/launch-infrastructure-plan.md`** - Canonical launch stack and setup order
@@ -346,6 +375,7 @@ npm run ingest-all
 ## 2026-04-09 Operational Freshness Update
 
 ### ✅ New Policy Direction
+
 - Draw freshness is now treated as a hard product requirement instead of a passive dashboard warning
 - The canonical V1 freshness policy now lives in `brewdocs/v1/ingestion-freshness-policy.md`
 - The canonical launch stack now lives in `brewdocs/v1/launch-infrastructure-plan.md`
@@ -353,6 +383,7 @@ npm run ingest-all
 - Dashboard and prediction surfaces are now expected to withhold live output whenever freshness is not healthy
 
 ### ✅ Launch Direction Locked
+
 - BrewLotto remains a web-first product on Vercel + Supabase
 - The same app should support website, mobile web, and PWA delivery
 - Production ingestion must run outside local development through dedicated scheduled infrastructure
@@ -360,6 +391,7 @@ npm run ingest-all
 - `brewlotto-v1` is the intended V1 production truth branch; active development continues on non-production branches until merge approval
 
 ### ✅ Operational Hardening Added
+
 - BrewCommand server routes now require authorized admin access instead of being openly callable
 - `/admin` now sits behind server-side BrewCommand authorization
 - PWA support is re-enabled in production with install affordance in the dashboard header
@@ -368,6 +400,7 @@ npm run ingest-all
 - `/api/health` now reports database plus freshness degradation for uptime monitoring
 
 ### 🔒 Required Runtime Behavior
+
 - Do not present stale stats as current
 - Do not generate predictions from delayed, stale, failed, or unknown freshness states
 - Use `draw_freshness_status` / `v_ingestion_health_summary` as the UI gating source of truth
@@ -375,6 +408,7 @@ npm run ingest-all
 ## Updated Todo List
 
 ### High Priority
+
 1. Keep ingestion on the Cloud Scheduler + Cloud Run path and leave the local cron helper archived.
 2. Run a final browser spot-check on the dropdown/menu destinations against the current mockups and rendered pages.
 3. Finish Stripe checkout, webhook, and customer portal wiring so `/billing` becomes a real self-serve flow.
@@ -384,6 +418,7 @@ npm run ingest-all
 7. Finish the BrewCommand Strategy Signals view so every ingestion-driven alert shows the recipient, reason, and qualifying strategy keys before moving back to results-history work.
 
 ### Medium Priority
+
 1. Replace the lightweight Learn and Legal shells with fuller CMS-backed and policy-backed content.
 2. Wire settings theme application into the actual UI so stored settings affect the experience.
 3. Complete notifications delivery integration so in-app history and delivery are fully connected.
@@ -391,16 +426,19 @@ npm run ingest-all
 5. Add the remaining Playwright/E2E coverage for the public landing, login, onboarding, and menu flows.
 
 ### Low Priority
+
 1. Add Chart.js or equivalent stats visualizations if they still add value after the live data pass.
 2. Clean up lint debt after the current product passes stabilize.
 3. Expand profile polish such as avatar upload if it remains in scope.
 
 ### Deferred / V1.5 Growth
+
 1. Build the referral growth loop from `brewdocs/v1/referral-growth-plan.md` after billing, notifications, and strategy gating are stable.
 
 ## Package.json Updates
 
 ### ✅ Added Scripts
+
 ```bash
 npm run fetch-ca-data   # Fetch California lottery data
 npm run ingest-all      # Ingest all data into Supabase
@@ -409,6 +447,7 @@ npm run ingest-all      # Ingest all data into Supabase
 ## Data Structure Compliance
 
 ### ✅ V1 Spec Compliance
+
 According to `brewdocs/v1/Brewlotto_v1.md`, data files should be structured as:
 
 ```
@@ -431,6 +470,7 @@ data/
 ## 2026-04-08 Progress Snapshot
 
 ### ✅ Completed Since Phase 7
+
 - Live Supabase security lints corrected
   - User access views now run with `security_invoker = true`
   - Alert tables now have RLS enabled in the live project
@@ -454,18 +494,21 @@ data/
 - Voice Mode now performs real browser narration when supported
 
 ### 🔎 Current Findings
+
 - BrewCommand health no longer renders blank and now reflects the canonical active game catalog
 - The previously identified duplicate placeholder `lottery_games` rows were confirmed empty and then deactivated safely
 - The canonical rows are the records that already own the actual `official_draws` history
 - Current freshness output now surfaces actual stale game status instead of duplicate placeholder failures
 
 ### 🔄 In Progress
+
 - BrewCommand phase completion work
 - Phase 9 commentary integration and replacement of remaining mocked dashboard data
 
 ## 2026-04-09 Route Rollout Update (11:14 EDT)
 
 ### ✅ Completed
+
 - Avatar dropdown is now aligned to the normalized IA and routes to live `/my-picks`, `/results`, `/profile`, and confirmable `/logout`
 - `/profile` is now live as a thin real V1 surface
   - authenticated identity summary
@@ -474,15 +517,18 @@ data/
   - truthful security actions without speculative account controls
 
 ### 🧪 Verification
+
 - `npm run build` ✅
 - `npm test` ✅ (4 suites, 33 tests)
 
 ### 🔜 Next Recommended Action
+
 1. Build `/stats`
 2. Build `/strategy-locker`
 3. Continue the remaining account/support surfaces after the analysis/premium pass
 
 ### Next Recommended Action
+
 1. Continue BrewCommand admin improvements beyond the current alert and ingestion health surfaces
 2. Replace dashboard mock prediction commentary with real prediction/explanation data
 3. Add follow-up validation around stale-game handling and scheduler freshness updates
@@ -490,28 +536,34 @@ data/
 ## Current Issues & Workarounds
 
 ### Issue 1: CA Pick 3/Pick 4 Live Data
+
 **Problem**: Official sources (lotto-8.com) return 404 for Pick 3/Pick 4 pages
 **Workaround**: Sample data generated for development and testing
-**Next Steps**: 
+**Next Steps**:
+
 1. Check with ChatGPT for alternative California data sources
 2. Try official Calottery.com API if available
 3. Use public APIs like LotteryAPI.net as fallback
 
 ### Issue 2: Data Format Inconsistencies
+
 **Problem**: NC and CA data have different CSV formats
 **Workaround**: Parsers handle format differences during ingestion
-**Next Steps**: 
+**Next Steps**:
+
 1. Standardize format during ingestion process
 2. Ensure all data maps to V1 spec database schema
 
 ## Next Steps for Data Ingestion
 
 ### ✅ Completed: D7.1 - California Historical Backfill
+
 - CA Historical Adapter created and tested
 - All CA historical data parsed and validated
 - Ready for Supabase integration (D7.2)
 
 ### ✅ Completed: D7.2 - Supabase Integration
+
 - Supabase integration with game_id/source_id lookups
 - Game and source records created automatically
 - Draws inserted into official_draws table
@@ -519,6 +571,7 @@ data/
 - Draw window labeling (day/evening/nightly)
 
 ### ✅ Completed: D7.3 - Multi-State Adapters & Infrastructure
+
 - Multi-state adapters for Powerball and Mega Millions
 - Unified ingestion job with retry logic
 - Daily scheduler using node-cron
@@ -526,6 +579,7 @@ data/
 - State-specific database entries for multi-state games
 
 ### Immediate Actions (D8 - Cross-Source Validation)
+
 1. **Compare data from multiple sources** to ensure accuracy
 2. **Identify and resolve data discrepancies**
 3. **Implement automated data reconciliation**
@@ -533,12 +587,14 @@ data/
 5. **Test complete ingestion pipeline** with `npm run ingest-all`
 
 ### Medium-term Actions (D9-D12)
+
 1. **Prediction Engine** - Implement Poisson, Momentum, Markov, Ensemble strategies
 2. **API Layer** - Expose predictions through RESTful endpoints
 3. **Dashboard UI** - Create customer dashboard with prediction panel
 4. **BrewCommand Admin** - Build internal monitoring console
 
 ### Long-term Actions
+
 1. **Expand to additional states** (Texas, Florida, New York)
 2. **Implement real-time ingestion** from official APIs
 3. **Add data freshness monitoring**
@@ -547,12 +603,14 @@ data/
 ## Testing the Data Pipeline
 
 ### Current Test Coverage
+
 - ✅ Fantasy 5 data fetching working
 - ✅ Parsers created for all CA games
 - ✅ Sample data generated for CA Pick 3/Pick 4
 - ⚠️ Live CA Pick 3/Pick 4 data sources not found
 
 ### Test Commands
+
 ```bash
 # Fetch California data
 npm run fetch-ca-data
@@ -566,6 +624,7 @@ ls -la /home/brewexec/brewlotto/data/ca/
 Based on `brewdocs/v1/fetchdata.md`, recommended sources:
 
 ### Official Sources
+
 1. **Calottery.com** - Official CA lottery site
    - https://www.calottery.com/draw-games/daily-3
    - https://www.calottery.com/draw-games/daily-4
@@ -579,7 +638,9 @@ Based on `brewdocs/v1/fetchdata.md`, recommended sources:
    - Kaggle datasets for model training
 
 ### Action Items for You
+
 When checking with ChatGPT, ask for:
+
 1. Official California lottery API endpoints
 2. Public APIs with CA Pick 3/Pick 4 data
 3. Historical CSV downloads for CA games
@@ -588,6 +649,7 @@ When checking with ChatGPT, ask for:
 ## Summary
 
 **Current Progress**:
+
 - ✅ Data files organized according to V1 spec
 - ✅ California historical data validated (430 total records)
 - ✅ CA Historical Adapter created and tested (D7.1 COMPLETED)
@@ -611,17 +673,20 @@ When checking with ChatGPT, ask for:
 - ✅ Empty duplicate `lottery_games` placeholders deactivated in production
 
 **In Progress (Phase 8 / Ops Cleanup)**:
+
 - 🔄 Final BrewCommand admin cleanup and data consistency pass
 - 🔄 Remaining cross-source validation and data quality alignment
 
 ## 2026-04-08 Late Progress Update (22:37 EDT)
 
 ### ✅ Recent Commits
+
 - `8ecd68d` `feat(dashboard): add V1 dashboard shell and PWA assets`
 - `910d577` `docs(v1): add UI architecture docs and supporting shared components`
 - `f456919` `chore(repo): ignore local artifacts and untrack logs`
 
 ### ✅ What Changed
+
 - Grouped the remaining V1 dashboard UI work into isolated commits instead of leaving it mixed with legacy and local files
 - Added the canonical dashboard shell components under `components/brewlotto/dashboard/`
 - Added the public PWA/dashboard asset set used by the App Router dashboard
@@ -630,6 +695,7 @@ When checking with ChatGPT, ask for:
 - Expanded `.gitignore` for local/export artifacts and removed tracked log noise from the repository index
 
 ### 🧪 Verification Snapshot
+
 - `npm run lint` fails on existing repo-wide ESLint violations outside the newly grouped dashboard work
 - `npm run build` still fails on unresolved legacy/module-path issues:
   - `app/api/stats/[game]/route.ts` missing `utils/fetchStats`
@@ -666,6 +732,7 @@ Fix the baseline lint/build/test compatibility issues separately, then continue 
   - Phase 9C+: destination-screen rollout in prioritized slices
 
 ### Normalized V1 Dropdown Destinations
+
 - `/profile`
 - `/my-picks`
 - `/results`
@@ -679,6 +746,7 @@ Fix the baseline lint/build/test compatibility issues separately, then continue 
 - `/logout` as confirmed action flow
 
 ### Recommended Build Order
+
 1. dropdown container / identity header upgrade
 2. `My Picks`
 3. `Today's Results`
@@ -695,6 +763,7 @@ Fix the baseline lint/build/test compatibility issues separately, then continue 
 ## 2026-04-09 Dropdown Destination Completion Update (12:24 EDT)
 
 ### ✅ Completed
+
 - Phase 9D shipped:
   - `/stats`
   - `/strategy-locker`
@@ -708,6 +777,7 @@ Fix the baseline lint/build/test compatibility issues separately, then continue 
 - The learn destination is now visibly labeled `BrewU` while keeping the route at `/learn`
 
 ### ✅ Route Data Sources
+
 - `/stats`
   - `play_logs`
   - `pick_results`
@@ -731,10 +801,12 @@ Fix the baseline lint/build/test compatibility issues separately, then continue 
   - `feature_entitlements`
 
 ### 🧪 Verification
+
 - `npm run build` ✅
 - `npm test` ✅ (4 suites, 33 tests)
 
 ### 🔜 Next Recommended Action
+
 1. Update any remaining design/progress docs that still describe Phase 9D/9E as pending
 2. Decide whether to deepen these new routes or shift back to Phase 8/BrewCommand polish
 3. Start a focused lint tranche when feature priorities permit

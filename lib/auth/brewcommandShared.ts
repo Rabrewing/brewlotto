@@ -21,6 +21,7 @@ const DEFAULT_BREW_QA_TESTER_EMAILS = [
   'nygyrl85@yahoo.com',
   'rb.brewington@gmail.com',
   'latasharorie@hotmail.com',
+  'haywood.loven@gmail.com',
 ];
 
 export function parseBrewCommandAdminEmails() {
@@ -30,10 +31,7 @@ export function parseBrewCommandAdminEmails() {
     .filter(Boolean);
 
   return Array.from(
-    new Set([
-      ...DEFAULT_BREWCOMMAND_ADMIN_EMAILS,
-      ...configuredEmails,
-    ]),
+    new Set([...DEFAULT_BREWCOMMAND_ADMIN_EMAILS, ...configuredEmails])
   );
 }
 
@@ -44,10 +42,7 @@ export function parseBrewQATesterEmails() {
     .filter(Boolean);
 
   return Array.from(
-    new Set([
-      ...DEFAULT_BREW_QA_TESTER_EMAILS,
-      ...configuredEmails,
-    ]),
+    new Set([...DEFAULT_BREW_QA_TESTER_EMAILS, ...configuredEmails])
   );
 }
 
@@ -60,14 +55,16 @@ export function isBrewCommandAdminUser(user: BrewCommandUserLike) {
   }
 
   const metadata = [user.app_metadata || {}, user.user_metadata || {}];
-  return metadata.some((entry) =>
-    entry.role === 'admin' ||
-    entry.role === 'superadmin' ||
-    entry.isAdmin === true ||
-    entry.is_admin === true ||
-    entry.isSuperAdmin === true ||
-    entry.is_superadmin === true ||
-    (Array.isArray(entry.roles) && (entry.roles.includes('admin') || entry.roles.includes('superadmin')))
+  return metadata.some(
+    (entry) =>
+      entry.role === 'admin' ||
+      entry.role === 'superadmin' ||
+      entry.isAdmin === true ||
+      entry.is_admin === true ||
+      entry.isSuperAdmin === true ||
+      entry.is_superadmin === true ||
+      (Array.isArray(entry.roles) &&
+        (entry.roles.includes('admin') || entry.roles.includes('superadmin')))
   );
 }
 
@@ -80,15 +77,17 @@ export function isBrewQATesterUser(user: BrewCommandUserLike) {
   }
 
   const metadata = [user.app_metadata || {}, user.user_metadata || {}];
-  return metadata.some((entry) =>
-    entry.role === 'tester' ||
-    entry.role === 'qa' ||
-    entry.role === 'quality_assurance' ||
-    entry.isTester === true ||
-    entry.is_tester === true ||
-    entry.isQA === true ||
-    entry.is_qa === true ||
-    (Array.isArray(entry.roles) && (entry.roles.includes('tester') || entry.roles.includes('qa')))
+  return metadata.some(
+    (entry) =>
+      entry.role === 'tester' ||
+      entry.role === 'qa' ||
+      entry.role === 'quality_assurance' ||
+      entry.isTester === true ||
+      entry.is_tester === true ||
+      entry.isQA === true ||
+      entry.is_qa === true ||
+      (Array.isArray(entry.roles) &&
+        (entry.roles.includes('tester') || entry.roles.includes('qa')))
   );
 }
 

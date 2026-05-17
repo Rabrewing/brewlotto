@@ -7,6 +7,8 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 ## [Unreleased]
 
 ### 2026-05-16
+
+- Added `haywood.loven@gmail.com` to the default QA tester allowlist so the Test Lab can accept the new tester account without needing an env-only override.
 - Added a V1 launch marketing roadmap checklist with phased guidance, KPI targets, and weekly operating notes so launch prep has a single checklist to follow once V1 is ready.
 - Marked the referral growth loop as deferred in the launch roadmap so V1 launch work stays focused on the core funnel and the referral build remains a V1.5 follow-on.
 - Expanded the BrewCommand QA Test Lab into a copy-ready guided-pass and free-roam-pass roadmap with severity levels, tab-by-tab coverage, and a report template that matches the live `/qa` form fields.
@@ -16,6 +18,7 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Split timing access into Pro `TimePulse` and Master `TimePulse II`, and updated billing, pricing, Strategy Locker, My Picks, Stats, and the QA flow to match the new tier ladder. TimePulse now resolves from the active Stripe-backed tier so stale entitlement rows do not drop BrewMaster users to Free Explorer.
 
 ### 2026-05-12
+
 - Recorded that the AI provider layer is connected for commentary and suggestion routes with env-driven OpenAI / DeepSeek / NIM routing and BrewCommand usage logging.
 - Allowed the AI provider selector to accept explicit `AI_PROVIDER=nim` instead of only relying on fallback detection.
 - Tightened `/pricing` copy so the selection surface reads cleaner while still routing upgrades to Stripe and current-plan changes to Billing.
@@ -24,9 +27,11 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Added chips and a popular-topics strip to the BrewU index so the help hub reads more like a browsable knowledge surface.
 
 ### 2026-05-13
+
 - Reworded the BrewU quick index so the top help surface reads like a browsable FAQ with question-style prompts and an "Ask BrewU" cue for faster topic discovery.
 
 ### 2026-05-15
+
 - Added a dedicated QA Test Lab for approved tester accounts, with a separate login allowlist, a gated intro overlay before the form unlocks, tier-by-tier test guidance, structured yes/no feedback, screenshot upload, and a BrewCommand QA queue.
 - Added a Stripe test-card cheat sheet to the QA Test Lab so testers can use `4242 4242 4242 4242` for successful tier testing and `4000 0000 0000 0002` for decline-path checks without using real cards.
 - Noted the preferred Run Strategy polish direction as a short BrewLotto avatar running-in-place cue that indicates the strategy is being computed, keeping the animation as post-core-flow polish only.
@@ -48,10 +53,12 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Cleaned visible schema-name leakage from Billing, Settings, and Stats copy so the UI reads like product language instead of table names.
 
 ### 2026-05-12
+
 - Confirmed the Stripe CLI is authenticated in test mode and ready for webhook verification, with the Brewlotto sandbox account and config file readable in the local environment.
 - Restyled the trial upgrade banner to a thinner blue/glow treatment and made expired trial generate actions route to `/pricing` instead of leaving users stuck at a hard lockout.
 
 ### 2026-05-10
+
 - Widened the shared dashboard shell for desktop and tablet while preserving the current mobile layout.
 - Reworked Strategy Locker so the entitlement snapshot opens as a compact summary with a collapsible full ladder, keeping the strategy cards visually primary.
 - Tuned BrewU so the page opens with an intelligence-center style coverage overview before the tutorial replay and lesson cards, and tracked content externalization as a later V1 follow-on.
@@ -70,6 +77,7 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Added a BrewU play-style matrix and payout ladder matrix so help content, AI guidance, and settlement classification share one source of truth.
 
 ### 2026-05-11
+
 - Wired NC Pick 3 / Pick 4 Fireball into the play-log and settlement label path so the modifier is tracked explicitly instead of being flattened into plain straight/box settlement math.
 - Added explicit NC Pick 3 / Pick 4 Fireball tracking to the play-style and payout workstream so the modifier is not lost in plain straight/box settlement math.
 - Surfaced NC Pick 3 / Pick 4 Fireball context in Results, My Picks, Strategy Locker, Stats & Performance, and BrewCommand so the modifier is visible in the product surfaces that drive confirmation and ratio tracking.
@@ -116,6 +124,7 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Added /settle endpoint to ingestion server + daily Cloud Scheduler job at 12:30 AM ET.
 
 ### 2026-05-13
+
 - Play confirmation nudges now fire during every ingestion run.
 - Settlement sweep automated with daily schedule.
 - Strategy runs scale draw count by user tier.
@@ -130,6 +139,7 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - BrewU Content Management documented in `brewdocs/v1/brewu-content-management.md`.
 
 ### 2026-05-14
+
 - Built TimePulse timing analysis (`lib/prediction/timingAnalysis.js`): per-strategy lag tracking, percentile windows, confidence badge (high/medium/low based on sample size and spread).
 - Brew AI compares timing profiles across all registered strategies and recommends the strategy with the tightest window.
 - TimePulse recommends play style (Straight / Box / 50/50) based on historical positional accuracy tracking.
@@ -140,16 +150,19 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Added timestamp discipline to AGENTS and Brewdocs so future AI sessions can read state without guessing.
 
 ### 2026-05-15
+
 - Made TimePulse timing analysis an explicit Master-tier entitlement (`timing_analysis_access`) instead of only a label-level rule.
 - Backfilled existing Master users so current entitlements keep TimePulse access without a Stripe catalog change.
 - Updated billing and Strategy Locker surfaces to read the explicit entitlement flag instead of only inferring access from tier text.
 
 ### 2026-05-16
+
 - Hardened the Supabase schema hygiene pass by pinning `search_path = public` on the core helper functions and narrowing legacy draw / `pick_history` write policies to `service_role` only, which clears the mutable search-path and permissive-write lint warnings without changing public read behavior.
 - Locked down anonymous GraphQL discovery across the public schema, removed authenticated access from admin/internal tables and helper views, and restricted SECURITY DEFINER RPCs to the service role so the remaining exposure is limited to user-owned tables the browser actually needs.
 - Added explicit `service_role` RLS policies to the policy-less admin/legacy tables Supabase flagged so those service-managed tables are no longer left enabled-without-policy.
 - Added optional Cloudflare Turnstile support to the magic-link login form so Supabase CAPTCHA can be enabled without changing the auth model away from passwordless email.
 
 ### 2026-05-05
+
 - Fixed cloud ingestion scheduler routing, AI usage tracking, and state-aware dashboard behavior.
 - Verified live NC and CA ingestion paths and updated the shared dashboard game mapping.
