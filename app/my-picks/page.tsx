@@ -80,6 +80,10 @@ interface TimingProfileRecord {
   windowEnd: string;
   sampleSize: number;
   confidence: string;
+  median: number;
+  spread: number;
+  recommendedStyle: string | null;
+  styleDistribution: Record<string, number> | null;
 }
 
 const STATE_OPTIONS: Array<{ value: FilterState; label: string }> = [
@@ -463,6 +467,14 @@ function PickCard({
   const status = getPickStatus(prediction);
   const fireballContext = getFireballContext(playLog);
   const officialFireballContext = getOfficialFireballContext(prediction);
+  const styleMap: Record<string, string> = {
+    straight: 'Straight',
+    box: 'Box',
+    '50_50': '50/50',
+  };
+  const timingStyleLabel = timingProfile?.recommendedStyle
+    ? styleMap[timingProfile.recommendedStyle] || null
+    : null;
 
   return (
     <article className="rounded-[28px] border border-[#ffbd39]/22 bg-[linear-gradient(145deg,rgba(32,19,13,0.82),rgba(13,10,10,0.96))] px-5 py-4 shadow-[0_0_22px_rgba(255,184,28,0.08)]">
@@ -547,50 +559,82 @@ function PickCard({
       </div>
 
       {timingStrategyKey ? (
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <div className="rounded-full border border-[#ffbd39]/14 bg-[#1a140c] px-3 py-1 text-[11px] text-[#f5cf84]">
-            {timingLabel}
-            {timingProfile
-              ? `: ${timingProfile.windowStart} — ${timingProfile.windowEnd}`
-              : ': tracking'}
+        <div className="mt-3 rounded-[18px] border border-[#ffbd39]/14 bg-[#1a140c] px-4 py-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="rounded-full border border-[#ffbd39]/14 bg-[#1a140c] px-3 py-1 text-[11px] text-[#f5cf84]">
+              {timingLabel}
+              {timingProfile
+                ? `: ${timingProfile.windowStart} — ${timingProfile.windowEnd}`
+                : ': tracking'}
+            </div>
+            {timingProfile ? (
+              <span className="rounded-full border border-[#ffbd39]/10 bg-white/[0.03] px-3 py-1 text-[10px] uppercase tracking-[0.1em] text-white/55">
+                {timingProfile.confidence} confidence
+              </span>
+            ) : null}
+            {onRefreshTiming ? (
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={onRefreshTiming}
+                  disabled={
+                    refreshingTiming ||
+                    (cooldownRemaining != null && cooldownRemaining > 0)
+                  }
+                  className={`flex h-7 w-7 items-center justify-center rounded-full transition-all ${
+                    refreshingTiming
+                      ? 'animate-spin bg-[#3b82f6]/30 text-white/50'
+                      : cooldownRemaining != null && cooldownRemaining > 0
+                        ? 'cursor-default bg-white/5 text-white/30'
+                        : 'animate-pulse bg-[#3b82f6]/15 text-[#60a5fa] hover:bg-[#3b82f6]/25'
+                  }`}
+                >
+                  <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 2v6h-6" /><path d="M3 12a9 9 0 0 1 15-6.7L21 8" /><path d="M3 22v-6h6" /><path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
+                  </svg>
+                </button>
+                {cooldownRemaining != null && cooldownRemaining > 0 ? (
+                  <span className="text-[10px] text-white/40 whitespace-nowrap">
+                    {Math.ceil(cooldownRemaining / 3600000)}h
+                  </span>
+                ) : null}
+              </div>
+            ) : null}
           </div>
-          {onRefreshTiming ? (
-            <button
-              type="button"
-              onClick={onRefreshTiming}
-              disabled={
-                refreshingTiming ||
-                (cooldownRemaining != null && cooldownRemaining > 0)
-              }
-              className={`flex h-7 w-7 items-center justify-center rounded-full transition-all ${
-                refreshingTiming
-                  ? 'animate-spin bg-[#3b82f6]/30 text-white/50'
-                  : cooldownRemaining != null && cooldownRemaining > 0
-                    ? 'bg-white/5 text-white/30 cursor-default'
-                    : 'bg-[#3b82f6]/15 text-[#60a5fa] hover:bg-[#3b82f6]/25 animate-pulse'
-              }`}
-              title={
-                cooldownRemaining != null && cooldownRemaining > 0
-                  ? `${Math.ceil(cooldownRemaining / 3600000)}h remaining`
-                  : 'Refresh timing window'
-              }
-            >
-              <svg
-                className="h-3.5 w-3.5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M21 2v6h-6" />
-                <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
-                <path d="M3 22v-6h6" />
-                <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
-              </svg>
-            </button>
-          ) : null}
+          {timingProfile ? (
+            <>
+              <div className="mt-2 text-[13px] leading-6 text-white/72">
+                Based on {timingProfile.sampleSize} historical {timingLabel}{' '}
+                patterns • median {timingProfile.median} days •{' '}
+                {timingProfile.spread}d spread
+              </div>
+              {timingStyleLabel ? (
+                <div className="mt-1 text-[12px] leading-6 text-[#93efb8]">
+                  Historical pattern favors a <strong>{timingStyleLabel}</strong>{' '}
+                  play style for this pick.
+                </div>
+              ) : null}
+              {timingProfile.styleDistribution ? (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {Object.entries(timingProfile.styleDistribution)
+                    .filter(([, value]) => Number(value) > 0)
+                    .map(([styleKey, value]) => (
+                      <span
+                        key={styleKey}
+                        className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[10px] uppercase tracking-[0.1em] text-white/55"
+                      >
+                        {styleMap[styleKey] || styleKey}: {Math.round(value)}
+                      </span>
+                    ))}
+                </div>
+              ) : null}
+            </>
+          ) : (
+            <div className="mt-2 text-[12px] leading-6 text-white/55">
+              Gathering timing data — save picks and check back as draws
+              accumulate to unlock your play window estimate.
+            </div>
+          )}
         </div>
       ) : null}
 
@@ -852,27 +896,38 @@ export default function MyPicksPage() {
 
   const TIMING_COOLDOWN_MS = 36 * 60 * 60 * 1000;
 
-  async function handleRefreshTiming(game: string, state: string) {
+  async function handleRefreshTiming(
+    game: string,
+    state: string,
+    storeCooldown: boolean = true
+  ) {
     const normalizedGame = normalizeTimingGame(game);
     const normalizedState = normalizeTimingState(state);
     const cacheKey = `brewlotto:timepulse-refresh-${normalizedGame}-${normalizedState}`;
-    const lastRefresh = parseInt(localStorage.getItem(cacheKey) || '0', 10);
+    const lastRefresh = parseInt(
+      localStorage.getItem(cacheKey) || '0',
+      10
+    );
     if (Date.now() - lastRefresh < TIMING_COOLDOWN_MS) return;
 
-    const comboKey = getTimingProfileRefreshKey(
-      normalizedGame,
-      normalizedState
-    );
+    const comboKey = getTimingProfileRefreshKey(normalizedGame, normalizedState);
     setRefreshingTiming(comboKey);
-    localStorage.setItem(cacheKey, String(Date.now()));
-    setTimingRefreshCooldowns((prev) => ({ ...prev, [comboKey]: Date.now() }));
+
+    if (storeCooldown) {
+      localStorage.setItem(cacheKey, String(Date.now()));
+      setTimingRefreshCooldowns((prev) => ({
+        ...prev,
+        [comboKey]: Date.now(),
+      }));
+    }
 
     try {
       const res = await fetch(
         `/api/stats/timing?game=${normalizedGame}&state=${normalizedState}&mode=${currentTier === 'master' ? 'master' : 'pro'}`,
         {
           cache: 'no-store',
-        }
+  }
+
       );
       const payload = await res.json();
       if (payload.success && payload.data) {

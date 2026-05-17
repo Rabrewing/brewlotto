@@ -91,7 +91,6 @@ function buildMenuSections(canAccessQa: boolean): MenuSection[] {
         { label: 'Support', icon: 'notifications', href: '/support', enabled: true, emphasis: 'help', description: 'Report issues and track tickets' },
         ...(canAccessQa ? [{ label: 'Test Lab', icon: 'lab', href: '/qa', enabled: true, description: 'Run tier-by-tier QA and submit findings' }] : []),
         { label: 'Terms & Privacy', icon: 'legal', href: '/legal', enabled: true, description: 'Policies and responsible use' },
-        { label: 'Logout', icon: 'logout', href: '/logout', enabled: true, description: 'Sign out of this session' },
       ],
     },
   ];
@@ -294,7 +293,14 @@ export function AvatarDropdown() {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const menuSections = buildMenuSections(canAccessQa);
-  const allItems = menuSections.flatMap((s) => s.items).filter((i) => i.enabled);
+  const logoutItem: MenuItem = {
+    label: 'Logout',
+    icon: 'logout',
+    href: '/logout',
+    enabled: true,
+    description: 'Sign out of this session',
+  };
+  const allItems = [...menuSections.flatMap((s) => s.items), logoutItem].filter((i) => i.enabled);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -547,37 +553,47 @@ export function AvatarDropdown() {
                     ) : null}
                   </div>
                 ))}
+              </div>
 
-                {hoveredItem?.description ? (
-                  <div className="mx-3 mt-3 rounded-[14px] bg-[#ffc742]/8 px-4 py-3">
-                    <div className="text-[12px] leading-5 text-white/72">{hoveredItem.description}</div>
-                  </div>
-                ) : null}
-
-                {confirmingLogout ? (
-                  <div className="mt-3 rounded-[16px] border border-[#ffc742]/18 bg-[#140f0e]/90 p-3">
-                    <div className="text-[13px] font-medium text-[#f6ddb2]">Logout now?</div>
-                    <div className="mt-1 text-[12px] leading-5 text-white/52">
-                      You will be returned through the existing logout flow.
+              <div className="border-t border-white/6 bg-black/15 px-2 pb-2 pt-2">
+                <div className="space-y-2">
+                  <MenuRow
+                    item={logoutItem}
+                    isFocused={focusedIndex === allItems.findIndex((i) => i.icon === 'logout')}
+                    setHoveredItem={setHoveredItem}
+                    onHover={() => setFocusedIndex(allItems.findIndex((i) => i.icon === 'logout'))}
+                    onClick={() => setConfirmingLogout(true)}
+                  />
+                  {hoveredItem?.description ? (
+                    <div className="mx-1 rounded-[14px] bg-[#ffc742]/8 px-4 py-3">
+                      <div className="text-[12px] leading-5 text-white/72">{hoveredItem.description}</div>
                     </div>
-                    <div className="mt-3 flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setConfirmingLogout(false)}
-                        className="flex-1 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[13px] text-white/70 transition-colors hover:bg-white/10 hover:text-white"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleLogout}
-                        className="flex-1 rounded-full bg-gradient-to-r from-[#ffc742] to-[#ffbe27] px-4 py-2 text-center text-[13px] font-semibold text-black shadow-[0_0_16px_rgba(255,199,66,0.2)]"
-                      >
-                        Logout
-                      </button>
+                  ) : null}
+                  {confirmingLogout ? (
+                    <div className="rounded-[16px] border border-[#ffc742]/18 bg-[#140f0e]/90 p-3">
+                      <div className="text-[13px] font-medium text-[#f6ddb2]">Logout now?</div>
+                      <div className="mt-1 text-[12px] leading-5 text-white/52">
+                        You will be returned through the existing logout flow.
+                      </div>
+                      <div className="mt-3 flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setConfirmingLogout(false)}
+                          className="flex-1 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[13px] text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleLogout}
+                          className="flex-1 rounded-full bg-gradient-to-r from-[#ffc742] to-[#ffbe27] px-4 py-2 text-center text-[13px] font-semibold text-black shadow-[0_0_16px_rgba(255,199,66,0.2)]"
+                        >
+                          Logout
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ) : null}
+                  ) : null}
+                </div>
               </div>
             </div>
           </div>

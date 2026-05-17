@@ -29,6 +29,7 @@
 - BrewCommand now has a notification bell for the admin surface, critical/email-worthy alerts are fanned out to one selected superadmin inbox by email, and the admin console shows recent alert delivery history alongside the shared alert center.
 - Dashboard and Results now normalize the preferred state code before calling the shared NC/CA game resolver, which keeps the client pages and results API aligned with Strategy Locker and My Picks instead of widening the helper types.
 - Strategy Locker now clears the current run preview when switching Midday/Evening on Pick 3 / Pick 4 so a midday run does not linger into the evening save path.
+- My Picks now carries the full TimePulse timing summary forward from the locker card, including the play window, confidence, sample size, median/spread, and the historical style hint when the timing profile favors Box / Straight / 50-50.
 - Sentry remains an external observability tool; BrewCommand should track product/business truth directly and only mirror Sentry status if we later decide we need a lightweight dashboard summary.
 - `SectionCard` is centralized in `components/brewlotto/dashboard/SectionCard.tsx` and the duplicated copies are gone.
 - Dropdown menu destinations are wired to live routes for gameplay, account, and system surfaces, and the older shared `Header` account button now points to `/profile` instead of a dead `/account` route.
@@ -105,10 +106,10 @@
 
 ### 🎯 Current Truth Priority
 
-1. Run a final browser spot-check on the widened desktop/tablet/mobile shell and the dropdown/menu spacing across the landing, login, and shared framework surfaces. The implementation is already in place and the checklist lives in `brewdocs/v1/responsive-layout-checklist.md`.
+1. Run a final browser spot-check on the widened laptop/tablet/mobile shell and the dropdown/menu spacing across all user-facing pages. The implementation is already in place, the avatar dropdown now keeps Logout visible in a footer row, and the canonical workflow lives in `brewdocs/v1/responsive-visual-qa.md`.
 2. Keep the remaining screenshot-rhythm QA focused on Billing and Notifications rather than route wiring.
 3. Verify Stripe live-mode checkout/webhook flow against the current billing ladder.
-4. Finish the CA Powerball/Mega live scraper work that remains stale/expected.
+4. CA Powerball and Mega Millions live scraping is now wired for both NC and CA via the multi-state scrapers, and the live GCP ingestion layer is healthy; treat this item as complete and keep only routine freshness monitoring on future ingestion runs.
 5. Keep the BrewCommand AI usage ledger visible while live-mode billing is validated.
 6. Keep the onboarding tutorial and future Opus Clip clips aligned with the landing/login flow.
 7. Tighten the BrewU support intake flow and verify screenshot upload / notification delivery.

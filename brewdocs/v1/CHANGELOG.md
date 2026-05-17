@@ -19,6 +19,11 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 - Normalized the dashboard and results client pages to the shared NC/CA state helper types so the results API, dashboard freshness logic, and game tabs stay aligned with the same state-aware config as the rest of the app.
 - Reset Strategy Locker run previews when switching Midday/Evening on Pick 3 / Pick 4 so each draw window can be run and saved independently.
 - Split timing access into Pro `TimePulse` and Master `TimePulse II`, and updated billing, pricing, Strategy Locker, My Picks, Stats, and the QA flow to match the new tier ladder. TimePulse now resolves from the active Stripe-backed tier so stale entitlement rows do not drop BrewMaster users to Free Explorer.
+- Confirmed the CA Powerball and Mega Millions scraper gap is closed in code: both games now write NC and CA rows through the multi-state ingestion path, with the remaining work limited to normal freshness monitoring during scheduled runs.
+- Confirmed the live GCP ingestion layer is healthy for the BrewLotto project: Cloud Run is serving the ingestion service on the latest ready revision and all scheduler jobs are enabled with clean recent attempts, so the CA Powerball/Mega scraping item is operationally complete.
+- Replaced the overlapping responsive checklists with a single canonical `responsive-visual-qa.md` so the final layout pass can be run in one ordered sequence across laptop, tablet, and mobile widths.
+- Moved the avatar dropdown Logout action into a visible footer row so tablet users do not have to hunt for the sign-out control inside the scrollable menu.
+- Expanded the My Picks TimePulse card so saved picks now show the full timing summary from Strategy Locker: play window, confidence, sample size, median/spread, and the historical play-style hint when the data favors Box / Straight / 50-50.
 
 ### 2026-05-12
 
