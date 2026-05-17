@@ -369,6 +369,19 @@ function getFireballContext(playLog?: PlayLogRecord | null) {
   return null;
 }
 
+function getOfficialFireballContext(prediction: PredictionRecord) {
+  if (!supportsFireballForPrediction(prediction)) {
+    return null;
+  }
+
+  const drawFireball = prediction.matchInfo?.drawFireball;
+  if (drawFireball === null || drawFireball === undefined) {
+    return 'Official Fireball pending';
+  }
+
+  return `Official Fireball ${drawFireball}`;
+}
+
 function PickStatusPill({
   status,
   createdAt,
@@ -448,6 +461,7 @@ function PickCard({
     prediction.bonus_number !== null && prediction.bonus_number !== undefined;
   const status = getPickStatus(prediction);
   const fireballContext = getFireballContext(playLog);
+  const officialFireballContext = getOfficialFireballContext(prediction);
 
   return (
     <article className="rounded-[28px] border border-[#ffbd39]/22 bg-[linear-gradient(145deg,rgba(32,19,13,0.82),rgba(13,10,10,0.96))] px-5 py-4 shadow-[0_0_22px_rgba(255,184,28,0.08)]">
@@ -480,6 +494,11 @@ function PickCard({
       {fireballContext ? (
         <div className="mt-3 inline-flex rounded-full border border-[#72caff]/18 bg-[#111f28] px-3 py-1 text-[11px] uppercase tracking-[0.12em] text-[#9edcff]">
           {fireballContext}
+        </div>
+      ) : null}
+      {officialFireballContext ? (
+        <div className="mt-2 inline-flex rounded-full border border-[#ffbd39]/18 bg-[#1a140c] px-3 py-1 text-[11px] uppercase tracking-[0.12em] text-[#f5cf84]">
+          {officialFireballContext}
         </div>
       ) : null}
 
