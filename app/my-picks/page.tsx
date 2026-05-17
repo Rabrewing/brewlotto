@@ -278,6 +278,26 @@ function getTimingProfileKey(strategyKey: string | null | undefined) {
   return TIMING_LABELS.has(mapped) ? mapped : null;
 }
 
+function getPredictionTimingProfileKey(prediction: PredictionRecord) {
+  const strategyKeys: Array<string | null | undefined> = [
+    prediction.source_strategy_key,
+    ...(Array.isArray(prediction.prediction_strategy_scores)
+      ? prediction.prediction_strategy_scores.map(
+          (score) => score?.strategy_key
+        )
+      : []),
+  ];
+
+  for (const strategyKey of strategyKeys) {
+    const profileKey = getTimingProfileKey(strategyKey);
+    if (profileKey) {
+      return profileKey;
+    }
+  }
+
+  return null;
+}
+
 function getTimingProfileLookupKey(
   game: string | null,
   state: string | null,
@@ -395,6 +415,7 @@ interface PickCardProps {
   onConfirmPlayed: (prediction: PredictionRecord) => Promise<void>;
   onDelete: (prediction: PredictionRecord) => Promise<void>;
   timingLabel: string;
+  timingStrategyKey?: string | null;
   timingProfile?: {
     windowStart: string;
     windowEnd: string;
@@ -414,6 +435,7 @@ function PickCard({
   onConfirmPlayed,
   onDelete,
   timingLabel,
+  timingStrategyKey,
   timingProfile,
   onRefreshTiming,
   refreshingTiming,
@@ -480,9 +502,11 @@ function PickCard({
         ) : null}
       </div>
 
-      {isConfirmed && prediction.matchInfo ? (
+      {prediction.matchInfo ? (
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <div className="rounded-full border border-[#72caff]/20 bg-[#72caff]/10 px-3 py-1 text-[12px] font-medium text-[#9fdcff]">
+            {isConfirmed ? 'Played result' : 'Saved hit'}
+            {' • '}
             {prediction.matchInfo.totalMatch === 0
               ? 'No match this draw'
               : `Matched ${prediction.matchInfo.primaryMatch} number${prediction.matchInfo.primaryMatch === 1 ? '' : 's'}${prediction.matchInfo.bonusMatch ? ' + bonus' : ''} ${prediction.matchInfo.totalMatch === 5 ? '— Jackpot!' : ''}`}
@@ -502,11 +526,13 @@ function PickCard({
         {getPredictionSummary(prediction)}
       </div>
 
-      {timingProfile ? (
+      {timingStrategyKey ? (
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <div className="rounded-full border border-[#ffbd39]/14 bg-[#1a140c] px-3 py-1 text-[11px] text-[#f5cf84]">
-            {timingLabel}: {timingProfile.windowStart} —{' '}
-            {timingProfile.windowEnd}
+            {timingLabel}
+            {timingProfile
+              ? `: ${timingProfile.windowStart} — ${timingProfile.windowEnd}`
+              : ': tracking'}
           </div>
           {onRefreshTiming ? (
             <button
@@ -1217,10 +1243,12 @@ export default function MyPicksPage() {
 
                 <div className="space-y-4">
                   {group.picks.map((prediction) => {
+                    const timingStrategyKey =
+                      getPredictionTimingProfileKey(prediction);
                     const timingProfileKey = getTimingProfileLookupKey(
                       prediction.game,
                       prediction.state,
-                      prediction.source_strategy_key
+                      timingStrategyKey
                     );
                     const timingComboKey = getTimingProfileRefreshKey(
                       prediction.game,
@@ -1251,6 +1279,7 @@ export default function MyPicksPage() {
                             ? timingProfiles[timingProfileKey] || null
                             : null
                         }
+                        timingStrategyKey={timingStrategyKey}
                         onRefreshTiming={() => {
                           handleRefreshTiming(
                             prediction.game || 'pick3',

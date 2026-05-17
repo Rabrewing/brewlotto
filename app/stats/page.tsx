@@ -11,7 +11,10 @@ import {
   SectionCard,
 } from '@/components/brewlotto/dashboard';
 import { supabase } from '@/lib/supabase/browserClient';
-import { buildStrategyPerformanceSummary, type StrategyPerformanceSummary } from '@/lib/stats/strategyPerformance';
+import {
+  buildStrategyPerformanceSummary,
+  type StrategyPerformanceSummary,
+} from '@/lib/stats/strategyPerformance';
 
 interface AuthUser {
   id: string;
@@ -60,6 +63,11 @@ interface PredictionRecord {
   is_saved: boolean;
 }
 
+type QueryResult<T> = {
+  data: T | null;
+  error: { message: string } | null;
+};
+
 interface StatCardProps {
   label: string;
   value: string;
@@ -93,6 +101,11 @@ const TIMING_LABELS = new Set([
   'PulseSync II',
   'SequenceX',
 ]);
+
+const TIMING_PROFILE_ALIASES: Record<string, string> = {
+  TimePulse: 'PulseSync',
+  'TimePulse II': 'PulseSync II',
+};
 
 function formatGameLabel(game: string) {
   switch (game) {
@@ -160,15 +173,26 @@ function getTimingProfileKey(strategyKey: string | null | undefined) {
     return trimmed;
   }
 
+  if (TIMING_PROFILE_ALIASES[trimmed]) {
+    return TIMING_PROFILE_ALIASES[trimmed];
+  }
+
   const mapped = getStrategyLabel(trimmed);
+  if (TIMING_PROFILE_ALIASES[mapped]) {
+    return TIMING_PROFILE_ALIASES[mapped];
+  }
   return TIMING_LABELS.has(mapped) ? mapped : null;
 }
 
 function StatCard({ label, value, helper }: StatCardProps) {
   return (
     <div className="flex-1 rounded-[24px] border border-[#ffbd39]/16 bg-[linear-gradient(145deg,rgba(27,19,14,0.8),rgba(11,10,10,0.96))] px-4 py-4 shadow-[0_0_18px_rgba(255,184,28,0.04)]">
-      <div className="text-[11px] uppercase tracking-[0.16em] text-white/35">{label}</div>
-      <div className="mt-3 text-[28px] font-semibold text-[#ffd27e]">{value}</div>
+      <div className="text-[11px] uppercase tracking-[0.16em] text-white/35">
+        {label}
+      </div>
+      <div className="mt-3 text-[28px] font-semibold text-[#ffd27e]">
+        {value}
+      </div>
       <div className="mt-2 text-[13px] leading-6 text-white/52">{helper}</div>
     </div>
   );
@@ -204,37 +228,57 @@ export default function StatsPage() {
 
         if (!authUser) {
           if (!cancelled) {
-            setError('You need to sign in before Brew can show personal performance data.');
+            setError(
+              'You need to sign in before Brew can show personal performance data.'
+            );
           }
           return;
         }
 
-        const [playLogsResult, pickResultsResult, dailyStatsResult, predictionsResult] = (await Promise.all([
+        const [
+          playLogsResult,
+          pickResultsResult,
+          dailyStatsResult,
+          predictionsResult,
+        ] = (await Promise.all([
           supabase
             .from('play_logs')
-            .select('id, game, state, created_at, is_settled, outcome_match_count, outcome_bonus_match, outcome_payout_amount')
+            .select(
+              'id, game, state, created_at, is_settled, outcome_match_count, outcome_bonus_match, outcome_payout_amount'
+            )
             .eq('user_id', authUser.id)
             .order('draw_date', { ascending: false })
             .limit(60),
           supabase
             .from('pick_results')
-            .select('id, game, state, draw_date, is_win, match_count, bonus_match, result_code')
+            .select(
+              'id, game, state, draw_date, is_win, match_count, bonus_match, result_code'
+            )
             .eq('user_id', authUser.id)
             .order('draw_date', { ascending: false })
             .limit(60),
           supabase
             .from('user_daily_stats')
-            .select('stat_date, picks_count, wins_count, partial_hits_count, exact_hits_count, accuracy, current_streak')
+            .select(
+              'stat_date, picks_count, wins_count, partial_hits_count, exact_hits_count, accuracy, current_streak'
+            )
             .eq('user_id', authUser.id)
             .order('stat_date', { ascending: false })
             .limit(7),
           supabase
             .from('predictions')
-            .select('id, game, state, created_at, source_strategy_key, confidence_score, is_saved')
+            .select(
+              'id, game, state, created_at, source_strategy_key, confidence_score, is_saved'
+            )
             .eq('user_id', authUser.id)
             .order('created_at', { ascending: false })
             .limit(120),
-        ])) as any[];
+        ])) as [
+          QueryResult<PlayLogRecord[]>,
+          QueryResult<PickResultRecord[]>,
+          QueryResult<DailyStatRecord[]>,
+          QueryResult<PredictionRecord[]>,
+        ];
 
         if (playLogsResult.error) {
           throw playLogsResult.error;
@@ -258,7 +302,11 @@ export default function StatsPage() {
         }
       } catch (loadError) {
         if (!cancelled) {
-          setError(loadError instanceof Error ? loadError.message : 'Failed to load stats');
+          setError(
+            loadError instanceof Error
+              ? loadError.message
+              : 'Failed to load stats'
+          );
         }
       } finally {
         if (!cancelled) {
@@ -274,13 +322,21 @@ export default function StatsPage() {
     };
   }, []);
 
-  const settledPlays = useMemo(() => playLogs.filter((entry) => entry.is_settled), [playLogs]);
+  const settledPlays = useMemo(
+    () => playLogs.filter((entry) => entry.is_settled),
+    [playLogs]
+  );
 
-  const winCount = useMemo(() => pickResults.filter((entry) => entry.is_win).length, [pickResults]);
+  const winCount = useMemo(
+    () => pickResults.filter((entry) => entry.is_win).length,
+    [pickResults]
+  );
 
   const partialHitCount = useMemo(
-    () => pickResults.filter((entry) => !entry.is_win && entry.match_count > 0).length,
-    [pickResults],
+    () =>
+      pickResults.filter((entry) => !entry.is_win && entry.match_count > 0)
+        .length,
+    [pickResults]
   );
 
   const hitRate = useMemo(() => {
@@ -288,24 +344,36 @@ export default function StatsPage() {
       return 0;
     }
 
-    return Math.round(((winCount + partialHitCount) / pickResults.length) * 100);
+    return Math.round(
+      ((winCount + partialHitCount) / pickResults.length) * 100
+    );
   }, [partialHitCount, pickResults.length, winCount]);
 
   const bestMatch = useMemo(() => {
-    return pickResults.reduce((best, entry) => Math.max(best, entry.match_count || 0), 0);
+    return pickResults.reduce(
+      (best, entry) => Math.max(best, entry.match_count || 0),
+      0
+    );
   }, [pickResults]);
 
   const averageConfidence = useMemo(() => {
     const confidenceValues = predictions
-      .map((entry) => (entry.confidence_score != null ? Number(entry.confidence_score) : null))
-      .filter((entry): entry is number => entry !== null && Number.isFinite(entry));
+      .map((entry) =>
+        entry.confidence_score != null ? Number(entry.confidence_score) : null
+      )
+      .filter(
+        (entry): entry is number => entry !== null && Number.isFinite(entry)
+      );
 
     if (confidenceValues.length === 0) {
       return null;
     }
 
-    return Math.round(confidenceValues.reduce((sum, value) => sum + value, 0) / confidenceValues.length);
-  }, [currentTier, predictions]);
+    return Math.round(
+      confidenceValues.reduce((sum, value) => sum + value, 0) /
+        confidenceValues.length
+    );
+  }, [predictions]);
 
   const currentStreak = useMemo(() => {
     return dailyStats[0]?.current_streak || 0;
@@ -329,14 +397,18 @@ export default function StatsPage() {
       summary.set(entry.game, existing);
     }
 
-    return [...summary.values()].sort((a, b) => b.plays - a.plays || a.label.localeCompare(b.label));
+    return [...summary.values()].sort(
+      (a, b) => b.plays - a.plays || a.label.localeCompare(b.label)
+    );
   }, [pickResults]);
 
   const strategySummary = useMemo<StrategyPerformanceSummary[]>(() => {
     return buildStrategyPerformanceSummary(predictions, playLogs);
   }, [playLogs, predictions]);
 
-  const [timingProfiles, setTimingProfiles] = useState<Record<string, TimingProfile>>({});
+  const [timingProfiles, setTimingProfiles] = useState<
+    Record<string, TimingProfile>
+  >({});
 
   useEffect(() => {
     let cancelled = false;
@@ -356,15 +428,20 @@ export default function StatsPage() {
         combos.set(`${game}-${state}`, { game, state });
       }
 
-      const results = await Promise.all(
+      const results = (await Promise.all(
         [...combos.values()].map(async ({ game, state }) => {
-          const response = await fetch(`/api/stats/timing?game=${game}&state=${state}&mode=${currentTier === 'master' ? 'master' : 'pro'}`, {
-            cache: 'no-store',
-          });
+          const response = await fetch(
+            `/api/stats/timing?game=${game}&state=${state}&mode=${currentTier === 'master' ? 'master' : 'pro'}`,
+            {
+              cache: 'no-store',
+            }
+          );
           const payload = await response.json();
-          return payload.success ? (payload.data || {}) as Record<string, TimingProfile> : {};
-        }),
-      ) as Record<string, TimingProfile>[];
+          return payload.success
+            ? ((payload.data || {}) as Record<string, TimingProfile>)
+            : {};
+        })
+      )) as Record<string, TimingProfile>[];
 
       if (cancelled) {
         return;
@@ -388,15 +465,16 @@ export default function StatsPage() {
     return () => {
       cancelled = true;
     };
-  }, [predictions]);
+  }, [currentTier, predictions]);
 
   const recentTrend = useMemo(() => {
     return [...dailyStats].reverse();
   }, [dailyStats]);
 
-  const settledSummaryText = settledPlays.length > 0
-    ? `Based on ${settledPlays.length} settled plays and ${pickResults.length} stored result records.`
-    : 'Outcome logging has not populated enough settled history yet, so Brew is only showing verified data already on your account.';
+  const settledSummaryText =
+    settledPlays.length > 0
+      ? `Based on ${settledPlays.length} settled plays and ${pickResults.length} stored result records.`
+      : 'Outcome logging has not populated enough settled history yet, so Brew is only showing verified data already on your account.';
 
   return (
     <main className="min-h-screen bg-[#050505] text-white">
@@ -423,9 +501,15 @@ export default function StatsPage() {
         ) : (
           <div className="space-y-5">
             <section className="rounded-[30px] border border-[#ffc742]/24 bg-[radial-gradient(circle_at_top_left,rgba(255,199,66,0.18),rgba(0,0,0,0)_34%),linear-gradient(145deg,rgba(30,20,13,0.88),rgba(8,8,8,0.98))] px-5 py-5 shadow-[0_0_28px_rgba(255,184,28,0.08)]">
-              <div className="text-[15px] uppercase tracking-[0.16em] text-white/38">Verified account performance</div>
-              <div className="mt-3 text-[24px] font-semibold text-[#f7ddb3]">{user.email || 'Signed-in Brew player'}</div>
-              <div className="mt-2 max-w-2xl text-[15px] leading-7 text-white/62">{settledSummaryText}</div>
+              <div className="text-[15px] uppercase tracking-[0.16em] text-white/38">
+                Verified account performance
+              </div>
+              <div className="mt-3 text-[24px] font-semibold text-[#f7ddb3]">
+                {user.email || 'Signed-in Brew player'}
+              </div>
+              <div className="mt-2 max-w-2xl text-[15px] leading-7 text-white/62">
+                {settledSummaryText}
+              </div>
             </section>
 
             <section className="grid gap-4 lg:grid-cols-4">
@@ -446,7 +530,9 @@ export default function StatsPage() {
               />
               <StatCard
                 label="Avg Confidence"
-                value={averageConfidence !== null ? `${averageConfidence}%` : 'N/A'}
+                value={
+                  averageConfidence !== null ? `${averageConfidence}%` : 'N/A'
+                }
                 helper="Average confidence on account-owned predictions only."
               />
             </section>
@@ -457,7 +543,9 @@ export default function StatsPage() {
             >
               {gameBreakdown.length === 0 ? (
                 <div className="rounded-[20px] border border-white/8 bg-black/20 px-4 py-4 text-[14px] leading-6 text-white/58">
-                  Brew has not logged enough settled per-game results for this account yet. Once play logs and result settlement are populated, this panel will show your strongest games.
+                  Brew has not logged enough settled per-game results for this
+                  account yet. Once play logs and result settlement are
+                  populated, this panel will show your strongest games.
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -467,12 +555,20 @@ export default function StatsPage() {
                       className="flex flex-col gap-3 rounded-[22px] border border-white/8 bg-black/20 px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
                     >
                       <div>
-                        <div className="text-[17px] font-medium text-[#f7ddb3]">{entry.label}</div>
-                        <div className="mt-1 text-[13px] text-white/52">{entry.plays} settled results tracked</div>
+                        <div className="text-[17px] font-medium text-[#f7ddb3]">
+                          {entry.label}
+                        </div>
+                        <div className="mt-1 text-[13px] text-white/52">
+                          {entry.plays} settled results tracked
+                        </div>
                       </div>
                       <div className="flex flex-wrap gap-2 text-[13px] uppercase tracking-[0.14em] text-white/42">
-                        <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">Wins {entry.wins}</span>
-                        <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">Best match {entry.bestMatch}</span>
+                        <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
+                          Wins {entry.wins}
+                        </span>
+                        <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
+                          Best match {entry.bestMatch}
+                        </span>
                       </div>
                     </div>
                   ))}
@@ -486,27 +582,44 @@ export default function StatsPage() {
             >
               {recentTrend.length === 0 ? (
                 <div className="rounded-[20px] border border-white/8 bg-black/20 px-4 py-4 text-[14px] leading-6 text-white/58">
-                  Daily trend rows have not been generated yet. Brew will start drawing these lines once the daily stats pipeline is writing account summaries.
+                  Daily trend rows have not been generated yet. Brew will start
+                  drawing these lines once the daily stats pipeline is writing
+                  account summaries.
                 </div>
               ) : (
                 <div className="space-y-3">
                   <div className="flex flex-wrap gap-3 text-[13px] uppercase tracking-[0.14em] text-white/42">
-                    <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">Current streak {currentStreak}</span>
-                    <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">Best match {bestMatch}</span>
+                    <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
+                      Current streak {currentStreak}
+                    </span>
+                    <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
+                      Best match {bestMatch}
+                    </span>
                   </div>
                   {recentTrend.map((entry) => (
-                    <div key={entry.stat_date} className="rounded-[20px] border border-white/8 bg-black/20 px-4 py-4">
+                    <div
+                      key={entry.stat_date}
+                      className="rounded-[20px] border border-white/8 bg-black/20 px-4 py-4"
+                    >
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                          <div className="text-[16px] font-medium text-[#f7ddb3]">{formatDayLabel(entry.stat_date)}</div>
-                          <div className="mt-1 text-[13px] text-white/52">{entry.picks_count} picks logged that day</div>
+                          <div className="text-[16px] font-medium text-[#f7ddb3]">
+                            {formatDayLabel(entry.stat_date)}
+                          </div>
+                          <div className="mt-1 text-[13px] text-white/52">
+                            {entry.picks_count} picks logged that day
+                          </div>
                         </div>
-                        <div className="text-[22px] font-semibold text-[#ffd27e]">{Math.round(entry.accuracy)}%</div>
+                        <div className="text-[22px] font-semibold text-[#ffd27e]">
+                          {Math.round(entry.accuracy)}%
+                        </div>
                       </div>
                       <div className="mt-3 h-2 rounded-full bg-white/6">
                         <div
                           className="h-2 rounded-full bg-gradient-to-r from-[#ffc742] to-[#ffbe27]"
-                          style={{ width: `${Math.max(6, Math.min(100, Math.round(entry.accuracy)))}%` }}
+                          style={{
+                            width: `${Math.max(6, Math.min(100, Math.round(entry.accuracy)))}%`,
+                          }}
                         />
                       </div>
                       <div className="mt-3 flex flex-wrap gap-2 text-[13px] text-white/58">
@@ -528,13 +641,17 @@ export default function StatsPage() {
             >
               {strategySummary.length === 0 ? (
                 <div className="rounded-[20px] border border-white/8 bg-black/20 px-4 py-4 text-[14px] leading-6 text-white/58">
-                  No account-owned strategy history is available yet. Generate or save predictions through an authenticated flow to start filling this section.
+                  No account-owned strategy history is available yet. Generate
+                  or save predictions through an authenticated flow to start
+                  filling this section.
                 </div>
               ) : (
                 <div className="space-y-3">
                   {strategySummary.map((entry) => {
                     const timingKey = getTimingProfileKey(entry.strategy);
-                    const timingProfile = timingKey ? timingProfiles[timingKey] || null : null;
+                    const timingProfile = timingKey
+                      ? timingProfiles[timingKey] || null
+                      : null;
 
                     return (
                       <div
@@ -542,9 +659,12 @@ export default function StatsPage() {
                         className="flex flex-col gap-3 rounded-[22px] border border-white/8 bg-black/20 px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
                       >
                         <div>
-                          <div className="text-[17px] font-medium text-[#f7ddb3]">{getStrategyLabel(entry.strategy)}</div>
+                          <div className="text-[17px] font-medium text-[#f7ddb3]">
+                            {getStrategyLabel(entry.strategy)}
+                          </div>
                           <div className="mt-1 text-[13px] text-white/52">
-                            {entry.predictions} stored predictions • {entry.confirmedPlays} confirmed plays
+                            {entry.predictions} stored predictions •{' '}
+                            {entry.confirmedPlays} confirmed plays
                           </div>
                         </div>
                         <div className="flex flex-wrap gap-2 text-[13px] uppercase tracking-[0.14em] text-white/42">
@@ -552,10 +672,16 @@ export default function StatsPage() {
                             Wins {entry.wins}
                           </span>
                           <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
-                            Hit rate {entry.hitRate !== null ? `${entry.hitRate}%` : 'N/A'}
+                            Hit rate{' '}
+                            {entry.hitRate !== null
+                              ? `${entry.hitRate}%`
+                              : 'N/A'}
                           </span>
                           <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
-                            Win rate {entry.winRate !== null ? `${entry.winRate}%` : 'N/A'}
+                            Win rate{' '}
+                            {entry.winRate !== null
+                              ? `${entry.winRate}%`
+                              : 'N/A'}
                           </span>
                           <span className="rounded-full border border-[#72caff]/18 bg-[#111f28] px-3 py-1 text-[#9edcff]">
                             Fireball plays {entry.fireballConfirmedPlays}
@@ -564,14 +690,21 @@ export default function StatsPage() {
                             Fireball hits {entry.fireballHits}
                           </span>
                           <span className="rounded-full border border-[#72caff]/18 bg-[#111f28] px-3 py-1 text-[#9edcff]">
-                            Fireball win rate {entry.fireballWinRate !== null ? `${entry.fireballWinRate}%` : 'N/A'}
+                            Fireball win rate{' '}
+                            {entry.fireballWinRate !== null
+                              ? `${entry.fireballWinRate}%`
+                              : 'N/A'}
                           </span>
                           <span className="rounded-full border border-white/8 bg-white/[0.03] px-3 py-1">
-                            Avg confidence {entry.averageConfidence !== null ? `${entry.averageConfidence}%` : 'N/A'}
+                            Avg confidence{' '}
+                            {entry.averageConfidence !== null
+                              ? `${entry.averageConfidence}%`
+                              : 'N/A'}
                           </span>
                           {timingProfile ? (
                             <span className="rounded-full border border-[#ffbd39]/14 bg-[#1a140c] px-3 py-1 text-[#f5cf84]">
-                              {timingLabel}: {timingProfile.windowStart} — {timingProfile.windowEnd}
+                              {timingLabel}: {timingProfile.windowStart} —{' '}
+                              {timingProfile.windowEnd}
                             </span>
                           ) : null}
                         </div>
@@ -583,9 +716,12 @@ export default function StatsPage() {
             </SectionCard>
 
             <section className="rounded-[28px] border border-[#72caff]/18 bg-[linear-gradient(145deg,rgba(19,22,31,0.76),rgba(10,10,12,0.96))] px-6 py-6 shadow-[0_0_20px_rgba(114,202,255,0.05)]">
-              <div className="text-[20px] font-medium text-[#d8e6f8]">Ready for deeper analysis?</div>
+              <div className="text-[20px] font-medium text-[#d8e6f8]">
+                Ready for deeper analysis?
+              </div>
               <div className="mt-3 text-[15px] leading-7 text-white/62">
-                The next V1 destination is Strategy Locker, where premium strategy summaries and entitlement framing will live.
+                The next V1 destination is Strategy Locker, where premium
+                strategy summaries and entitlement framing will live.
               </div>
               <div className="mt-5 flex flex-wrap gap-3">
                 <Link
