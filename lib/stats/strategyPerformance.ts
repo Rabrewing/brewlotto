@@ -167,19 +167,6 @@ export function buildStrategyPerformanceSummary(
     }
   }
 
-    if (
-      prediction.confidence_score != null &&
-      Number.isFinite(Number(prediction.confidence_score))
-    ) {
-      existing.confidenceTotal += Number(prediction.confidence_score);
-      existing.confidenceCount += 1;
-    }
-
-    existing.lastActivityAt =
-      existing.lastActivityAt || prediction.created_at || null;
-    summary.set(strategy, existing);
-  }
-
   for (const playLog of playLogs) {
     if (!playLog.is_settled) {
       continue;
