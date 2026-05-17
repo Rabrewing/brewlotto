@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { getStrategyLabel } from '@/utils/strategyLabel';
 import { useUserTier } from '@/hooks/useUserTier';
+import { useBrewSoundEffects } from '@/hooks/useBrewSoundEffects';
 import {
   DashboardContainer,
   Header,
@@ -660,6 +661,7 @@ export default function MyPicksPage() {
   >(null);
   const [pendingFireballPrediction, setPendingFireballPrediction] =
     useState<PredictionRecord | null>(null);
+  const { playSound } = useBrewSoundEffects();
   const [timingProfiles, setTimingProfiles] = useState<
     Record<string, TimingProfileRecord>
   >({});
@@ -1021,6 +1023,7 @@ export default function MyPicksPage() {
       }
 
       setConfirmedPredictionIds((current) => [...current, prediction.id]);
+      void playSound('success');
       setActionMessage(
         fireballActive
           ? 'Play confirmed with Fireball active. Brew will show the Fireball badge on this saved pick.'
