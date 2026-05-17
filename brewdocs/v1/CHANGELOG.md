@@ -8,6 +8,8 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 
 ### 2026-05-16
 
+- Clarified the Notifications surface so in-app and email read as the live channels today, while push and SMS are clearly marked as future Twilio-backed options.
+- Polished the QA Test Lab guidance, BrewU strategy copy, and Notifications labels so the customer-facing language stays plain while still calling out TimePulse / TimePulse II where testers should look for it.
 - Added `haywood.loven@gmail.com` to the default QA tester allowlist so the Test Lab can accept the new tester account without needing an env-only override.
 - Added a V1 launch marketing roadmap checklist with phased guidance, KPI targets, and weekly operating notes so launch prep has a single checklist to follow once V1 is ready.
 - Marked the referral growth loop as deferred in the launch roadmap so V1 launch work stays focused on the core funnel and the referral build remains a V1.5 follow-on.

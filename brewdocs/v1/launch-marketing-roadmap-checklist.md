@@ -108,6 +108,7 @@ If users do not reach step 3 quickly, improve onboarding and store pages before 
 - [ ] Ask testers to complete the guided pass first
 - [ ] Ask testers to complete the free-roam pass second
 - [ ] Ask testers to capture screenshots when something feels unclear
+- [ ] Ask testers to verify TimePulse shows for BrewPro and TimePulse II shows for BrewMaster in Strategy Locker, My Picks, and Stats
 - [ ] Watch install-to-save conversion
 - [ ] Watch saved-hit visibility in My Picks
 - [ ] Watch confirmed-play flow and Fireball flow
@@ -188,6 +189,7 @@ Publish content that explains the product:
 - How do I use Strategy Locker?
 - What should I check in My Picks?
 - How do I know if a result is a win?
+- Where do TimePulse and TimePulse II show up in the app?
 
 ### Content guidance notes
 
@@ -195,6 +197,7 @@ Publish content that explains the product:
 - Explain the mechanics before you ask for a subscription.
 - Show screenshots in the content when possible.
 - Keep the language simple enough for a first-time lottery app user.
+- Keep TimePulse explanations tied to BrewPro and BrewMaster so testers know which tier should show which timing view.
 
 ## Acquisition Channels
 
