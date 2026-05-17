@@ -8,6 +8,7 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 
 ### 2026-05-16
 - Added a V1 launch marketing roadmap checklist with phased guidance, KPI targets, and weekly operating notes so launch prep has a single checklist to follow once V1 is ready.
+- Marked the referral growth loop as deferred in the launch roadmap so V1 launch work stays focused on the core funnel and the referral build remains a V1.5 follow-on.
 - Expanded the BrewCommand QA Test Lab into a copy-ready guided-pass and free-roam-pass roadmap with severity levels, tab-by-tab coverage, and a report template that matches the live `/qa` form fields.
 - Added `latasharorie@hotmail.com` to the default QA tester allowlist so the Test Lab can accept the new tester account without needing an env-only override.
 - Normalized the dashboard and results client pages to the shared NC/CA state helper types so the results API, dashboard freshness logic, and game tabs stay aligned with the same state-aware config as the rest of the app.

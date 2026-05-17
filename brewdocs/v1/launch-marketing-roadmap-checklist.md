@@ -47,6 +47,7 @@ If users do not reach step 3 quickly, improve onboarding and store pages before 
 
 - [ ] Confirm V1 feature scope is frozen
 - [ ] Confirm the landing page, onboarding, dashboard, Strategy Locker, My Picks, Results, Stats, Billing, BrewU, Support, and QA/Test Lab are stable
+- [ ] Keep the referral loop deferred until billing, notifications, and strategy gating are stable
 - [ ] Verify the current tier ladder copy is final
 - [ ] Verify the Fireball copy is final for NC Pick 3 and Pick 4
 - [ ] Verify TimePulse is shown for BrewPro and TimePulse II for BrewMaster
@@ -59,6 +60,7 @@ If users do not reach step 3 quickly, improve onboarding and store pages before 
 - Do not start paid acquisition until the first-value loop is working.
 - The first-value loop is: sign in -> save pick -> see hit -> confirm play -> see result.
 - If any of those steps feel confusing, fix the product before trying to scale traffic.
+- Referral is a V1.5 item, not a launch dependency. Do not block V1 on it.
 
 ## Phase 1 - App Store / Storefront Readiness
 
