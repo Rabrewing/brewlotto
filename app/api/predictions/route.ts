@@ -88,12 +88,22 @@ async function attachMatchInfo(
       } | null;
 
       if (gameRow) {
+        const windowAliases: string[] = [drawWindow];
+        if (drawWindow === 'midday' || drawWindow === 'day') {
+          windowAliases.push('day', 'midday');
+        } else if (drawWindow === 'run' || drawWindow === 'nightly' || drawWindow === 'daily') {
+          windowAliases.push('nightly', 'daily', 'run');
+        } else if (drawWindow === 'evening') {
+          windowAliases.push('evening');
+        }
+
         const { data: drawsData } = await supabase
           .from('official_draws')
           .select('primary_numbers, bonus_numbers, fireball_value')
           .eq('game_id', gameRow.id)
           .eq('draw_date', drawDate)
-          .eq('draw_window_label', drawWindow);
+          .in('draw_window_label', windowAliases)
+          .limit(1);
         const draws = (drawsData || []) as DrawRow[];
 
         if (draws && draws.length > 0) {
