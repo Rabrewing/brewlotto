@@ -662,6 +662,21 @@ export default function QaPage() {
         <Header />
         <NavigationTabs />
 
+        <div className="mb-5 flex flex-wrap gap-2">
+          <Link href="/dashboard" className="rounded-full border border-[#ffbd39]/18 bg-[#1a140c] px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.1em] text-[#f5cf84] transition-colors hover:bg-[#ffbd39]/12 hover:text-white">Dashboard</Link>
+          <Link href="/strategy-locker" className="rounded-full border border-[#ffbd39]/18 bg-[#1a140c] px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.1em] text-[#f5cf84] transition-colors hover:bg-[#ffbd39]/12 hover:text-white">Strategy Locker</Link>
+          <Link href="/my-picks" className="rounded-full border border-[#ffbd39]/18 bg-[#1a140c] px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.1em] text-[#f5cf84] transition-colors hover:bg-[#ffbd39]/12 hover:text-white">My Picks</Link>
+          <Link href="/results" className="rounded-full border border-[#ffbd39]/18 bg-[#1a140c] px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.1em] text-[#f5cf84] transition-colors hover:bg-[#ffbd39]/12 hover:text-white">Results</Link>
+          <Link href="/stats" className="rounded-full border border-[#ffbd39]/18 bg-[#1a140c] px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.1em] text-[#f5cf84] transition-colors hover:bg-[#ffbd39]/12 hover:text-white">Stats</Link>
+          <Link href="/pricing" className="rounded-full border border-[#ffbd39]/18 bg-[#1a140c] px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.1em] text-[#f5cf84] transition-colors hover:bg-[#ffbd39]/12 hover:text-white">Pricing</Link>
+          <Link href="/billing" className="rounded-full border border-[#ffbd39]/18 bg-[#1a140c] px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.1em] text-[#f5cf84] transition-colors hover:bg-[#ffbd39]/12 hover:text-white">Billing</Link>
+          <Link href="/notifications" className="rounded-full border border-[#ffbd39]/18 bg-[#1a140c] px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.1em] text-[#f5cf84] transition-colors hover:bg-[#ffbd39]/12 hover:text-white">Notifications</Link>
+          <Link href="/learn" className="rounded-full border border-[#ffbd39]/18 bg-[#1a140c] px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.1em] text-[#f5cf84] transition-colors hover:bg-[#ffbd39]/12 hover:text-white">BrewU</Link>
+          <Link href="/support" className="rounded-full border border-[#ffbd39]/18 bg-[#1a140c] px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.1em] text-[#f5cf84] transition-colors hover:bg-[#ffbd39]/12 hover:text-white">Support</Link>
+          <Link href="/admin" className="rounded-full border border-[#72caff]/18 bg-[#101922] px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.1em] text-[#9edcff] transition-colors hover:bg-[#72caff]/12 hover:text-white">Admin</Link>
+          <Link href="/qa" className="rounded-full border border-[#72caff]/18 bg-[#101922] px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.1em] text-[#9edcff] transition-colors hover:bg-[#72caff]/12 hover:text-white">QA</Link>
+        </div>
+
         <div className="mb-4 mt-2 flex flex-wrap items-center justify-between gap-3">
           <div className="text-[32px] font-medium tracking-[-0.03em] text-[#f8cf98] sm:text-[40px]">
             Test Lab
