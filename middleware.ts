@@ -16,6 +16,7 @@ function isExempt(pathname: string) {
     || pathname.startsWith('/pricing')
     || pathname.startsWith('/legal')
     || pathname.startsWith('/logout')
+    || pathname.startsWith('/qa')
     || pathname.startsWith('/api/')
     || pathname.startsWith('/_next/')
     || pathname === '/favicon.ico';
