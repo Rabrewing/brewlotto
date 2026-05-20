@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
         return redirectResponse;
       }
 
-      const redirectTarget = isBrewQATesterUser(user) && !isBrewCommandAdminUser(user)
+      const redirectTarget = isBrewQATesterUser(user)
         ? '/qa'
         : next;
 
