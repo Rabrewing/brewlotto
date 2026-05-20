@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { BrandedSelect } from '@/components/brewlotto/BrandedSelect';
 import {
   DashboardContainer,
   Header,
@@ -283,47 +284,37 @@ export default function SettingsPage() {
               description="Saved defaults influence future route and gameplay preferences for your account."
             >
               <div className="grid gap-4 md:grid-cols-2">
-                <label>
-                  <div className="mb-2 text-[12px] uppercase tracking-[0.16em] text-white/35">
-                    Default state
-                  </div>
-                  <select
-                    value={settings.default_state}
-                    onChange={(event) =>
-                      setSettings((current) => ({
-                        ...current,
-                        default_state: event.target
-                          .value as UserSettingsRecord['default_state'],
-                      }))
-                    }
-                    className="w-full rounded-[18px] border border-white/10 bg-[#0d0b0b] px-4 py-3 text-[15px] text-white outline-none"
-                  >
-                    <option value="NC">North Carolina</option>
-                    <option value="CA">California</option>
-                  </select>
-                </label>
-                <label>
-                  <div className="mb-2 text-[12px] uppercase tracking-[0.16em] text-white/35">
-                    Default game
-                  </div>
-                  <select
-                    value={settings.default_game}
-                    onChange={(event) =>
-                      setSettings((current) => ({
-                        ...current,
-                        default_game: event.target
-                          .value as UserSettingsRecord['default_game'],
-                      }))
-                    }
-                    className="w-full rounded-[18px] border border-white/10 bg-[#0d0b0b] px-4 py-3 text-[15px] text-white outline-none"
-                  >
-                    <option value="pick3">Pick 3</option>
-                    <option value="pick4">Pick 4</option>
-                    <option value="cash5">Cash 5</option>
-                    <option value="powerball">Powerball</option>
-                    <option value="mega_millions">Mega Millions</option>
-                  </select>
-                </label>
+                <BrandedSelect
+                  label="Default state"
+                  value={settings.default_state}
+                  onChange={(value) =>
+                    setSettings((current) => ({
+                      ...current,
+                      default_state: value as UserSettingsRecord['default_state'],
+                    }))
+                  }
+                  options={[
+                    { value: 'NC', label: 'North Carolina' },
+                    { value: 'CA', label: 'California' },
+                  ]}
+                />
+                <BrandedSelect
+                  label="Default game"
+                  value={settings.default_game}
+                  onChange={(value) =>
+                    setSettings((current) => ({
+                      ...current,
+                      default_game: value as UserSettingsRecord['default_game'],
+                    }))
+                  }
+                  options={[
+                    { value: 'pick3', label: 'Pick 3' },
+                    { value: 'pick4', label: 'Pick 4' },
+                    { value: 'cash5', label: 'Cash 5' },
+                    { value: 'powerball', label: 'Powerball' },
+                    { value: 'mega_millions', label: 'Mega Millions' },
+                  ]}
+                />
               </div>
             </SectionCard>
 
@@ -376,46 +367,36 @@ export default function SettingsPage() {
               description="These values are stored now even though the full theme switcher rollout remains future work."
             >
               <div className="grid gap-4 md:grid-cols-2">
-                <label>
-                  <div className="mb-2 text-[12px] uppercase tracking-[0.16em] text-white/35">
-                    Theme
-                  </div>
-                  <select
-                    value={settings.theme}
-                    onChange={(event) =>
-                      setSettings((current) => ({
-                        ...current,
-                        theme: event.target
-                          .value as UserSettingsRecord['theme'],
-                      }))
-                    }
-                    className="w-full rounded-[18px] border border-white/10 bg-[#0d0b0b] px-4 py-3 text-[15px] text-white outline-none"
-                  >
-                    <option value="dark">Dark</option>
-                    <option value="light">Light</option>
-                    <option value="system">System</option>
-                  </select>
-                </label>
-                <label>
-                  <div className="mb-2 text-[12px] uppercase tracking-[0.16em] text-white/35">
-                    Accent mode
-                  </div>
-                  <select
-                    value={settings.accent_mode}
-                    onChange={(event) =>
-                      setSettings((current) => ({
-                        ...current,
-                        accent_mode: event.target
-                          .value as UserSettingsRecord['accent_mode'],
-                      }))
-                    }
-                    className="w-full rounded-[18px] border border-white/10 bg-[#0d0b0b] px-4 py-3 text-[15px] text-white outline-none"
-                  >
-                    <option value="gold">Gold</option>
-                    <option value="blue">Blue</option>
-                    <option value="auto">Auto</option>
-                  </select>
-                </label>
+                <BrandedSelect
+                  label="Theme"
+                  value={settings.theme}
+                  onChange={(value) =>
+                    setSettings((current) => ({
+                      ...current,
+                      theme: value as UserSettingsRecord['theme'],
+                    }))
+                  }
+                  options={[
+                    { value: 'dark', label: 'Dark' },
+                    { value: 'light', label: 'Light' },
+                    { value: 'system', label: 'System' },
+                  ]}
+                />
+                <BrandedSelect
+                  label="Accent mode"
+                  value={settings.accent_mode}
+                  onChange={(value) =>
+                    setSettings((current) => ({
+                      ...current,
+                      accent_mode: value as UserSettingsRecord['accent_mode'],
+                    }))
+                  }
+                  options={[
+                    { value: 'gold', label: 'Gold' },
+                    { value: 'blue', label: 'Blue' },
+                    { value: 'auto', label: 'Auto' },
+                  ]}
+                />
               </div>
 
               <div className="mt-5 flex flex-wrap items-center gap-3">

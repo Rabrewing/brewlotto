@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { BrandedSelect } from '@/components/brewlotto/BrandedSelect';
 import { DashboardContainer, Header, NavigationTabs } from '@/components/brewlotto/dashboard';
 import { supabase } from '@/lib/supabase/browserClient';
 
@@ -104,29 +105,33 @@ export default function AdminQaPage() {
         </div>
 
         <div className="mb-5 flex flex-wrap gap-3">
-          <select
+          <BrandedSelect
+            label="Tier filter"
             value={filterTier}
-            onChange={(e) => setFilterTier(e.target.value)}
-            className="rounded-full border border-white/10 bg-[#0a0a0c] px-4 py-2 text-[13px] text-white/70 outline-none"
-          >
-            <option value="all">All Tiers</option>
-            <option value="free">Free</option>
-            <option value="starter">Starter</option>
-            <option value="pro">Pro</option>
-            <option value="master">Master</option>
-          </select>
-          <select
+            onChange={(value) => setFilterTier(value)}
+            options={[
+              { value: 'all', label: 'All Tiers' },
+              { value: 'free', label: 'Free' },
+              { value: 'starter', label: 'Starter' },
+              { value: 'pro', label: 'Pro' },
+              { value: 'master', label: 'Master' },
+            ]}
+            className="min-w-[220px]"
+          />
+          <BrandedSelect
+            label="Status filter"
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="rounded-full border border-white/10 bg-[#0a0a0c] px-4 py-2 text-[13px] text-white/70 outline-none"
-          >
-            <option value="all">All Status</option>
-            <option value="open">Open</option>
-            <option value="reviewing">Reviewing</option>
-            <option value="triaged">Triaged</option>
-            <option value="resolved">Resolved</option>
-            <option value="closed">Closed</option>
-          </select>
+            onChange={(value) => setFilterStatus(value)}
+            options={[
+              { value: 'all', label: 'All Status' },
+              { value: 'open', label: 'Open' },
+              { value: 'reviewing', label: 'Reviewing' },
+              { value: 'triaged', label: 'Triaged' },
+              { value: 'resolved', label: 'Resolved' },
+              { value: 'closed', label: 'Closed' },
+            ]}
+            className="min-w-[220px]"
+          />
           <div className="self-center text-[12px] text-white/40">{filtered.length} reports</div>
         </div>
 
@@ -183,17 +188,18 @@ export default function AdminQaPage() {
 
                 {editingId === report.id ? (
                   <div className="mt-4 space-y-3 rounded-[18px] border border-[#ffbd39]/18 bg-[#1a140c] px-4 py-4">
-                    <select
+                    <BrandedSelect
+                      label="Report status"
                       value={editStatus}
-                      onChange={(e) => setEditStatus(e.target.value)}
-                      className="w-full rounded-lg border border-white/10 bg-[#0a0a0c] px-3 py-2 text-[13px] text-white outline-none"
-                    >
-                      <option value="open">Open</option>
-                      <option value="reviewing">Reviewing</option>
-                      <option value="triaged">Triaged</option>
-                      <option value="resolved">Resolved</option>
-                      <option value="closed">Closed</option>
-                    </select>
+                      onChange={(value) => setEditStatus(value)}
+                      options={[
+                        { value: 'open', label: 'Open' },
+                        { value: 'reviewing', label: 'Reviewing' },
+                        { value: 'triaged', label: 'Triaged' },
+                        { value: 'resolved', label: 'Resolved' },
+                        { value: 'closed', label: 'Closed' },
+                      ]}
+                    />
                     <textarea
                       value={editNotes}
                       onChange={(e) => setEditNotes(e.target.value)}

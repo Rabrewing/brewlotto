@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
+import { BrandedSelect } from '@/components/brewlotto/BrandedSelect';
 import { getStrategyLabel } from '@/utils/strategyLabel';
 import { useUserTier } from '@/hooks/useUserTier';
 import { useBrewSoundEffects } from '@/hooks/useBrewSoundEffects';
@@ -1140,33 +1141,21 @@ export default function MyPicksPage() {
         </div>
 
         <div className="mb-5 flex flex-wrap gap-3">
-          <select
+          <BrandedSelect
+            label="State"
             value={selectedState}
-            onChange={(event) =>
-              setSelectedState(event.target.value as FilterState)
-            }
-            className="rounded-full border border-[#ffbd39]/25 bg-[#120e0e]/85 px-4 py-3 text-[15px] text-[#ffd27e] shadow-[0_0_12px_rgba(255,184,28,0.08)] outline-none"
-          >
-            {STATE_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+            onChange={(value) => setSelectedState(value as FilterState)}
+            options={STATE_OPTIONS}
+            className="min-w-[220px]"
+          />
 
-          <select
+          <BrandedSelect
+            label="Game"
             value={selectedGame}
-            onChange={(event) =>
-              setSelectedGame(event.target.value as FilterGame)
-            }
-            className="rounded-full border border-[#ffbd39]/25 bg-[#120e0e]/85 px-4 py-3 text-[15px] text-[#ffd27e] shadow-[0_0_12px_rgba(255,184,28,0.08)] outline-none"
-          >
-            {gameOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.value === 'ALL' ? option.label : option.label}
-              </option>
-            ))}
-          </select>
+            onChange={(value) => setSelectedGame(value as FilterGame)}
+            options={gameOptions}
+            className="min-w-[220px]"
+          />
 
           {selectedGame === 'pick3' || selectedGame === 'pick4' ? (
             <div className="flex gap-1.5 self-center">

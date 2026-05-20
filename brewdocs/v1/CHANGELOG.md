@@ -8,6 +8,13 @@ This changelog records shipped or committed V1 changes in a compact, timestamped
 
 ### 2026-05-17
 
+- Added a short strategy decision checklist so launch reviews can quickly bucket a new idea into `Now`, `Later`, or `Maybe never`.
+- Added a strategy product vision page that sits above the historical notes and defines how future strategy ideas should be judged before they become user-facing features.
+- Added a historical strategy ideas note that preserves the older odds-driven concepts, including the heatmap-style odds visualization idea for teaching positional strength and range concentration.
+- Organized the historical strategy note into `now / later / maybe never` buckets so the older odds-driven ideas stay usable as a roadmap without blending into the live V1 engine canon.
+- Added `mbrewing34@gmail.com` and `kbrewing02@gmail.com` to the default QA tester allowlist so the Test Lab can accept the new family tester accounts without needing an env-only override.
+- Applied the branded dropdown treatment to BrewCommand admin and QA filters so operator menus match the custom BrewLotto picker styling.
+- Replaced the remaining customer-facing dropdowns in Settings, My Picks, and Profile with branded custom menus so they no longer fall back to the browser’s white native picker.
 - Replaced the Support category select with a branded custom dropdown so the support form no longer falls back to the browser’s white native picker.
 - Polished the legal hub and policy pages into more publishable copy so the Terms, Privacy, California addendum, AI Usage, Internet Property, and Responsible Play routes read like launch-facing pages instead of internal draft notes.
 - Split the legal hub so Privacy now points to a dedicated California addendum route, and added a privacy request shortcut / category in Support so general privacy and California requests no longer share the same inline page.

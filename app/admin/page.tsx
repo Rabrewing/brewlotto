@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { BrandedSelect } from '@/components/brewlotto/BrandedSelect';
 import { getStrategyLabel } from '@/utils/strategyLabel';
 import { useRouter } from 'next/navigation';
 
@@ -585,7 +586,7 @@ export default function AdminPage() {
     selectedRecipient: alertRecipient.recipientEmail,
   };
 
-  async function loadAdminData(options?: { alertsOnly?: boolean; nextRequestId?: number }) {
+  const loadAdminData = useCallback(async (options?: { alertsOnly?: boolean; nextRequestId?: number }) => {
     setError(null);
     const requestId = options?.nextRequestId ?? latestRequestRef.current;
 
@@ -704,7 +705,7 @@ export default function AdminPage() {
     setAlertDeliveries(alertDeliveriesPayload.data || []);
     setSupportRequests(supportRequestsPayload.data || []);
     setQaReports(qaReportsPayload.data || []);
-  }
+  }, [categoryFilter, severityFilter, statusFilter]);
 
   useEffect(() => {
     async function bootstrap() {
@@ -731,7 +732,7 @@ export default function AdminPage() {
     }
 
     bootstrap();
-  }, [statusFilter, severityFilter, categoryFilter]);
+  }, [loadAdminData, loading]);
 
   async function handleRefresh() {
     setRefreshing(true);
@@ -1031,18 +1032,13 @@ export default function AdminPage() {
               Keep BrewCommand alert emails pointed at one inbox at a time. This is the address that receives critical and email-worthy admin alerts.
             </div>
             <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <select
+              <BrandedSelect
+                label="Alert recipient"
                 value={alertRecipient.recipientEmail}
-                onChange={(event) => void saveAlertRecipient(event.target.value)}
-                disabled={savingAlertRecipient}
-                className="w-full rounded-full border border-white/10 bg-black/35 px-4 py-3 text-sm text-white outline-none sm:max-w-md"
-              >
-                {alertRecipient.choices.map((email) => (
-                  <option key={email} value={email}>
-                    {email}
-                  </option>
-                ))}
-              </select>
+                onChange={(value) => void saveAlertRecipient(value)}
+                options={alertRecipient.choices.map((email) => ({ value: email, label: email }))}
+                className="w-full sm:max-w-md"
+              />
               <button
                 onClick={() => void saveAlertRecipient(alertRecipient.recipientEmail)}
                 disabled={savingAlertRecipient}
@@ -1983,40 +1979,46 @@ export default function AdminPage() {
                 <p className="mt-1 text-sm text-white/55">Newest events first, using the alert APIs already wired into Supabase.</p>
               </div>
               <div className="flex flex-wrap gap-2">
-                <select
+                <BrandedSelect
+                  label="Status filter"
                   value={statusFilter}
-                  onChange={(event) => setStatusFilter(event.target.value as AlertStatusFilter)}
-                  className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 outline-none"
-                >
-                  <option value="all">All statuses</option>
-                  <option value="raised">Raised</option>
-                  <option value="acknowledged">Acknowledged</option>
-                  <option value="resolved">Resolved</option>
-                  <option value="escalated">Escalated</option>
-                </select>
-                <select
+                  onChange={(value) => setStatusFilter(value as AlertStatusFilter)}
+                  options={[
+                    { value: 'all', label: 'All statuses' },
+                    { value: 'raised', label: 'Raised' },
+                    { value: 'acknowledged', label: 'Acknowledged' },
+                    { value: 'resolved', label: 'Resolved' },
+                    { value: 'escalated', label: 'Escalated' },
+                  ]}
+                  className="min-w-[220px]"
+                />
+                <BrandedSelect
+                  label="Severity filter"
                   value={severityFilter}
-                  onChange={(event) => setSeverityFilter(event.target.value as AlertSeverityFilter)}
-                  className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 outline-none"
-                >
-                  <option value="all">All severities</option>
-                  <option value="critical">Critical</option>
-                  <option value="warning">Warning</option>
-                  <option value="info">Info</option>
-                </select>
-                <select
+                  onChange={(value) => setSeverityFilter(value as AlertSeverityFilter)}
+                  options={[
+                    { value: 'all', label: 'All severities' },
+                    { value: 'critical', label: 'Critical' },
+                    { value: 'warning', label: 'Warning' },
+                    { value: 'info', label: 'Info' },
+                  ]}
+                  className="min-w-[220px]"
+                />
+                <BrandedSelect
+                  label="Category filter"
                   value={categoryFilter}
-                  onChange={(event) => setCategoryFilter(event.target.value as AlertCategoryFilter)}
-                  className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 outline-none"
-                >
-                  <option value="all">All categories</option>
-                  <option value="freshness">Freshness</option>
-                  <option value="ingestion">Ingestion</option>
-                  <option value="validation">Validation</option>
-                  <option value="system">System</option>
-                  <option value="billing">Billing</option>
-                  <option value="prediction">Prediction</option>
-                </select>
+                  onChange={(value) => setCategoryFilter(value as AlertCategoryFilter)}
+                  options={[
+                    { value: 'all', label: 'All categories' },
+                    { value: 'freshness', label: 'Freshness' },
+                    { value: 'ingestion', label: 'Ingestion' },
+                    { value: 'validation', label: 'Validation' },
+                    { value: 'system', label: 'System' },
+                    { value: 'billing', label: 'Billing' },
+                    { value: 'prediction', label: 'Prediction' },
+                  ]}
+                  className="min-w-[220px]"
+                />
               </div>
             </div>
 

@@ -85,13 +85,14 @@ function buildMenuSections(canAccessQa: boolean): MenuSection[] {
       ],
     },
     {
-      title: 'Systems',
-      items: [
-        { label: 'BrewU', icon: 'learn', href: '/learn', enabled: true, description: 'Tutorials, play styles, and help' },
-        { label: 'Support', icon: 'notifications', href: '/support', enabled: true, emphasis: 'help', description: 'Report issues and track tickets' },
-        ...(canAccessQa ? [{ label: 'Test Lab', icon: 'lab', href: '/qa', enabled: true, description: 'Run tier-by-tier QA and submit findings' }] : []),
-        { label: 'Terms & Privacy', icon: 'legal', href: '/legal', enabled: true, description: 'Policies and responsible use' },
-      ],
+    title: 'Systems',
+    items: [
+      { label: 'BrewU', icon: 'learn', href: '/learn', enabled: true, description: 'Tutorials, play styles, and help' },
+      { label: 'Test Lab', icon: 'settings', href: '/qa', enabled: true, description: 'QA testing and reporting' },
+      { label: 'Support', icon: 'notifications', href: '/support', enabled: true, emphasis: 'help', description: 'Report issues and track tickets' },
+      { label: 'Terms & Privacy', icon: 'legal', href: '/legal', enabled: true, description: 'Policies and responsible use' },
+      { label: 'Logout', icon: 'logout', href: '/logout', enabled: true, description: 'Sign out of this session' },
+    ],
     },
   ];
 }

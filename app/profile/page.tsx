@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
+import { BrandedSelect } from '@/components/brewlotto/BrandedSelect';
 import { 
   DashboardContainer,
   Header,
@@ -337,20 +338,13 @@ export default function ProfilePage() {
               description="This default state is stored in your V1 user preferences so new account surfaces can reuse the same home lottery context."
             >
               <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                <label className="block max-w-[280px] flex-1">
-                  <div className="mb-2 text-[12px] uppercase tracking-[0.16em] text-white/35">Default state</div>
-                  <select
-                    value={preferredState}
-                    onChange={(event) => setPreferredState(event.target.value as PreferredStateCode)}
-                    className="w-full rounded-[18px] border border-white/10 bg-[#0d0b0b] px-4 py-3 text-[15px] text-white outline-none transition-colors focus:border-[#ffc742]/45"
-                  >
-                    {STATE_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                <BrandedSelect
+                  label="Default state"
+                  value={preferredState}
+                  onChange={(value) => setPreferredState(value as PreferredStateCode)}
+                  options={STATE_OPTIONS}
+                  className="w-full max-w-[280px] flex-1"
+                />
 
                 <button
                   type="button"
