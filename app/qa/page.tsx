@@ -705,6 +705,11 @@ export default function QaPage() {
                 a free-roam pass so we can see whether the app gives enough cues
                 for people to find their way around on their own.
               </div>
+              <div className="mt-4 rounded-[22px] border border-[#ffc742]/18 bg-[#1a140c] px-4 py-3 text-[13px] leading-6 text-[#f7ddb3]">
+                <span className="font-semibold text-white">Return to Test Lab: </span>
+                Use the avatar dropdown (top-right) at any time to come back here.
+                The quick-nav links below also let you jump directly to each test area.
+              </div>
               <div className="mt-5 grid gap-3 text-[13px] leading-6 text-white/72 sm:grid-cols-2 sm:text-[14px] sm:leading-7">
                 {[
                   'Guided pass: start at login or onboarding, then follow the flow in order so we can verify the app does what the page promises.',
